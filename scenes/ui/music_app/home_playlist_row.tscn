@@ -1,0 +1,91 @@
+[gd_scene load_steps=4 format=3]
+
+[ext_resource type="Script" path="res://scripts/ui/music_app/modules/music_app_home_playlist_row.gd" id="1_script"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_home_playlist_row_panel"]
+bg_color = Color(0.192157, 0.192157, 0.2, 1)
+corner_radius_top_left = 18
+corner_radius_top_right = 18
+corner_radius_bottom_right = 18
+corner_radius_bottom_left = 18
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_home_playlist_cover_panel"]
+bg_color = Color(0.231373, 0.231373, 0.239216, 1)
+corner_radius_top_left = 18
+corner_radius_top_right = 18
+corner_radius_bottom_right = 18
+corner_radius_bottom_left = 18
+
+[node name="HomePlaylistRow" type="Panel"]
+custom_minimum_size = Vector2(0, 92)
+layout_mode = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_home_playlist_row_panel")
+script = ExtResource("1_script")
+
+[node name="Margin" type="MarginContainer" parent="."]
+layout_mode = 0
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/margin_left = 4
+theme_override_constants/margin_top = 10
+theme_override_constants/margin_right = 4
+theme_override_constants/margin_bottom = 10
+
+[node name="Row" type="HBoxContainer" parent="Margin"]
+layout_mode = 2
+theme_override_constants/separation = 14
+
+[node name="CoverPanel" type="Panel" parent="Margin/Row"]
+custom_minimum_size = Vector2(68, 68)
+layout_mode = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_home_playlist_cover_panel")
+
+[node name="MarkLabel" type="Label" parent="Margin/Row/CoverPanel"]
+layout_mode = 0
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_colors/font_color = Color(0.968627, 0.968627, 0.972549, 1)
+theme_override_font_sizes/font_size = 26
+text = "我"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="Info" type="VBoxContainer" parent="Margin/Row"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 4
+alignment = 1
+
+[node name="TitleLabel" type="Label" parent="Margin/Row/Info"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.968627, 0.968627, 0.972549, 1)
+theme_override_font_sizes/font_size = 20
+text = "歌单名称"
+
+[node name="CountLabel" type="Label" parent="Margin/Row/Info"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.643137, 0.65098, 0.690196, 1)
+theme_override_font_sizes/font_size = 16
+text = "0 首歌曲"
+
+[node name="DeleteButton" type="Button" parent="Margin/Row"]
+custom_minimum_size = Vector2(38, 38)
+layout_mode = 2
+theme_override_colors/font_color = Color(0.643137, 0.65098, 0.690196, 1)
+theme_override_colors/font_hover_color = Color(0.643137, 0.65098, 0.690196, 1)
+theme_override_colors/font_pressed_color = Color(0.643137, 0.65098, 0.690196, 1)
+theme_override_font_sizes/font_size = 14
+flat = true
+text = "删"
+
+[node name="OpenButton" type="Button" parent="."]
+layout_mode = 0
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+flat = true

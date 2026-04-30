@@ -1,0 +1,1260 @@
+[gd_scene format=3 uid="uid://4n2j1r53pnr1"]
+
+[ext_resource type="Script" uid="uid://crnuaxlx02ks7" path="res://scripts/ui/music_app/music_app_showcase.gd" id="1_script"]
+[ext_resource type="Script" uid="uid://b7ibq16q80ngu" path="res://scripts/ui/music_app/modules/music_app_home_module.gd" id="2_script"]
+[ext_resource type="Script" uid="uid://cx5gvug1qkjgt" path="res://scripts/ui/music_app/modules/music_app_playlist_module.gd" id="3_script"]
+[ext_resource type="Script" uid="uid://2xj1d207a5qg" path="res://scripts/ui/music_app/modules/music_app_player_module.gd" id="4_script"]
+[ext_resource type="Script" uid="uid://p8v8hpaoo7fe" path="res://scripts/ui/music_app/modules/music_app_mini_player_module.gd" id="5_script"]
+[ext_resource type="PackedScene" path="res://scenes/ui/music_app/home_feature_card.tscn" id="6_feature_card"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_playlist_hero_cover"]
+bg_color = Color(0.231373, 0.231373, 0.239216, 1)
+corner_radius_top_left = 22
+corner_radius_top_right = 22
+corner_radius_bottom_right = 22
+corner_radius_bottom_left = 22
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_song_row"]
+bg_color = Color(0.160784, 0.160784, 0.168627, 1)
+corner_radius_top_left = 16
+corner_radius_top_right = 16
+corner_radius_bottom_right = 16
+corner_radius_bottom_left = 16
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_player_cover_panel"]
+bg_color = Color(0.176471, 0.192157, 0.223529, 1)
+corner_radius_top_left = 8
+corner_radius_top_right = 8
+corner_radius_bottom_right = 8
+corner_radius_bottom_left = 8
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_player_cover_circle"]
+bg_color = Color(0, 0, 0, 0)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(1, 1, 1, 0.24)
+corner_radius_top_left = 999
+corner_radius_top_right = 999
+corner_radius_bottom_right = 999
+corner_radius_bottom_left = 999
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_mini_cover_panel"]
+bg_color = Color(0.18, 0.18, 0.2, 1)
+corner_radius_top_left = 18
+corner_radius_top_right = 18
+corner_radius_bottom_right = 18
+corner_radius_bottom_left = 18
+
+[node name="MusicAppShowcase" type="Control" unique_id=1976821598]
+custom_minimum_size = Vector2(430, 932)
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_script")
+
+[node name="Background" type="ColorRect" parent="." unique_id=1763412571]
+layout_mode = 0
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0.0823529, 0.0823529, 0.0862745, 1)
+
+[node name="PreviewRoot" type="Control" parent="." unique_id=18213997]
+unique_name_in_owner = true
+anchors_preset = 0
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="PhoneShell" type="Panel" parent="PreviewRoot" unique_id=1571802138]
+unique_name_in_owner = true
+clip_contents = true
+layout_mode = 0
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="HomePage" type="Control" parent="PreviewRoot/PhoneShell" unique_id=839843003]
+unique_name_in_owner = true
+anchors_preset = 0
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("2_script")
+
+[node name="Margin" type="MarginContainer" parent="PreviewRoot/PhoneShell/HomePage" unique_id=1268931507]
+layout_mode = 0
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/margin_left = 14
+theme_override_constants/margin_top = 8
+theme_override_constants/margin_right = 14
+theme_override_constants/margin_bottom = 100
+
+[node name="HomeVBox" type="VBoxContainer" parent="PreviewRoot/PhoneShell/HomePage/Margin" unique_id=1083217856]
+layout_mode = 2
+theme_override_constants/separation = 18
+
+[node name="SearchRow" type="HBoxContainer" parent="PreviewRoot/PhoneShell/HomePage/Margin/HomeVBox" unique_id=307127496]
+custom_minimum_size = Vector2(0, 56)
+layout_mode = 2
+theme_override_constants/separation = 12
+
+[node name="HomeMenuButton" type="Button" parent="PreviewRoot/PhoneShell/HomePage/Margin/HomeVBox/SearchRow" unique_id=302340676]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(50, 50)
+layout_mode = 2
+text = "≡"
+
+[node name="SearchBar" type="Panel" parent="PreviewRoot/PhoneShell/HomePage/Margin/HomeVBox/SearchRow" unique_id=539984825]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="Margin" type="MarginContainer" parent="PreviewRoot/PhoneShell/HomePage/Margin/HomeVBox/SearchRow/SearchBar" unique_id=61255873]
+layout_mode = 0
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/margin_left = 18
+theme_override_constants/margin_top = 14
+theme_override_constants/margin_right = 18
+theme_override_constants/margin_bottom = 14
+
+[node name="SearchHBox" type="HBoxContainer" parent="PreviewRoot/PhoneShell/HomePage/Margin/HomeVBox/SearchRow/SearchBar/Margin" unique_id=983491901]
+layout_mode = 2
+theme_override_constants/separation = 12
+
+[node name="SearchIconLabel" type="Label" parent="PreviewRoot/PhoneShell/HomePage/Margin/HomeVBox/SearchRow/SearchBar/Margin/SearchHBox" unique_id=90974247]
+layout_mode = 2
+text = "⌕"
+
+[node name="SearchPromptLabel" type="Label" parent="PreviewRoot/PhoneShell/HomePage/Margin/HomeVBox/SearchRow/SearchBar/Margin/SearchHBox" unique_id=1417647797]
+unique_name_in_owner = true
+layout_mode = 2
+text = "点击这里开始搜索"
+
+[node name="FeatureGrid" type="GridContainer" parent="PreviewRoot/PhoneShell/HomePage/Margin/HomeVBox" unique_id=603568706]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_constants/h_separation = 12
+theme_override_constants/v_separation = 12
+columns = 4
+
+[node name="FeatureCard0" parent="PreviewRoot/PhoneShell/HomePage/Margin/HomeVBox/FeatureGrid" unique_id=241142624 instance=ExtResource("6_feature_card")]
+unique_name_in_owner = true
+
+[node name="FeatureCard1" parent="PreviewRoot/PhoneShell/HomePage/Margin/HomeVBox/FeatureGrid" unique_id=669691854 instance=ExtResource("6_feature_card")]
+unique_name_in_owner = true
+
+[node name="FeatureCard2" parent="PreviewRoot/PhoneShell/HomePage/Margin/HomeVBox/FeatureGrid" unique_id=1537187717 instance=ExtResource("6_feature_card")]
+unique_name_in_owner = true
+
+[node name="FeatureCard3" parent="PreviewRoot/PhoneShell/HomePage/Margin/HomeVBox/FeatureGrid" unique_id=928339068 instance=ExtResource("6_feature_card")]
+unique_name_in_owner = true
+
+[node name="HomeTabsRow" type="HBoxContainer" parent="PreviewRoot/PhoneShell/HomePage/Margin/HomeVBox" unique_id=1921064607]
+layout_mode = 2
+theme_override_constants/separation = 18
+
+[node name="MyPlaylistsLabel" type="Label" parent="PreviewRoot/PhoneShell/HomePage/Margin/HomeVBox/HomeTabsRow" unique_id=1844565254]
+unique_name_in_owner = true
+layout_mode = 2
+text = "我的歌单 (1)"
+
+[node name="FavoritePlaylistsLabel" type="Label" parent="PreviewRoot/PhoneShell/HomePage/Margin/HomeVBox/HomeTabsRow" unique_id=887127775]
+unique_name_in_owner = true
+layout_mode = 2
+text = "收藏歌单 (0)"
+
+[node name="Spacer" type="Control" parent="PreviewRoot/PhoneShell/HomePage/Margin/HomeVBox/HomeTabsRow" unique_id=2062928736]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="NewPlaylistButton" type="Button" parent="PreviewRoot/PhoneShell/HomePage/Margin/HomeVBox/HomeTabsRow" unique_id=2048103684]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(40, 40)
+layout_mode = 2
+text = "+"
+
+[node name="ImportButton" type="Button" parent="PreviewRoot/PhoneShell/HomePage/Margin/HomeVBox/HomeTabsRow" unique_id=335780428]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(40, 40)
+layout_mode = 2
+text = "↓"
+
+[node name="HomeTabUnderline" type="Panel" parent="PreviewRoot/PhoneShell/HomePage/Margin/HomeVBox" unique_id=1845383377]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(128, 4)
+layout_mode = 2
+
+[node name="HomeScroll" type="ScrollContainer" parent="PreviewRoot/PhoneShell/HomePage/Margin/HomeVBox" unique_id=359626649]
+layout_mode = 2
+size_flags_vertical = 3
+horizontal_scroll_mode = 0
+
+[node name="HomeList" type="VBoxContainer" parent="PreviewRoot/PhoneShell/HomePage/Margin/HomeVBox/HomeScroll" unique_id=1683118366]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 6
+
+[node name="PlaylistPage" type="Control" parent="PreviewRoot/PhoneShell" unique_id=741966306]
+unique_name_in_owner = true
+visible = false
+anchors_preset = 0
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("3_script")
+
+[node name="Margin" type="MarginContainer" parent="PreviewRoot/PhoneShell/PlaylistPage" unique_id=85336666]
+layout_mode = 0
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/margin_left = 14
+theme_override_constants/margin_top = 8
+theme_override_constants/margin_right = 14
+theme_override_constants/margin_bottom = 100
+
+[node name="PlaylistVBox" type="VBoxContainer" parent="PreviewRoot/PhoneShell/PlaylistPage/Margin" unique_id=1797493169]
+layout_mode = 2
+theme_override_constants/separation = 16
+
+[node name="PlaylistTopRow" type="HBoxContainer" parent="PreviewRoot/PhoneShell/PlaylistPage/Margin/PlaylistVBox" unique_id=1014400035]
+custom_minimum_size = Vector2(0, 48)
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="PlaylistBackButton" type="Button" parent="PreviewRoot/PhoneShell/PlaylistPage/Margin/PlaylistVBox/PlaylistTopRow" unique_id=1508810897]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(44, 44)
+layout_mode = 2
+text = "←"
+
+[node name="PlaylistTopTitle" type="Label" parent="PreviewRoot/PhoneShell/PlaylistPage/Margin/PlaylistVBox/PlaylistTopRow" unique_id=1119246384]
+unique_name_in_owner = true
+layout_mode = 2
+text = "歌单"
+
+[node name="Spacer" type="Control" parent="PreviewRoot/PhoneShell/PlaylistPage/Margin/PlaylistVBox/PlaylistTopRow" unique_id=2022315722]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="PlaylistSearchButton" type="Button" parent="PreviewRoot/PhoneShell/PlaylistPage/Margin/PlaylistVBox/PlaylistTopRow" unique_id=995483356]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(44, 44)
+layout_mode = 2
+text = "⌕"
+
+[node name="PlaylistMoreButton" type="Button" parent="PreviewRoot/PhoneShell/PlaylistPage/Margin/PlaylistVBox/PlaylistTopRow" unique_id=706924577]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(44, 44)
+layout_mode = 2
+text = "⋯"
+
+[node name="PlaylistHeroPanel" type="Panel" parent="PreviewRoot/PhoneShell/PlaylistPage/Margin/PlaylistVBox" unique_id=1234494683]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 176)
+layout_mode = 2
+
+[node name="Margin" type="MarginContainer" parent="PreviewRoot/PhoneShell/PlaylistPage/Margin/PlaylistVBox/PlaylistHeroPanel" unique_id=1871958647]
+layout_mode = 0
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/margin_left = 14
+theme_override_constants/margin_top = 18
+theme_override_constants/margin_right = 14
+theme_override_constants/margin_bottom = 18
+
+[node name="HeroRow" type="HBoxContainer" parent="PreviewRoot/PhoneShell/PlaylistPage/Margin/PlaylistVBox/PlaylistHeroPanel/Margin" unique_id=2096062181]
+layout_mode = 2
+theme_override_constants/separation = 18
+
+[node name="PlaylistHeroCover" type="Panel" parent="PreviewRoot/PhoneShell/PlaylistPage/Margin/PlaylistVBox/PlaylistHeroPanel/Margin/HeroRow" unique_id=944066011]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(118, 118)
+layout_mode = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_playlist_hero_cover")
+
+[node name="PlaylistHeroMarkLabel" type="Label" parent="PreviewRoot/PhoneShell/PlaylistPage/Margin/PlaylistVBox/PlaylistHeroPanel/Margin/HeroRow/PlaylistHeroCover" unique_id=1600885860]
+unique_name_in_owner = true
+layout_mode = 0
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+text = "我"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="Info" type="VBoxContainer" parent="PreviewRoot/PhoneShell/PlaylistPage/Margin/PlaylistVBox/PlaylistHeroPanel/Margin/HeroRow" unique_id=453774606]
+layout_mode = 2
+theme_override_constants/separation = 8
+alignment = 1
+
+[node name="PlaylistHeroTitleLabel" type="Label" parent="PreviewRoot/PhoneShell/PlaylistPage/Margin/PlaylistVBox/PlaylistHeroPanel/Margin/HeroRow/Info" unique_id=1583898995]
+unique_name_in_owner = true
+layout_mode = 2
+text = "我喜欢"
+
+[node name="PlaylistHeroCountLabel" type="Label" parent="PreviewRoot/PhoneShell/PlaylistPage/Margin/PlaylistVBox/PlaylistHeroPanel/Margin/HeroRow/Info" unique_id=2046281453]
+unique_name_in_owner = true
+layout_mode = 2
+text = "共 0 首"
+
+[node name="PlaylistActionsRow" type="HBoxContainer" parent="PreviewRoot/PhoneShell/PlaylistPage/Margin/PlaylistVBox" unique_id=1332593054]
+custom_minimum_size = Vector2(0, 52)
+layout_mode = 2
+theme_override_constants/separation = 14
+
+[node name="PlayAllButton" type="Button" parent="PreviewRoot/PhoneShell/PlaylistPage/Margin/PlaylistVBox/PlaylistActionsRow" unique_id=1453129486]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+text = "▶ 播放全部"
+
+[node name="PlaylistAddButton" type="Button" parent="PreviewRoot/PhoneShell/PlaylistPage/Margin/PlaylistVBox/PlaylistActionsRow" unique_id=50040948]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(52, 52)
+layout_mode = 2
+text = "+"
+
+[node name="PlaylistEditButton" type="Button" parent="PreviewRoot/PhoneShell/PlaylistPage/Margin/PlaylistVBox/PlaylistActionsRow" unique_id=1508249865]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(52, 52)
+layout_mode = 2
+text = "✎"
+
+[node name="PlaylistScroll" type="ScrollContainer" parent="PreviewRoot/PhoneShell/PlaylistPage/Margin/PlaylistVBox" unique_id=859457217]
+layout_mode = 2
+size_flags_vertical = 3
+horizontal_scroll_mode = 0
+
+[node name="SongList" type="VBoxContainer" parent="PreviewRoot/PhoneShell/PlaylistPage/Margin/PlaylistVBox/PlaylistScroll" unique_id=141487840]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 6
+
+[node name="SongRow0" type="Panel" parent="PreviewRoot/PhoneShell/PlaylistPage/Margin/PlaylistVBox/PlaylistScroll/SongList" unique_id=784453627]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 86)
+layout_mode = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_song_row")
+
+[node name="Margin" type="MarginContainer" parent="PreviewRoot/PhoneShell/PlaylistPage/Margin/PlaylistVBox/PlaylistScroll/SongList/SongRow0" unique_id=26363891]
+layout_mode = 0
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/margin_left = 4
+theme_override_constants/margin_top = 10
+theme_override_constants/margin_right = 4
+theme_override_constants/margin_bottom = 10
+
+[node name="Row" type="HBoxContainer" parent="PreviewRoot/PhoneShell/PlaylistPage/Margin/PlaylistVBox/PlaylistScroll/SongList/SongRow0/Margin" unique_id=1622274073]
+layout_mode = 2
+theme_override_constants/separation = 12
+
+[node name="SongIndex0" type="Label" parent="PreviewRoot/PhoneShell/PlaylistPage/Margin/PlaylistVBox/PlaylistScroll/SongList/SongRow0/Margin/Row" unique_id=1974986595]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(28, 0)
+layout_mode = 2
+theme_override_colors/font_color = Color(0.968627, 0.968627, 0.972549, 1)
+theme_override_font_sizes/font_size = 18
+text = "1"
+horizontal_alignment = 1
+
+[node name="SongInfo" type="VBoxContainer" parent="PreviewRoot/PhoneShell/PlaylistPage/Margin/PlaylistVBox/PlaylistScroll/SongList/SongRow0/Margin/Row" unique_id=804211400]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 4
+alignment = 1
+
+[node name="SongTitle0" type="Label" parent="PreviewRoot/PhoneShell/PlaylistPage/Margin/PlaylistVBox/PlaylistScroll/SongList/SongRow0/Margin/Row/SongInfo" unique_id=1204423589]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_colors/font_color = Color(0.968627, 0.968627, 0.972549, 1)
+theme_override_font_sizes/font_size = 18
+text = "花香"
+
+[node name="SongSubtitle0" type="Label" parent="PreviewRoot/PhoneShell/PlaylistPage/Margin/PlaylistVBox/PlaylistScroll/SongList/SongRow0/Margin/Row/SongInfo" unique_id=198298133]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_colors/font_color = Color(0.643137, 0.65098, 0.690196, 1)
+theme_override_font_sizes/font_size = 14
+text = "周传雄 - 我在身边"
+
+[node name="SongVip0" type="Label" parent="PreviewRoot/PhoneShell/PlaylistPage/Margin/PlaylistVBox/PlaylistScroll/SongList/SongRow0/Margin/Row" unique_id=710261925]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_colors/font_color = Color(0.643137, 0.65098, 0.690196, 1)
+theme_override_font_sizes/font_size = 14
+text = "元力QQ"
+
+[node name="SongMore0" type="Button" parent="PreviewRoot/PhoneShell/PlaylistPage/Margin/PlaylistVBox/PlaylistScroll/SongList/SongRow0/Margin/Row" unique_id=892951940]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(34, 34)
+layout_mode = 2
+text = "⋯"
+
+[node name="SongButton0" type="Button" parent="PreviewRoot/PhoneShell/PlaylistPage/Margin/PlaylistVBox/PlaylistScroll/SongList/SongRow0" unique_id=193107905]
+unique_name_in_owner = true
+layout_mode = 0
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="SongRow1" type="Panel" parent="PreviewRoot/PhoneShell/PlaylistPage/Margin/PlaylistVBox/PlaylistScroll/SongList" unique_id=871638355]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 86)
+layout_mode = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_song_row")
+
+[node name="Margin" type="MarginContainer" parent="PreviewRoot/PhoneShell/PlaylistPage/Margin/PlaylistVBox/PlaylistScroll/SongList/SongRow1" unique_id=1007542805]
+layout_mode = 0
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/margin_left = 4
+theme_override_constants/margin_top = 10
+theme_override_constants/margin_right = 4
+theme_override_constants/margin_bottom = 10
+
+[node name="Row" type="HBoxContainer" parent="PreviewRoot/PhoneShell/PlaylistPage/Margin/PlaylistVBox/PlaylistScroll/SongList/SongRow1/Margin" unique_id=99873485]
+layout_mode = 2
+theme_override_constants/separation = 12
+
+[node name="SongIndex1" type="Label" parent="PreviewRoot/PhoneShell/PlaylistPage/Margin/PlaylistVBox/PlaylistScroll/SongList/SongRow1/Margin/Row" unique_id=981277534]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(28, 0)
+layout_mode = 2
+theme_override_colors/font_color = Color(0.968627, 0.968627, 0.972549, 1)
+theme_override_font_sizes/font_size = 18
+text = "2"
+horizontal_alignment = 1
+
+[node name="SongInfo" type="VBoxContainer" parent="PreviewRoot/PhoneShell/PlaylistPage/Margin/PlaylistVBox/PlaylistScroll/SongList/SongRow1/Margin/Row" unique_id=1206177066]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 4
+alignment = 1
+
+[node name="SongTitle1" type="Label" parent="PreviewRoot/PhoneShell/PlaylistPage/Margin/PlaylistVBox/PlaylistScroll/SongList/SongRow1/Margin/Row/SongInfo" unique_id=150768357]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_colors/font_color = Color(0.968627, 0.968627, 0.972549, 1)
+theme_override_font_sizes/font_size = 18
+text = "冬天的秘密"
+
+[node name="SongSubtitle1" type="Label" parent="PreviewRoot/PhoneShell/PlaylistPage/Margin/PlaylistVBox/PlaylistScroll/SongList/SongRow1/Margin/Row/SongInfo" unique_id=1237308983]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_colors/font_color = Color(0.643137, 0.65098, 0.690196, 1)
+theme_override_font_sizes/font_size = 14
+text = "周传雄 - 恋人创世纪"
+
+[node name="SongVip1" type="Label" parent="PreviewRoot/PhoneShell/PlaylistPage/Margin/PlaylistVBox/PlaylistScroll/SongList/SongRow1/Margin/Row" unique_id=64574755]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_colors/font_color = Color(0.643137, 0.65098, 0.690196, 1)
+theme_override_font_sizes/font_size = 14
+text = "元力QQ"
+
+[node name="SongMore1" type="Button" parent="PreviewRoot/PhoneShell/PlaylistPage/Margin/PlaylistVBox/PlaylistScroll/SongList/SongRow1/Margin/Row" unique_id=1004496599]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(34, 34)
+layout_mode = 2
+text = "⋯"
+
+[node name="SongButton1" type="Button" parent="PreviewRoot/PhoneShell/PlaylistPage/Margin/PlaylistVBox/PlaylistScroll/SongList/SongRow1" unique_id=2065119223]
+unique_name_in_owner = true
+layout_mode = 0
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="SongRow2" type="Panel" parent="PreviewRoot/PhoneShell/PlaylistPage/Margin/PlaylistVBox/PlaylistScroll/SongList" unique_id=1395233405]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 86)
+layout_mode = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_song_row")
+
+[node name="Margin" type="MarginContainer" parent="PreviewRoot/PhoneShell/PlaylistPage/Margin/PlaylistVBox/PlaylistScroll/SongList/SongRow2" unique_id=959787153]
+layout_mode = 0
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/margin_left = 4
+theme_override_constants/margin_top = 10
+theme_override_constants/margin_right = 4
+theme_override_constants/margin_bottom = 10
+
+[node name="Row" type="HBoxContainer" parent="PreviewRoot/PhoneShell/PlaylistPage/Margin/PlaylistVBox/PlaylistScroll/SongList/SongRow2/Margin" unique_id=1744913521]
+layout_mode = 2
+theme_override_constants/separation = 12
+
+[node name="SongIndex2" type="Label" parent="PreviewRoot/PhoneShell/PlaylistPage/Margin/PlaylistVBox/PlaylistScroll/SongList/SongRow2/Margin/Row" unique_id=674677930]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(28, 0)
+layout_mode = 2
+theme_override_colors/font_color = Color(0.968627, 0.968627, 0.972549, 1)
+theme_override_font_sizes/font_size = 18
+text = "3"
+horizontal_alignment = 1
+
+[node name="SongInfo" type="VBoxContainer" parent="PreviewRoot/PhoneShell/PlaylistPage/Margin/PlaylistVBox/PlaylistScroll/SongList/SongRow2/Margin/Row" unique_id=287545403]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 4
+alignment = 1
+
+[node name="SongTitle2" type="Label" parent="PreviewRoot/PhoneShell/PlaylistPage/Margin/PlaylistVBox/PlaylistScroll/SongList/SongRow2/Margin/Row/SongInfo" unique_id=1929828363]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_colors/font_color = Color(0.968627, 0.968627, 0.972549, 1)
+theme_override_font_sizes/font_size = 18
+text = "黄昏"
+
+[node name="SongSubtitle2" type="Label" parent="PreviewRoot/PhoneShell/PlaylistPage/Margin/PlaylistVBox/PlaylistScroll/SongList/SongRow2/Margin/Row/SongInfo" unique_id=1439740789]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_colors/font_color = Color(0.643137, 0.65098, 0.690196, 1)
+theme_override_font_sizes/font_size = 14
+text = "周传雄 - Transfer"
+
+[node name="SongVip2" type="Label" parent="PreviewRoot/PhoneShell/PlaylistPage/Margin/PlaylistVBox/PlaylistScroll/SongList/SongRow2/Margin/Row" unique_id=811821738]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_colors/font_color = Color(0.643137, 0.65098, 0.690196, 1)
+theme_override_font_sizes/font_size = 14
+text = "元力QQ"
+
+[node name="SongMore2" type="Button" parent="PreviewRoot/PhoneShell/PlaylistPage/Margin/PlaylistVBox/PlaylistScroll/SongList/SongRow2/Margin/Row" unique_id=275777224]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(34, 34)
+layout_mode = 2
+text = "⋯"
+
+[node name="SongButton2" type="Button" parent="PreviewRoot/PhoneShell/PlaylistPage/Margin/PlaylistVBox/PlaylistScroll/SongList/SongRow2" unique_id=571105852]
+unique_name_in_owner = true
+layout_mode = 0
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="SongRow3" type="Panel" parent="PreviewRoot/PhoneShell/PlaylistPage/Margin/PlaylistVBox/PlaylistScroll/SongList" unique_id=1929759112]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 86)
+layout_mode = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_song_row")
+
+[node name="Margin" type="MarginContainer" parent="PreviewRoot/PhoneShell/PlaylistPage/Margin/PlaylistVBox/PlaylistScroll/SongList/SongRow3" unique_id=516941881]
+layout_mode = 0
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/margin_left = 4
+theme_override_constants/margin_top = 10
+theme_override_constants/margin_right = 4
+theme_override_constants/margin_bottom = 10
+
+[node name="Row" type="HBoxContainer" parent="PreviewRoot/PhoneShell/PlaylistPage/Margin/PlaylistVBox/PlaylistScroll/SongList/SongRow3/Margin" unique_id=2049849277]
+layout_mode = 2
+theme_override_constants/separation = 12
+
+[node name="SongIndex3" type="Label" parent="PreviewRoot/PhoneShell/PlaylistPage/Margin/PlaylistVBox/PlaylistScroll/SongList/SongRow3/Margin/Row" unique_id=285577903]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(28, 0)
+layout_mode = 2
+theme_override_colors/font_color = Color(0.968627, 0.968627, 0.972549, 1)
+theme_override_font_sizes/font_size = 18
+text = "4"
+horizontal_alignment = 1
+
+[node name="SongInfo" type="VBoxContainer" parent="PreviewRoot/PhoneShell/PlaylistPage/Margin/PlaylistVBox/PlaylistScroll/SongList/SongRow3/Margin/Row" unique_id=1977885082]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 4
+alignment = 1
+
+[node name="SongTitle3" type="Label" parent="PreviewRoot/PhoneShell/PlaylistPage/Margin/PlaylistVBox/PlaylistScroll/SongList/SongRow3/Margin/Row/SongInfo" unique_id=1063919591]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_colors/font_color = Color(0.968627, 0.968627, 0.972549, 1)
+theme_override_font_sizes/font_size = 18
+text = "青花"
+
+[node name="SongSubtitle3" type="Label" parent="PreviewRoot/PhoneShell/PlaylistPage/Margin/PlaylistVBox/PlaylistScroll/SongList/SongRow3/Margin/Row/SongInfo" unique_id=94406545]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_colors/font_color = Color(0.643137, 0.65098, 0.690196, 1)
+theme_override_font_sizes/font_size = 14
+text = "周传雄 - 蓝色土耳其"
+
+[node name="SongVip3" type="Label" parent="PreviewRoot/PhoneShell/PlaylistPage/Margin/PlaylistVBox/PlaylistScroll/SongList/SongRow3/Margin/Row" unique_id=768845803]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_colors/font_color = Color(0.643137, 0.65098, 0.690196, 1)
+theme_override_font_sizes/font_size = 14
+text = "元力QQ"
+
+[node name="SongMore3" type="Button" parent="PreviewRoot/PhoneShell/PlaylistPage/Margin/PlaylistVBox/PlaylistScroll/SongList/SongRow3/Margin/Row" unique_id=556203898]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(34, 34)
+layout_mode = 2
+text = "⋯"
+
+[node name="SongButton3" type="Button" parent="PreviewRoot/PhoneShell/PlaylistPage/Margin/PlaylistVBox/PlaylistScroll/SongList/SongRow3" unique_id=509483579]
+unique_name_in_owner = true
+layout_mode = 0
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="SongRow4" type="Panel" parent="PreviewRoot/PhoneShell/PlaylistPage/Margin/PlaylistVBox/PlaylistScroll/SongList" unique_id=1124174307]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 86)
+layout_mode = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_song_row")
+
+[node name="Margin" type="MarginContainer" parent="PreviewRoot/PhoneShell/PlaylistPage/Margin/PlaylistVBox/PlaylistScroll/SongList/SongRow4" unique_id=281520977]
+layout_mode = 0
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/margin_left = 4
+theme_override_constants/margin_top = 10
+theme_override_constants/margin_right = 4
+theme_override_constants/margin_bottom = 10
+
+[node name="Row" type="HBoxContainer" parent="PreviewRoot/PhoneShell/PlaylistPage/Margin/PlaylistVBox/PlaylistScroll/SongList/SongRow4/Margin" unique_id=320447844]
+layout_mode = 2
+theme_override_constants/separation = 12
+
+[node name="SongIndex4" type="Label" parent="PreviewRoot/PhoneShell/PlaylistPage/Margin/PlaylistVBox/PlaylistScroll/SongList/SongRow4/Margin/Row" unique_id=1031741646]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(28, 0)
+layout_mode = 2
+theme_override_colors/font_color = Color(0.968627, 0.968627, 0.972549, 1)
+theme_override_font_sizes/font_size = 18
+text = "5"
+horizontal_alignment = 1
+
+[node name="SongInfo" type="VBoxContainer" parent="PreviewRoot/PhoneShell/PlaylistPage/Margin/PlaylistVBox/PlaylistScroll/SongList/SongRow4/Margin/Row" unique_id=771694147]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 4
+alignment = 1
+
+[node name="SongTitle4" type="Label" parent="PreviewRoot/PhoneShell/PlaylistPage/Margin/PlaylistVBox/PlaylistScroll/SongList/SongRow4/Margin/Row/SongInfo" unique_id=1448121937]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_colors/font_color = Color(0.968627, 0.968627, 0.972549, 1)
+theme_override_font_sizes/font_size = 18
+text = "如果当时"
+
+[node name="SongSubtitle4" type="Label" parent="PreviewRoot/PhoneShell/PlaylistPage/Margin/PlaylistVBox/PlaylistScroll/SongList/SongRow4/Margin/Row/SongInfo" unique_id=25923023]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_colors/font_color = Color(0.643137, 0.65098, 0.690196, 1)
+theme_override_font_sizes/font_size = 14
+text = "许嵩 - 自定义"
+
+[node name="SongVip4" type="Label" parent="PreviewRoot/PhoneShell/PlaylistPage/Margin/PlaylistVBox/PlaylistScroll/SongList/SongRow4/Margin/Row" unique_id=1218497230]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_colors/font_color = Color(0.643137, 0.65098, 0.690196, 1)
+theme_override_font_sizes/font_size = 14
+text = "元力QQ"
+
+[node name="SongMore4" type="Button" parent="PreviewRoot/PhoneShell/PlaylistPage/Margin/PlaylistVBox/PlaylistScroll/SongList/SongRow4/Margin/Row" unique_id=1102201147]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(34, 34)
+layout_mode = 2
+text = "⋯"
+
+[node name="SongButton4" type="Button" parent="PreviewRoot/PhoneShell/PlaylistPage/Margin/PlaylistVBox/PlaylistScroll/SongList/SongRow4" unique_id=43418845]
+unique_name_in_owner = true
+layout_mode = 0
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="SongRow5" type="Panel" parent="PreviewRoot/PhoneShell/PlaylistPage/Margin/PlaylistVBox/PlaylistScroll/SongList" unique_id=1128126874]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 86)
+layout_mode = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_song_row")
+
+[node name="Margin" type="MarginContainer" parent="PreviewRoot/PhoneShell/PlaylistPage/Margin/PlaylistVBox/PlaylistScroll/SongList/SongRow5" unique_id=1956233364]
+layout_mode = 0
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/margin_left = 4
+theme_override_constants/margin_top = 10
+theme_override_constants/margin_right = 4
+theme_override_constants/margin_bottom = 10
+
+[node name="Row" type="HBoxContainer" parent="PreviewRoot/PhoneShell/PlaylistPage/Margin/PlaylistVBox/PlaylistScroll/SongList/SongRow5/Margin" unique_id=1952489981]
+layout_mode = 2
+theme_override_constants/separation = 12
+
+[node name="SongIndex5" type="Label" parent="PreviewRoot/PhoneShell/PlaylistPage/Margin/PlaylistVBox/PlaylistScroll/SongList/SongRow5/Margin/Row" unique_id=1806331894]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(28, 0)
+layout_mode = 2
+theme_override_colors/font_color = Color(0.968627, 0.968627, 0.972549, 1)
+theme_override_font_sizes/font_size = 18
+text = "6"
+horizontal_alignment = 1
+
+[node name="SongInfo" type="VBoxContainer" parent="PreviewRoot/PhoneShell/PlaylistPage/Margin/PlaylistVBox/PlaylistScroll/SongList/SongRow5/Margin/Row" unique_id=1003105982]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 4
+alignment = 1
+
+[node name="SongTitle5" type="Label" parent="PreviewRoot/PhoneShell/PlaylistPage/Margin/PlaylistVBox/PlaylistScroll/SongList/SongRow5/Margin/Row/SongInfo" unique_id=1615151536]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_colors/font_color = Color(0.968627, 0.968627, 0.972549, 1)
+theme_override_font_sizes/font_size = 18
+text = "素颜"
+
+[node name="SongSubtitle5" type="Label" parent="PreviewRoot/PhoneShell/PlaylistPage/Margin/PlaylistVBox/PlaylistScroll/SongList/SongRow5/Margin/Row/SongInfo" unique_id=645109508]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_colors/font_color = Color(0.643137, 0.65098, 0.690196, 1)
+theme_override_font_sizes/font_size = 14
+text = "许嵩, 何曼婷 - 素颜"
+
+[node name="SongVip5" type="Label" parent="PreviewRoot/PhoneShell/PlaylistPage/Margin/PlaylistVBox/PlaylistScroll/SongList/SongRow5/Margin/Row" unique_id=1821648335]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_colors/font_color = Color(0.643137, 0.65098, 0.690196, 1)
+theme_override_font_sizes/font_size = 14
+text = "元力QQ"
+
+[node name="SongMore5" type="Button" parent="PreviewRoot/PhoneShell/PlaylistPage/Margin/PlaylistVBox/PlaylistScroll/SongList/SongRow5/Margin/Row" unique_id=420336611]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(34, 34)
+layout_mode = 2
+text = "⋯"
+
+[node name="SongButton5" type="Button" parent="PreviewRoot/PhoneShell/PlaylistPage/Margin/PlaylistVBox/PlaylistScroll/SongList/SongRow5" unique_id=1269419910]
+unique_name_in_owner = true
+layout_mode = 0
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="SongRow6" type="Panel" parent="PreviewRoot/PhoneShell/PlaylistPage/Margin/PlaylistVBox/PlaylistScroll/SongList" unique_id=2001084934]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 86)
+layout_mode = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_song_row")
+
+[node name="Margin" type="MarginContainer" parent="PreviewRoot/PhoneShell/PlaylistPage/Margin/PlaylistVBox/PlaylistScroll/SongList/SongRow6" unique_id=124708981]
+layout_mode = 0
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/margin_left = 4
+theme_override_constants/margin_top = 10
+theme_override_constants/margin_right = 4
+theme_override_constants/margin_bottom = 10
+
+[node name="Row" type="HBoxContainer" parent="PreviewRoot/PhoneShell/PlaylistPage/Margin/PlaylistVBox/PlaylistScroll/SongList/SongRow6/Margin" unique_id=1443501131]
+layout_mode = 2
+theme_override_constants/separation = 12
+
+[node name="SongIndex6" type="Label" parent="PreviewRoot/PhoneShell/PlaylistPage/Margin/PlaylistVBox/PlaylistScroll/SongList/SongRow6/Margin/Row" unique_id=616822657]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(28, 0)
+layout_mode = 2
+theme_override_colors/font_color = Color(0.968627, 0.968627, 0.972549, 1)
+theme_override_font_sizes/font_size = 18
+text = "7"
+horizontal_alignment = 1
+
+[node name="SongInfo" type="VBoxContainer" parent="PreviewRoot/PhoneShell/PlaylistPage/Margin/PlaylistVBox/PlaylistScroll/SongList/SongRow6/Margin/Row" unique_id=1319555101]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 4
+alignment = 1
+
+[node name="SongTitle6" type="Label" parent="PreviewRoot/PhoneShell/PlaylistPage/Margin/PlaylistVBox/PlaylistScroll/SongList/SongRow6/Margin/Row/SongInfo" unique_id=671455413]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_colors/font_color = Color(0.968627, 0.968627, 0.972549, 1)
+theme_override_font_sizes/font_size = 18
+text = "幻听"
+
+[node name="SongSubtitle6" type="Label" parent="PreviewRoot/PhoneShell/PlaylistPage/Margin/PlaylistVBox/PlaylistScroll/SongList/SongRow6/Margin/Row/SongInfo" unique_id=1866035378]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_colors/font_color = Color(0.643137, 0.65098, 0.690196, 1)
+theme_override_font_sizes/font_size = 14
+text = "许嵩 - 梦游计"
+
+[node name="SongVip6" type="Label" parent="PreviewRoot/PhoneShell/PlaylistPage/Margin/PlaylistVBox/PlaylistScroll/SongList/SongRow6/Margin/Row" unique_id=1554171710]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_colors/font_color = Color(0.643137, 0.65098, 0.690196, 1)
+theme_override_font_sizes/font_size = 14
+text = "元力QQ"
+
+[node name="SongMore6" type="Button" parent="PreviewRoot/PhoneShell/PlaylistPage/Margin/PlaylistVBox/PlaylistScroll/SongList/SongRow6/Margin/Row" unique_id=905116414]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(34, 34)
+layout_mode = 2
+text = "⋯"
+
+[node name="SongButton6" type="Button" parent="PreviewRoot/PhoneShell/PlaylistPage/Margin/PlaylistVBox/PlaylistScroll/SongList/SongRow6" unique_id=533422296]
+unique_name_in_owner = true
+layout_mode = 0
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="SongRow7" type="Panel" parent="PreviewRoot/PhoneShell/PlaylistPage/Margin/PlaylistVBox/PlaylistScroll/SongList" unique_id=1511482632]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 86)
+layout_mode = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_song_row")
+
+[node name="Margin" type="MarginContainer" parent="PreviewRoot/PhoneShell/PlaylistPage/Margin/PlaylistVBox/PlaylistScroll/SongList/SongRow7" unique_id=179257496]
+layout_mode = 0
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/margin_left = 4
+theme_override_constants/margin_top = 10
+theme_override_constants/margin_right = 4
+theme_override_constants/margin_bottom = 10
+
+[node name="Row" type="HBoxContainer" parent="PreviewRoot/PhoneShell/PlaylistPage/Margin/PlaylistVBox/PlaylistScroll/SongList/SongRow7/Margin" unique_id=1135162599]
+layout_mode = 2
+theme_override_constants/separation = 12
+
+[node name="SongIndex7" type="Label" parent="PreviewRoot/PhoneShell/PlaylistPage/Margin/PlaylistVBox/PlaylistScroll/SongList/SongRow7/Margin/Row" unique_id=386814667]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(28, 0)
+layout_mode = 2
+theme_override_colors/font_color = Color(0.968627, 0.968627, 0.972549, 1)
+theme_override_font_sizes/font_size = 18
+text = "8"
+horizontal_alignment = 1
+
+[node name="SongInfo" type="VBoxContainer" parent="PreviewRoot/PhoneShell/PlaylistPage/Margin/PlaylistVBox/PlaylistScroll/SongList/SongRow7/Margin/Row" unique_id=1432596679]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 4
+alignment = 1
+
+[node name="SongTitle7" type="Label" parent="PreviewRoot/PhoneShell/PlaylistPage/Margin/PlaylistVBox/PlaylistScroll/SongList/SongRow7/Margin/Row/SongInfo" unique_id=1293481844]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_colors/font_color = Color(0.968627, 0.968627, 0.972549, 1)
+theme_override_font_sizes/font_size = 18
+text = "唯你懂我心"
+
+[node name="SongSubtitle7" type="Label" parent="PreviewRoot/PhoneShell/PlaylistPage/Margin/PlaylistVBox/PlaylistScroll/SongList/SongRow7/Margin/Row/SongInfo" unique_id=2095661519]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_colors/font_color = Color(0.643137, 0.65098, 0.690196, 1)
+theme_override_font_sizes/font_size = 14
+text = "汪苏泷 - 弗斯特"
+
+[node name="SongVip7" type="Label" parent="PreviewRoot/PhoneShell/PlaylistPage/Margin/PlaylistVBox/PlaylistScroll/SongList/SongRow7/Margin/Row" unique_id=1014952780]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_colors/font_color = Color(0.643137, 0.65098, 0.690196, 1)
+theme_override_font_sizes/font_size = 14
+text = "元力QQ"
+
+[node name="SongMore7" type="Button" parent="PreviewRoot/PhoneShell/PlaylistPage/Margin/PlaylistVBox/PlaylistScroll/SongList/SongRow7/Margin/Row" unique_id=1178601077]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(34, 34)
+layout_mode = 2
+text = "⋯"
+
+[node name="SongButton7" type="Button" parent="PreviewRoot/PhoneShell/PlaylistPage/Margin/PlaylistVBox/PlaylistScroll/SongList/SongRow7" unique_id=93661740]
+unique_name_in_owner = true
+layout_mode = 0
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="SongBottomSpace" type="Control" parent="PreviewRoot/PhoneShell/PlaylistPage/Margin/PlaylistVBox/PlaylistScroll/SongList" unique_id=890655664]
+custom_minimum_size = Vector2(0, 24)
+layout_mode = 2
+
+[node name="PlayerPage" type="Control" parent="PreviewRoot/PhoneShell" unique_id=706021004]
+unique_name_in_owner = true
+visible = false
+anchors_preset = 0
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("4_script")
+
+[node name="PlayerBackdrop" type="ColorRect" parent="PreviewRoot/PhoneShell/PlayerPage" unique_id=1343948977]
+unique_name_in_owner = true
+layout_mode = 0
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0.109804, 0.113725, 0.129412, 1)
+
+[node name="PlayerMargin" type="MarginContainer" parent="PreviewRoot/PhoneShell/PlayerPage" unique_id=909338491]
+layout_mode = 0
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/margin_left = 14
+theme_override_constants/margin_top = 8
+theme_override_constants/margin_right = 14
+theme_override_constants/margin_bottom = 18
+
+[node name="PlayerVBox" type="VBoxContainer" parent="PreviewRoot/PhoneShell/PlayerPage/PlayerMargin" unique_id=462645613]
+layout_mode = 2
+theme_override_constants/separation = 18
+
+[node name="PlayerTopRow" type="HBoxContainer" parent="PreviewRoot/PhoneShell/PlayerPage/PlayerMargin/PlayerVBox" unique_id=994617136]
+custom_minimum_size = Vector2(0, 48)
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="ClosePlayerButton" type="Button" parent="PreviewRoot/PhoneShell/PlayerPage/PlayerMargin/PlayerVBox/PlayerTopRow" unique_id=1650913413]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(44, 44)
+layout_mode = 2
+text = "←"
+
+[node name="Spacer" type="Control" parent="PreviewRoot/PhoneShell/PlayerPage/PlayerMargin/PlayerVBox/PlayerTopRow" unique_id=1068371053]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="PlayerShareButton" type="Button" parent="PreviewRoot/PhoneShell/PlayerPage/PlayerMargin/PlayerVBox/PlayerTopRow" unique_id=806745311]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(44, 44)
+layout_mode = 2
+text = "↗"
+
+[node name="PlayerTitleBlock" type="VBoxContainer" parent="PreviewRoot/PhoneShell/PlayerPage/PlayerMargin/PlayerVBox" unique_id=635078707]
+layout_mode = 2
+theme_override_constants/separation = 8
+alignment = 1
+
+[node name="NowTitleLabel" type="Label" parent="PreviewRoot/PhoneShell/PlayerPage/PlayerMargin/PlayerVBox/PlayerTitleBlock" unique_id=1104681979]
+unique_name_in_owner = true
+layout_mode = 2
+text = "虚拟"
+horizontal_alignment = 1
+
+[node name="ArtistCenter" type="CenterContainer" parent="PreviewRoot/PhoneShell/PlayerPage/PlayerMargin/PlayerVBox/PlayerTitleBlock" unique_id=816994794]
+layout_mode = 2
+
+[node name="ArtistRow" type="HBoxContainer" parent="PreviewRoot/PhoneShell/PlayerPage/PlayerMargin/PlayerVBox/PlayerTitleBlock/ArtistCenter" unique_id=1408038028]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="NowArtistLabel" type="Label" parent="PreviewRoot/PhoneShell/PlayerPage/PlayerMargin/PlayerVBox/PlayerTitleBlock/ArtistCenter/ArtistRow" unique_id=364759087]
+unique_name_in_owner = true
+layout_mode = 2
+text = "陈粒"
+
+[node name="PlayerSourceChip" type="Panel" parent="PreviewRoot/PhoneShell/PlayerPage/PlayerMargin/PlayerVBox/PlayerTitleBlock/ArtistCenter/ArtistRow" unique_id=1018701668]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(74, 30)
+layout_mode = 2
+
+[node name="Margin" type="MarginContainer" parent="PreviewRoot/PhoneShell/PlayerPage/PlayerMargin/PlayerVBox/PlayerTitleBlock/ArtistCenter/ArtistRow/PlayerSourceChip" unique_id=1012786507]
+layout_mode = 0
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/margin_left = 12
+theme_override_constants/margin_top = 6
+theme_override_constants/margin_right = 12
+theme_override_constants/margin_bottom = 6
+
+[node name="PlayerSourceLabel" type="Label" parent="PreviewRoot/PhoneShell/PlayerPage/PlayerMargin/PlayerVBox/PlayerTitleBlock/ArtistCenter/ArtistRow/PlayerSourceChip/Margin" unique_id=822233788]
+unique_name_in_owner = true
+layout_mode = 2
+text = "元力QQ"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="CoverStage" type="CenterContainer" parent="PreviewRoot/PhoneShell/PlayerPage/PlayerMargin/PlayerVBox" unique_id=998450547]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="CoverPanel" type="Panel" parent="PreviewRoot/PhoneShell/PlayerPage/PlayerMargin/PlayerVBox/CoverStage" unique_id=946789015]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(310, 310)
+layout_mode = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_player_cover_panel")
+
+[node name="CoverGlowLeft" type="ColorRect" parent="PreviewRoot/PhoneShell/PlayerPage/PlayerMargin/PlayerVBox/CoverStage/CoverPanel" unique_id=654731710]
+unique_name_in_owner = true
+layout_mode = 0
+offset_top = 34.0
+offset_right = 166.0
+offset_bottom = 266.0
+color = Color(0, 0, 0, 0)
+
+[node name="CoverGlowRight" type="ColorRect" parent="PreviewRoot/PhoneShell/PlayerPage/PlayerMargin/PlayerVBox/CoverStage/CoverPanel" unique_id=1692710363]
+unique_name_in_owner = true
+layout_mode = 0
+offset_left = 160.0
+offset_right = 310.0
+offset_bottom = 260.0
+color = Color(0, 0, 0, 0)
+
+[node name="CoverCircle" type="Panel" parent="PreviewRoot/PhoneShell/PlayerPage/PlayerMargin/PlayerVBox/CoverStage/CoverPanel" unique_id=1021963745]
+unique_name_in_owner = true
+layout_mode = 0
+offset_left = 48.0
+offset_top = 48.0
+offset_right = 248.0
+offset_bottom = 248.0
+theme_override_styles/panel = SubResource("StyleBoxFlat_player_cover_circle")
+
+[node name="CoverMarkLabel" type="Label" parent="PreviewRoot/PhoneShell/PlayerPage/PlayerMargin/PlayerVBox/CoverStage/CoverPanel" unique_id=522729667]
+unique_name_in_owner = true
+layout_mode = 0
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_colors/font_color = Color(1, 1, 1, 0.88)
+theme_override_font_sizes/font_size = 28
+text = "虚拟"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="PlayerMetaRow" type="HBoxContainer" parent="PreviewRoot/PhoneShell/PlayerPage/PlayerMargin/PlayerVBox" unique_id=1341640196]
+layout_mode = 2
+theme_override_constants/separation = 18
+alignment = 1
+
+[node name="LikeButton" type="Button" parent="PreviewRoot/PhoneShell/PlayerPage/PlayerMargin/PlayerVBox/PlayerMetaRow" unique_id=1397618199]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(40, 40)
+layout_mode = 2
+text = "♡"
+
+[node name="PlayerFxLabel" type="Label" parent="PreviewRoot/PhoneShell/PlayerPage/PlayerMargin/PlayerVBox/PlayerMetaRow" unique_id=1133679788]
+unique_name_in_owner = true
+layout_mode = 2
+text = "音效"
+
+[node name="ToneButton" type="Button" parent="PreviewRoot/PhoneShell/PlayerPage/PlayerMargin/PlayerVBox/PlayerMetaRow" unique_id=1977435395]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(40, 40)
+layout_mode = 2
+text = "◎"
+
+[node name="SpeedLabel" type="Label" parent="PreviewRoot/PhoneShell/PlayerPage/PlayerMargin/PlayerVBox/PlayerMetaRow" unique_id=1551380707]
+unique_name_in_owner = true
+layout_mode = 2
+text = "1.0x"
+
+[node name="CommentButton" type="Button" parent="PreviewRoot/PhoneShell/PlayerPage/PlayerMargin/PlayerVBox/PlayerMetaRow" unique_id=278719635]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(40, 40)
+layout_mode = 2
+text = "评"
+
+[node name="PlayerQueueButton" type="Button" parent="PreviewRoot/PhoneShell/PlayerPage/PlayerMargin/PlayerVBox/PlayerMetaRow" unique_id=787150441]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(40, 40)
+layout_mode = 2
+text = "⋯"
+
+[node name="ProgressWrap" type="VBoxContainer" parent="PreviewRoot/PhoneShell/PlayerPage/PlayerMargin/PlayerVBox" unique_id=1782633426]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="TimeRow" type="HBoxContainer" parent="PreviewRoot/PhoneShell/PlayerPage/PlayerMargin/PlayerVBox/ProgressWrap" unique_id=2085207077]
+layout_mode = 2
+
+[node name="ElapsedLabel" type="Label" parent="PreviewRoot/PhoneShell/PlayerPage/PlayerMargin/PlayerVBox/ProgressWrap/TimeRow" unique_id=710331033]
+unique_name_in_owner = true
+layout_mode = 2
+text = "02:38"
+
+[node name="Spacer" type="Control" parent="PreviewRoot/PhoneShell/PlayerPage/PlayerMargin/PlayerVBox/ProgressWrap/TimeRow" unique_id=638192304]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="RemainingLabel" type="Label" parent="PreviewRoot/PhoneShell/PlayerPage/PlayerMargin/PlayerVBox/ProgressWrap/TimeRow" unique_id=1414238252]
+unique_name_in_owner = true
+layout_mode = 2
+text = "04:01"
+horizontal_alignment = 2
+
+[node name="PlayerProgressBar" type="ProgressBar" parent="PreviewRoot/PhoneShell/PlayerPage/PlayerMargin/PlayerVBox/ProgressWrap" unique_id=1346522589]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 6)
+layout_mode = 2
+value = 40.0
+show_percentage = false
+
+[node name="ControlsCenter" type="CenterContainer" parent="PreviewRoot/PhoneShell/PlayerPage/PlayerMargin/PlayerVBox" unique_id=1678578533]
+layout_mode = 2
+
+[node name="ControlsRow" type="HBoxContainer" parent="PreviewRoot/PhoneShell/PlayerPage/PlayerMargin/PlayerVBox/ControlsCenter" unique_id=654070068]
+layout_mode = 2
+theme_override_constants/separation = 18
+
+[node name="ShuffleButton" type="Button" parent="PreviewRoot/PhoneShell/PlayerPage/PlayerMargin/PlayerVBox/ControlsCenter/ControlsRow" unique_id=1065896579]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(48, 48)
+layout_mode = 2
+text = "⇄"
+
+[node name="PlayerPrevButton" type="Button" parent="PreviewRoot/PhoneShell/PlayerPage/PlayerMargin/PlayerVBox/ControlsCenter/ControlsRow" unique_id=749697126]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(56, 56)
+layout_mode = 2
+text = "◀◀"
+
+[node name="PlayerPlayButton" type="Button" parent="PreviewRoot/PhoneShell/PlayerPage/PlayerMargin/PlayerVBox/ControlsCenter/ControlsRow" unique_id=1869086045]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(84, 84)
+layout_mode = 2
+text = "▶"
+
+[node name="PlayerNextButton" type="Button" parent="PreviewRoot/PhoneShell/PlayerPage/PlayerMargin/PlayerVBox/ControlsCenter/ControlsRow" unique_id=1153550113]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(56, 56)
+layout_mode = 2
+text = "▶▶"
+
+[node name="PlayerListButton" type="Button" parent="PreviewRoot/PhoneShell/PlayerPage/PlayerMargin/PlayerVBox/ControlsCenter/ControlsRow" unique_id=1334156431]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(48, 48)
+layout_mode = 2
+text = "≡"
+
+[node name="BottomFiller" type="Control" parent="PreviewRoot/PhoneShell/PlayerPage/PlayerMargin/PlayerVBox" unique_id=280628813]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="MiniPlayer" type="Panel" parent="PreviewRoot/PhoneShell" unique_id=651896687]
+unique_name_in_owner = true
+visible = false
+layout_mode = 0
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 12.0
+offset_top = -82.0
+offset_right = -12.0
+offset_bottom = -12.0
+grow_horizontal = 2
+grow_vertical = 0
+script = ExtResource("5_script")
+
+[node name="Margin" type="MarginContainer" parent="PreviewRoot/PhoneShell/MiniPlayer" unique_id=1660075583]
+layout_mode = 0
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/margin_left = 12
+theme_override_constants/margin_top = 10
+theme_override_constants/margin_right = 12
+theme_override_constants/margin_bottom = 10
+
+[node name="Row" type="HBoxContainer" parent="PreviewRoot/PhoneShell/MiniPlayer/Margin" unique_id=381376481]
+layout_mode = 2
+theme_override_constants/separation = 14
+
+[node name="MiniCoverPanel" type="Panel" parent="PreviewRoot/PhoneShell/MiniPlayer/Margin/Row" unique_id=1043050561]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(56, 56)
+layout_mode = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_mini_cover_panel")
+
+[node name="MiniCoverMarkLabel" type="Label" parent="PreviewRoot/PhoneShell/MiniPlayer/Margin/Row/MiniCoverPanel" unique_id=985287164]
+unique_name_in_owner = true
+layout_mode = 0
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_colors/font_color = Color(0.968627, 0.968627, 0.972549, 1)
+theme_override_font_sizes/font_size = 22
+text = "虚"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="MiniTrackLabel" type="Label" parent="PreviewRoot/PhoneShell/MiniPlayer/Margin/Row" unique_id=106849500]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+text = "虚拟 - 陈粒"
+vertical_alignment = 1
+
+[node name="MiniPlayButton" type="Button" parent="PreviewRoot/PhoneShell/MiniPlayer/Margin/Row" unique_id=1634867500]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(60, 60)
+layout_mode = 2
+text = "▶"
+
+[node name="MiniListButton" type="Button" parent="PreviewRoot/PhoneShell/MiniPlayer/Margin/Row" unique_id=1603467272]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(60, 60)
+layout_mode = 2
+text = "≡"
+
+[node name="MiniOpenButton" type="Button" parent="PreviewRoot/PhoneShell/MiniPlayer" unique_id=943220940]
+unique_name_in_owner = true
+layout_mode = 0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_right = -132.0
+grow_horizontal = 2
+grow_vertical = 2
