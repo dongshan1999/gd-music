@@ -1,0 +1,44 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "GDScript: Launch Music App Showcase",
+      "type": "godot",
+      "request": "launch",
+      "project": "${workspaceFolder}",
+      "scene": "res://scenes/music_app_showcase_scene.tscn",
+      "address": "127.0.0.1",
+      "port": 6007,
+      "editor_path": "E:/Tool/Godot_v4.6.2-stable_win64/Godot_v4.6.2-stable_win64.exe",
+      "debug_collisions": false,
+      "debug_paths": false,
+      "debug_navigation": false,
+      "debug_avoidance": false,
+      "debug_stringnames": false,
+      "additional_options": ""
+    },
+    {
+      "name": "GDScript: Launch Start Scene",
+      "type": "godot",
+      "request": "launch",
+      "project": "${workspaceFolder}",
+      "scene": "res://scenes/start_scene.tscn",
+      "address": "127.0.0.1",
+      "port": 6007,
+      "editor_path": "E:/Tool/Godot_v4.6.2-stable_win64/Godot_v4.6.2-stable_win64.exe",
+      "debug_collisions": false,
+      "debug_paths": false,
+      "debug_navigation": false,
+      "debug_avoidance": false,
+      "debug_stringnames": false,
+      "additional_options": ""
+    },
+    {
+      "name": "GDScript: Attach To Running Project",
+      "type": "godot",
+      "request": "attach",
+      "address": "127.0.0.1",
+      "port": 6007
+    }
+  ]
+}
