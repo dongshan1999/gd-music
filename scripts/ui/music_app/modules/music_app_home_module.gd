@@ -54,7 +54,6 @@ func refresh() -> void:
 		return
 
 	search_icon_label.text = "🔎"
-	search_prompt_label.text = tr("music_app.home.search_prompt")
 	my_playlists_label.text = tr("music_app.home.my_playlists_count").format({"count": _controller._playlists.size()})
 	favorite_playlists_label.text = tr("music_app.home.favorite_playlists_count").format({"count": 0})
 

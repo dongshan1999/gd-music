@@ -44,8 +44,6 @@ func refresh() -> void:
 	if _controller == null:
 		return
 
-	playlist_top_title.text = tr("music_app.playlist.title")
-	play_all_button.text = tr("music_app.playlist.play_all")
 
 	if _controller._playlists.is_empty():
 		playlist_hero_mark_label.text = tr("music_app.playlist.favorites_mark")

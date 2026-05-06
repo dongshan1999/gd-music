@@ -39,8 +39,6 @@ func refresh() -> void:
 		return
 
 	scan_back_button.text = "←"
-	scan_hint_label.text = tr("music_app.scan.hint")
-	start_scan_button.text = tr("music_app.scan.start")
 
 	if _root_path.is_empty():
 		_root_path = _controller._get_scan_root_path()

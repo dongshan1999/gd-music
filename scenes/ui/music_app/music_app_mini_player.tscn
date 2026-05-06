@@ -1,0 +1,99 @@
+[gd_scene load_steps=4 format=3]
+
+[ext_resource type="Script" path="res://scripts/ui/music_app/modules/music_app_mini_player_module.gd" id="5_script"]
+
+[ext_resource type="Script" path="res://scripts/ui/common/localize_comp.gd" id="999_localize_comp"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_mini_cover_panel"]
+bg_color = Color(0.18, 0.18, 0.2, 1)
+corner_radius_top_left = 18
+corner_radius_top_right = 18
+corner_radius_bottom_right = 18
+corner_radius_bottom_left = 18
+
+[node name="MiniPlayer" type="Panel" unique_id=651896687]
+unique_name_in_owner = true
+visible = false
+layout_mode = 0
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 12.0
+offset_top = -82.0
+offset_right = -12.0
+offset_bottom = -12.0
+grow_horizontal = 2
+grow_vertical = 0
+script = ExtResource("5_script")
+
+[node name="Margin" type="MarginContainer" parent="." unique_id=1660075583]
+layout_mode = 0
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/margin_left = 12
+theme_override_constants/margin_top = 10
+theme_override_constants/margin_right = 12
+theme_override_constants/margin_bottom = 10
+
+[node name="Row" type="HBoxContainer" parent="Margin" unique_id=381376481]
+layout_mode = 2
+theme_override_constants/separation = 14
+
+[node name="MiniCoverPanel" type="Panel" parent="Margin/Row" unique_id=1043050561]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(56, 56)
+layout_mode = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_mini_cover_panel")
+
+[node name="MiniCoverMarkLabel" type="Label" parent="Margin/Row/MiniCoverPanel" unique_id=985287164]
+unique_name_in_owner = true
+layout_mode = 0
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_font_sizes/font_size = 22
+theme_override_colors/font_color = Color(0.968627, 0.968627, 0.972549, 1)
+text = "虚"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="LocalizeComp" type="Node" parent="Margin/Row/MiniCoverPanel/MiniCoverMarkLabel"]
+script = ExtResource("999_localize_comp")
+tr_key = "music_app.player.placeholder_mark"
+update_in_runtime = false
+
+[node name="MiniTrackLabel" type="Label" parent="Margin/Row" unique_id=106849500]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+text = "虚拟 - 陈粒"
+vertical_alignment = 1
+
+[node name="LocalizeComp" type="Node" parent="Margin/Row/MiniTrackLabel"]
+script = ExtResource("999_localize_comp")
+tr_key = "music_app.mini_player.placeholder_track"
+update_in_runtime = false
+
+[node name="MiniPlayButton" type="Button" parent="Margin/Row" unique_id=1634867500]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(60, 60)
+layout_mode = 2
+text = "▶"
+
+[node name="MiniListButton" type="Button" parent="Margin/Row" unique_id=1603467272]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(60, 60)
+layout_mode = 2
+text = "≡"
+
+[node name="MiniOpenButton" type="Button" parent="." unique_id=943220940]
+unique_name_in_owner = true
+layout_mode = 0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_right = -132.0
+grow_horizontal = 2
+grow_vertical = 2
