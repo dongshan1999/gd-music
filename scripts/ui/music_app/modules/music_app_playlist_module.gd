@@ -1,8 +1,11 @@
 class_name MusicAppPlaylistModule
 extends Control
+
 const MusicAppShowcaseControllerType := preload("res://scripts/ui/music_app/music_app_showcase.gd")
+const MusicAppPlaylistSongRowType := preload("res://scripts/ui/music_app/modules/music_app_playlist_song_row.gd")
 const PlaylistDataType := preload("res://scripts/save/music/playlist_data.gd")
 const TrackDataType := preload("res://scripts/save/music/track_data.gd")
+const PLAYLIST_SONG_ROW_SCENE := preload("res://scenes/ui/music_app/playlist_song_row.tscn")
 
 var _controller: MusicAppShowcaseControllerType
 var _is_bound := false
@@ -19,13 +22,10 @@ var _is_bound := false
 @onready var play_all_button: Button = %PlayAllButton
 @onready var playlist_add_button: Button = %PlaylistAddButton
 @onready var playlist_edit_button: Button = %PlaylistEditButton
-@onready var song_rows: Array[Panel] = [%SongRow0, %SongRow1, %SongRow2, %SongRow3, %SongRow4, %SongRow5, %SongRow6, %SongRow7]
-@onready var song_indices: Array[Label] = [%SongIndex0, %SongIndex1, %SongIndex2, %SongIndex3, %SongIndex4, %SongIndex5, %SongIndex6, %SongIndex7]
-@onready var song_titles: Array[Label] = [%SongTitle0, %SongTitle1, %SongTitle2, %SongTitle3, %SongTitle4, %SongTitle5, %SongTitle6, %SongTitle7]
-@onready var song_subtitles: Array[Label] = [%SongSubtitle0, %SongSubtitle1, %SongSubtitle2, %SongSubtitle3, %SongSubtitle4, %SongSubtitle5, %SongSubtitle6, %SongSubtitle7]
-@onready var song_vips: Array[Label] = [%SongVip0, %SongVip1, %SongVip2, %SongVip3, %SongVip4, %SongVip5, %SongVip6, %SongVip7]
-@onready var song_more_buttons: Array[Button] = [%SongMore0, %SongMore1, %SongMore2, %SongMore3, %SongMore4, %SongMore5, %SongMore6, %SongMore7]
-@onready var song_buttons: Array[Button] = [%SongButton0, %SongButton1, %SongButton2, %SongButton3, %SongButton4, %SongButton5, %SongButton6, %SongButton7]
+@onready var song_list: VBoxContainer = $Margin/PlaylistVBox/PlaylistScroll/SongList
+@onready var song_bottom_space: Control = $Margin/PlaylistVBox/PlaylistScroll/SongList/SongBottomSpace
+
+var song_rows: Array[MusicAppPlaylistSongRowType] = []
 
 func setup(controller: MusicAppShowcaseControllerType) -> void:
 	_controller = controller
@@ -36,9 +36,6 @@ func bind() -> void:
 		return
 	_is_bound = true
 
-	for index in song_buttons.size():
-		song_buttons[index].pressed.connect(_select_song_from_playlist.bind(index))
-
 	playlist_back_button.pressed.connect(close_page)
 	play_all_button.pressed.connect(_play_playlist_from_start)
 	playlist_add_button.pressed.connect(_create_playlist_from_current)
@@ -47,30 +44,28 @@ func refresh() -> void:
 	if _controller == null:
 		return
 
+	playlist_top_title.text = tr("music_app.playlist.title")
+	play_all_button.text = tr("music_app.playlist.play_all")
+
 	if _controller._playlists.is_empty():
-		for row in song_rows:
-			row.visible = false
+		playlist_hero_mark_label.text = tr("music_app.playlist.favorites_mark")
+		playlist_hero_title_label.text = tr("music_app.playlist.favorites_title")
+		playlist_hero_count_label.text = _controller._format_total_track_count(0)
+		_sync_song_rows(0)
 		return
 
 	var playlist: PlaylistDataType = _controller._get_selected_playlist()
 	var tracks: Array[int] = _controller._get_playlist_track_indices(_controller._selected_playlist_index)
 
-	playlist_hero_title_label.text = playlist.title
-	playlist_hero_count_label.text = "共 %d 首" % playlist.count
-	playlist_hero_mark_label.text = playlist.mark
+	_sync_song_rows(tracks.size())
+	playlist_hero_title_label.text = _controller._get_playlist_display_title(playlist)
+	playlist_hero_count_label.text = _controller._format_total_track_count(playlist.count)
+	playlist_hero_mark_label.text = _controller._get_playlist_display_mark(playlist)
 
 	for index in song_rows.size():
-		var visible_row: bool = index < tracks.size()
-		song_rows[index].visible = visible_row
-		if not visible_row:
-			continue
-
 		var track_index: int = tracks[index]
 		var track: TrackDataType = _controller._tracks[track_index]
-		song_indices[index].text = str(index + 1)
-		song_titles[index].text = track.title
-		song_subtitles[index].text = track.subtitle
-		song_vips[index].text = "[%s]" % track.source
+		song_rows[index].configure(index, track)
 
 func open_selected_playlist() -> void:
 	if _controller._playlists.is_empty():
@@ -112,3 +107,15 @@ func _create_playlist_from_current() -> void:
 	_controller._refresh_home_page()
 	_controller._refresh_playlist_page()
 	_controller._save_app_state()
+
+func _sync_song_rows(target_size: int) -> void:
+	while song_rows.size() < target_size:
+		var row := PLAYLIST_SONG_ROW_SCENE.instantiate() as MusicAppPlaylistSongRowType
+		song_list.add_child(row)
+		song_list.move_child(row, song_bottom_space.get_index())
+		row.play_requested.connect(_select_song_from_playlist)
+		song_rows.append(row)
+
+	while song_rows.size() > target_size:
+		var row: MusicAppPlaylistSongRowType = song_rows.pop_back()
+		row.queue_free()

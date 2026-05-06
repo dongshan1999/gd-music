@@ -1,0 +1,62 @@
+keys,en,zh,zh_CN
+music_app.home.search_prompt,Tap here to start searching,点击这里开始搜索,点击这里开始搜索
+music_app.home.feature.recommended,Recommended Playlists,推荐歌单,推荐歌单
+music_app.home.feature.charts,Charts,榜单,榜单
+music_app.home.feature.history,Play History,播放历史,播放历史
+music_app.home.feature.local_music,Local Music,本地音乐,本地音乐
+music_app.home.my_playlists_count,My Playlists ({count}),我的歌单 ({count}),我的歌单 ({count})
+music_app.home.favorite_playlists_count,Favorite Playlists ({count}),收藏歌单 ({count}),收藏歌单 ({count})
+music_app.home.my_playlists_placeholder,My Playlists (1),我的歌单 (1),我的歌单 (1)
+music_app.home.favorite_playlists_placeholder,Favorite Playlists (0),收藏歌单 (0),收藏歌单 (0)
+music_app.playlist.title,Playlist,歌单,歌单
+music_app.playlist.favorites_title,Liked,我喜欢,我喜欢
+music_app.playlist.favorites_mark,L,我,我
+music_app.playlist.total_tracks,Total {count} tracks,共 {count} 首,共 {count} 首
+music_app.playlist.total_tracks_zero,Total 0 tracks,共 0 首,共 0 首
+music_app.playlist.play_all,▶ Play All,▶ 播放全部,▶ 播放全部
+music_app.playlist.new_playlist,New Playlist,新建歌单,新建歌单
+music_app.playlist.placeholder_title,Playlist Name,歌单名称,歌单名称
+music_app.common.song_count,{count} tracks,{count} 首歌曲,{count} 首歌曲
+music_app.common.song_count_zero,0 tracks,0 首歌曲,0 首歌曲
+music_app.action.delete_short,Del,删,删
+music_app.player.empty_title,No Tracks,暂无歌曲,暂无歌曲
+music_app.player.empty_artist,Import music to get started,请先导入音乐,请先导入音乐
+music_app.player.placeholder_title,Virtual,虚拟,虚拟
+music_app.player.placeholder_mark,V,虚,虚
+music_app.player.placeholder_artist,Chen Li,陈粒,陈粒
+music_app.player.placeholder_source,Yuanli QQ,元力QQ,元力QQ
+music_app.player.fx,FX,音效,音效
+music_app.player.comments_short,Cmts,评,评
+music_app.mini_player.empty,"No tracks, import music first","暂无歌曲，请先导入","暂无歌曲，请先导入"
+music_app.mini_player.placeholder_track,Virtual - Chen Li,虚拟 - 陈粒,虚拟 - 陈粒
+music_app.local.title,Local Music,本地音乐,本地音乐
+music_app.local.empty_line1,🎵 No local music yet,🎵 暂无本地音乐,🎵 暂无本地音乐
+music_app.local.empty_line2,Tap the ⋯ menu to scan first,点击右上角 ⋯ 先扫描,点击右上角 ⋯ 先扫描
+music_app.local.menu.scan,🔍 Scan Local Music,🔍 扫描本地音乐,🔍 扫描本地音乐
+music_app.local.menu.edit,✏️ Edit,✏️ 批量编辑,✏️ 批量编辑
+music_app.local.menu.download,⬇️ Download List,⬇️ 下载列表,⬇️ 下载列表
+music_app.local.search_title,Search,搜索,搜索
+music_app.local.search_message,Search will be added later.,搜索功能稍后补齐。,搜索功能稍后补齐。
+music_app.local.edit_title,Edit,编辑,编辑
+music_app.local.edit_message,Edit is not implemented yet. Scanning is available for now.,编辑功能暂未实现，当前先支持扫描。,编辑功能暂未实现，当前先支持扫描。
+music_app.local.download_title,Download List,下载列表,下载列表
+music_app.local.download_message,Download list is not implemented yet. Scanning is available for now.,下载列表暂未实现，当前先支持扫描。,下载列表暂未实现，当前先支持扫描。
+music_app.scan.select_all,Select All,全选,全选
+music_app.scan.unselect_all,Clear All,取消全选,取消全选
+music_app.scan.hint,📁 Select folders to scan,📁 选择要扫描的文件夹,📁 选择要扫描的文件夹
+music_app.scan.start,Start Scan,开始扫描,开始扫描
+music_app.scan.select_folder_title,Select a Folder,请选择文件夹,请选择文件夹
+music_app.scan.select_folder_message,Enter a drive first or select folders to scan.,请先进入一个磁盘，或勾选要扫描的目录。,请先进入一个磁盘，或勾选要扫描的目录。
+music_app.scan.not_found_title,No Music Found,未找到音乐,未找到音乐
+music_app.scan.not_found_message,No new audio files were found in the selected folders.,所选文件夹里没有新的音频文件。,所选文件夹里没有新的音频文件。
+music_app.scan.complete_title,Scan Complete,扫描完成,扫描完成
+music_app.scan.complete_message,Added {count} local tracks.,新增 {count} 首本地音乐。,新增 {count} 首本地音乐。
+music_app.scan.windows_root,Windows,Windows,Windows
+music_app.track.local_file,Local File,本地文件,本地文件
+music_app.track.local_folder,Local Folder,本地文件夹,本地文件夹
+music_app.alert.no_tracks_title,No Tracks,暂无歌曲,暂无歌曲
+music_app.alert.no_tracks_message,Import music before using this feature.,请先导入音乐后再使用这个功能。,请先导入音乐后再使用这个功能。
+music_app.alert.empty_playlist_title,Empty Playlist,歌单为空,歌单为空
+music_app.alert.empty_playlist_message,This playlist has no playable tracks yet.,这个歌单里还没有可播放的歌曲。,这个歌单里还没有可播放的歌曲。
+music_app.alert.deleted_title,Deleted,已删除,已删除
+music_app.alert.deleted_message,"Playlist ""{title}"" was deleted.",歌单《{title}》已删除。,歌单《{title}》已删除。

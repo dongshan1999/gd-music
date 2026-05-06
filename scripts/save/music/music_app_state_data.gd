@@ -1,5 +1,6 @@
 class_name MusicAppStateData
 extends "res://dx/runtime/scripts/serializer/json_object.gd"
+
 const TrackDataType := preload("res://scripts/save/music/track_data.gd")
 const PlaylistDataType := preload("res://scripts/save/music/playlist_data.gd")
 
@@ -9,8 +10,7 @@ const DEFAULT_SELECTED_TRACK_INDEX := 0
 const DEFAULT_ELAPSED_SECONDS := 0
 const DEFAULT_IS_PLAYING := false
 const DEFAULT_LIKED_TRACKS := {}
-const DEFAULT_FAVORITE_PLAYLIST_TITLE := "我喜欢"
-const DEFAULT_FAVORITE_PLAYLIST_MARK := "我"
+const SYSTEM_FAVORITE_PLAYLIST_ID := "__music_app.favorite_playlist__"
 
 var version: int = SAVE_VERSION
 var tracks: Array[TrackDataType] = []
@@ -20,6 +20,31 @@ var selected_track_index: int = DEFAULT_SELECTED_TRACK_INDEX
 var elapsed_seconds: int = DEFAULT_ELAPSED_SECONDS
 var is_playing: bool = DEFAULT_IS_PLAYING
 var liked_tracks: Dictionary = {}
+
+static func is_system_favorite_playlist(playlist) -> bool:
+	if playlist == null:
+		return false
+	if playlist.title == SYSTEM_FAVORITE_PLAYLIST_ID:
+		return true
+	return not playlist.deletable and (
+		playlist.title.is_empty()
+		or playlist.title in _legacy_favorite_playlist_titles()
+		or playlist.mark in _legacy_favorite_playlist_marks()
+	)
+
+static func _legacy_favorite_playlist_titles() -> Array[String]:
+	return [
+		SYSTEM_FAVORITE_PLAYLIST_ID,
+		"\u6211\u559c\u6b22",
+		"Liked"
+	]
+
+static func _legacy_favorite_playlist_marks() -> Array[String]:
+	return [
+		"",
+		"\u6211",
+		"L"
+	]
 
 func _init() -> void:
 	version = SAVE_VERSION
@@ -70,6 +95,10 @@ func _normalize_playlists() -> void:
 		playlist.tracks = cleaned_tracks
 		if playlist.count <= 0:
 			playlist.count = cleaned_tracks.size()
+		if is_system_favorite_playlist(playlist):
+			playlist.title = SYSTEM_FAVORITE_PLAYLIST_ID
+			playlist.mark = ""
+			playlist.deletable = false
 		result.append(playlist)
 
 	_ensure_default_favorite_playlist(result)
@@ -91,22 +120,22 @@ func _build_default_tracks() -> Array[TrackDataType]:
 
 func _build_default_playlists() -> Array[PlaylistDataType]:
 	return [
-		_make_playlist(DEFAULT_FAVORITE_PLAYLIST_TITLE, 0, DEFAULT_FAVORITE_PLAYLIST_MARK, [], false)
+		_make_playlist(SYSTEM_FAVORITE_PLAYLIST_ID, 0, "", [], false)
 	]
 
 func _ensure_default_favorite_playlist(target_playlists: Array[PlaylistDataType]) -> void:
 	for playlist in target_playlists:
-		if playlist.title != DEFAULT_FAVORITE_PLAYLIST_TITLE:
+		if not is_system_favorite_playlist(playlist):
 			continue
+		playlist.title = SYSTEM_FAVORITE_PLAYLIST_ID
+		playlist.mark = ""
 		playlist.deletable = false
-		if playlist.mark.is_empty():
-			playlist.mark = DEFAULT_FAVORITE_PLAYLIST_MARK
 		if playlist.count <= 0:
 			playlist.count = playlist.tracks.size()
 		return
 
 	target_playlists.append(
-		_make_playlist(DEFAULT_FAVORITE_PLAYLIST_TITLE, 0, DEFAULT_FAVORITE_PLAYLIST_MARK, [], false)
+		_make_playlist(SYSTEM_FAVORITE_PLAYLIST_ID, 0, "", [], false)
 	)
 
 func _make_track(

@@ -38,6 +38,11 @@ window/per_pixel_transparency/allowed=true
 
 version_control/autoload_on_startup=true
 
+[internationalization]
+
+locale/fallback="en"
+locale/translations=PackedStringArray("res://translations/music_app.en.translation", "res://translations/music_app.zh.translation", "res://translations/music_app.zh_CN.translation")
+
 [rendering]
 
 viewport/transparent_background=true

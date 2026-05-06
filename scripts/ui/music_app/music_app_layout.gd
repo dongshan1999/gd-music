@@ -1,11 +1,15 @@
 class_name MusicAppLayout
 extends RefCounted
 
-static func show_page(controller, page: int, player_page_value: int, playlist_page_value: int, home_page_value: int) -> void:
-	controller.home_page.visible = page == home_page_value
-	controller.playlist_page.visible = page == playlist_page_value
-	controller.player_page.visible = page == player_page_value
-	controller.mini_player.visible = page != player_page_value
+static func show_page(controller, page: int) -> void:
+	controller.home_page.visible = page == controller._page_home()
+	controller.playlist_page.visible = page == controller._page_playlist()
+	controller.player_page.visible = page == controller._page_player()
+	if controller.local_music_page != null:
+		controller.local_music_page.visible = page == controller._page_local_music()
+	if controller.local_scan_page != null:
+		controller.local_scan_page.visible = page == controller._page_local_scan()
+	controller.mini_player.visible = page != controller._page_player() and page != controller._page_local_scan()
 
 static func layout_preview(scene_size: Vector2, controller, home_ui, outer_margin: float) -> void:
 	if controller.preview_root == null:
