@@ -43,7 +43,7 @@ horizontal_alignment = 1
 layout_mode = 2
 theme_override_colors/font_color = Color(0.968627, 0.968627, 0.972549, 1)
 theme_override_font_sizes/font_size = 14
-text = "推荐歌单"
+text = "music_app.home.feature.recommended"
 horizontal_alignment = 1
 
 [node name="OpenButton" type="Button" parent="."]

@@ -1,5 +1,6 @@
 class_name MusicAppMiniPlayerModule
 extends Panel
+
 const MusicAppShowcaseControllerType := preload("res://scripts/ui/music_app/music_app_showcase.gd")
 const TrackDataType := preload("res://scripts/save/music/track_data.gd")
 
@@ -31,14 +32,14 @@ func refresh() -> void:
 
 	if not _controller._has_tracks():
 		mini_cover_mark_label.text = ""
-		mini_track_label.text = "暂无歌曲，请先导入"
+		mini_track_label.text = tr("music_app.mini_player.empty")
 		mini_play_button.text = "▶"
 		return
 
 	var track: TrackDataType = _controller._get_current_track()
 	mini_cover_mark_label.text = track.mark
-	mini_track_label.text = "%s - %s" % [track.title, track.artist]
-	mini_play_button.text = "Ⅱ" if _controller._is_playing else "▶"
+	mini_track_label.text = "%s - %s" % [track.title, _controller._get_track_display_artist(track)]
+	mini_play_button.text = "⏸" if _controller._is_playing else "▶"
 
 func _toggle_playback() -> void:
 	if not _controller._has_tracks():

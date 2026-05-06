@@ -6,9 +6,15 @@ const MusicAppShowcaseControllerType := preload("res://scripts/ui/music_app/musi
 const MusicAppHomePlaylistRowType := preload("res://scripts/ui/music_app/modules/music_app_home_playlist_row.gd")
 const PlaylistDataType := preload("res://scripts/save/music/playlist_data.gd")
 const HOME_PLAYLIST_ROW_SCENE := preload("res://scenes/ui/music_app/home_playlist_row.tscn")
-const FEATURE_CARD_ICONS := ["◉", "⌂", "◷", "▣"]
-const FEATURE_CARD_TEXTS := ["推荐歌单", "榜单", "播放历史", "本地音乐"]
-const FEATURE_CARD_TARGETS := [0, 1, 0, 2]
+const FEATURE_ACTION_LOCAL_MUSIC := -1
+const FEATURE_CARD_ICONS := ["🎧", "📈", "🕘", "💽"]
+const FEATURE_CARD_KEYS := [
+	"music_app.home.feature.recommended",
+	"music_app.home.feature.charts",
+	"music_app.home.feature.history",
+	"music_app.home.feature.local_music"
+]
+const FEATURE_CARD_TARGETS := [0, 1, 0, FEATURE_ACTION_LOCAL_MUSIC]
 
 var _controller: MusicAppShowcaseControllerType
 var _is_bound := false
@@ -25,6 +31,7 @@ var _is_bound := false
 @onready var import_button: Button = %ImportButton
 @onready var home_list: VBoxContainer = $Margin/HomeVBox/HomeScroll/HomeList
 @onready var feature_cards: Array[HomeFeatureCardType] = [%FeatureCard0, %FeatureCard1, %FeatureCard2, %FeatureCard3]
+
 var home_playlist_rows: Array[MusicAppHomePlaylistRowType] = []
 
 func setup(controller: MusicAppShowcaseControllerType) -> void:
@@ -36,23 +43,35 @@ func bind() -> void:
 		return
 	_is_bound = true
 
-	var feature_count := mini(feature_cards.size(), FEATURE_CARD_TEXTS.size())
-	for index in feature_count:
-		feature_cards[index].configure(index, FEATURE_CARD_ICONS[index], FEATURE_CARD_TEXTS[index])
-		feature_cards[index].pressed.connect(_on_feature_pressed)
+	for card in feature_cards:
+		card.pressed.connect(_on_feature_pressed)
 
 	new_playlist_button.pressed.connect(_create_playlist_from_current)
+	import_button.pressed.connect(_open_local_music)
 
 func refresh() -> void:
 	if _controller == null:
 		return
 
-	_sync_home_playlist_rows()
-	my_playlists_label.text = "我的歌单 (%d)" % _controller._playlists.size()
+	search_icon_label.text = "🔎"
+	search_prompt_label.text = tr("music_app.home.search_prompt")
+	my_playlists_label.text = tr("music_app.home.my_playlists_count").format({"count": _controller._playlists.size()})
+	favorite_playlists_label.text = tr("music_app.home.favorite_playlists_count").format({"count": 0})
 
+	var feature_count := mini(feature_cards.size(), FEATURE_CARD_KEYS.size())
+	for index in feature_count:
+		feature_cards[index].configure(index, FEATURE_CARD_ICONS[index], tr(FEATURE_CARD_KEYS[index]))
+
+	_sync_home_playlist_rows()
 	for index in home_playlist_rows.size():
 		var playlist: PlaylistDataType = _controller._playlists[index]
-		home_playlist_rows[index].configure(index, playlist)
+		home_playlist_rows[index].configure(
+			index,
+			_controller._get_playlist_display_mark(playlist),
+			_controller._get_playlist_display_title(playlist),
+			playlist.count,
+			playlist.deletable
+		)
 
 func _open_playlist(index: int) -> void:
 	if _controller._playlists.is_empty():
@@ -85,6 +104,9 @@ func _on_feature_pressed(index: int) -> void:
 		return
 
 	var target_playlist: int = FEATURE_CARD_TARGETS[index]
+	if target_playlist == FEATURE_ACTION_LOCAL_MUSIC:
+		_open_local_music()
+		return
 	_open_playlist(target_playlist)
 
 func _create_playlist_from_current() -> void:
@@ -94,6 +116,9 @@ func _create_playlist_from_current() -> void:
 	_controller._refresh_home_page()
 	_controller._refresh_playlist_page()
 	_controller._save_app_state()
+
+func _open_local_music() -> void:
+	_controller.local_music_page.open_page()
 
 func _delete_playlist(index: int) -> void:
 	if index < 0 or index >= _controller._playlists.size():

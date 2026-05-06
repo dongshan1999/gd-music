@@ -106,7 +106,11 @@ func save_object(relative_path: String, object, pretty: bool = true) -> bool:
 	if serialized_object == null:
 		return false
 	_normalize_object(serialized_object)
-	return save_json(relative_path, serialize_object(serialized_object), pretty)
+
+	var serialized_data = serialize_object(serialized_object)
+	if JSON_SERIALIZER_SCRIPT.has_error():
+		return false
+	return save_json(relative_path, serialized_data, pretty)
 
 func load_object(relative_path: String, default_object):
 	if default_object == null:
@@ -144,7 +148,13 @@ func clone_object(object):
 	if cloned == null:
 		return null
 
-	JSON_SERIALIZER_SCRIPT.deserialize(JSON_SERIALIZER_SCRIPT.serialize(object, true), cloned, true)
+	var serialized_data = JSON_SERIALIZER_SCRIPT.serialize(object, true)
+	if JSON_SERIALIZER_SCRIPT.has_error():
+		return null
+
+	JSON_SERIALIZER_SCRIPT.deserialize(serialized_data, cloned, true)
+	if JSON_SERIALIZER_SCRIPT.has_error():
+		return null
 	return cloned
 
 func load_data(default_data = null, relative_path: String = DEFAULT_DATA_PATH):

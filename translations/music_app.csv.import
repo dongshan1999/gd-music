@@ -1,0 +1,19 @@
+[remap]
+
+importer="csv_translation"
+type="Translation"
+uid="uid://bcg4rboarrcb6"
+
+[deps]
+
+files=["res://translations/music_app.en.translation", "res://translations/music_app.zh.translation", "res://translations/music_app.zh_CN.translation"]
+
+source_file="res://translations/music_app.csv"
+dest_files=["res://translations/music_app.en.translation", "res://translations/music_app.zh.translation", "res://translations/music_app.zh_CN.translation"]
+
+[params]
+
+compress=1
+delimiter=0
+unescape_keys=false
+unescape_translations=true

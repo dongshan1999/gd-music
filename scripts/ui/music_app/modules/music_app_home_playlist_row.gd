@@ -1,6 +1,5 @@
 class_name MusicAppHomePlaylistRow
 extends Panel
-const PlaylistDataType := preload("res://scripts/save/music/playlist_data.gd")
 
 signal open_requested(index: int)
 signal delete_requested(index: int)
@@ -28,13 +27,14 @@ func setup() -> void:
 	_open_button.pressed.connect(_on_open_pressed)
 	_delete_button.pressed.connect(_on_delete_pressed)
 
-func configure(index: int, playlist: PlaylistDataType) -> void:
+func configure(index: int, display_mark: String, display_title: String, count: int, deletable: bool) -> void:
 	setup()
 	_playlist_index = index
-	_mark_label.text = playlist.mark
-	_title_label.text = playlist.title
-	_count_label.text = "%d 首歌曲" % playlist.count
-	_delete_button.visible = playlist.deletable
+	_mark_label.text = display_mark
+	_title_label.text = display_title
+	_count_label.text = tr("music_app.common.song_count").format({"count": count})
+	_delete_button.text = tr("music_app.action.delete_short")
+	_delete_button.visible = deletable
 
 func _on_open_pressed() -> void:
 	if _playlist_index < 0:

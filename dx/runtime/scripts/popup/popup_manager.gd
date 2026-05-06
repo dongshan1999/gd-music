@@ -12,13 +12,13 @@ var _root: Control
 var _layer: CanvasLayer
 var _overlay: ColorRect
 var _host: Control
-var _current_popup: PopupViewType
+var _current_popup: PopupView
 var _current_popup_id: int = -1
 
 func _ready() -> void:
 	_ensure_ui()
 
-func show(popup_id: int) -> PopupViewType:
+func show(popup_id: int) -> PopupView:
 	_ensure_ui()
 	hide()
 
@@ -26,7 +26,7 @@ func show(popup_id: int) -> PopupViewType:
 		push_error("Popup id is not registered: %s" % popup_id)
 		return null
 
-	var scene: PackedScene = PopupRegistryType.get_scene(popup_id)
+	var scene: PackedScene = PopupRegistry.get_scene(popup_id)
 	var instance: Node = scene.instantiate()
 	if not (instance is PopupViewType):
 		push_error("Popup root must extend PopupView.")

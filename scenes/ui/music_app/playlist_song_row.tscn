@@ -1,0 +1,75 @@
+[gd_scene load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://scripts/ui/music_app/modules/music_app_playlist_song_row.gd" id="1_script"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_playlist_song_row_panel"]
+bg_color = Color(0.160784, 0.160784, 0.168627, 1)
+corner_radius_top_left = 16
+corner_radius_top_right = 16
+corner_radius_bottom_right = 16
+corner_radius_bottom_left = 16
+
+[node name="PlaylistSongRow" type="Panel"]
+custom_minimum_size = Vector2(0, 86)
+layout_mode = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_playlist_song_row_panel")
+script = ExtResource("1_script")
+
+[node name="Margin" type="MarginContainer" parent="."]
+layout_mode = 0
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/margin_left = 4
+theme_override_constants/margin_top = 10
+theme_override_constants/margin_right = 4
+theme_override_constants/margin_bottom = 10
+
+[node name="Row" type="HBoxContainer" parent="Margin"]
+layout_mode = 2
+theme_override_constants/separation = 12
+
+[node name="SongIndexLabel" type="Label" parent="Margin/Row"]
+custom_minimum_size = Vector2(28, 0)
+layout_mode = 2
+theme_override_colors/font_color = Color(0.968627, 0.968627, 0.972549, 1)
+theme_override_font_sizes/font_size = 18
+text = "1"
+horizontal_alignment = 1
+
+[node name="SongInfo" type="VBoxContainer" parent="Margin/Row"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 4
+alignment = 1
+
+[node name="SongTitleLabel" type="Label" parent="Margin/Row/SongInfo"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.968627, 0.968627, 0.972549, 1)
+theme_override_font_sizes/font_size = 18
+text = "Track Title"
+
+[node name="SongSubtitleLabel" type="Label" parent="Margin/Row/SongInfo"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.643137, 0.65098, 0.690196, 1)
+theme_override_font_sizes/font_size = 14
+text = "Artist - Album"
+
+[node name="SongVipLabel" type="Label" parent="Margin/Row"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.643137, 0.65098, 0.690196, 1)
+theme_override_font_sizes/font_size = 14
+text = "[SOURCE]"
+
+[node name="SongMoreButton" type="Button" parent="Margin/Row"]
+custom_minimum_size = Vector2(34, 34)
+layout_mode = 2
+text = "..."
+
+[node name="SongButton" type="Button" parent="."]
+layout_mode = 0
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2

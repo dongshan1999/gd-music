@@ -1,0 +1,98 @@
+[gd_scene load_steps=4 format=3]
+
+[ext_resource type="Script" path="res://scripts/ui/music_app/modules/music_app_local_music_row.gd" id="1_script"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_local_music_row_panel"]
+bg_color = Color(0.160784, 0.160784, 0.168627, 1)
+corner_radius_top_left = 16
+corner_radius_top_right = 16
+corner_radius_bottom_right = 16
+corner_radius_bottom_left = 16
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_local_music_source_chip"]
+bg_color = Color(0.235294, 0.235294, 0.243137, 1)
+corner_radius_top_left = 999
+corner_radius_top_right = 999
+corner_radius_bottom_right = 999
+corner_radius_bottom_left = 999
+
+[node name="LocalMusicRow" type="Panel"]
+custom_minimum_size = Vector2(0, 86)
+layout_mode = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_local_music_row_panel")
+script = ExtResource("1_script")
+
+[node name="Margin" type="MarginContainer" parent="."]
+layout_mode = 0
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/margin_left = 6
+theme_override_constants/margin_top = 10
+theme_override_constants/margin_right = 6
+theme_override_constants/margin_bottom = 10
+
+[node name="Row" type="HBoxContainer" parent="Margin"]
+layout_mode = 2
+theme_override_constants/separation = 10
+
+[node name="IndexLabel" type="Label" parent="Margin/Row"]
+custom_minimum_size = Vector2(28, 0)
+layout_mode = 2
+theme_override_font_sizes/font_size = 18
+text = "1"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="Info" type="VBoxContainer" parent="Margin/Row"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 4
+alignment = 1
+
+[node name="TitleLabel" type="Label" parent="Margin/Row/Info"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 18
+text = "Track Title"
+
+[node name="SubtitleLabel" type="Label" parent="Margin/Row/Info"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 14
+text = "o Artist - Album"
+
+[node name="SourceChip" type="Panel" parent="Margin/Row"]
+custom_minimum_size = Vector2(64, 28)
+layout_mode = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_local_music_source_chip")
+
+[node name="Margin" type="MarginContainer" parent="Margin/Row/SourceChip"]
+layout_mode = 0
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/margin_left = 8
+theme_override_constants/margin_top = 4
+theme_override_constants/margin_right = 8
+theme_override_constants/margin_bottom = 4
+
+[node name="SourceLabel" type="Label" parent="Margin/Row/SourceChip/Margin"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 12
+text = "LOCAL"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="MoreButton" type="Button" parent="Margin/Row"]
+custom_minimum_size = Vector2(34, 34)
+layout_mode = 2
+text = "..."
+
+[node name="OpenButton" type="Button" parent="."]
+layout_mode = 0
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+flat = true

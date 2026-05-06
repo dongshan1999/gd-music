@@ -1,5 +1,6 @@
 class_name MusicAppPlayerModule
 extends Control
+
 const MusicAppShowcaseControllerType := preload("res://scripts/ui/music_app/music_app_showcase.gd")
 const TrackDataType := preload("res://scripts/save/music/track_data.gd")
 
@@ -40,17 +41,18 @@ func bind() -> void:
 	player_prev_button.pressed.connect(_play_previous)
 	player_play_button.pressed.connect(toggle_playback)
 	player_next_button.pressed.connect(_play_next)
-	player_list_button.pressed.connect(_open_selected_playlist)
-	player_queue_button.pressed.connect(_open_selected_playlist)
 	like_button.pressed.connect(_toggle_like_current_track)
 
 func refresh() -> void:
 	if _controller == null:
 		return
 
+	player_fx_label.text = tr("music_app.player.fx")
+	comment_button.text = tr("music_app.player.comments_short")
+
 	if not _controller._has_tracks():
-		now_title_label.text = "暂无歌曲"
-		now_artist_label.text = "请先导入音乐"
+		now_title_label.text = tr("music_app.player.empty_title")
+		now_artist_label.text = tr("music_app.player.empty_artist")
 		player_source_label.text = ""
 		cover_mark_label.text = ""
 		like_button.text = "♡"
@@ -65,11 +67,11 @@ func refresh() -> void:
 	var progress: float = clampf(float(_controller._elapsed_seconds) / float(duration), 0.0, 1.0)
 
 	now_title_label.text = track.title
-	now_artist_label.text = track.artist
+	now_artist_label.text = _controller._get_track_display_artist(track)
 	player_source_label.text = track.source
 	cover_mark_label.text = track.title
 	like_button.text = "♥" if _controller._is_current_track_liked() else "♡"
-	player_play_button.text = "Ⅱ" if _controller._is_playing else "▶"
+	player_play_button.text = "⏸" if _controller._is_playing else "▶"
 	player_progress_bar.value = progress * 100.0
 	elapsed_label.text = _format_seconds(_controller._elapsed_seconds)
 	remaining_label.text = _format_seconds(duration)

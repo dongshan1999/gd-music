@@ -8,6 +8,7 @@ const DEFAULT_TERTIARY := Color(0.176471, 0.192157, 0.223529, 1.0)
 var title: String = ""
 var artist: String = ""
 var subtitle: String = ""
+var file_path: String = ""
 var duration: int = 1
 var preview_start: int = 0
 var mark: String = ""
