@@ -46,16 +46,12 @@ func refresh() -> void:
 		return
 
 	local_music_back_button.text = "←"
-	local_music_title_label.text = tr("music_app.local.title")
 	local_music_search_button.text = "🔎"
 	local_music_more_button.text = "⋯"
 	local_music_empty_label.text = "%s\n%s" % [
 		tr("music_app.local.empty_line1"),
 		tr("music_app.local.empty_line2")
 	]
-	scan_music_button.text = tr("music_app.local.menu.scan")
-	edit_music_button.text = tr("music_app.local.menu.edit")
-	download_list_button.text = tr("music_app.local.menu.download")
 
 	_visible_track_indices = _controller._get_local_track_indices()
 	var track_count := _visible_track_indices.size()

@@ -1,0 +1,178 @@
+[gd_scene load_steps=6 format=3]
+
+[ext_resource type="Script" path="res://scripts/ui/music_app/modules/music_app_home_module.gd" id="2_script"]
+
+[ext_resource type="Script" path="res://scripts/ui/music_app/modules/music_app_home_feature_card.gd" id="3_cgd3q"]
+
+[ext_resource type="PackedScene" path="res://scenes/ui/music_app/home_feature_card.tscn" id="6_feature_card"]
+
+[ext_resource type="Script" path="res://scripts/ui/common/localize_comp.gd" id="999_localize_comp"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_feature_card_panel"]
+bg_color = Color(0.192157, 0.192157, 0.2, 1)
+corner_radius_top_left = 20
+corner_radius_top_right = 20
+corner_radius_bottom_right = 20
+corner_radius_bottom_left = 20
+
+[node name="HomePage" type="Control" unique_id=839843003]
+unique_name_in_owner = true
+anchors_preset = 0
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("2_script")
+
+[node name="Margin" type="MarginContainer" parent="." unique_id=1268931507]
+layout_mode = 0
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/margin_left = 14
+theme_override_constants/margin_top = 8
+theme_override_constants/margin_right = 14
+theme_override_constants/margin_bottom = 100
+
+[node name="HomeVBox" type="VBoxContainer" parent="Margin" unique_id=1083217856]
+layout_mode = 2
+theme_override_constants/separation = 18
+
+[node name="SearchRow" type="HBoxContainer" parent="Margin/HomeVBox" unique_id=307127496]
+custom_minimum_size = Vector2(0, 56)
+layout_mode = 2
+theme_override_constants/separation = 12
+
+[node name="HomeMenuButton" type="Button" parent="Margin/HomeVBox/SearchRow" unique_id=302340676]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(50, 50)
+layout_mode = 2
+text = "≡"
+
+[node name="SearchBar" type="Panel" parent="Margin/HomeVBox/SearchRow" unique_id=539984825]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="Margin" type="MarginContainer" parent="Margin/HomeVBox/SearchRow/SearchBar" unique_id=61255873]
+layout_mode = 0
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/margin_left = 18
+theme_override_constants/margin_top = 14
+theme_override_constants/margin_right = 18
+theme_override_constants/margin_bottom = 14
+
+[node name="SearchHBox" type="HBoxContainer" parent="Margin/HomeVBox/SearchRow/SearchBar/Margin" unique_id=983491901]
+layout_mode = 2
+theme_override_constants/separation = 12
+
+[node name="SearchIconLabel" type="Label" parent="Margin/HomeVBox/SearchRow/SearchBar/Margin/SearchHBox" unique_id=90974247]
+layout_mode = 2
+text = "⌕"
+
+[node name="SearchPromptLabel" type="Label" parent="Margin/HomeVBox/SearchRow/SearchBar/Margin/SearchHBox" unique_id=1417647797]
+unique_name_in_owner = true
+layout_mode = 2
+text = "点击这里开始搜索"
+
+[node name="LocalizeComp" type="Node" parent="Margin/HomeVBox/SearchRow/SearchBar/Margin/SearchHBox/SearchPromptLabel"]
+script = ExtResource("999_localize_comp")
+tr_key = "music_app.home.search_prompt"
+
+[node name="FeatureGrid" type="GridContainer" parent="Margin/HomeVBox" unique_id=603568706]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_constants/h_separation = 12
+theme_override_constants/v_separation = 12
+columns = 4
+
+[node name="FeatureCard0" type="Panel" parent="Margin/HomeVBox/FeatureGrid" unique_id=241142624 instance=ExtResource("6_feature_card")]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(86, 120)
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_styles/panel = SubResource("StyleBoxFlat_feature_card_panel")
+script = ExtResource("3_cgd3q")
+
+[node name="FeatureCard1" type="Panel" parent="Margin/HomeVBox/FeatureGrid" unique_id=669691854 instance=ExtResource("6_feature_card")]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(86, 120)
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_styles/panel = SubResource("StyleBoxFlat_feature_card_panel")
+script = ExtResource("3_cgd3q")
+
+[node name="FeatureCard2" type="Panel" parent="Margin/HomeVBox/FeatureGrid" unique_id=1537187717 instance=ExtResource("6_feature_card")]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(86, 120)
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_styles/panel = SubResource("StyleBoxFlat_feature_card_panel")
+script = ExtResource("3_cgd3q")
+
+[node name="FeatureCard3" type="Panel" parent="Margin/HomeVBox/FeatureGrid" unique_id=928339068 instance=ExtResource("6_feature_card")]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(86, 120)
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_styles/panel = SubResource("StyleBoxFlat_feature_card_panel")
+script = ExtResource("3_cgd3q")
+
+[node name="HomeTabsRow" type="HBoxContainer" parent="Margin/HomeVBox" unique_id=1921064607]
+layout_mode = 2
+theme_override_constants/separation = 18
+
+[node name="MyPlaylistsLabel" type="Label" parent="Margin/HomeVBox/HomeTabsRow" unique_id=1844565254]
+unique_name_in_owner = true
+layout_mode = 2
+text = "我的歌单 (1)"
+
+[node name="LocalizeComp" type="Node" parent="Margin/HomeVBox/HomeTabsRow/MyPlaylistsLabel"]
+script = ExtResource("999_localize_comp")
+tr_key = "music_app.home.my_playlists_placeholder"
+update_in_runtime = false
+
+[node name="FavoritePlaylistsLabel" type="Label" parent="Margin/HomeVBox/HomeTabsRow" unique_id=887127775]
+unique_name_in_owner = true
+layout_mode = 2
+text = "收藏歌单 (0)"
+
+[node name="LocalizeComp" type="Node" parent="Margin/HomeVBox/HomeTabsRow/FavoritePlaylistsLabel"]
+script = ExtResource("999_localize_comp")
+tr_key = "music_app.home.favorite_playlists_placeholder"
+update_in_runtime = false
+
+[node name="Spacer" type="Control" parent="Margin/HomeVBox/HomeTabsRow" unique_id=2062928736]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="NewPlaylistButton" type="Button" parent="Margin/HomeVBox/HomeTabsRow" unique_id=2048103684]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(40, 40)
+layout_mode = 2
+text = "+"
+
+[node name="ImportButton" type="Button" parent="Margin/HomeVBox/HomeTabsRow" unique_id=335780428]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(40, 40)
+layout_mode = 2
+text = "↓"
+
+[node name="HomeTabUnderline" type="Panel" parent="Margin/HomeVBox" unique_id=1845383377]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(128, 4)
+layout_mode = 2
+
+[node name="HomeScroll" type="ScrollContainer" parent="Margin/HomeVBox" unique_id=359626649]
+layout_mode = 2
+size_flags_vertical = 3
+horizontal_scroll_mode = 0
+
+[node name="HomeList" type="VBoxContainer" parent="Margin/HomeVBox/HomeScroll" unique_id=1683118366]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 6

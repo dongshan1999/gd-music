@@ -1,0 +1,160 @@
+[gd_scene load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://scripts/ui/music_app/modules/music_app_local_music_module.gd" id="7_local_music_script"]
+
+[ext_resource type="Script" path="res://scripts/ui/common/localize_comp.gd" id="999_localize_comp"]
+
+[node name="LocalMusicPage" type="Control" unique_id=1377588459]
+unique_name_in_owner = true
+visible = false
+anchors_preset = 0
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("7_local_music_script")
+
+[node name="Margin" type="MarginContainer" parent="." unique_id=632509384]
+layout_mode = 0
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/margin_left = 14
+theme_override_constants/margin_top = 14
+theme_override_constants/margin_right = 14
+theme_override_constants/margin_bottom = 14
+
+[node name="LocalMusicVBox" type="VBoxContainer" parent="Margin" unique_id=444186272]
+layout_mode = 2
+theme_override_constants/separation = 12
+
+[node name="LocalMusicTopRow" type="HBoxContainer" parent="Margin/LocalMusicVBox" unique_id=1632475819]
+layout_mode = 2
+theme_override_constants/separation = 10
+
+[node name="LocalMusicBackButton" type="Button" parent="Margin/LocalMusicVBox/LocalMusicTopRow" unique_id=1695007080]
+unique_name_in_owner = true
+layout_mode = 2
+text = "←"
+
+[node name="LocalMusicTitleLabel" type="Label" parent="Margin/LocalMusicVBox/LocalMusicTopRow" unique_id=648830172]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_font_sizes/font_size = 20
+text = "本地音乐"
+vertical_alignment = 1
+
+[node name="LocalizeComp" type="Node" parent="Margin/LocalMusicVBox/LocalMusicTopRow/LocalMusicTitleLabel"]
+script = ExtResource("999_localize_comp")
+tr_key = "music_app.local.title"
+
+[node name="Spacer" type="Control" parent="Margin/LocalMusicVBox/LocalMusicTopRow" unique_id=1834830686]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="LocalMusicSearchButton" type="Button" parent="Margin/LocalMusicVBox/LocalMusicTopRow" unique_id=1891825845]
+unique_name_in_owner = true
+layout_mode = 2
+text = "⌕"
+
+[node name="LocalMusicMoreButton" type="Button" parent="Margin/LocalMusicVBox/LocalMusicTopRow" unique_id=617966820]
+unique_name_in_owner = true
+layout_mode = 2
+text = "⋮"
+
+[node name="LocalMusicScroll" type="ScrollContainer" parent="Margin/LocalMusicVBox" unique_id=1747168716]
+layout_mode = 2
+size_flags_vertical = 3
+horizontal_scroll_mode = 0
+
+[node name="LocalMusicList" type="VBoxContainer" parent="Margin/LocalMusicVBox/LocalMusicScroll" unique_id=376860864]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 8
+
+[node name="LocalMusicEmptyLabel" type="Label" parent="Margin/LocalMusicVBox/LocalMusicScroll/LocalMusicList" unique_id=1758484510]
+unique_name_in_owner = true
+layout_mode = 2
+text = "🎵 暂无本地音乐"
+horizontal_alignment = 1
+vertical_alignment = 1
+autowrap_mode = 3
+
+[node name="LocalizeComp" type="Node" parent="Margin/LocalMusicVBox/LocalMusicScroll/LocalMusicList/LocalMusicEmptyLabel"]
+script = ExtResource("999_localize_comp")
+tr_key = "music_app.local.empty_line1"
+update_in_runtime = false
+
+[node name="LocalMusicBottomSpace" type="Control" parent="Margin/LocalMusicVBox/LocalMusicScroll/LocalMusicList" unique_id=244488390]
+unique_name_in_owner = true
+layout_mode = 2
+
+[node name="LocalMusicMenuScrim" type="Button" parent="." unique_id=1809347180]
+unique_name_in_owner = true
+visible = false
+modulate = Color(0, 0, 0, 1)
+layout_mode = 0
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+flat = true
+
+[node name="LocalMusicMenuPanel" type="Panel" parent="." unique_id=1053552513]
+unique_name_in_owner = true
+visible = false
+layout_mode = 0
+offset_left = 192.0
+offset_top = 56.0
+offset_right = 390.0
+offset_bottom = 208.0
+
+[node name="Margin" type="MarginContainer" parent="LocalMusicMenuPanel" unique_id=2000997070]
+layout_mode = 0
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/margin_left = 12
+theme_override_constants/margin_top = 12
+theme_override_constants/margin_right = 12
+theme_override_constants/margin_bottom = 12
+
+[node name="MenuVBox" type="VBoxContainer" parent="LocalMusicMenuPanel/Margin" unique_id=446984095]
+layout_mode = 2
+theme_override_constants/separation = 10
+
+[node name="ScanMusicButton" type="Button" parent="LocalMusicMenuPanel/Margin/MenuVBox" unique_id=990709116]
+unique_name_in_owner = true
+layout_mode = 2
+text = "🔍 扫描本地音乐"
+flat = true
+alignment = 0
+
+[node name="LocalizeComp" type="Node" parent="LocalMusicMenuPanel/Margin/MenuVBox/ScanMusicButton"]
+script = ExtResource("999_localize_comp")
+tr_key = "music_app.local.menu.scan"
+
+[node name="EditMusicButton" type="Button" parent="LocalMusicMenuPanel/Margin/MenuVBox" unique_id=1609157111]
+unique_name_in_owner = true
+layout_mode = 2
+text = "✏️ 批量编辑"
+flat = true
+alignment = 0
+
+[node name="LocalizeComp" type="Node" parent="LocalMusicMenuPanel/Margin/MenuVBox/EditMusicButton"]
+script = ExtResource("999_localize_comp")
+tr_key = "music_app.local.menu.edit"
+
+[node name="DownloadListButton" type="Button" parent="LocalMusicMenuPanel/Margin/MenuVBox" unique_id=199534854]
+unique_name_in_owner = true
+layout_mode = 2
+text = "⬇️ 下载列表"
+flat = true
+alignment = 0
+
+[node name="LocalizeComp" type="Node" parent="LocalMusicMenuPanel/Margin/MenuVBox/DownloadListButton"]
+script = ExtResource("999_localize_comp")
+tr_key = "music_app.local.menu.download"

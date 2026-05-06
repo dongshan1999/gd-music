@@ -47,8 +47,6 @@ func refresh() -> void:
 	if _controller == null:
 		return
 
-	player_fx_label.text = tr("music_app.player.fx")
-	comment_button.text = tr("music_app.player.comments_short")
 
 	if not _controller._has_tracks():
 		now_title_label.text = tr("music_app.player.empty_title")

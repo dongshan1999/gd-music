@@ -1,0 +1,93 @@
+[gd_scene load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://scripts/ui/music_app/modules/music_app_local_music_scan_module.gd" id="8_local_scan_script"]
+
+[ext_resource type="Script" path="res://scripts/ui/common/localize_comp.gd" id="999_localize_comp"]
+
+[node name="LocalScanPage" type="Control" unique_id=767850004]
+unique_name_in_owner = true
+visible = false
+anchors_preset = 0
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("8_local_scan_script")
+
+[node name="Margin" type="MarginContainer" parent="." unique_id=1192320192]
+layout_mode = 0
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/margin_left = 14
+theme_override_constants/margin_top = 14
+theme_override_constants/margin_right = 14
+theme_override_constants/margin_bottom = 14
+
+[node name="ScanVBox" type="VBoxContainer" parent="Margin" unique_id=1087578797]
+layout_mode = 2
+theme_override_constants/separation = 12
+
+[node name="ScanTopRow" type="HBoxContainer" parent="Margin/ScanVBox" unique_id=212900525]
+layout_mode = 2
+theme_override_constants/separation = 10
+
+[node name="ScanBackButton" type="Button" parent="Margin/ScanVBox/ScanTopRow" unique_id=1643129048]
+unique_name_in_owner = true
+layout_mode = 2
+text = "←"
+
+[node name="ScanPathLabel" type="Label" parent="Margin/ScanVBox/ScanTopRow" unique_id=1474766410]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+text = "/storage/emulated/0"
+vertical_alignment = 1
+clip_text = true
+
+[node name="ScanSelectAllButton" type="Button" parent="Margin/ScanVBox" unique_id=839455108]
+unique_name_in_owner = true
+layout_mode = 2
+text = "全选"
+flat = true
+alignment = 0
+
+[node name="LocalizeComp" type="Node" parent="Margin/ScanVBox/ScanSelectAllButton"]
+script = ExtResource("999_localize_comp")
+tr_key = "music_app.scan.select_all"
+update_in_runtime = false
+
+[node name="ScanScroll" type="ScrollContainer" parent="Margin/ScanVBox" unique_id=238022566]
+layout_mode = 2
+size_flags_vertical = 3
+horizontal_scroll_mode = 0
+
+[node name="ScanFolderList" type="VBoxContainer" parent="Margin/ScanVBox/ScanScroll" unique_id=519277331]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 8
+
+[node name="ScanHintLabel" type="Label" parent="Margin/ScanVBox/ScanScroll/ScanFolderList" unique_id=1478582596]
+unique_name_in_owner = true
+layout_mode = 2
+text = "📁 选择要扫描的文件夹"
+horizontal_alignment = 1
+
+[node name="LocalizeComp" type="Node" parent="Margin/ScanVBox/ScanScroll/ScanFolderList/ScanHintLabel"]
+script = ExtResource("999_localize_comp")
+tr_key = "music_app.scan.hint"
+
+[node name="ScanFolderBottomSpace" type="Control" parent="Margin/ScanVBox/ScanScroll/ScanFolderList" unique_id=128018529]
+unique_name_in_owner = true
+layout_mode = 2
+
+[node name="StartScanButton" type="Button" parent="Margin/ScanVBox" unique_id=128651178]
+unique_name_in_owner = true
+layout_mode = 2
+text = "开始扫描"
+
+[node name="LocalizeComp" type="Node" parent="Margin/ScanVBox/StartScanButton"]
+script = ExtResource("999_localize_comp")
+tr_key = "music_app.scan.start"

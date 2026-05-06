@@ -1,6 +1,6 @@
-[gd_scene load_steps=3 format=3]
+[gd_scene format=3 uid="uid://dci3stsofj54o"]
 
-[ext_resource type="Script" path="res://scripts/ui/music_app/modules/music_app_home_feature_card.gd" id="1_script"]
+[ext_resource type="Script" uid="uid://deu8s1247ochw" path="res://scripts/ui/music_app/modules/music_app_home_feature_card.gd" id="1_script"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_feature_card_panel"]
 bg_color = Color(0.192157, 0.192157, 0.2, 1)
@@ -9,14 +9,13 @@ corner_radius_top_right = 20
 corner_radius_bottom_right = 20
 corner_radius_bottom_left = 20
 
-[node name="HomeFeatureCard" type="Panel"]
+[node name="HomeFeatureCard" type="Panel" unique_id=500341263]
 custom_minimum_size = Vector2(86, 120)
-layout_mode = 2
 size_flags_horizontal = 3
 theme_override_styles/panel = SubResource("StyleBoxFlat_feature_card_panel")
 script = ExtResource("1_script")
 
-[node name="Margin" type="MarginContainer" parent="."]
+[node name="Margin" type="MarginContainer" parent="." unique_id=227475803]
 layout_mode = 0
 anchor_right = 1.0
 anchor_bottom = 1.0
@@ -27,26 +26,25 @@ theme_override_constants/margin_top = 8
 theme_override_constants/margin_right = 8
 theme_override_constants/margin_bottom = 8
 
-[node name="VBox" type="VBoxContainer" parent="Margin"]
+[node name="VBox" type="VBoxContainer" parent="Margin" unique_id=124033812]
 layout_mode = 2
 theme_override_constants/separation = 12
 alignment = 1
 
-[node name="IconLabel" type="Label" parent="Margin/VBox"]
+[node name="IconLabel" type="Label" parent="Margin/VBox" unique_id=45399221]
 layout_mode = 2
 theme_override_colors/font_color = Color(0.968627, 0.968627, 0.972549, 1)
 theme_override_font_sizes/font_size = 26
 text = "◉"
 horizontal_alignment = 1
 
-[node name="TextLabel" type="Label" parent="Margin/VBox"]
+[node name="TextLabel" type="Label" parent="Margin/VBox" unique_id=322862711]
 layout_mode = 2
 theme_override_colors/font_color = Color(0.968627, 0.968627, 0.972549, 1)
 theme_override_font_sizes/font_size = 14
-text = "music_app.home.feature.recommended"
 horizontal_alignment = 1
 
-[node name="OpenButton" type="Button" parent="."]
+[node name="OpenButton" type="Button" parent="." unique_id=250689779]
 layout_mode = 0
 anchor_right = 1.0
 anchor_bottom = 1.0
