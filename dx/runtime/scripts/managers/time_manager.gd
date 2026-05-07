@@ -1,7 +1,7 @@
-class_name DXTimeManager
-extends "res://dx/runtime/scripts/managers/dx_manager.gd"
+extends RefCounted
 const DateTimeType := preload("res://dx/runtime/scripts/utility/datetime.gd")
 
+var dx: Node
 var _base_time_scale := 1.0
 var _debug_time_scale_enabled := false
 var _debug_time_scale := 1.0
@@ -14,8 +14,21 @@ func in_ready() -> void:
 func now() -> DateTimeType:
 	return DateTimeType.from_unix_timestamp(now_unix())
 
+func today() -> DateTimeType:
+	var current := now()
+	return DateTimeType.new(current.year, current.month, current.day)
+
 func utc_now() -> DateTimeType:
 	return DateTimeType.from_unix_timestamp(utc_now_unix())
+
+func from_unix_timestamp(timestamp: int) -> DateTimeType:
+	return DateTimeType.from_unix_timestamp(timestamp)
+
+func from_dictionary(value: Dictionary) -> DateTimeType:
+	return DateTimeType.from_dictionary(value)
+
+func parse(value: String) -> DateTimeType:
+	return DateTimeType.parse(value)
 
 func now_unix() -> int:
 	return int(Time.get_unix_time_from_system()) + _debug_time_offset_seconds

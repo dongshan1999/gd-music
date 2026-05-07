@@ -1,4 +1,3 @@
-class_name datetime
 extends RefCounted
 
 const SCRIPT_PATH := "res://dx/runtime/scripts/utility/datetime.gd"
@@ -120,7 +119,7 @@ var day_of_year: int:
 	get:
 		return _get_day_of_year()
 
-var date: datetime:
+var date:
 	get:
 		return _get_date_only()
 
@@ -149,17 +148,17 @@ func _init(
 
 	_set_components(year_value, month_value, day_value, hour_value, minute_value, second_value)
 
-static func now() -> datetime:
+static func now():
 	return _create()
 
-static func today() -> datetime:
-	var current := now()
+static func today():
+	var current = now()
 	return _create(current.year, current.month, current.day)
 
-static func from_unix_timestamp(timestamp: int) -> datetime:
+static func from_unix_timestamp(timestamp: int):
 	return from_dictionary(Time.get_datetime_dict_from_unix_time(timestamp))
 
-static func from_dictionary(value: Dictionary) -> datetime:
+static func from_dictionary(value: Dictionary):
 	return _create(
 		int(value.get("year", 1)),
 		int(value.get("month", 1)),
@@ -169,7 +168,7 @@ static func from_dictionary(value: Dictionary) -> datetime:
 		int(value.get("second", 0))
 	)
 
-static func parse(value: String) -> datetime:
+static func parse(value: String):
 	var iso_value := value.strip_edges()
 	if iso_value.ends_with("Z"):
 		iso_value = iso_value.left(iso_value.length() - 1)
@@ -190,7 +189,7 @@ static func days_in_month(year_value: int, month_value: int) -> int:
 		_:
 			return 31
 
-func clone() -> datetime:
+func clone():
 	return _create(_year, _month, _day, _hour, _minute, _second)
 
 func get_weekday_text(short_name: bool = false) -> String:
@@ -221,13 +220,13 @@ func to_dictionary() -> Dictionary:
 func to_iso_string(use_space: bool = false) -> String:
 	return Time.get_datetime_string_from_datetime_dict(to_dictionary(), use_space)
 
-func add_years(years: int) -> datetime:
+func add_years(years: int):
 	var target_year := _year + years
 	assert(target_year >= 1, "datetime year must be >= 1 after add_years.")
 	var target_day := mini(_day, days_in_month(target_year, _month))
 	return _create(target_year, _month, target_day, _hour, _minute, _second)
 
-func add_months(months: int) -> datetime:
+func add_months(months: int):
 	var absolute_month := (_year - 1) * 12 + (_month - 1) + months
 	assert(absolute_month >= 0, "datetime result year must be >= 1 after add_months.")
 
@@ -236,19 +235,19 @@ func add_months(months: int) -> datetime:
 	var target_day := mini(_day, days_in_month(target_year, target_month))
 	return _create(target_year, target_month, target_day, _hour, _minute, _second)
 
-func add_days(days: int) -> datetime:
+func add_days(days: int):
 	return from_unix_timestamp(to_unix_timestamp() + days * 24 * 3600)
 
-func add_hours(hours: int) -> datetime:
+func add_hours(hours: int):
 	return from_unix_timestamp(to_unix_timestamp() + hours * 3600)
 
-func add_minutes(minutes: int) -> datetime:
+func add_minutes(minutes: int):
 	return from_unix_timestamp(to_unix_timestamp() + minutes * 60)
 
-func add_seconds(seconds: int) -> datetime:
+func add_seconds(seconds: int):
 	return from_unix_timestamp(to_unix_timestamp() + seconds)
 
-func equals(other: datetime) -> bool:
+func equals(other) -> bool:
 	if other == null:
 		return false
 	return (
@@ -260,19 +259,19 @@ func equals(other: datetime) -> bool:
 		_second == other.second
 	)
 
-func compare_to(other: datetime) -> int:
+func compare_to(other) -> int:
 	var diff := subtract(other)
 	if diff == 0:
 		return 0
 	return 1 if diff > 0 else -1
 
-func is_after(other: datetime) -> bool:
+func is_after(other) -> bool:
 	return compare_to(other) > 0
 
-func is_before(other: datetime) -> bool:
+func is_before(other) -> bool:
 	return compare_to(other) < 0
 
-func subtract(other: datetime) -> int:
+func subtract(other) -> int:
 	return to_unix_timestamp() - other.to_unix_timestamp()
 
 func format(pattern: String = DEFAULT_FORMAT) -> String:
@@ -316,7 +315,7 @@ func _get_day_of_year() -> int:
 		total += days_in_month(_year, month_index)
 	return total
 
-func _get_date_only() -> datetime:
+func _get_date_only():
 	return _create(_year, _month, _day)
 
 static func _create(
@@ -326,7 +325,7 @@ static func _create(
 	hour_value: int = 0,
 	minute_value: int = 0,
 	second_value: int = 0
-) -> datetime:
+):
 	var script = load(SCRIPT_PATH)
 	return script.new(year_value, month_value, day_value, hour_value, minute_value, second_value)
 

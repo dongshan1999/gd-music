@@ -4,14 +4,17 @@ extends Control
 const MusicAppStateDataType := preload("res://scripts/save/music/music_app_state_data.gd")
 const TrackDataType := preload("res://scripts/save/music/track_data.gd")
 const PlaylistDataType := preload("res://scripts/save/music/playlist_data.gd")
-const AppSaveManagerType := preload("res://dx/runtime/scripts/save/save_manager.gd")
+const AppSaveManagerType := preload("res://dx/runtime/scripts/managers/save/save_manager.gd")
 const MusicAppLayoutType := preload("res://scripts/ui/music_app/music_app_layout.gd")
-const PopupRegistryType := preload("res://dx/runtime/scripts/popup/popup_registry.gd")
-const PopupManagerType := preload("res://dx/runtime/scripts/popup/popup_manager.gd")
-const PopupViewType := preload("res://dx/runtime/scripts/popup/popup_view.gd")
+const PopupRegistryType := preload("res://dx/runtime/scripts/managers/popup/popup_registry.gd")
+const PopupManagerType := preload("res://dx/runtime/scripts/managers/popup/popup_manager.gd")
+const PopupViewType := preload("res://dx/runtime/scripts/managers/popup/popup_view.gd")
 const CommonDialogPopupType := preload("res://scripts/popup/common_dialog_popup.gd")
 
 const OUTER_MARGIN := 0.0
+const TOAST_FADE_DURATION := 0.18
+const TOAST_VISIBLE_DURATION := 0.95
+const TOAST_LIFT_DISTANCE := 10.0
 const WINDOWS_SCAN_ROOT := "windows://drives"
 const AUDIO_EXTENSIONS := {
 	"mp3": true,
@@ -44,13 +47,16 @@ var _return_page: int = AppPage.HOME
 var _playlist_back_target: int = AppPage.HOME
 var _timer: Timer = Timer.new()
 var _fallback_state := MusicAppStateDataType.new()
+var _toast_panel: PanelContainer
+var _toast_label: Label
+var _toast_tween: Tween
 
 var _state: MusicAppStateDataType:
 	get:
-		var save_manager := _get_save_manager()
+		var save_manager := DX.save as AppSaveManagerType
 		return save_manager.data.music if save_manager != null else _fallback_state
 	set(value):
-		var save_manager := _get_save_manager()
+		var save_manager := DX.save as AppSaveManagerType
 		if save_manager != null:
 			save_manager.data.music = value
 		else:
@@ -105,6 +111,8 @@ func _ready() -> void:
 	mini_player.setup(self)
 	local_music_page.setup(self)
 	local_scan_page.setup(self)
+	_ensure_toast_ui()
+	_sync_favorite_playlist_from_likes()
 
 	add_child(_timer)
 	_timer.wait_time = 1.0
@@ -205,6 +213,42 @@ func _is_current_track_liked() -> bool:
 		return false
 	return bool(_liked_tracks.get(_track_key(_get_current_track()), false))
 
+func _is_track_liked(track_index: int) -> bool:
+	if track_index < 0 or track_index >= _tracks.size():
+		return false
+	return bool(_liked_tracks.get(_track_key(_tracks[track_index]), false))
+
+func _toggle_like_track(track_index: int) -> bool:
+	var next_state := not _is_track_liked(track_index)
+	if not _set_track_liked(track_index, next_state):
+		return false
+
+	_show_toast(
+		tr("music_app.toast.favorite_added")
+		if next_state
+		else tr("music_app.toast.favorite_removed")
+	)
+	return next_state
+
+func _set_track_liked(track_index: int, liked: bool) -> bool:
+	if track_index < 0 or track_index >= _tracks.size():
+		return false
+
+	var key := _track_key(_tracks[track_index])
+	var current_state := bool(_liked_tracks.get(key, false))
+	if current_state == liked:
+		return false
+
+	if liked:
+		_liked_tracks[key] = true
+	else:
+		_liked_tracks.erase(key)
+
+	_sync_favorite_playlist_from_likes()
+	_refresh_all_ui()
+	_save_app_state()
+	return true
+
 func _track_key(track: TrackDataType) -> String:
 	if not track.file_path.is_empty():
 		return track.file_path
@@ -265,28 +309,51 @@ func _playlist_title_exists(title: String) -> bool:
 	return false
 
 func _try_create_playlist_from_current() -> bool:
-	if _tracks.is_empty():
-		return false
-
 	var title := _next_playlist_title()
-	var track_ids: Array[int] = []
-	var source_tracks: Array[int] = _get_playlist_track_indices(_selected_playlist_index)
-	if source_tracks.is_empty():
-		track_ids.append(_selected_track_index)
-	else:
-		var preview_count := mini(source_tracks.size(), 3)
-		for index in preview_count:
-			track_ids.append(source_tracks[index])
-
 	var playlist := PlaylistDataType.new()
 	playlist.title = title
-	playlist.count = track_ids.size()
+	playlist.count = 0
 	playlist.mark = title.left(1)
-	playlist.tracks = track_ids
+	playlist.tracks = []
 	playlist.deletable = true
 	_playlists.append(playlist)
 	_selected_playlist_index = _playlists.size() - 1
 	return true
+
+func _sync_favorite_playlist_from_likes() -> void:
+	var favorite_playlist := _get_or_create_favorite_playlist()
+	var liked_track_indices: Array[int] = []
+	for index in _tracks.size():
+		if _is_track_liked(index):
+			liked_track_indices.append(index)
+
+	favorite_playlist.title = MusicAppStateDataType.SYSTEM_FAVORITE_PLAYLIST_ID
+	favorite_playlist.mark = ""
+	favorite_playlist.deletable = false
+	favorite_playlist.tracks = liked_track_indices
+	favorite_playlist.count = liked_track_indices.size()
+
+func _get_or_create_favorite_playlist() -> PlaylistDataType:
+	var favorite_index := _find_favorite_playlist_index()
+	if favorite_index >= 0:
+		return _playlists[favorite_index]
+
+	var favorite_playlist := PlaylistDataType.new()
+	favorite_playlist.title = MusicAppStateDataType.SYSTEM_FAVORITE_PLAYLIST_ID
+	favorite_playlist.mark = ""
+	favorite_playlist.deletable = false
+	favorite_playlist.count = 0
+	favorite_playlist.tracks = []
+	_playlists.insert(0, favorite_playlist)
+	if _playlists.size() > 1:
+		_selected_playlist_index += 1
+	return favorite_playlist
+
+func _find_favorite_playlist_index() -> int:
+	for index in _playlists.size():
+		if _is_system_favorite_playlist(_playlists[index]):
+			return index
+	return -1
 
 func _page_home() -> int:
 	return AppPage.HOME
@@ -317,24 +384,15 @@ func _get_playlist_back_target() -> int:
 
 func _layout_preview() -> void:
 	MusicAppLayoutType.layout_preview(size, self, home_page, OUTER_MARGIN)
+	_reposition_toast()
 
 func _save_app_state() -> void:
-	var save_manager := _get_save_manager()
+	var save_manager := DX.save as AppSaveManagerType
 	if save_manager != null:
 		save_manager.save_data()
 
-func _get_popup_manager() -> PopupManagerType:
-	if not is_inside_tree():
-		return null
-	return get_node_or_null("/root/Popup") as PopupManagerType
-
-func _get_save_manager() -> AppSaveManagerType:
-	if not is_inside_tree():
-		return null
-	return get_node_or_null("/root/AppSave") as AppSaveManagerType
-
 func _show_common_alert(title: String, message: String) -> void:
-	var popup_manager := _get_popup_manager()
+	var popup_manager := DX.popup as PopupManagerType
 	if popup_manager == null:
 		push_error("Popup autoload is not available.")
 		return
@@ -360,6 +418,96 @@ func _show_playlist_deleted_popup(title: String) -> void:
 	_show_common_alert(
 		tr("music_app.alert.deleted_title"),
 		tr("music_app.alert.deleted_message").format({"title": title})
+	)
+
+func _show_toast(message: String) -> void:
+	_ensure_toast_ui()
+	if _toast_panel == null or _toast_label == null or phone_shell == null:
+		return
+
+	if _toast_tween != null:
+		_toast_tween.kill()
+		_toast_tween = null
+
+	_toast_label.text = message
+	_toast_panel.reset_size()
+	var toast_size := _toast_panel.get_combined_minimum_size()
+	_toast_panel.size = toast_size
+
+	var base_position := _get_toast_position(toast_size)
+	_toast_panel.visible = true
+	_toast_panel.modulate = Color(1, 1, 1, 0)
+	_toast_panel.position = base_position + Vector2(0, TOAST_LIFT_DISTANCE)
+
+	_toast_tween = create_tween()
+	_toast_tween.set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_OUT)
+	_toast_tween.parallel().tween_property(_toast_panel, "position", base_position, TOAST_FADE_DURATION)
+	_toast_tween.parallel().tween_property(_toast_panel, "modulate", Color.WHITE, TOAST_FADE_DURATION)
+	_toast_tween.tween_interval(TOAST_VISIBLE_DURATION)
+	_toast_tween.set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_IN)
+	_toast_tween.parallel().tween_property(
+		_toast_panel,
+		"position",
+		base_position + Vector2(0, -TOAST_LIFT_DISTANCE),
+		TOAST_FADE_DURATION
+	)
+	_toast_tween.parallel().tween_property(
+		_toast_panel,
+		"modulate",
+		Color(1, 1, 1, 0),
+		TOAST_FADE_DURATION
+	)
+	_toast_tween.finished.connect(_hide_toast)
+
+func _hide_toast() -> void:
+	if _toast_panel == null:
+		return
+	_toast_panel.visible = false
+	_toast_tween = null
+
+func _ensure_toast_ui() -> void:
+	if _toast_panel != null or phone_shell == null:
+		return
+
+	_toast_panel = PanelContainer.new()
+	_toast_panel.name = "ToastPanel"
+	_toast_panel.visible = false
+	_toast_panel.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_toast_panel.z_index = 120
+
+	var toast_style := StyleBoxFlat.new()
+	toast_style.bg_color = Color(0.0705882, 0.0784314, 0.0980392, 0.94)
+	toast_style.corner_radius_top_left = 18
+	toast_style.corner_radius_top_right = 18
+	toast_style.corner_radius_bottom_right = 18
+	toast_style.corner_radius_bottom_left = 18
+	toast_style.content_margin_left = 16
+	toast_style.content_margin_right = 16
+	toast_style.content_margin_top = 10
+	toast_style.content_margin_bottom = 10
+	_toast_panel.add_theme_stylebox_override("panel", toast_style)
+
+	_toast_label = Label.new()
+	_toast_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	_toast_label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+	_toast_label.add_theme_color_override("font_color", Color(0.968627, 0.968627, 0.972549, 1))
+	_toast_label.add_theme_font_size_override("font_size", 14)
+	_toast_panel.add_child(_toast_label)
+	phone_shell.add_child(_toast_panel)
+
+func _reposition_toast() -> void:
+	if _toast_panel == null or not _toast_panel.visible:
+		return
+	_toast_panel.position = _get_toast_position(_toast_panel.size)
+
+func _get_toast_position(toast_size: Vector2) -> Vector2:
+	if phone_shell == null:
+		return Vector2.ZERO
+
+	var bottom_offset := 104.0 if mini_player != null and mini_player.visible else 28.0
+	return Vector2(
+		floor((phone_shell.size.x - toast_size.x) * 0.5),
+		floor(phone_shell.size.y - bottom_offset - toast_size.y)
 	)
 
 func _get_scan_root_path() -> String:

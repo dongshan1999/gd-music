@@ -1,5 +1,4 @@
 @tool
-class_name LocalizeComp
 extends Node
 
 @export_placeholder("music_app.home.search_prompt")
@@ -38,24 +37,29 @@ func _enter_tree() -> void:
 func _ready() -> void:
 	_queue_refresh()
 
+func _exit_tree() -> void:
+	if Engine.is_editor_hint():
+		return
+
+	var localization = _get_localization_manager()
+	if localization == null:
+		return
+
+	var target := _get_text_target()
+	if target != null:
+		localization.unbind_text(target)
+
 func _notification(what: int) -> void:
-	if what == NOTIFICATION_TRANSLATION_CHANGED:
+	if what == NOTIFICATION_PARENTED:
 		_queue_refresh()
-	elif what == NOTIFICATION_PARENTED:
+	elif what == NOTIFICATION_TRANSLATION_CHANGED and Engine.is_editor_hint():
 		_queue_refresh()
 
 func refresh_text() -> void:
 	_refresh_queued = false
 
-	if tr_key.is_empty():
-		return
-	if Engine.is_editor_hint():
-		if not refresh_in_editor:
-			return
-	elif not update_in_runtime:
-		return
-
 	var target := _get_text_target()
+	var localization_manager = _get_localization_manager()
 	if target == null:
 		if Engine.is_editor_hint() and warn_if_parent_has_no_text:
 			push_warning(
@@ -64,24 +68,46 @@ func refresh_text() -> void:
 			)
 		return
 
-	var translated_text := TranslationServer.translate(tr_key)
-	if translated_text.is_empty():
-		translated_text = tr(tr_key)
-	if translated_text == tr_key and Engine.is_editor_hint():
-		# Keep the editor-authored preview text if the key is unresolved.
+	if tr_key.is_empty():
+		if localization_manager != null:
+			localization_manager.unbind_text(target)
 		return
 
-	var final_text := _format_text(translated_text)
-	var current_text = target.get("text")
-	if current_text == final_text:
+	if Engine.is_editor_hint():
+		if not refresh_in_editor:
+			return
+
+		var preview_text := _translate_direct()
+		if preview_text == tr_key:
+			return
+		if target.get("text") != preview_text:
+			target.set("text", preview_text)
 		return
-	target.set("text", final_text)
+
+	if not update_in_runtime:
+		return
+
+	if localization_manager == null:
+		var fallback_text := _translate_direct()
+		if target.get("text") != fallback_text:
+			target.set("text", fallback_text)
+		return
+
+	localization_manager.bind_text(target, tr_key, _get_format_payload())
 
 func _queue_refresh() -> void:
 	if _refresh_queued:
 		return
 	_refresh_queued = true
 	call_deferred("refresh_text")
+
+func _translate_direct() -> String:
+	var translated_text := TranslationServer.translate(tr_key)
+	if translated_text.is_empty():
+		translated_text = tr_key
+	else:
+		translated_text = translated_text.replace("\\n", "\n")
+	return _format_text(translated_text)
 
 func _format_text(source_text: String) -> String:
 	if not named_format_args.is_empty():
@@ -94,11 +120,24 @@ func _format_text(source_text: String) -> String:
 		positional_args[str(index)] = format_args[index]
 	return source_text.format(positional_args)
 
+func _get_format_payload():
+	if not named_format_args.is_empty():
+		return named_format_args.duplicate(true)
+	if format_args.is_empty():
+		return null
+	return format_args.duplicate()
+
+func _get_localization_manager():
+	var dx = get_node_or_null("/root/DX")
+	if dx == null:
+		return null
+	return dx.localization
+
 func _get_text_target() -> Object:
 	var parent := get_parent()
 	if parent == null:
 		return null
-	if not parent is Object:
+	if not (parent is Object):
 		return null
 	if _has_text_property(parent):
 		return parent

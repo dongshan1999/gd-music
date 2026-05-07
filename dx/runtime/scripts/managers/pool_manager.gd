@@ -1,9 +1,9 @@
-class_name DXPoolManager
-extends "res://dx/runtime/scripts/managers/dx_manager.gd"
+extends RefCounted
 
 const DEFAULT_MAX_CAPACITY := 100
 const DEFAULT_EXPIRATION_SECONDS := 300.0
 
+var dx: Node
 var _active_root: Node
 var _inactive_root: Node
 var _pools: Dictionary = {}
@@ -26,7 +26,7 @@ func initialize_scene_pool(
 	expiration_seconds: float = DEFAULT_EXPIRATION_SECONDS
 ) -> bool:
 	if scene == null:
-		framework.logger.error("Pool", "初始化对象池失败，scene 不能为空: %s" % String(name))
+		dx.logger.error("Pool", "初始化对象池失败，scene 不能为空: %s" % String(name))
 		return false
 
 	_pools[name] = {
@@ -42,7 +42,7 @@ func contains(name: StringName) -> bool:
 
 func pop(name: StringName, parent: Node = null) -> Node:
 	if not _pools.has(name):
-		framework.logger.warning("Pool", "未找到对象池: %s" % String(name))
+		dx.logger.warning("Pool", "未找到对象池: %s" % String(name))
 		return null
 
 	_ensure_roots()
@@ -76,7 +76,7 @@ func push(name: StringName, node: Node, parent: Node = null) -> bool:
 	if node == null:
 		return false
 	if not _pools.has(name):
-		framework.logger.warning("Pool", "未找到对象池，已直接释放节点: %s" % String(name))
+		dx.logger.warning("Pool", "未找到对象池，已直接释放节点: %s" % String(name))
 		node.queue_free()
 		return false
 
@@ -118,11 +118,11 @@ func _ensure_roots() -> void:
 	if _active_root == null:
 		_active_root = Node.new()
 		_active_root.name = "PoolActive"
-		framework.add_child(_active_root)
+		dx.add_child(_active_root)
 	if _inactive_root == null:
 		_inactive_root = Node.new()
 		_inactive_root.name = "PoolInactive"
-		framework.add_child(_inactive_root)
+		dx.add_child(_inactive_root)
 
 func _cleanup_expired_objects() -> void:
 	for key in _pools.keys():

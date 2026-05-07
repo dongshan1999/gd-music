@@ -1,19 +1,19 @@
-class_name DXCountdownManager
-extends "res://dx/runtime/scripts/managers/dx_manager.gd"
+extends RefCounted
 
 const SIGNAL_APP_BACKGROUND := &"app/background"
-const CountdownInfoScript = preload("res://dx/runtime/scripts/managers/dx_countdown_info.gd")
+const CountdownInfoScript = preload("res://dx/runtime/scripts/managers/countdown_info.gd")
 
+var dx: Node
 var _active: Dictionary = {}
 var _inactive: Dictionary = {}
 var _is_background := false
 var _background_entered_unix := 0
 
 func in_ready() -> void:
-	framework.signals.subscribe(SIGNAL_APP_BACKGROUND, _on_app_background_changed)
+	dx.signals.subscribe(SIGNAL_APP_BACKGROUND, _on_app_background_changed)
 
 func in_exit_tree() -> void:
-	framework.signals.unsubscribe(SIGNAL_APP_BACKGROUND, _on_app_background_changed)
+	dx.signals.unsubscribe(SIGNAL_APP_BACKGROUND, _on_app_background_changed)
 
 func in_process(_delta: float) -> void:
 	_refresh_all()
@@ -33,7 +33,7 @@ func start_seconds(
 	destroy_on_complete: bool = true,
 	run_in_background: bool = true
 ) -> Object:
-	var end_timestamp: int = framework.time.now_unix() + maxi(0, duration_seconds)
+	var end_timestamp: int = dx.time.now_unix() + maxi(0, duration_seconds)
 	return start(
 		CountdownInfoScript.new(
 			id,
@@ -92,7 +92,7 @@ func resume(id: StringName) -> void:
 		return
 	_inactive.erase(id)
 	_active[id] = info
-	info.resume(framework.time.now_unix())
+	info.resume(dx.time.now_unix())
 	_refresh_single(info, true)
 
 func remove(id: StringName) -> void:
@@ -136,7 +136,7 @@ func _refresh_single(info, force_notify: bool) -> void:
 			info.notify_update()
 		return
 
-	var new_remaining: int = maxi(0, info.end_unix_timestamp - framework.time.now_unix())
+	var new_remaining: int = maxi(0, info.end_unix_timestamp - dx.time.now_unix())
 	if force_notify or new_remaining != info.remaining_seconds:
 		info.remaining_seconds = new_remaining
 		info.notify_update()
@@ -161,10 +161,10 @@ func _on_app_background_changed(value: Variant) -> void:
 
 	_is_background = background
 	if background:
-		_background_entered_unix = framework.time.now_unix()
+		_background_entered_unix = dx.time.now_unix()
 		return
 
-	var paused_seconds: int = maxi(0, framework.time.now_unix() - _background_entered_unix)
+	var paused_seconds: int = maxi(0, dx.time.now_unix() - _background_entered_unix)
 	if paused_seconds <= 0:
 		return
 

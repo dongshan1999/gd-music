@@ -1,8 +1,6 @@
-[gd_scene load_steps=4 format=3]
+[gd_scene format=3 uid="uid://cgs5gwcepfoow"]
 
-[ext_resource type="Script" path="res://scripts/ui/music_app/modules/music_app_mini_player_module.gd" id="5_script"]
-
-[ext_resource type="Script" path="res://scripts/ui/common/localize_comp.gd" id="999_localize_comp"]
+[ext_resource type="Script" uid="uid://p8v8hpaoo7fe" path="res://scripts/ui/music_app/modules/music_app_mini_player_module.gd" id="5_script"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_mini_cover_panel"]
 bg_color = Color(0.18, 0.18, 0.2, 1)
@@ -11,10 +9,11 @@ corner_radius_top_right = 18
 corner_radius_bottom_right = 18
 corner_radius_bottom_left = 18
 
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_hy7py"]
+
 [node name="MiniPlayer" type="Panel" unique_id=651896687]
 unique_name_in_owner = true
-visible = false
-layout_mode = 0
+anchors_preset = 12
 anchor_top = 1.0
 anchor_right = 1.0
 anchor_bottom = 1.0
@@ -54,28 +53,28 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-theme_override_font_sizes/font_size = 22
 theme_override_colors/font_color = Color(0.968627, 0.968627, 0.972549, 1)
+theme_override_font_sizes/font_size = 22
 text = "虚"
 horizontal_alignment = 1
 vertical_alignment = 1
 
-[node name="LocalizeComp" type="Node" parent="Margin/Row/MiniCoverPanel/MiniCoverMarkLabel"]
-script = ExtResource("999_localize_comp")
-tr_key = "music_app.player.placeholder_mark"
-update_in_runtime = false
-
-[node name="MiniTrackLabel" type="Label" parent="Margin/Row" unique_id=106849500]
-unique_name_in_owner = true
+[node name="TrackSlot" type="Control" parent="Margin/Row" unique_id=909100001]
 layout_mode = 2
 size_flags_horizontal = 3
+
+[node name="MiniTrackLabel" type="Label" parent="Margin/Row/TrackSlot" unique_id=106849500]
+unique_name_in_owner = true
+layout_mode = 0
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+clip_text = true
+text_overrun_behavior = 3
 text = "虚拟 - 陈粒"
 vertical_alignment = 1
-
-[node name="LocalizeComp" type="Node" parent="Margin/Row/MiniTrackLabel"]
-script = ExtResource("999_localize_comp")
-tr_key = "music_app.mini_player.placeholder_track"
-update_in_runtime = false
 
 [node name="MiniPlayButton" type="Button" parent="Margin/Row" unique_id=1634867500]
 unique_name_in_owner = true
@@ -91,9 +90,11 @@ text = "≡"
 
 [node name="MiniOpenButton" type="Button" parent="." unique_id=943220940]
 unique_name_in_owner = true
-layout_mode = 0
+layout_mode = 1
+anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
-offset_right = -132.0
+offset_right = -146.0
 grow_horizontal = 2
 grow_vertical = 2
+theme_override_styles/normal = SubResource("StyleBoxEmpty_hy7py")

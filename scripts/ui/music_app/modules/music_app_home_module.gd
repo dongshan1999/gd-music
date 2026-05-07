@@ -127,6 +127,9 @@ func _delete_playlist(index: int) -> void:
 	if not playlist.deletable:
 		return
 
+	if index < _controller._selected_playlist_index:
+		_controller._selected_playlist_index -= 1
+
 	_controller._playlists.remove_at(index)
 	_controller._selected_playlist_index = clampi(_controller._selected_playlist_index, 0, maxi(_controller._playlists.size() - 1, 0))
 	if _controller._current_page == _controller._page_playlist() and _controller._playlists.is_empty():

@@ -1,5 +1,6 @@
-class_name DXDataManager
-extends "res://dx/runtime/scripts/managers/dx_manager.gd"
+extends RefCounted
+
+var dx: Node
 
 var _buckets: Dictionary = {}
 
