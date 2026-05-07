@@ -2,7 +2,7 @@
 
 [ext_resource type="Script" path="res://scripts/ui/music_app/modules/music_app_local_music_module.gd" id="7_local_music_script"]
 
-[ext_resource type="Script" path="res://scripts/ui/common/localize_comp.gd" id="999_localize_comp"]
+[ext_resource type="Script" path="res://dx/runtime/scripts/managers/localization/localize_comp.gd" id="999_localize_comp"]
 
 [node name="LocalMusicPage" type="Control" unique_id=1377588459]
 unique_name_in_owner = true

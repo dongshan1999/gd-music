@@ -1,4 +1,3 @@
-class_name JsonObject
 extends RefCounted
 
 ## 重写此方法返回配置字典，格式：

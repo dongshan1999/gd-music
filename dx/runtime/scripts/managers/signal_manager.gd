@@ -1,5 +1,6 @@
-class_name DXSignalManager
-extends "res://dx/runtime/scripts/managers/dx_manager.gd"
+extends RefCounted
+
+var dx: Node
 
 var _subscriptions: Dictionary = {}
 

@@ -56,6 +56,7 @@ grow_vertical = 2
 [node name="PlayerPage" parent="PreviewRoot/PhoneShell" instance=ExtResource("4_player_page")]
 
 [node name="MiniPlayer" parent="PreviewRoot/PhoneShell" instance=ExtResource("5_mini_player")]
+z_index = 180
 
 [node name="LocalMusicPage" parent="PreviewRoot/PhoneShell" instance=ExtResource("6_local_music_page")]
 

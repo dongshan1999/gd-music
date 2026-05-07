@@ -1,8 +1,7 @@
-[gd_scene load_steps=4 format=3]
+[gd_scene format=3 uid="uid://dkg816xqi54py"]
 
-[ext_resource type="Script" path="res://scripts/ui/music_app/modules/music_app_playlist_module.gd" id="3_script"]
-
-[ext_resource type="Script" path="res://scripts/ui/common/localize_comp.gd" id="999_localize_comp"]
+[ext_resource type="Script" uid="uid://cx5gvug1qkjgt" path="res://scripts/ui/music_app/modules/music_app_playlist_module.gd" id="3_script"]
+[ext_resource type="Script" path="res://dx/runtime/scripts/managers/localization/localize_comp.gd" id="999_localize_comp"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_playlist_hero_cover"]
 bg_color = Color(0.231373, 0.231373, 0.239216, 1)
@@ -13,8 +12,8 @@ corner_radius_bottom_left = 22
 
 [node name="PlaylistPage" type="Control" unique_id=741966306]
 unique_name_in_owner = true
-visible = false
-anchors_preset = 0
+layout_mode = 3
+anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
@@ -52,7 +51,7 @@ unique_name_in_owner = true
 layout_mode = 2
 text = "歌单"
 
-[node name="LocalizeComp" type="Node" parent="Margin/PlaylistVBox/PlaylistTopRow/PlaylistTopTitle"]
+[node name="LocalizeComp" type="Node" parent="Margin/PlaylistVBox/PlaylistTopRow/PlaylistTopTitle" unique_id=1955727055]
 script = ExtResource("999_localize_comp")
 tr_key = "music_app.playlist.title"
 
@@ -109,7 +108,7 @@ text = "我"
 horizontal_alignment = 1
 vertical_alignment = 1
 
-[node name="LocalizeComp" type="Node" parent="Margin/PlaylistVBox/PlaylistHeroPanel/Margin/HeroRow/PlaylistHeroCover/PlaylistHeroMarkLabel"]
+[node name="LocalizeComp" type="Node" parent="Margin/PlaylistVBox/PlaylistHeroPanel/Margin/HeroRow/PlaylistHeroCover/PlaylistHeroMarkLabel" unique_id=534931306]
 script = ExtResource("999_localize_comp")
 tr_key = "music_app.playlist.favorites_mark"
 update_in_runtime = false
@@ -124,7 +123,7 @@ unique_name_in_owner = true
 layout_mode = 2
 text = "我喜欢"
 
-[node name="LocalizeComp" type="Node" parent="Margin/PlaylistVBox/PlaylistHeroPanel/Margin/HeroRow/Info/PlaylistHeroTitleLabel"]
+[node name="LocalizeComp" type="Node" parent="Margin/PlaylistVBox/PlaylistHeroPanel/Margin/HeroRow/Info/PlaylistHeroTitleLabel" unique_id=202041321]
 script = ExtResource("999_localize_comp")
 tr_key = "music_app.playlist.favorites_title"
 update_in_runtime = false
@@ -134,7 +133,7 @@ unique_name_in_owner = true
 layout_mode = 2
 text = "共 0 首"
 
-[node name="LocalizeComp" type="Node" parent="Margin/PlaylistVBox/PlaylistHeroPanel/Margin/HeroRow/Info/PlaylistHeroCountLabel"]
+[node name="LocalizeComp" type="Node" parent="Margin/PlaylistVBox/PlaylistHeroPanel/Margin/HeroRow/Info/PlaylistHeroCountLabel" unique_id=409719352]
 script = ExtResource("999_localize_comp")
 tr_key = "music_app.playlist.total_tracks_zero"
 update_in_runtime = false
@@ -150,7 +149,7 @@ layout_mode = 2
 size_flags_horizontal = 3
 text = "▶ 播放全部"
 
-[node name="LocalizeComp" type="Node" parent="Margin/PlaylistVBox/PlaylistActionsRow/PlayAllButton"]
+[node name="LocalizeComp" type="Node" parent="Margin/PlaylistVBox/PlaylistActionsRow/PlayAllButton" unique_id=247668619]
 script = ExtResource("999_localize_comp")
 tr_key = "music_app.playlist.play_all"
 

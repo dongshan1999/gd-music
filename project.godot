@@ -21,9 +21,7 @@ config/icon="res://textures/icon.svg"
 
 [autoload]
 
-AppSave="*res://dx/runtime/scripts/save/save_manager.gd"
-Popup="*res://dx/runtime/scripts/popup/popup_manager.gd"
-DX="*res://dx/runtime/scripts/managers/dx_framework.gd"
+DX="*res://dx/runtime/scenes/managers/dx.tscn"
 
 [display]
 
@@ -40,7 +38,6 @@ version_control/autoload_on_startup=true
 
 [internationalization]
 
-locale/fallback="en"
 locale/translations=PackedStringArray("res://translations/music_app.en.translation", "res://translations/music_app.zh.translation", "res://translations/music_app.zh_CN.translation")
 
 [rendering]

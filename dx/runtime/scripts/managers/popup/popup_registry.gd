@@ -1,4 +1,3 @@
-class_name PopupRegistry
 extends RefCounted
 
 enum PopupId {

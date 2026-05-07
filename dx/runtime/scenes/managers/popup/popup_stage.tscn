@@ -1,0 +1,109 @@
+[gd_scene format=3 uid="uid://dhmyd5cykywaw"]
+
+[ext_resource type="Script" uid="uid://gb2a46yn0e83" path="res://dx/runtime/scripts/managers/popup/popup_stage.gd" id="1_script"]
+
+[node name="PopupStage" type="Control" unique_id=1742325373]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+script = ExtResource("1_script")
+
+[node name="PageLayerRoot" type="Control" parent="." unique_id=1151035449]
+unique_name_in_owner = true
+visible = false
+z_index = 120
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+
+[node name="PageOverlay" type="ColorRect" parent="PageLayerRoot" unique_id=1393358798]
+unique_name_in_owner = true
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 1
+color = Color(0, 0, 0, 0.18)
+
+[node name="PageHost" type="Control" parent="PageLayerRoot" unique_id=1863259516]
+unique_name_in_owner = true
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="MiniPlayerLayerRoot" type="Control" parent="." unique_id=401256819]
+unique_name_in_owner = true
+visible = false
+z_index = 240
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+
+[node name="MiniPlayerOverlay" type="ColorRect" parent="MiniPlayerLayerRoot" unique_id=1523137284]
+unique_name_in_owner = true
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 1
+color = Color(0, 0, 0, 0.34)
+
+[node name="MiniPlayerHost" type="Control" parent="MiniPlayerLayerRoot" unique_id=562659113]
+unique_name_in_owner = true
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="FullscreenLayerRoot" type="Control" parent="." unique_id=2069687562]
+unique_name_in_owner = true
+visible = false
+z_index = 360
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+
+[node name="FullscreenOverlay" type="ColorRect" parent="FullscreenLayerRoot" unique_id=769180585]
+unique_name_in_owner = true
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 1
+color = Color(0, 0, 0, 0.58)
+
+[node name="FullscreenHost" type="Control" parent="FullscreenLayerRoot" unique_id=607135259]
+unique_name_in_owner = true
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2

@@ -1,8 +1,7 @@
-[gd_scene load_steps=5 format=3]
+[gd_scene format=3 uid="uid://bm2c4vapaiaqf"]
 
-[ext_resource type="Script" path="res://scripts/ui/music_app/modules/music_app_player_module.gd" id="4_script"]
-
-[ext_resource type="Script" path="res://scripts/ui/common/localize_comp.gd" id="999_localize_comp"]
+[ext_resource type="Script" uid="uid://2xj1d207a5qg" path="res://scripts/ui/music_app/modules/music_app_player_module.gd" id="4_script"]
+[ext_resource type="Script" path="res://dx/runtime/scripts/managers/localization/localize_comp.gd" id="999_localize_comp"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_player_cover_panel"]
 bg_color = Color(0.176471, 0.192157, 0.223529, 1)
@@ -25,8 +24,8 @@ corner_radius_bottom_left = 999
 
 [node name="PlayerPage" type="Control" unique_id=706021004]
 unique_name_in_owner = true
-visible = false
-anchors_preset = 0
+layout_mode = 3
+anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
@@ -89,7 +88,7 @@ layout_mode = 2
 text = "虚拟"
 horizontal_alignment = 1
 
-[node name="LocalizeComp" type="Node" parent="PlayerMargin/PlayerVBox/PlayerTitleBlock/NowTitleLabel"]
+[node name="LocalizeComp" type="Node" parent="PlayerMargin/PlayerVBox/PlayerTitleBlock/NowTitleLabel" unique_id=1212558242]
 script = ExtResource("999_localize_comp")
 tr_key = "music_app.player.placeholder_title"
 update_in_runtime = false
@@ -106,7 +105,7 @@ unique_name_in_owner = true
 layout_mode = 2
 text = "陈粒"
 
-[node name="LocalizeComp" type="Node" parent="PlayerMargin/PlayerVBox/PlayerTitleBlock/ArtistCenter/ArtistRow/NowArtistLabel"]
+[node name="LocalizeComp" type="Node" parent="PlayerMargin/PlayerVBox/PlayerTitleBlock/ArtistCenter/ArtistRow/NowArtistLabel" unique_id=943377041]
 script = ExtResource("999_localize_comp")
 tr_key = "music_app.player.placeholder_artist"
 update_in_runtime = false
@@ -134,7 +133,7 @@ text = "元力QQ"
 horizontal_alignment = 1
 vertical_alignment = 1
 
-[node name="LocalizeComp" type="Node" parent="PlayerMargin/PlayerVBox/PlayerTitleBlock/ArtistCenter/ArtistRow/PlayerSourceChip/Margin/PlayerSourceLabel"]
+[node name="LocalizeComp" type="Node" parent="PlayerMargin/PlayerVBox/PlayerTitleBlock/ArtistCenter/ArtistRow/PlayerSourceChip/Margin/PlayerSourceLabel" unique_id=872577743]
 script = ExtResource("999_localize_comp")
 tr_key = "music_app.player.placeholder_source"
 update_in_runtime = false
@@ -181,13 +180,13 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-theme_override_font_sizes/font_size = 28
 theme_override_colors/font_color = Color(1, 1, 1, 0.88)
+theme_override_font_sizes/font_size = 28
 text = "虚拟"
 horizontal_alignment = 1
 vertical_alignment = 1
 
-[node name="LocalizeComp" type="Node" parent="PlayerMargin/PlayerVBox/CoverStage/CoverPanel/CoverMarkLabel"]
+[node name="LocalizeComp" type="Node" parent="PlayerMargin/PlayerVBox/CoverStage/CoverPanel/CoverMarkLabel" unique_id=363683347]
 script = ExtResource("999_localize_comp")
 tr_key = "music_app.player.placeholder_title"
 update_in_runtime = false
@@ -208,7 +207,7 @@ unique_name_in_owner = true
 layout_mode = 2
 text = "音效"
 
-[node name="LocalizeComp" type="Node" parent="PlayerMargin/PlayerVBox/PlayerMetaRow/PlayerFxLabel"]
+[node name="LocalizeComp" type="Node" parent="PlayerMargin/PlayerVBox/PlayerMetaRow/PlayerFxLabel" unique_id=708220863]
 script = ExtResource("999_localize_comp")
 tr_key = "music_app.player.fx"
 
@@ -229,7 +228,7 @@ custom_minimum_size = Vector2(40, 40)
 layout_mode = 2
 text = "评"
 
-[node name="LocalizeComp" type="Node" parent="PlayerMargin/PlayerVBox/PlayerMetaRow/CommentButton"]
+[node name="LocalizeComp" type="Node" parent="PlayerMargin/PlayerVBox/PlayerMetaRow/CommentButton" unique_id=1134174078]
 script = ExtResource("999_localize_comp")
 tr_key = "music_app.player.comments_short"
 

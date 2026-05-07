@@ -1,13 +1,12 @@
-[gd_scene load_steps=3 format=3]
+[gd_scene format=3 uid="uid://6xsr1dl3o4fh"]
 
-[ext_resource type="Script" path="res://scripts/ui/music_app/modules/music_app_local_music_scan_module.gd" id="8_local_scan_script"]
-
-[ext_resource type="Script" path="res://scripts/ui/common/localize_comp.gd" id="999_localize_comp"]
+[ext_resource type="Script" uid="uid://bxlxk77s8dtmi" path="res://scripts/ui/music_app/modules/music_app_local_music_scan_module.gd" id="8_local_scan_script"]
+[ext_resource type="Script" path="res://dx/runtime/scripts/managers/localization/localize_comp.gd" id="999_localize_comp"]
 
 [node name="LocalScanPage" type="Control" unique_id=767850004]
 unique_name_in_owner = true
-visible = false
-anchors_preset = 0
+layout_mode = 3
+anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
@@ -53,7 +52,7 @@ text = "全选"
 flat = true
 alignment = 0
 
-[node name="LocalizeComp" type="Node" parent="Margin/ScanVBox/ScanSelectAllButton"]
+[node name="LocalizeComp" type="Node" parent="Margin/ScanVBox/ScanSelectAllButton" unique_id=123748500]
 script = ExtResource("999_localize_comp")
 tr_key = "music_app.scan.select_all"
 update_in_runtime = false
@@ -75,7 +74,7 @@ layout_mode = 2
 text = "📁 选择要扫描的文件夹"
 horizontal_alignment = 1
 
-[node name="LocalizeComp" type="Node" parent="Margin/ScanVBox/ScanScroll/ScanFolderList/ScanHintLabel"]
+[node name="LocalizeComp" type="Node" parent="Margin/ScanVBox/ScanScroll/ScanFolderList/ScanHintLabel" unique_id=1602412346]
 script = ExtResource("999_localize_comp")
 tr_key = "music_app.scan.hint"
 
@@ -88,6 +87,6 @@ unique_name_in_owner = true
 layout_mode = 2
 text = "开始扫描"
 
-[node name="LocalizeComp" type="Node" parent="Margin/ScanVBox/StartScanButton"]
+[node name="LocalizeComp" type="Node" parent="Margin/ScanVBox/StartScanButton" unique_id=82370510]
 script = ExtResource("999_localize_comp")
 tr_key = "music_app.scan.start"

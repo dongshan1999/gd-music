@@ -1,4 +1,3 @@
-class_name JsonSerializer
 extends RefCounted
 
 # Cyclic references are unsupported; the depth guard prevents stack overflows.
@@ -756,8 +755,53 @@ static func _get_global_class_script_path(type_name: String) -> String:
 		script_path = str(item.get("path", ""))
 		break
 
+	if script_path.is_empty():
+		script_path = _guess_script_path_from_type_name(type_name)
+
 	_global_class_path_cache[type_name] = script_path
 	return script_path
+
+static func _guess_script_path_from_type_name(type_name: String) -> String:
+	var candidate_file_names: Array[String] = []
+	var snake_case_name := type_name.to_snake_case()
+	if not snake_case_name.is_empty():
+		candidate_file_names.append("%s.gd" % snake_case_name)
+	candidate_file_names.append("%s.gd" % type_name)
+
+	for candidate_file_name in candidate_file_names:
+		var script_path := _find_script_path_recursive("res://", candidate_file_name)
+		if not script_path.is_empty():
+			return script_path
+
+	return ""
+
+static func _find_script_path_recursive(directory_path: String, target_file_name: String) -> String:
+	var directory := DirAccess.open(directory_path)
+	if directory == null:
+		return ""
+
+	directory.list_dir_begin()
+	while true:
+		var entry_name := directory.get_next()
+		if entry_name.is_empty():
+			break
+		if entry_name in [".", ".."]:
+			continue
+
+		var entry_path := directory_path.path_join(entry_name)
+		if directory.current_is_dir():
+			var nested_result := _find_script_path_recursive(entry_path, target_file_name)
+			if not nested_result.is_empty():
+				directory.list_dir_end()
+				return nested_result
+			continue
+
+		if entry_name == target_file_name:
+			directory.list_dir_end()
+			return entry_path
+
+	directory.list_dir_end()
+	return ""
 
 static func _get_array_element_type_info(array_type_info: Dictionary) -> Dictionary:
 	var hint: int = int(array_type_info.get("hint", 0))

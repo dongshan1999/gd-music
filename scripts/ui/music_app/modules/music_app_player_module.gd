@@ -117,11 +117,7 @@ func _toggle_like_current_track() -> void:
 	if not _controller._has_tracks():
 		return
 
-	var key: String = _controller._track_key(_controller._get_current_track())
-	var next_state: bool = not bool(_controller._liked_tracks.get(key, false))
-	_controller._liked_tracks[key] = next_state
-	_controller._refresh_player_page()
-	_controller._save_app_state()
+	_controller._toggle_like_track(_controller._selected_track_index)
 
 func _play_previous() -> void:
 	_controller._select_track(_controller._selected_track_index - 1, true)

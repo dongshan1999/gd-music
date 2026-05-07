@@ -1,6 +1,6 @@
-class_name DXLogger
-extends "res://dx/runtime/scripts/managers/dx_manager.gd"
+extends RefCounted
 
+var dx: Node
 var _enabled := true
 var _info_enabled := true
 var _warning_enabled := true
@@ -90,6 +90,6 @@ func _log_internal(tag: StringName, message: Variant, level: String) -> void:
 			print(text)
 
 func _timestamp() -> String:
-	if framework != null and framework.time != null:
-		return framework.time.now().format("yyyy-MM-dd HH:mm:ss")
+	if dx != null and dx.time != null:
+		return dx.time.now().format("yyyy-MM-dd HH:mm:ss")
 	return Time.get_datetime_string_from_system(true, true)

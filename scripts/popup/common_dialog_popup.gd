@@ -1,5 +1,5 @@
 class_name CommonDialogPopup
-extends "res://dx/runtime/scripts/popup/popup_view.gd"
+extends "res://dx/runtime/scripts/managers/popup/popup_view.gd"
 
 var _confirm_action: Callable = Callable()
 var _cancel_action: Callable = Callable()

@@ -60,3 +60,5 @@ music_app.alert.empty_playlist_title,Empty Playlist,歌单为空,歌单为空
 music_app.alert.empty_playlist_message,This playlist has no playable tracks yet.,这个歌单里还没有可播放的歌曲。,这个歌单里还没有可播放的歌曲。
 music_app.alert.deleted_title,Deleted,已删除,已删除
 music_app.alert.deleted_message,"Playlist ""{title}"" was deleted.",歌单《{title}》已删除。,歌单《{title}》已删除。
+music_app.toast.favorite_added,Added to Liked,已添加到我喜欢,已添加到我喜欢
+music_app.toast.favorite_removed,Removed from Liked,已从我喜欢移除,已从我喜欢移除

@@ -1,9 +1,17 @@
-class_name PopupView
 extends Control
 
-@export var allow_overlay_close := false
+enum PopupLayer {
+	PAGE,
+	MINI_PLAYER,
+	FULLSCREEN
+}
+
+@export var popup_layer: PopupLayer = PopupLayer.FULLSCREEN
 
 var popup_manager
+
+func get_resolved_popup_layer() -> int:
+	return popup_layer
 
 func close_popup() -> void:
 	if popup_manager != null:

@@ -1,0 +1,9 @@
+[gd_scene format=3 uid="uid://w48o34w6vxm6"]
+
+[ext_resource type="Script" uid="uid://n1rbcu31inw1" path="res://dx/dx.gd" id="1_script"]
+[ext_resource type="PackedScene" path="res://dx/runtime/scenes/managers/popup/popup_manager.tscn" id="2_popup_manager"]
+
+[node name="DX" type="Node" unique_id=1798667270]
+script = ExtResource("1_script")
+
+[node name="Popup" parent="." unique_id=845419527 instance=ExtResource("2_popup_manager")]
