@@ -2,6 +2,7 @@ class_name MusicAppMiniPlayerModule
 extends Panel
 
 const MusicAppShowcaseControllerType := preload("res://scripts/ui/music_app/music_app_showcase.gd")
+const PopupRegistryType := preload("res://dx/runtime/scripts/managers/popup/popup_registry.gd")
 const TrackDataType := preload("res://scripts/save/music/track_data.gd")
 
 var _controller: MusicAppShowcaseControllerType
@@ -44,12 +45,24 @@ func refresh() -> void:
 func _toggle_playback() -> void:
 	if not _controller._has_tracks():
 		return
-	_controller.player_page.toggle_playback()
+	_controller.toggle_playback()
 
 func _open_selected_playlist() -> void:
 	if not _controller._has_tracks():
 		return
-	_controller.playlist_page.open_selected_playlist()
+	_show_popup(PopupRegistryType.PopupId.MUSIC_APP_PLAYLIST)
 
 func _open_player_from_current() -> void:
-	_controller.player_page.open_from_current()
+	_show_popup(PopupRegistryType.PopupId.MUSIC_APP_PLAYER)
+
+func _show_popup(popup_id: int):
+	var popup_manager = DX.popup
+	if popup_manager == null or not popup_manager.has_method("show_or_reuse"):
+		return null
+
+	var popup = popup_manager.show_or_reuse(popup_id)
+	if popup != null and popup.has_method("setup"):
+		popup.setup(_controller)
+	if popup != null and popup.has_method("refresh"):
+		popup.refresh()
+	return popup

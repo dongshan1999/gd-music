@@ -11,7 +11,17 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
+popup_layer = 0
 script = ExtResource("8_local_scan_script")
+
+[node name="Background" type="ColorRect" parent="."]
+layout_mode = 0
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+color = Color(0.0862745, 0.0901961, 0.101961, 1)
 
 [node name="Margin" type="MarginContainer" parent="." unique_id=1192320192]
 layout_mode = 0

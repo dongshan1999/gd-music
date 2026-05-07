@@ -1,8 +1,9 @@
 class_name MusicAppLocalMusicModule
-extends Control
+extends "res://dx/runtime/scripts/managers/popup/popup_view.gd"
 
 const MusicAppShowcaseControllerType := preload("res://scripts/ui/music_app/music_app_showcase.gd")
 const MusicAppLocalMusicRowType := preload("res://scripts/ui/music_app/modules/music_app_local_music_row.gd")
+const PopupRegistryType := preload("res://dx/runtime/scripts/managers/popup/popup_registry.gd")
 const LOCAL_MUSIC_ROW_SCENE := preload("res://scenes/ui/music_app/local_music_row.tscn")
 
 var _controller: MusicAppShowcaseControllerType
@@ -65,11 +66,10 @@ func refresh() -> void:
 func open_page() -> void:
 	_hide_menu()
 	_controller._refresh_local_music_page()
-	_controller._show_page(_controller._page_local_music())
 
 func close_page() -> void:
 	_hide_menu()
-	_controller._show_page(_controller._page_home())
+	close_popup()
 
 func _sync_rows(target_size: int) -> void:
 	while _rows.size() < target_size:
@@ -89,8 +89,7 @@ func _play_track(track_index: int) -> void:
 	if track_index < 0 or track_index >= _visible_track_indices.size():
 		return
 	_controller._select_track(_visible_track_indices[track_index], true)
-	_controller._set_return_page(_controller._page_local_music())
-	_controller._show_page(_controller._page_player())
+	_show_popup(PopupRegistryType.PopupId.MUSIC_APP_PLAYER)
 
 func _toggle_menu() -> void:
 	var next_visible := not local_music_menu_panel.visible
@@ -103,7 +102,9 @@ func _hide_menu() -> void:
 
 func _open_scan_page() -> void:
 	_hide_menu()
-	_controller.local_scan_page.open_page()
+	var popup = _show_popup(PopupRegistryType.PopupId.MUSIC_APP_LOCAL_SCAN)
+	if popup != null and popup.has_method("open_page"):
+		popup.open_page()
 
 func _show_stub_search() -> void:
 	_controller._show_common_alert(
@@ -127,3 +128,15 @@ func _show_stub_download() -> void:
 
 func _show_row_menu(_track_index: int) -> void:
 	_toggle_menu()
+
+func _show_popup(popup_id: int):
+	var manager = DX.popup
+	if manager == null or not manager.has_method("show_or_reuse"):
+		return null
+
+	var popup = manager.show_or_reuse(popup_id)
+	if popup != null and popup.has_method("setup"):
+		popup.setup(_controller)
+	if popup != null and popup.has_method("refresh"):
+		popup.refresh()
+	return popup

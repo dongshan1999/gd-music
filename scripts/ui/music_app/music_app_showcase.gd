@@ -5,13 +5,11 @@ const MusicAppStateDataType := preload("res://scripts/save/music/music_app_state
 const TrackDataType := preload("res://scripts/save/music/track_data.gd")
 const PlaylistDataType := preload("res://scripts/save/music/playlist_data.gd")
 const AppSaveManagerType := preload("res://dx/runtime/scripts/managers/save/save_manager.gd")
-const MusicAppLayoutType := preload("res://scripts/ui/music_app/music_app_layout.gd")
 const PopupRegistryType := preload("res://dx/runtime/scripts/managers/popup/popup_registry.gd")
 const PopupManagerType := preload("res://dx/runtime/scripts/managers/popup/popup_manager.gd")
 const PopupViewType := preload("res://dx/runtime/scripts/managers/popup/popup_view.gd")
 const CommonDialogPopupType := preload("res://scripts/popup/common_dialog_popup.gd")
 
-const OUTER_MARGIN := 0.0
 const TOAST_FADE_DURATION := 0.18
 const TOAST_VISIBLE_DURATION := 0.95
 const TOAST_LIFT_DISTANCE := 10.0
@@ -25,26 +23,18 @@ const AUDIO_EXTENSIONS := {
 	"aac": true
 }
 
-enum AppPage {
-	HOME,
-	PLAYLIST,
-	PLAYER,
-	LOCAL_MUSIC,
-	LOCAL_SCAN
-}
+const HOME_POPUP_ID := PopupRegistryType.PopupId.MUSIC_APP_HOME
+const PLAYLIST_POPUP_ID := PopupRegistryType.PopupId.MUSIC_APP_PLAYLIST
+const PLAYER_POPUP_ID := PopupRegistryType.PopupId.MUSIC_APP_PLAYER
+const LOCAL_MUSIC_POPUP_ID := PopupRegistryType.PopupId.MUSIC_APP_LOCAL_MUSIC
+const LOCAL_SCAN_POPUP_ID := PopupRegistryType.PopupId.MUSIC_APP_LOCAL_SCAN
 
 @onready var preview_root: Control = %PreviewRoot
 @onready var phone_shell: Panel = %PhoneShell
-@onready var home_page: Control = %HomePage
-@onready var playlist_page: Control = %PlaylistPage
-@onready var player_page: Control = %PlayerPage
+@onready var normal_popup_host: Control = %NormalPopupHost
 @onready var mini_player: Control = %MiniPlayer
-@onready var local_music_page: Control = %LocalMusicPage
-@onready var local_scan_page: Control = %LocalScanPage
+@onready var fullscreen_popup_host: Control = %FullscreenPopupHost
 
-var _current_page: int = AppPage.HOME
-var _return_page: int = AppPage.HOME
-var _playlist_back_target: int = AppPage.HOME
 var _timer: Timer = Timer.new()
 var _fallback_state := MusicAppStateDataType.new()
 var _toast_panel: PanelContainer
@@ -105,12 +95,16 @@ var _playlists: Array[PlaylistDataType]:
 		_state.playlists = value
 
 func _ready() -> void:
-	home_page.setup(self)
-	playlist_page.setup(self)
-	player_page.setup(self)
+	var popup_manager := _get_popup_manager()
+	if popup_manager != null:
+		popup_manager.set_normal_host(normal_popup_host)
+		popup_manager.set_fullscreen_host(fullscreen_popup_host)
+		if not popup_manager.popup_shown.is_connected(_on_popup_visibility_changed):
+			popup_manager.popup_shown.connect(_on_popup_visibility_changed)
+		if not popup_manager.popup_hidden.is_connected(_on_popup_visibility_changed):
+			popup_manager.popup_hidden.connect(_on_popup_visibility_changed)
+
 	mini_player.setup(self)
-	local_music_page.setup(self)
-	local_scan_page.setup(self)
 	_ensure_toast_ui()
 	_sync_favorite_playlist_from_likes()
 
@@ -119,9 +113,19 @@ func _ready() -> void:
 	_timer.timeout.connect(_on_tick)
 	_timer.start()
 
+	_show_home_popup()
 	_refresh_all_ui()
-	_show_page(AppPage.HOME)
 	_layout_preview()
+
+func _exit_tree() -> void:
+	var popup_manager := _get_popup_manager()
+	if popup_manager != null:
+		if popup_manager.popup_shown.is_connected(_on_popup_visibility_changed):
+			popup_manager.popup_shown.disconnect(_on_popup_visibility_changed)
+		if popup_manager.popup_hidden.is_connected(_on_popup_visibility_changed):
+			popup_manager.popup_hidden.disconnect(_on_popup_visibility_changed)
+		popup_manager.clear_normal_host(normal_popup_host)
+		popup_manager.clear_fullscreen_host(fullscreen_popup_host)
 
 func _notification(what: int) -> void:
 	if what == NOTIFICATION_TRANSLATION_CHANGED and is_node_ready():
@@ -132,45 +136,32 @@ func _notification(what: int) -> void:
 		_save_app_state()
 
 func _refresh_all_ui() -> void:
-	home_page.refresh()
-	playlist_page.refresh()
-	player_page.refresh()
-	mini_player.refresh()
-	local_music_page.refresh()
-	local_scan_page.refresh()
+	_refresh_home_page()
+	_refresh_playlist_page()
+	_refresh_player_page()
+	_refresh_local_music_page()
+	_refresh_local_scan_page()
+	_refresh_mini_player()
 
 func _refresh_home_page() -> void:
-	home_page.refresh()
+	_refresh_popup(HOME_POPUP_ID)
 
 func _refresh_playlist_page() -> void:
-	playlist_page.refresh()
+	_refresh_popup(PLAYLIST_POPUP_ID)
 
 func _refresh_player_page() -> void:
-	player_page.refresh()
+	_refresh_popup(PLAYER_POPUP_ID)
 
 func _refresh_mini_player() -> void:
 	mini_player.refresh()
-	mini_player.visible = _current_page != AppPage.PLAYER and _current_page != AppPage.LOCAL_SCAN
+	mini_player.visible = _get_popup(PLAYER_POPUP_ID) == null and _get_popup(LOCAL_SCAN_POPUP_ID) == null
+	_reposition_toast()
 
 func _refresh_local_music_page() -> void:
-	local_music_page.refresh()
+	_refresh_popup(LOCAL_MUSIC_POPUP_ID)
 
 func _refresh_local_scan_page() -> void:
-	local_scan_page.refresh()
-
-func _show_page(page: int) -> void:
-	_current_page = page
-	MusicAppLayoutType.show_page(self, page)
-
-func _navigate_back() -> void:
-	if _current_page == AppPage.PLAYER:
-		player_page.navigate_back()
-	elif _current_page == AppPage.PLAYLIST:
-		playlist_page.close_page()
-	elif _current_page == AppPage.LOCAL_SCAN:
-		local_scan_page.navigate_back()
-	elif _current_page == AppPage.LOCAL_MUSIC:
-		local_music_page.close_page()
+	_refresh_popup(LOCAL_SCAN_POPUP_ID)
 
 func _select_track(track_index: int, autoplay: bool) -> void:
 	if _tracks.is_empty():
@@ -183,7 +174,21 @@ func _select_track(track_index: int, autoplay: bool) -> void:
 	_save_app_state()
 
 func _on_tick() -> void:
-	player_page.on_tick()
+	if not _has_tracks():
+		_is_playing = false
+		return
+
+	if not _is_playing:
+		return
+
+	_elapsed_seconds += 1
+	if _elapsed_seconds >= _get_current_duration():
+		_select_track(_selected_track_index + 1, true)
+		return
+
+	_refresh_player_page()
+	_refresh_mini_player()
+	_refresh_playlist_page()
 
 func _has_tracks() -> bool:
 	return not _tracks.is_empty()
@@ -355,35 +360,7 @@ func _find_favorite_playlist_index() -> int:
 			return index
 	return -1
 
-func _page_home() -> int:
-	return AppPage.HOME
-
-func _page_playlist() -> int:
-	return AppPage.PLAYLIST
-
-func _page_player() -> int:
-	return AppPage.PLAYER
-
-func _page_local_music() -> int:
-	return AppPage.LOCAL_MUSIC
-
-func _page_local_scan() -> int:
-	return AppPage.LOCAL_SCAN
-
-func _set_return_page(page: int) -> void:
-	_return_page = page
-
-func _get_return_page() -> int:
-	return _return_page
-
-func _set_playlist_back_target(page: int) -> void:
-	_playlist_back_target = page
-
-func _get_playlist_back_target() -> int:
-	return _playlist_back_target
-
 func _layout_preview() -> void:
-	MusicAppLayoutType.layout_preview(size, self, home_page, OUTER_MARGIN)
 	_reposition_toast()
 
 func _save_app_state() -> void:
@@ -392,7 +369,7 @@ func _save_app_state() -> void:
 		save_manager.save_data()
 
 func _show_common_alert(title: String, message: String) -> void:
-	var popup_manager := DX.popup as PopupManagerType
+	var popup_manager := _get_popup_manager()
 	if popup_manager == null:
 		push_error("Popup autoload is not available.")
 		return
@@ -419,6 +396,54 @@ func _show_playlist_deleted_popup(title: String) -> void:
 		tr("music_app.alert.deleted_title"),
 		tr("music_app.alert.deleted_message").format({"title": title})
 	)
+
+func toggle_playback() -> void:
+	if not _has_tracks():
+		_is_playing = false
+		_refresh_player_page()
+		_refresh_mini_player()
+		return
+
+	_is_playing = not _is_playing
+	_refresh_player_page()
+	_refresh_mini_player()
+	_refresh_playlist_page()
+	_save_app_state()
+
+func _refresh_popup(popup_id: int) -> void:
+	var popup = _get_popup(popup_id)
+	if popup == null or not popup.has_method("refresh"):
+		return
+	popup.refresh()
+	if popup_id == HOME_POPUP_ID:
+		_layout_preview()
+
+func _get_popup_manager() -> PopupManagerType:
+	return DX.popup as PopupManagerType
+
+func _get_popup(popup_id: int):
+	var popup_manager := _get_popup_manager()
+	if popup_manager == null or not popup_manager.has_method("get_popup"):
+		return null
+	return popup_manager.get_popup(popup_id)
+
+func _get_current_popup():
+	var popup_manager := _get_popup_manager()
+	if popup_manager == null or not popup_manager.has_method("get_current_popup"):
+		return null
+	return popup_manager.get_current_popup()
+
+func _show_home_popup() -> void:
+	var popup_manager := _get_popup_manager()
+	if popup_manager == null or not popup_manager.has_method("show_or_reuse"):
+		return
+
+	var home_popup = popup_manager.show_or_reuse(HOME_POPUP_ID)
+	if home_popup != null and home_popup.has_method("setup"):
+		home_popup.setup(self)
+
+func _on_popup_visibility_changed(_popup_id = null, _popup = null) -> void:
+	_refresh_mini_player()
 
 func _show_toast(message: String) -> void:
 	_ensure_toast_ui()
@@ -701,15 +726,11 @@ func _unhandled_input(event: InputEvent) -> void:
 	if not event.is_action_pressed("ui_cancel"):
 		return
 
-	if _current_page == AppPage.PLAYER:
-		_navigate_back()
-		get_viewport().set_input_as_handled()
-	elif _current_page == AppPage.PLAYLIST:
-		playlist_page.close_page()
-		get_viewport().set_input_as_handled()
-	elif _current_page == AppPage.LOCAL_SCAN:
-		local_scan_page.navigate_back()
-		get_viewport().set_input_as_handled()
-	elif _current_page == AppPage.LOCAL_MUSIC:
-		local_music_page.close_page()
+	var current_popup = _get_current_popup()
+	if current_popup == null or current_popup == _get_popup(HOME_POPUP_ID):
+		return
+
+	var popup_manager := _get_popup_manager()
+	if popup_manager != null:
+		popup_manager.hide()
 		get_viewport().set_input_as_handled()

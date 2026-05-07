@@ -1,10 +1,11 @@
 class_name MusicAppHomeModule
-extends Control
+extends "res://dx/runtime/scripts/managers/popup/popup_view.gd"
 
 const HomeFeatureCardType = preload("res://scripts/ui/music_app/modules/music_app_home_feature_card.gd")
 const MusicAppShowcaseControllerType := preload("res://scripts/ui/music_app/music_app_showcase.gd")
 const MusicAppHomePlaylistRowType := preload("res://scripts/ui/music_app/modules/music_app_home_playlist_row.gd")
 const PlaylistDataType := preload("res://scripts/save/music/playlist_data.gd")
+const PopupRegistryType := preload("res://dx/runtime/scripts/managers/popup/popup_registry.gd")
 const HOME_PLAYLIST_ROW_SCENE := preload("res://scenes/ui/music_app/home_playlist_row.tscn")
 const FEATURE_ACTION_LOCAL_MUSIC := -1
 const FEATURE_CARD_ICONS := ["🎧", "📈", "🕘", "💽"]
@@ -77,12 +78,10 @@ func _open_playlist(index: int) -> void:
 		return
 
 	_controller._selected_playlist_index = clampi(index, 0, _controller._playlists.size() - 1)
-	_controller._set_playlist_back_target(_controller._current_page if _controller._current_page != _controller._page_playlist() else _controller._page_home())
-	_controller._set_return_page(_controller._page_playlist())
 	_controller._refresh_home_page()
 	_controller._refresh_playlist_page()
 	_controller._save_app_state()
-	_controller._show_page(_controller._page_playlist())
+	_show_popup(PopupRegistryType.PopupId.MUSIC_APP_PLAYLIST)
 
 func _sync_home_playlist_rows() -> void:
 	var target_size := _controller._playlists.size()
@@ -117,7 +116,9 @@ func _create_playlist_from_current() -> void:
 	_controller._save_app_state()
 
 func _open_local_music() -> void:
-	_controller.local_music_page.open_page()
+	var popup = _show_popup(PopupRegistryType.PopupId.MUSIC_APP_LOCAL_MUSIC)
+	if popup != null and popup.has_method("open_page"):
+		popup.open_page()
 
 func _delete_playlist(index: int) -> void:
 	if index < 0 or index >= _controller._playlists.size():
@@ -132,8 +133,18 @@ func _delete_playlist(index: int) -> void:
 
 	_controller._playlists.remove_at(index)
 	_controller._selected_playlist_index = clampi(_controller._selected_playlist_index, 0, maxi(_controller._playlists.size() - 1, 0))
-	if _controller._current_page == _controller._page_playlist() and _controller._playlists.is_empty():
-		_controller._show_page(_controller._page_home())
 	_controller._refresh_home_page()
 	_controller._refresh_playlist_page()
 	_controller._save_app_state()
+
+func _show_popup(popup_id: int):
+	var manager = DX.popup
+	if manager == null or not manager.has_method("show_or_reuse"):
+		return null
+
+	var popup = manager.show_or_reuse(popup_id)
+	if popup != null and popup.has_method("setup"):
+		popup.setup(_controller)
+	if popup != null and popup.has_method("refresh"):
+		popup.refresh()
+	return popup

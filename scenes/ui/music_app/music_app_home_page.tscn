@@ -1,12 +1,8 @@
-[gd_scene load_steps=6 format=3]
+[gd_scene format=3 uid="uid://icxomk0v5mvw"]
 
-[ext_resource type="Script" path="res://scripts/ui/music_app/modules/music_app_home_module.gd" id="2_script"]
-
-[ext_resource type="Script" path="res://scripts/ui/music_app/modules/music_app_home_feature_card.gd" id="3_cgd3q"]
-
-[ext_resource type="PackedScene" path="res://scenes/ui/music_app/home_feature_card.tscn" id="6_feature_card"]
-
-[ext_resource type="Script" path="res://dx/runtime/scripts/managers/localization/localize_comp.gd" id="999_localize_comp"]
+[ext_resource type="Script" uid="uid://b7ibq16q80ngu" path="res://scripts/ui/music_app/modules/music_app_home_module.gd" id="2_script"]
+[ext_resource type="PackedScene" uid="uid://dci3stsofj54o" path="res://scenes/ui/music_app/home_feature_card.tscn" id="6_feature_card"]
+[ext_resource type="Script" uid="uid://bym33i5tdjhtg" path="res://dx/runtime/scripts/managers/localization/localize_comp.gd" id="999_localize_comp"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_feature_card_panel"]
 bg_color = Color(0.192157, 0.192157, 0.2, 1)
@@ -17,12 +13,23 @@ corner_radius_bottom_left = 20
 
 [node name="HomePage" type="Control" unique_id=839843003]
 unique_name_in_owner = true
-anchors_preset = 0
+layout_mode = 3
+anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 script = ExtResource("2_script")
+popup_layer = 0
+
+[node name="Background" type="ColorRect" parent="." unique_id=470667221]
+layout_mode = 0
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+color = Color(0.0862745, 0.0901961, 0.101961, 1)
 
 [node name="Margin" type="MarginContainer" parent="." unique_id=1268931507]
 layout_mode = 0
@@ -79,7 +86,7 @@ unique_name_in_owner = true
 layout_mode = 2
 text = "点击这里开始搜索"
 
-[node name="LocalizeComp" type="Node" parent="Margin/HomeVBox/SearchRow/SearchBar/Margin/SearchHBox/SearchPromptLabel"]
+[node name="LocalizeComp" type="Node" parent="Margin/HomeVBox/SearchRow/SearchBar/Margin/SearchHBox/SearchPromptLabel" unique_id=843908630]
 script = ExtResource("999_localize_comp")
 tr_key = "music_app.home.search_prompt"
 
@@ -90,37 +97,25 @@ theme_override_constants/h_separation = 12
 theme_override_constants/v_separation = 12
 columns = 4
 
-[node name="FeatureCard0" type="Panel" parent="Margin/HomeVBox/FeatureGrid" unique_id=241142624 instance=ExtResource("6_feature_card")]
+[node name="FeatureCard0" parent="Margin/HomeVBox/FeatureGrid" unique_id=241142624 instance=ExtResource("6_feature_card")]
 unique_name_in_owner = true
-custom_minimum_size = Vector2(86, 120)
 layout_mode = 2
-size_flags_horizontal = 3
 theme_override_styles/panel = SubResource("StyleBoxFlat_feature_card_panel")
-script = ExtResource("3_cgd3q")
 
-[node name="FeatureCard1" type="Panel" parent="Margin/HomeVBox/FeatureGrid" unique_id=669691854 instance=ExtResource("6_feature_card")]
+[node name="FeatureCard1" parent="Margin/HomeVBox/FeatureGrid" unique_id=669691854 instance=ExtResource("6_feature_card")]
 unique_name_in_owner = true
-custom_minimum_size = Vector2(86, 120)
 layout_mode = 2
-size_flags_horizontal = 3
 theme_override_styles/panel = SubResource("StyleBoxFlat_feature_card_panel")
-script = ExtResource("3_cgd3q")
 
-[node name="FeatureCard2" type="Panel" parent="Margin/HomeVBox/FeatureGrid" unique_id=1537187717 instance=ExtResource("6_feature_card")]
+[node name="FeatureCard2" parent="Margin/HomeVBox/FeatureGrid" unique_id=1537187717 instance=ExtResource("6_feature_card")]
 unique_name_in_owner = true
-custom_minimum_size = Vector2(86, 120)
 layout_mode = 2
-size_flags_horizontal = 3
 theme_override_styles/panel = SubResource("StyleBoxFlat_feature_card_panel")
-script = ExtResource("3_cgd3q")
 
-[node name="FeatureCard3" type="Panel" parent="Margin/HomeVBox/FeatureGrid" unique_id=928339068 instance=ExtResource("6_feature_card")]
+[node name="FeatureCard3" parent="Margin/HomeVBox/FeatureGrid" unique_id=928339068 instance=ExtResource("6_feature_card")]
 unique_name_in_owner = true
-custom_minimum_size = Vector2(86, 120)
 layout_mode = 2
-size_flags_horizontal = 3
 theme_override_styles/panel = SubResource("StyleBoxFlat_feature_card_panel")
-script = ExtResource("3_cgd3q")
 
 [node name="HomeTabsRow" type="HBoxContainer" parent="Margin/HomeVBox" unique_id=1921064607]
 layout_mode = 2
@@ -131,7 +126,7 @@ unique_name_in_owner = true
 layout_mode = 2
 text = "我的歌单 (1)"
 
-[node name="LocalizeComp" type="Node" parent="Margin/HomeVBox/HomeTabsRow/MyPlaylistsLabel"]
+[node name="LocalizeComp" type="Node" parent="Margin/HomeVBox/HomeTabsRow/MyPlaylistsLabel" unique_id=1962019408]
 script = ExtResource("999_localize_comp")
 tr_key = "music_app.home.my_playlists_placeholder"
 update_in_runtime = false
@@ -141,7 +136,7 @@ unique_name_in_owner = true
 layout_mode = 2
 text = "收藏歌单 (0)"
 
-[node name="LocalizeComp" type="Node" parent="Margin/HomeVBox/HomeTabsRow/FavoritePlaylistsLabel"]
+[node name="LocalizeComp" type="Node" parent="Margin/HomeVBox/HomeTabsRow/FavoritePlaylistsLabel" unique_id=1389699811]
 script = ExtResource("999_localize_comp")
 tr_key = "music_app.home.favorite_playlists_placeholder"
 update_in_runtime = false

@@ -1,18 +1,7 @@
-[gd_scene load_steps=8 format=3]
+[gd_scene format=3 uid="uid://dqb3yk0oe8330"]
 
-[ext_resource type="Script" path="res://scripts/ui/music_app/music_app_showcase.gd" id="1_script"]
-
-[ext_resource type="PackedScene" path="res://scenes/ui/music_app/music_app_home_page.tscn" id="2_home_page"]
-
-[ext_resource type="PackedScene" path="res://scenes/ui/music_app/music_app_playlist_page.tscn" id="3_playlist_page"]
-
-[ext_resource type="PackedScene" path="res://scenes/ui/music_app/music_app_player_page.tscn" id="4_player_page"]
-
-[ext_resource type="PackedScene" path="res://scenes/ui/music_app/music_app_mini_player.tscn" id="5_mini_player"]
-
-[ext_resource type="PackedScene" path="res://scenes/ui/music_app/music_app_local_music_page.tscn" id="6_local_music_page"]
-
-[ext_resource type="PackedScene" path="res://scenes/ui/music_app/music_app_local_scan_page.tscn" id="7_local_scan_page"]
+[ext_resource type="Script" uid="uid://crnuaxlx02ks7" path="res://scripts/ui/music_app/music_app_showcase.gd" id="1_script"]
+[ext_resource type="PackedScene" uid="uid://cgs5gwcepfoow" path="res://scenes/ui/music_app/music_app_mini_player.tscn" id="5_mini_player"]
 
 [node name="MusicAppShowcase" type="Control" unique_id=1976821598]
 custom_minimum_size = Vector2(430, 932)
@@ -49,15 +38,35 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 
-[node name="HomePage" parent="PreviewRoot/PhoneShell" instance=ExtResource("2_home_page")]
+[node name="NormalPopupHost" type="Control" parent="PreviewRoot/PhoneShell" unique_id=1330102395]
+unique_name_in_owner = true
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
 
-[node name="PlaylistPage" parent="PreviewRoot/PhoneShell" instance=ExtResource("3_playlist_page")]
+[node name="MiniPlayer" parent="PreviewRoot/PhoneShell" unique_id=888591116 instance=ExtResource("5_mini_player")]
+layout_mode = 0
+anchors_preset = 0
+anchor_top = 0.0
+anchor_right = 0.0
+anchor_bottom = 0.0
+offset_left = 0.0
+offset_top = 860.0
+offset_right = 430.0
+offset_bottom = 930.0
+grow_horizontal = 1
+grow_vertical = 1
 
-[node name="PlayerPage" parent="PreviewRoot/PhoneShell" instance=ExtResource("4_player_page")]
-
-[node name="MiniPlayer" parent="PreviewRoot/PhoneShell" instance=ExtResource("5_mini_player")]
-z_index = 180
-
-[node name="LocalMusicPage" parent="PreviewRoot/PhoneShell" instance=ExtResource("6_local_music_page")]
-
-[node name="LocalScanPage" parent="PreviewRoot/PhoneShell" instance=ExtResource("7_local_scan_page")]
+[node name="FullscreenPopupHost" type="Control" parent="PreviewRoot/PhoneShell" unique_id=751598150]
+unique_name_in_owner = true
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2

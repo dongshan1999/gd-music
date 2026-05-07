@@ -1,9 +1,10 @@
 class_name MusicAppPlaylistModule
-extends Control
+extends "res://dx/runtime/scripts/managers/popup/popup_view.gd"
 
 const MusicAppShowcaseControllerType := preload("res://scripts/ui/music_app/music_app_showcase.gd")
 const MusicAppPlaylistSongRowType := preload("res://scripts/ui/music_app/modules/music_app_playlist_song_row.gd")
 const PlaylistDataType := preload("res://scripts/save/music/playlist_data.gd")
+const PopupRegistryType := preload("res://dx/runtime/scripts/managers/popup/popup_registry.gd")
 const TrackDataType := preload("res://scripts/save/music/track_data.gd")
 const PLAYLIST_SONG_ROW_SCENE := preload("res://scenes/ui/music_app/playlist_song_row.tscn")
 
@@ -66,19 +67,10 @@ func refresh() -> void:
 		song_rows[index].configure(index, track)
 
 func open_selected_playlist() -> void:
-	if _controller._playlists.is_empty():
-		return
-
-	_controller._set_playlist_back_target(_controller._current_page if _controller._current_page != _controller._page_playlist() else _controller._page_home())
-	_controller._set_return_page(_controller._page_playlist())
-	_controller._refresh_playlist_page()
-	_controller._show_page(_controller._page_playlist())
+	_show_popup(PopupRegistryType.PopupId.MUSIC_APP_PLAYLIST)
 
 func close_page() -> void:
-	if _controller._get_playlist_back_target() == _controller._page_player():
-		_controller._show_page(_controller._page_player())
-	else:
-		_controller._show_page(_controller._page_home())
+	close_popup()
 
 func _play_playlist_from_start() -> void:
 	var tracks: Array[int] = _controller._get_playlist_track_indices(_controller._selected_playlist_index)
@@ -86,8 +78,7 @@ func _play_playlist_from_start() -> void:
 		return
 
 	_controller._select_track(tracks[0], true)
-	_controller._set_return_page(_controller._page_playlist())
-	_controller._show_page(_controller._page_player())
+	_show_popup(PopupRegistryType.PopupId.MUSIC_APP_PLAYER)
 
 func _select_song_from_playlist(slot_index: int) -> void:
 	var tracks: Array[int] = _controller._get_playlist_track_indices(_controller._selected_playlist_index)
@@ -95,8 +86,7 @@ func _select_song_from_playlist(slot_index: int) -> void:
 		return
 
 	_controller._select_track(tracks[slot_index], true)
-	_controller._set_return_page(_controller._page_playlist())
-	_controller._show_page(_controller._page_player())
+	_show_popup(PopupRegistryType.PopupId.MUSIC_APP_PLAYER)
 
 func _create_playlist_from_current() -> void:
 	if not _controller._try_create_playlist_from_current():
@@ -117,3 +107,15 @@ func _sync_song_rows(target_size: int) -> void:
 	while song_rows.size() > target_size:
 		var row: MusicAppPlaylistSongRowType = song_rows.pop_back()
 		row.queue_free()
+
+func _show_popup(popup_id: int):
+	var manager = DX.popup
+	if manager == null or not manager.has_method("show_or_reuse"):
+		return null
+
+	var popup = manager.show_or_reuse(popup_id)
+	if popup != null and popup.has_method("setup"):
+		popup.setup(_controller)
+	if popup != null and popup.has_method("refresh"):
+		popup.refresh()
+	return popup

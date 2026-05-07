@@ -1,7 +1,8 @@
 class_name MusicAppPlayerModule
-extends Control
+extends "res://dx/runtime/scripts/managers/popup/popup_view.gd"
 
 const MusicAppShowcaseControllerType := preload("res://scripts/ui/music_app/music_app_showcase.gd")
+const PopupRegistryType := preload("res://dx/runtime/scripts/managers/popup/popup_registry.gd")
 const TrackDataType := preload("res://scripts/save/music/track_data.gd")
 
 var _controller: MusicAppShowcaseControllerType
@@ -75,43 +76,13 @@ func refresh() -> void:
 	remaining_label.text = _format_seconds(duration)
 
 func open_from_current() -> void:
-	if _controller._current_page != _controller._page_player():
-		_controller._set_return_page(_controller._current_page)
-	_controller._refresh_player_page()
-	_controller._show_page(_controller._page_player())
+	_show_popup(PopupRegistryType.PopupId.MUSIC_APP_PLAYER)
 
 func navigate_back() -> void:
-	_controller._show_page(_controller._get_return_page())
+	close_popup()
 
 func toggle_playback() -> void:
-	if not _controller._has_tracks():
-		_controller._is_playing = false
-		_controller._refresh_player_page()
-		_controller._refresh_mini_player()
-		return
-
-	_controller._is_playing = not _controller._is_playing
-	_controller._refresh_player_page()
-	_controller._refresh_mini_player()
-	_controller._refresh_playlist_page()
-	_controller._save_app_state()
-
-func on_tick() -> void:
-	if not _controller._has_tracks():
-		_controller._is_playing = false
-		return
-
-	if not _controller._is_playing:
-		return
-
-	_controller._elapsed_seconds += 1
-	if _controller._elapsed_seconds >= _controller._get_current_duration():
-		_controller._select_track(_controller._selected_track_index + 1, true)
-		return
-
-	_controller._refresh_player_page()
-	_controller._refresh_mini_player()
-	_controller._refresh_playlist_page()
+	_controller.toggle_playback()
 
 func _toggle_like_current_track() -> void:
 	if not _controller._has_tracks():
@@ -126,9 +97,21 @@ func _play_next() -> void:
 	_controller._select_track(_controller._selected_track_index + 1, true)
 
 func _open_selected_playlist() -> void:
-	_controller.playlist_page.open_selected_playlist()
+	_show_popup(PopupRegistryType.PopupId.MUSIC_APP_PLAYLIST)
 
 func _format_seconds(total_seconds: int) -> String:
 	var minutes: int = int(float(total_seconds) / 60.0)
 	var seconds: int = total_seconds % 60
 	return "%02d:%02d" % [minutes, seconds]
+
+func _show_popup(popup_id: int):
+	var manager = DX.popup
+	if manager == null or not manager.has_method("show_or_reuse"):
+		return null
+
+	var popup = manager.show_or_reuse(popup_id)
+	if popup != null and popup.has_method("setup"):
+		popup.setup(_controller)
+	if popup != null and popup.has_method("refresh"):
+		popup.refresh()
+	return popup

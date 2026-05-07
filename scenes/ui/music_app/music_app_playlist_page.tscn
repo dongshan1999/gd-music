@@ -1,7 +1,7 @@
 [gd_scene format=3 uid="uid://dkg816xqi54py"]
 
 [ext_resource type="Script" uid="uid://cx5gvug1qkjgt" path="res://scripts/ui/music_app/modules/music_app_playlist_module.gd" id="3_script"]
-[ext_resource type="Script" path="res://dx/runtime/scripts/managers/localization/localize_comp.gd" id="999_localize_comp"]
+[ext_resource type="Script" uid="uid://bym33i5tdjhtg" path="res://dx/runtime/scripts/managers/localization/localize_comp.gd" id="999_localize_comp"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_playlist_hero_cover"]
 bg_color = Color(0.231373, 0.231373, 0.239216, 1)
@@ -19,6 +19,16 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 script = ExtResource("3_script")
+popup_layer = 0
+
+[node name="Background" type="ColorRect" parent="." unique_id=1107794786]
+layout_mode = 0
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+color = Color(0.0862745, 0.0901961, 0.101961, 1)
 
 [node name="Margin" type="MarginContainer" parent="." unique_id=85336666]
 layout_mode = 0
