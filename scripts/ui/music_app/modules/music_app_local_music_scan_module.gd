@@ -1,5 +1,5 @@
 class_name MusicAppLocalMusicScanModule
-extends Control
+extends "res://dx/runtime/scripts/managers/popup/popup_view.gd"
 
 const MusicAppShowcaseControllerType := preload("res://scripts/ui/music_app/music_app_showcase.gd")
 const MusicAppLocalMusicScanFolderRowType := preload("res://scripts/ui/music_app/modules/music_app_local_music_scan_folder_row.gd")
@@ -63,11 +63,10 @@ func open_page() -> void:
 	_selected_paths.clear()
 	_current_path = _root_path
 	refresh()
-	_controller._show_page(_controller._page_local_scan())
 
 func close_page() -> void:
 	_controller._refresh_local_music_page()
-	_controller._show_page(_controller._page_local_music())
+	close_popup()
 
 func navigate_back() -> void:
 	if _current_path == _root_path:

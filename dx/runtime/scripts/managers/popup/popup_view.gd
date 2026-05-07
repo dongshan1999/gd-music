@@ -1,8 +1,7 @@
 extends Control
 
 enum PopupLayer {
-	PAGE,
-	MINI_PLAYER,
+	NORMAL,
 	FULLSCREEN
 }
 
@@ -15,7 +14,10 @@ func get_resolved_popup_layer() -> int:
 
 func close_popup() -> void:
 	if popup_manager != null:
-		popup_manager.hide()
+		if popup_manager.has_method("hide_popup"):
+			popup_manager.hide_popup(self)
+		else:
+			popup_manager.hide()
 
 func _popup_open(manager) -> void:
 	popup_manager = manager

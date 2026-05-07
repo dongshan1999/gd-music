@@ -30,6 +30,7 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
+popup_layer = 1
 script = ExtResource("4_script")
 
 [node name="PlayerBackdrop" type="ColorRect" parent="." unique_id=1343948977]
