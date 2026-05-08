@@ -57,12 +57,10 @@ func _open_player_from_current() -> void:
 
 func _show_popup(popup_id: int):
 	var popup_manager = DX.popup
-	if popup_manager == null or not popup_manager.has_method("show_or_reuse"):
+	if popup_manager == null:
 		return null
 
-	var popup = popup_manager.show_or_reuse(popup_id)
+	var popup = popup_manager.show(popup_id)
 	if popup != null and popup.has_method("setup"):
 		popup.setup(_controller)
-	if popup != null and popup.has_method("refresh"):
-		popup.refresh()
 	return popup

@@ -85,10 +85,32 @@ func toggle_playback() -> void:
 	_controller.toggle_playback()
 
 func _toggle_like_current_track() -> void:
-	if not _controller._has_tracks():
+	if _controller == null or not _controller._has_tracks():
 		return
 
-	_controller._toggle_like_track(_controller._selected_track_index)
+	var track_index := _controller._selected_track_index
+	if track_index < 0 or track_index >= _controller._tracks.size():
+		return
+
+	var next_state := not _controller._is_track_liked(track_index)
+	var liked_tracks: Dictionary = _controller._liked_tracks.duplicate(true)
+	var track: TrackDataType = _controller._tracks[track_index]
+	var key := _controller._track_key(track)
+
+	if next_state:
+		liked_tracks[key] = true
+	else:
+		liked_tracks.erase(key)
+
+	_controller._liked_tracks = liked_tracks
+	_controller._sync_favorite_playlist_from_likes()
+	_controller._refresh_all_ui()
+	_controller._save_app_state()
+	_controller._show_toast(
+		tr("music_app.toast.favorite_added")
+		if next_state
+		else tr("music_app.toast.favorite_removed")
+	)
 
 func _play_previous() -> void:
 	_controller._select_track(_controller._selected_track_index - 1, true)
@@ -106,12 +128,10 @@ func _format_seconds(total_seconds: int) -> String:
 
 func _show_popup(popup_id: int):
 	var manager = DX.popup
-	if manager == null or not manager.has_method("show_or_reuse"):
+	if manager == null:
 		return null
 
-	var popup = manager.show_or_reuse(popup_id)
+	var popup = manager.show(popup_id)
 	if popup != null and popup.has_method("setup"):
 		popup.setup(_controller)
-	if popup != null and popup.has_method("refresh"):
-		popup.refresh()
 	return popup

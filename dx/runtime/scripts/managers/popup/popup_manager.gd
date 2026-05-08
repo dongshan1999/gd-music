@@ -16,6 +16,16 @@ var _popup_stacks := {
 }
 
 func show(popup_id: int) -> PopupViewType:
+	var existing_popup := get_popup(popup_id)
+	if existing_popup != null:
+		_bring_popup_to_front(existing_popup)
+		_touch_popup_entry(popup_id, existing_popup)
+		popup_shown.emit(popup_id, existing_popup)
+		return existing_popup
+
+	return _show_new_popup(popup_id)
+
+func _show_new_popup(popup_id: int) -> PopupViewType:
 	if not PopupRegistryType.has_popup(popup_id):
 		push_error("Popup id is not registered: %s" % popup_id)
 		return null
@@ -46,15 +56,6 @@ func show(popup_id: int) -> PopupViewType:
 	popup._popup_open(self)
 	popup_shown.emit(popup_id, popup)
 	return popup
-
-func show_or_reuse(popup_id: int) -> PopupViewType:
-	var existing_popup := get_popup(popup_id)
-	if existing_popup != null:
-		_bring_popup_to_front(existing_popup)
-		_touch_popup_entry(popup_id, existing_popup)
-		popup_shown.emit(popup_id, existing_popup)
-		return existing_popup
-	return show(popup_id)
 
 func get_popup(popup_id: int) -> PopupViewType:
 	var popup_entry := _find_popup_entry(popup_id)

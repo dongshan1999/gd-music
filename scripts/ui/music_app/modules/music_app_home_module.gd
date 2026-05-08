@@ -139,12 +139,10 @@ func _delete_playlist(index: int) -> void:
 
 func _show_popup(popup_id: int):
 	var manager = DX.popup
-	if manager == null or not manager.has_method("show_or_reuse"):
+	if manager == null:
 		return null
 
-	var popup = manager.show_or_reuse(popup_id)
+	var popup = manager.show(popup_id)
 	if popup != null and popup.has_method("setup"):
 		popup.setup(_controller)
-	if popup != null and popup.has_method("refresh"):
-		popup.refresh()
 	return popup
