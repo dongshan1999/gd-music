@@ -9,10 +9,7 @@ const PopupRegistryType := preload("res://dx/runtime/scripts/managers/popup/popu
 const PopupManagerType := preload("res://dx/runtime/scripts/managers/popup/popup_manager.gd")
 const PopupViewType := preload("res://dx/runtime/scripts/managers/popup/popup_view.gd")
 const CommonDialogPopupType := preload("res://scripts/popup/common_dialog_popup.gd")
-
-const TOAST_FADE_DURATION := 0.18
-const TOAST_VISIBLE_DURATION := 0.95
-const TOAST_LIFT_DISTANCE := 10.0
+const CommonToastPopupType := preload("res://scripts/popup/common_toast_popup.gd")
 const WINDOWS_SCAN_ROOT := "windows://drives"
 const AUDIO_EXTENSIONS := {
 	"mp3": true,
@@ -28,18 +25,14 @@ const PLAYLIST_POPUP_ID := PopupRegistryType.PopupId.MUSIC_APP_PLAYLIST
 const PLAYER_POPUP_ID := PopupRegistryType.PopupId.MUSIC_APP_PLAYER
 const LOCAL_MUSIC_POPUP_ID := PopupRegistryType.PopupId.MUSIC_APP_LOCAL_MUSIC
 const LOCAL_SCAN_POPUP_ID := PopupRegistryType.PopupId.MUSIC_APP_LOCAL_SCAN
+const TOAST_POPUP_ID := PopupRegistryType.PopupId.COMMON_TOAST
 
-@onready var preview_root: Control = %PreviewRoot
-@onready var phone_shell: Panel = %PhoneShell
 @onready var normal_popup_host: Control = %NormalPopupHost
 @onready var mini_player: Control = %MiniPlayer
 @onready var fullscreen_popup_host: Control = %FullscreenPopupHost
 
 var _timer: Timer = Timer.new()
 var _fallback_state := MusicAppStateDataType.new()
-var _toast_panel: PanelContainer
-var _toast_label: Label
-var _toast_tween: Tween
 
 var _state: MusicAppStateDataType:
 	get:
@@ -105,7 +98,6 @@ func _ready() -> void:
 			popup_manager.popup_hidden.connect(_on_popup_visibility_changed)
 
 	mini_player.setup(self)
-	_ensure_toast_ui()
 	_sync_favorite_playlist_from_likes()
 
 	add_child(_timer)
@@ -115,7 +107,6 @@ func _ready() -> void:
 
 	_show_home_popup()
 	_refresh_all_ui()
-	_layout_preview()
 
 func _exit_tree() -> void:
 	var popup_manager := _get_popup_manager()
@@ -130,8 +121,6 @@ func _exit_tree() -> void:
 func _notification(what: int) -> void:
 	if what == NOTIFICATION_TRANSLATION_CHANGED and is_node_ready():
 		_refresh_all_ui()
-	elif what == NOTIFICATION_RESIZED and is_node_ready():
-		_layout_preview()
 	elif what == NOTIFICATION_WM_CLOSE_REQUEST or what == NOTIFICATION_PREDELETE:
 		_save_app_state()
 
@@ -155,7 +144,6 @@ func _refresh_player_page() -> void:
 func _refresh_mini_player() -> void:
 	mini_player.refresh()
 	mini_player.visible = _get_popup(PLAYER_POPUP_ID) == null and _get_popup(LOCAL_SCAN_POPUP_ID) == null
-	_reposition_toast()
 
 func _refresh_local_music_page() -> void:
 	_refresh_popup(LOCAL_MUSIC_POPUP_ID)
@@ -222,37 +210,6 @@ func _is_track_liked(track_index: int) -> bool:
 	if track_index < 0 or track_index >= _tracks.size():
 		return false
 	return bool(_liked_tracks.get(_track_key(_tracks[track_index]), false))
-
-func _toggle_like_track(track_index: int) -> bool:
-	var next_state := not _is_track_liked(track_index)
-	if not _set_track_liked(track_index, next_state):
-		return false
-
-	_show_toast(
-		tr("music_app.toast.favorite_added")
-		if next_state
-		else tr("music_app.toast.favorite_removed")
-	)
-	return next_state
-
-func _set_track_liked(track_index: int, liked: bool) -> bool:
-	if track_index < 0 or track_index >= _tracks.size():
-		return false
-
-	var key := _track_key(_tracks[track_index])
-	var current_state := bool(_liked_tracks.get(key, false))
-	if current_state == liked:
-		return false
-
-	if liked:
-		_liked_tracks[key] = true
-	else:
-		_liked_tracks.erase(key)
-
-	_sync_favorite_playlist_from_likes()
-	_refresh_all_ui()
-	_save_app_state()
-	return true
 
 func _track_key(track: TrackDataType) -> String:
 	if not track.file_path.is_empty():
@@ -360,9 +317,6 @@ func _find_favorite_playlist_index() -> int:
 			return index
 	return -1
 
-func _layout_preview() -> void:
-	_reposition_toast()
-
 func _save_app_state() -> void:
 	var save_manager := DX.save as AppSaveManagerType
 	if save_manager != null:
@@ -415,8 +369,6 @@ func _refresh_popup(popup_id: int) -> void:
 	if popup == null or not popup.has_method("refresh"):
 		return
 	popup.refresh()
-	if popup_id == HOME_POPUP_ID:
-		_layout_preview()
 
 func _get_popup_manager() -> PopupManagerType:
 	return DX.popup as PopupManagerType
@@ -435,10 +387,10 @@ func _get_current_popup():
 
 func _show_home_popup() -> void:
 	var popup_manager := _get_popup_manager()
-	if popup_manager == null or not popup_manager.has_method("show_or_reuse"):
+	if popup_manager == null:
 		return
 
-	var home_popup = popup_manager.show_or_reuse(HOME_POPUP_ID)
+	var home_popup = popup_manager.show(HOME_POPUP_ID)
 	if home_popup != null and home_popup.has_method("setup"):
 		home_popup.setup(self)
 
@@ -446,94 +398,14 @@ func _on_popup_visibility_changed(_popup_id = null, _popup = null) -> void:
 	_refresh_mini_player()
 
 func _show_toast(message: String) -> void:
-	_ensure_toast_ui()
-	if _toast_panel == null or _toast_label == null or phone_shell == null:
+	var popup_manager := _get_popup_manager()
+	if popup_manager == null:
 		return
 
-	if _toast_tween != null:
-		_toast_tween.kill()
-		_toast_tween = null
-
-	_toast_label.text = message
-	_toast_panel.reset_size()
-	var toast_size := _toast_panel.get_combined_minimum_size()
-	_toast_panel.size = toast_size
-
-	var base_position := _get_toast_position(toast_size)
-	_toast_panel.visible = true
-	_toast_panel.modulate = Color(1, 1, 1, 0)
-	_toast_panel.position = base_position + Vector2(0, TOAST_LIFT_DISTANCE)
-
-	_toast_tween = create_tween()
-	_toast_tween.set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_OUT)
-	_toast_tween.parallel().tween_property(_toast_panel, "position", base_position, TOAST_FADE_DURATION)
-	_toast_tween.parallel().tween_property(_toast_panel, "modulate", Color.WHITE, TOAST_FADE_DURATION)
-	_toast_tween.tween_interval(TOAST_VISIBLE_DURATION)
-	_toast_tween.set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_IN)
-	_toast_tween.parallel().tween_property(
-		_toast_panel,
-		"position",
-		base_position + Vector2(0, -TOAST_LIFT_DISTANCE),
-		TOAST_FADE_DURATION
-	)
-	_toast_tween.parallel().tween_property(
-		_toast_panel,
-		"modulate",
-		Color(1, 1, 1, 0),
-		TOAST_FADE_DURATION
-	)
-	_toast_tween.finished.connect(_hide_toast)
-
-func _hide_toast() -> void:
-	if _toast_panel == null:
-		return
-	_toast_panel.visible = false
-	_toast_tween = null
-
-func _ensure_toast_ui() -> void:
-	if _toast_panel != null or phone_shell == null:
-		return
-
-	_toast_panel = PanelContainer.new()
-	_toast_panel.name = "ToastPanel"
-	_toast_panel.visible = false
-	_toast_panel.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	_toast_panel.z_index = 120
-
-	var toast_style := StyleBoxFlat.new()
-	toast_style.bg_color = Color(0.0705882, 0.0784314, 0.0980392, 0.94)
-	toast_style.corner_radius_top_left = 18
-	toast_style.corner_radius_top_right = 18
-	toast_style.corner_radius_bottom_right = 18
-	toast_style.corner_radius_bottom_left = 18
-	toast_style.content_margin_left = 16
-	toast_style.content_margin_right = 16
-	toast_style.content_margin_top = 10
-	toast_style.content_margin_bottom = 10
-	_toast_panel.add_theme_stylebox_override("panel", toast_style)
-
-	_toast_label = Label.new()
-	_toast_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	_toast_label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
-	_toast_label.add_theme_color_override("font_color", Color(0.968627, 0.968627, 0.972549, 1))
-	_toast_label.add_theme_font_size_override("font_size", 14)
-	_toast_panel.add_child(_toast_label)
-	phone_shell.add_child(_toast_panel)
-
-func _reposition_toast() -> void:
-	if _toast_panel == null or not _toast_panel.visible:
-		return
-	_toast_panel.position = _get_toast_position(_toast_panel.size)
-
-func _get_toast_position(toast_size: Vector2) -> Vector2:
-	if phone_shell == null:
-		return Vector2.ZERO
-
-	var bottom_offset := 104.0 if mini_player != null and mini_player.visible else 28.0
-	return Vector2(
-		floor((phone_shell.size.x - toast_size.x) * 0.5),
-		floor(phone_shell.size.y - bottom_offset - toast_size.y)
-	)
+	var popup: PopupViewType = popup_manager.show(TOAST_POPUP_ID)
+	if popup is CommonToastPopupType:
+		var toast_popup := popup as CommonToastPopupType
+		toast_popup.show_message(message, 104.0 if mini_player.visible else 28.0)
 
 func _get_scan_root_path() -> String:
 	var os_name := OS.get_name()
