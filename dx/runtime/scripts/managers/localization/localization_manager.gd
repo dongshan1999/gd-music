@@ -1,3 +1,4 @@
+class_name DX_LocalizationManager
 extends RefCounted
 
 const TEXT_PROPERTY := &"text"

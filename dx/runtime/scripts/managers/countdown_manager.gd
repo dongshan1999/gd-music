@@ -1,7 +1,8 @@
+class_name DX_CountdownManager
 extends RefCounted
 
 const SIGNAL_APP_BACKGROUND := &"app/background"
-const CountdownInfoScript = preload("res://dx/runtime/scripts/managers/countdown_info.gd")
+const DX_CountdownInfoScript = preload("res://dx/runtime/scripts/managers/countdown_info.gd")
 
 var dx: Node
 var _active: Dictionary = {}
@@ -35,10 +36,10 @@ func start_seconds(
 ) -> Object:
 	var end_timestamp: int = dx.time.now_unix() + maxi(0, duration_seconds)
 	return start(
-		CountdownInfoScript.new(
+		DX_CountdownInfoScript.new(
 			id,
 			end_timestamp,
-			CountdownInfoScript.CountdownStatus.RUNNING,
+			DX_CountdownInfoScript.CountdownStatus.RUNNING,
 			destroy_on_complete,
 			run_in_background
 		)
@@ -119,7 +120,7 @@ func _refresh_all() -> void:
 		if info == null:
 			completed_ids.append(key)
 			continue
-		if info.status != CountdownInfoScript.CountdownStatus.RUNNING:
+		if info.status != DX_CountdownInfoScript.CountdownStatus.RUNNING:
 			continue
 		_refresh_single(info, false)
 		if info.is_completed():
@@ -131,7 +132,7 @@ func _refresh_all() -> void:
 func _refresh_single(info, force_notify: bool) -> void:
 	if info == null:
 		return
-	if info.status == CountdownInfoScript.CountdownStatus.PAUSED:
+	if info.status == DX_CountdownInfoScript.CountdownStatus.PAUSED:
 		if force_notify:
 			info.notify_update()
 		return
@@ -141,7 +142,7 @@ func _refresh_single(info, force_notify: bool) -> void:
 		info.remaining_seconds = new_remaining
 		info.notify_update()
 
-	if new_remaining <= 0 and info.status == CountdownInfoScript.CountdownStatus.RUNNING:
+	if new_remaining <= 0 and info.status == DX_CountdownInfoScript.CountdownStatus.RUNNING:
 		info.complete()
 
 func _finalize_countdown(id: StringName) -> void:
@@ -171,7 +172,7 @@ func _on_app_background_changed(value: Variant) -> void:
 	for info in get_active_items():
 		if info.run_in_background:
 			continue
-		if info.status != CountdownInfoScript.CountdownStatus.RUNNING:
+		if info.status != DX_CountdownInfoScript.CountdownStatus.RUNNING:
 			continue
 		info.end_unix_timestamp += paused_seconds
 		_refresh_single(info, true)

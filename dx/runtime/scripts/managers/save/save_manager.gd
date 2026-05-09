@@ -1,12 +1,11 @@
+class_name DX_SaveManager
 extends RefCounted
 
 const SAVE_ROOT := "user://save_data"
 const DEFAULT_DATA_PATH := "app/data.json"
-const APP_SAVE_DATA_SCRIPT := preload("res://dx/runtime/scripts/managers/save/save_data.gd")
-const JSON_SERIALIZER_SCRIPT := preload("res://dx/runtime/scripts/serializer/json_serializer.gd")
 
 var dx: Node
-var data = APP_SAVE_DATA_SCRIPT.new()
+var data = DX_SaveData.new()
 var _data_path: String = DEFAULT_DATA_PATH
 
 func in_ready() -> void:
@@ -27,7 +26,7 @@ func load(relative_path: String, default_value: Variant = null):
 func load_data(relative_path: String = DEFAULT_DATA_PATH):
 	_data_path = relative_path
 	var has_existing_file := _file_exists(_data_path)
-	var fallback_data = APP_SAVE_DATA_SCRIPT.new()
+	var fallback_data = DX_SaveData.new()
 	data = self.load(_data_path, fallback_data)
 	if data == null:
 		data = _clone_object(fallback_data)
@@ -100,12 +99,12 @@ func _load_object(relative_path: String, default_object):
 func _serialize_object(object, include_ignored: bool = false) -> Dictionary:
 	if object == null:
 		return {}
-	return JSON_SERIALIZER_SCRIPT.serialize(object, include_ignored)
+	return DX_JsonSerializer.serialize(object, include_ignored)
 
 func _populate_object(object, source_data: Dictionary) -> void:
 	if object == null:
 		return
-	JSON_SERIALIZER_SCRIPT.deserialize(source_data, object)
+	DX_JsonSerializer.deserialize(source_data, object)
 
 func _clone_object(object):
 	if object == null:
@@ -119,12 +118,12 @@ func _clone_object(object):
 	if cloned == null:
 		return null
 
-	var serialized_data = JSON_SERIALIZER_SCRIPT.serialize(object, true)
-	if JSON_SERIALIZER_SCRIPT.has_error():
+	var serialized_data = DX_JsonSerializer.serialize(object, true)
+	if DX_JsonSerializer.has_error():
 		return null
 
-	JSON_SERIALIZER_SCRIPT.deserialize(serialized_data, cloned, true)
-	if JSON_SERIALIZER_SCRIPT.has_error():
+	DX_JsonSerializer.deserialize(serialized_data, cloned, true)
+	if DX_JsonSerializer.has_error():
 		return null
 	return cloned
 
@@ -150,7 +149,7 @@ func _encode_save_value(value: Variant) -> Dictionary:
 			return {"ok": true, "value": value}
 
 	push_error(
-		"SaveManager.save only supports JSON-compatible values or JsonObject instances."
+		"DX_SaveManager.save only supports JSON-compatible values or DX_JsonObject instances."
 	)
 	return {"ok": false}
 

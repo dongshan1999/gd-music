@@ -1,3 +1,4 @@
+class_name DX_PoolManager
 extends RefCounted
 
 const DEFAULT_MAX_CAPACITY := 100

@@ -1,8 +1,6 @@
 class_name MusicAppMiniPlayerController
 extends "res://scripts/ui/music_app/controllers/music_app_controller_base.gd"
 
-const PopupRegistryType := preload("res://dx/runtime/scripts/managers/popup/popup_registry.gd")
-
 var _playback_controller: MusicAppPlaybackController = MusicAppPlaybackController.new()
 
 ## 判断迷你播放器当前是否有可播放队列。
@@ -29,7 +27,7 @@ func toggle_playback() -> void:
 
 ## 打开完整播放器页面。
 func open_player_page() -> void:
-	show_popup(PopupRegistryType.PopupId.MUSIC_APP_PLAYER)
+	show_popup(DX_PopupRegistry.PopupId.MUSIC_APP_PLAYER)
 
 ## 展示当前播放队列对话框。
 func show_playback_queue() -> void:

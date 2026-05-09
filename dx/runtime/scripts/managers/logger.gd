@@ -1,3 +1,4 @@
+class_name DX_Logger
 extends RefCounted
 
 var dx: Node

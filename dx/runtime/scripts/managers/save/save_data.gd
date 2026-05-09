@@ -1,4 +1,5 @@
-extends "res://dx/runtime/scripts/serializer/json_object.gd"
+class_name DX_SaveData
+extends DX_JsonObject
 const MUSIC_APP_STATE_DATA_SCRIPT := preload("res://scripts/save/music/music_app_state_data.gd")
 const MUSIC_PLUGIN_SETTINGS_DATA_SCRIPT := preload("res://scripts/save/music/music_plugin_settings_data.gd")
 

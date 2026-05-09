@@ -1,3 +1,4 @@
+class_name DX_JsonSerializer
 extends RefCounted
 
 # Cyclic references are unsupported; the depth guard prevents stack overflows.

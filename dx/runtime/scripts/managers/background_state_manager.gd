@@ -1,3 +1,4 @@
+class_name DX_BackgroundStateManager
 extends RefCounted
 
 const SIGNAL_APP_PAUSE := &"app/pause"

@@ -1,13 +1,11 @@
 class_name MusicAppPluginController
 extends "res://scripts/ui/music_app/controllers/music_app_controller_base.gd"
 
-const MusicPluginManagerType := preload("res://dx/runtime/scripts/managers/music_plugin_manager.gd")
-
 var _playback_controller: MusicAppPlaybackController = MusicAppPlaybackController.new()
 
 ## 返回全局音乐插件管理器。
-func get_music_plugin_manager() -> MusicPluginManagerType:
-	return DX.music_plugins as MusicPluginManagerType
+func get_music_plugin_manager() -> DX_MusicPluginManager:
+	return DX.music_plugins as DX_MusicPluginManager
 
 ## 启动本地音乐插件宿主服务。
 func start_music_plugin_host() -> Dictionary:

@@ -1,8 +1,6 @@
 class_name MusicAppHomeController
 extends "res://scripts/ui/music_app/controllers/music_app_controller_base.gd"
 
-const PopupRegistryType := preload("res://dx/runtime/scripts/managers/popup/popup_registry.gd")
-
 ## 返回首页要展示的全部歌单。
 func get_playlists() -> Array:
 	return get_playlists_ref()
@@ -70,18 +68,18 @@ func delete_playlist(index: int) -> bool:
 func open_playlist(index: int) -> bool:
 	if not _select_playlist(index):
 		return false
-	show_popup(PopupRegistryType.PopupId.MUSIC_APP_PLAYLIST)
+	show_popup(DX_PopupRegistry.PopupId.MUSIC_APP_PLAYLIST)
 	return true
 
 ## 打开本地音乐页面。
 func open_local_music() -> void:
-	var popup = show_popup(PopupRegistryType.PopupId.MUSIC_APP_LOCAL_MUSIC)
+	var popup = show_popup(DX_PopupRegistry.PopupId.MUSIC_APP_LOCAL_MUSIC)
 	if popup != null and popup.has_method("open_page"):
 		popup.open_page()
 
 ## 打开插件音乐浏览页。
 func open_plugin_browser() -> void:
-	show_popup(PopupRegistryType.PopupId.MUSIC_APP_PLUGIN_BROWSER)
+	show_popup(DX_PopupRegistry.PopupId.MUSIC_APP_PLUGIN_BROWSER)
 
 ## 处理首页功能入口点击。
 func open_feature_card(index: int) -> bool:

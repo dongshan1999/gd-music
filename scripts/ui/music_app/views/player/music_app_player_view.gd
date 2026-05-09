@@ -3,7 +3,6 @@ extends "res://dx/runtime/scripts/managers/popup/popup_view.gd"
 
 const MusicAppScriptPathsType := preload("res://scripts/constants/music_app_script_paths.gd")
 const MusicAppUiSymbolsType := preload("res://scripts/constants/music_app_ui_symbols.gd")
-const PopupRegistryType := preload("res://dx/runtime/scripts/managers/popup/popup_registry.gd")
 
 var _controller: MusicAppShowcaseController
 var _player_controller: MusicAppPlayerController = MusicAppPlayerController.new()
@@ -90,7 +89,7 @@ func refresh() -> void:
 	remaining_label.text = _format_seconds(duration)
 
 func open_from_current() -> void:
-	_player_controller.show_popup(PopupRegistryType.PopupId.MUSIC_APP_PLAYER)
+	_player_controller.show_popup(DX_PopupRegistry.PopupId.MUSIC_APP_PLAYER)
 
 func navigate_back() -> void:
 	close_popup()
