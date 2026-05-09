@@ -1,7 +1,8 @@
 class_name MusicAppLocalMusicRow
 extends Panel
 
-const TrackDataType := preload("res://scripts/save/music/track_data.gd")
+const MusicAppScriptPathsType := preload("res://scripts/constants/music_app_script_paths.gd")
+const MusicAppUiSymbolsType := preload("res://scripts/constants/music_app_ui_symbols.gd")
 
 signal play_requested(index: int)
 signal more_requested(index: int)
@@ -27,12 +28,12 @@ func setup() -> void:
 	_source_label = $Margin/Row/SourceChip/Margin/SourceLabel
 	_more_button = $Margin/Row/MoreButton
 	_open_button = $OpenButton
-	_more_button.text = "⋯"
+	_more_button.text = MusicAppUiSymbolsType.MORE
 
 	_more_button.pressed.connect(_on_more_pressed)
 	_open_button.pressed.connect(_on_open_pressed)
 
-func configure(track_index: int, track: TrackDataType) -> void:
+func configure(track_index: int, track: TrackData) -> void:
 	setup()
 	_track_index = track_index
 	_index_label.text = str(track_index + 1)
@@ -40,13 +41,13 @@ func configure(track_index: int, track: TrackDataType) -> void:
 	_subtitle_label.text = _build_subtitle(track)
 	_source_label.text = track.source if not track.source.is_empty() else "LOCAL"
 
-func _build_subtitle(track: TrackDataType) -> String:
+func _build_subtitle(track: TrackData) -> String:
 	var subtitle := track.artist
 	if not track.subtitle.is_empty() and track.subtitle != track.artist:
 		subtitle = "%s - %s" % [subtitle, track.subtitle] if not subtitle.is_empty() else track.subtitle
 	if subtitle.is_empty():
 		subtitle = tr("music_app.track.local_file")
-	return "• %s" % subtitle
+	return "%s %s" % [MusicAppUiSymbolsType.BULLET, subtitle]
 
 func _on_open_pressed() -> void:
 	if _track_index < 0:

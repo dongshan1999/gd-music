@@ -1,9 +1,6 @@
 class_name MusicAppStateData
 extends "res://dx/runtime/scripts/serializer/json_object.gd"
 
-const TrackDataType := preload("res://scripts/save/music/track_data.gd")
-const PlaylistDataType := preload("res://scripts/save/music/playlist_data.gd")
-
 const SAVE_VERSION := 2
 const DEFAULT_SELECTED_PLAYLIST_INDEX := 0
 const DEFAULT_SELECTED_TRACK_INDEX := 0
@@ -14,8 +11,8 @@ const DEFAULT_LIKED_TRACKS := {}
 const SYSTEM_FAVORITE_PLAYLIST_ID := "__music_app.favorite_playlist__"
 
 var version: int = SAVE_VERSION
-var tracks: Array[TrackDataType] = []
-var playlists: Array[PlaylistDataType] = []
+var tracks: Array[TrackData] = []
+var playlists: Array[PlaylistData] = []
 var selected_playlist_index: int = DEFAULT_SELECTED_PLAYLIST_INDEX
 var selected_track_index: int = DEFAULT_SELECTED_TRACK_INDEX
 var playback_track_indices: Array[int] = []
@@ -82,7 +79,7 @@ func normalize() -> void:
 		elapsed_seconds = clampi(elapsed_seconds, 0, tracks[selected_track_index].duration)
 
 func _normalize_tracks() -> void:
-	var result: Array[TrackDataType] = []
+	var result: Array[TrackData] = []
 	for track in tracks:
 		if track == null:
 			continue
@@ -91,7 +88,7 @@ func _normalize_tracks() -> void:
 	tracks = result
 
 func _normalize_playlists() -> void:
-	var result: Array[PlaylistDataType] = []
+	var result: Array[PlaylistData] = []
 	for playlist in playlists:
 		if playlist == null:
 			continue
@@ -132,15 +129,15 @@ func _clamp_index(index: int, size: int) -> int:
 		return 0
 	return clampi(index, 0, size - 1)
 
-func _build_default_tracks() -> Array[TrackDataType]:
+func _build_default_tracks() -> Array[TrackData]:
 	return []
 
-func _build_default_playlists() -> Array[PlaylistDataType]:
+func _build_default_playlists() -> Array[PlaylistData]:
 	return [
 		_make_playlist(SYSTEM_FAVORITE_PLAYLIST_ID, 0, "", [], false)
 	]
 
-func _ensure_default_favorite_playlist(target_playlists: Array[PlaylistDataType]) -> void:
+func _ensure_default_favorite_playlist(target_playlists: Array[PlaylistData]) -> void:
 	for playlist in target_playlists:
 		if not is_system_favorite_playlist(playlist):
 			continue
@@ -166,8 +163,8 @@ func _make_track(
 	accent: Color,
 	secondary: Color,
 	tertiary: Color
-) -> TrackDataType:
-	var track := TrackDataType.new()
+) -> TrackData:
+	var track := TrackData.new()
 	track.title = title
 	track.artist = artist
 	track.subtitle = subtitle
@@ -187,8 +184,8 @@ func _make_playlist(
 	mark: String,
 	track_indices: Array[int],
 	deletable: bool
-) -> PlaylistDataType:
-	var playlist := PlaylistDataType.new()
+) -> PlaylistData:
+	var playlist := PlaylistData.new()
 	playlist.title = title
 	playlist.count = count
 	playlist.mark = mark

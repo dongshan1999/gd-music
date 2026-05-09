@@ -1,25 +1,25 @@
 class_name MusicAppHomeView
 extends "res://dx/runtime/scripts/managers/popup/popup_view.gd"
 
-const HomeFeatureCardType = preload("res://scripts/ui/music_app/views/home/music_app_home_feature_card.gd")
-const MusicAppShowcaseControllerType := preload("res://scripts/ui/music_app/music_app_showcase.gd")
-const MusicAppLibraryControllerType := preload("res://scripts/ui/music_app/controllers/music_app_library_controller.gd")
-const MusicAppHomePlaylistRowType := preload("res://scripts/ui/music_app/views/home/music_app_home_playlist_row.gd")
-const PlaylistDataType := preload("res://scripts/save/music/playlist_data.gd")
-const PopupRegistryType := preload("res://dx/runtime/scripts/managers/popup/popup_registry.gd")
-const HOME_PLAYLIST_ROW_SCENE := preload("res://scenes/ui/music_app/home_playlist_row.tscn")
-const FEATURE_ACTION_LOCAL_MUSIC := -1
-const FEATURE_CARD_ICONS := ["🎧", "📈", "🕘", "💽"]
+const MusicAppScriptPathsType := preload("res://scripts/constants/music_app_script_paths.gd")
+const MusicAppUiSymbolsType := preload("res://scripts/constants/music_app_ui_symbols.gd")
+const HomeFeatureCardType = preload(MusicAppScriptPathsType.MUSIC_APP_HOME_FEATURE_CARD_VIEW)
+const HOME_PLAYLIST_ROW_SCENE := preload(MusicAppScriptPathsType.HOME_PLAYLIST_ROW)
+const FEATURE_CARD_ICONS := [
+	MusicAppUiSymbolsType.FEATURE_RECOMMENDED,
+	MusicAppUiSymbolsType.FEATURE_CHARTS,
+	MusicAppUiSymbolsType.FEATURE_HISTORY,
+	MusicAppUiSymbolsType.FEATURE_LOCAL_MUSIC
+]
 const FEATURE_CARD_KEYS := [
 	"music_app.home.feature.recommended",
 	"music_app.home.feature.charts",
 	"music_app.home.feature.history",
 	"music_app.home.feature.local_music"
 ]
-const FEATURE_CARD_TARGETS := [0, 1, 0, FEATURE_ACTION_LOCAL_MUSIC]
 
-var _controller: MusicAppShowcaseControllerType
-var _library_controller: MusicAppLibraryControllerType = MusicAppLibraryControllerType.new()
+var _controller: MusicAppShowcaseController
+var _home_controller: MusicAppHomeController = MusicAppHomeController.new()
 var _is_bound := false
 
 @onready var search_bar: Panel = %SearchBar
@@ -33,11 +33,11 @@ var _is_bound := false
 @onready var new_playlist_button: Button = %NewPlaylistButton
 @onready var import_button: Button = %ImportButton
 @onready var home_list: VBoxContainer = $Margin/HomeVBox/HomeScroll/HomeList
-@onready var feature_cards: Array[HomeFeatureCardType] = [%FeatureCard0, %FeatureCard1, %FeatureCard2, %FeatureCard3]
+@onready var feature_cards: Array[MusicAppHomeFeatureCard] = [%FeatureCard0, %FeatureCard1, %FeatureCard2, %FeatureCard3]
 
-var home_playlist_rows: Array[MusicAppHomePlaylistRowType] = []
+var home_playlist_rows: Array[MusicAppHomePlaylistRow] = []
 
-func setup(controller: MusicAppShowcaseControllerType) -> void:
+func setup(controller: MusicAppShowcaseController) -> void:
 	_controller = controller
 	bind()
 	refresh()
@@ -62,11 +62,11 @@ func refresh() -> void:
 	if _controller == null:
 		return
 
-	search_icon_label.text = "🔎"
-	var playlists := _library_controller.get_playlists()
+	search_icon_label.text = MusicAppUiSymbolsType.SEARCH
+	var playlists := _home_controller.get_playlists()
 	my_playlists_label.text = tr("music_app.home.my_playlists_count").format({"count": playlists.size()})
 	var favorite_count := 0
-	var favorite_index := _library_controller.find_favorite_playlist_index()
+	var favorite_index := _home_controller.find_favorite_playlist_index()
 	if favorite_index >= 0:
 		favorite_count = playlists[favorite_index].count
 	favorite_playlists_label.text = tr("music_app.home.favorite_playlists_count").format(
@@ -79,52 +79,43 @@ func refresh() -> void:
 
 	_sync_home_playlist_rows()
 	for index in home_playlist_rows.size():
-		var playlist: PlaylistDataType = playlists[index]
+		var playlist: PlaylistData = playlists[index]
 		home_playlist_rows[index].configure(
 			index,
-			_library_controller.get_playlist_display_mark(playlist),
-			_library_controller.get_playlist_display_title(playlist),
+			_home_controller.get_playlist_display_mark(playlist),
+			_home_controller.get_playlist_display_title(playlist),
 			playlist.count,
 			playlist.deletable
 		)
 
 func _open_playlist(index: int) -> void:
-	_library_controller.open_playlist(index)
+	_home_controller.open_playlist(index)
 
 func _sync_home_playlist_rows() -> void:
-	var target_size := _library_controller.get_playlists().size()
+	var target_size := _home_controller.get_playlists().size()
 
 	while home_playlist_rows.size() < target_size:
-		var row := HOME_PLAYLIST_ROW_SCENE.instantiate() as MusicAppHomePlaylistRowType
+		var row := HOME_PLAYLIST_ROW_SCENE.instantiate() as MusicAppHomePlaylistRow
 		home_list.add_child(row)
 		row.open_requested.connect(_open_playlist)
 		row.delete_requested.connect(_delete_playlist)
 		home_playlist_rows.append(row)
 
 	while home_playlist_rows.size() > target_size:
-		var row: MusicAppHomePlaylistRowType = home_playlist_rows.pop_back()
+		var row: MusicAppHomePlaylistRow = home_playlist_rows.pop_back()
 		row.queue_free()
 
 func _on_feature_pressed(index: int) -> void:
-	if index < 0 or index >= FEATURE_CARD_TARGETS.size():
-		return
-
-	var target_playlist: int = FEATURE_CARD_TARGETS[index]
-	if target_playlist == FEATURE_ACTION_LOCAL_MUSIC:
-		_open_local_music()
-		return
-	_open_playlist(target_playlist)
+	_home_controller.open_feature_card(index)
 
 func _create_playlist_from_current() -> void:
-	_library_controller.create_playlist_from_current()
+	_home_controller.create_playlist_from_current()
 
 func _open_local_music() -> void:
-	var popup = _library_controller.show_popup(PopupRegistryType.PopupId.MUSIC_APP_LOCAL_MUSIC)
-	if popup != null and popup.has_method("open_page"):
-		popup.open_page()
+	_home_controller.open_local_music()
 
 func _open_plugin_browser() -> void:
-	_library_controller.show_popup(PopupRegistryType.PopupId.MUSIC_APP_PLUGIN_BROWSER)
+	_home_controller.open_plugin_browser()
 
 func _on_search_bar_gui_input(event: InputEvent) -> void:
 	if event is InputEventMouseButton:
@@ -133,4 +124,4 @@ func _on_search_bar_gui_input(event: InputEvent) -> void:
 			_open_plugin_browser()
 
 func _delete_playlist(index: int) -> void:
-	_library_controller.delete_playlist(index)
+	_home_controller.delete_playlist(index)

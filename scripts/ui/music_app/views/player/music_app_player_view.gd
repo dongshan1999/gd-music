@@ -1,13 +1,12 @@
 class_name MusicAppPlayerView
 extends "res://dx/runtime/scripts/managers/popup/popup_view.gd"
 
-const MusicAppLibraryControllerType := preload("res://scripts/ui/music_app/controllers/music_app_library_controller.gd")
-const MusicAppShowcaseControllerType := preload("res://scripts/ui/music_app/music_app_showcase.gd")
+const MusicAppScriptPathsType := preload("res://scripts/constants/music_app_script_paths.gd")
+const MusicAppUiSymbolsType := preload("res://scripts/constants/music_app_ui_symbols.gd")
 const PopupRegistryType := preload("res://dx/runtime/scripts/managers/popup/popup_registry.gd")
-const TrackDataType := preload("res://scripts/save/music/track_data.gd")
 
-var _controller: MusicAppShowcaseControllerType
-var _library_controller: MusicAppLibraryControllerType = MusicAppLibraryControllerType.new()
+var _controller: MusicAppShowcaseController
+var _player_controller: MusicAppPlayerController = MusicAppPlayerController.new()
 var _is_bound := false
 
 @onready var close_player_button: Button = %ClosePlayerButton
@@ -31,7 +30,7 @@ var _is_bound := false
 @onready var player_next_button: Button = %PlayerNextButton
 @onready var player_list_button: Button = %PlayerListButton
 
-func setup(controller: MusicAppShowcaseControllerType) -> void:
+func setup(controller: MusicAppShowcaseController) -> void:
 	_controller = controller
 	bind()
 	refresh()
@@ -46,6 +45,8 @@ func bind() -> void:
 	player_play_button.pressed.connect(toggle_playback)
 	player_next_button.pressed.connect(_play_next)
 	like_button.pressed.connect(_toggle_like_current_track)
+	player_queue_button.pressed.connect(_show_playback_queue)
+	player_list_button.pressed.connect(_show_playback_queue)
 	if not _controller.state_changed.is_connected(refresh):
 		_controller.state_changed.connect(refresh)
 
@@ -54,52 +55,60 @@ func refresh() -> void:
 		return
 
 
-	if not _library_controller.has_tracks():
+	if not _player_controller.has_tracks():
 		now_title_label.text = tr("music_app.player.empty_title")
 		now_artist_label.text = tr("music_app.player.empty_artist")
 		player_source_label.text = ""
 		cover_mark_label.text = ""
-		like_button.text = "♡"
-		player_play_button.text = "▶"
+		like_button.text = MusicAppUiSymbolsType.HEART_OUTLINE
+		player_play_button.text = MusicAppUiSymbolsType.PLAY
 		player_progress_bar.value = 0.0
 		elapsed_label.text = "00:00"
 		remaining_label.text = "00:00"
 		return
 
-	var track: TrackDataType = _library_controller.get_current_track()
-	var duration: int = _library_controller.get_current_duration()
-	var progress: float = clampf(float(_library_controller.get_elapsed_seconds()) / float(duration), 0.0, 1.0)
+	var track: TrackData = _player_controller.get_current_track()
+	var duration: int = _player_controller.get_current_duration()
+	var progress: float = clampf(float(_player_controller.get_current_elapsed_seconds()) / float(duration), 0.0, 1.0)
 
 	now_title_label.text = track.title
-	now_artist_label.text = _library_controller.get_track_display_artist(track)
+	now_artist_label.text = _player_controller.get_track_display_artist(track)
 	player_source_label.text = track.source
 	cover_mark_label.text = track.title
-	like_button.text = "♥" if _library_controller.is_current_track_liked() else "♡"
-	player_play_button.text = "⏸" if _library_controller.is_playing() else "▶"
+	like_button.text = (
+		MusicAppUiSymbolsType.HEART_FILLED
+		if _player_controller.is_current_track_liked()
+		else MusicAppUiSymbolsType.HEART_OUTLINE
+	)
+	player_play_button.text = (
+		MusicAppUiSymbolsType.PAUSE
+		if _player_controller.is_playing()
+		else MusicAppUiSymbolsType.PLAY
+	)
 	player_progress_bar.value = progress * 100.0
-	elapsed_label.text = _format_seconds(_library_controller.get_elapsed_seconds())
+	elapsed_label.text = _format_seconds(_player_controller.get_current_elapsed_seconds())
 	remaining_label.text = _format_seconds(duration)
 
 func open_from_current() -> void:
-	_library_controller.show_popup(PopupRegistryType.PopupId.MUSIC_APP_PLAYER)
+	_player_controller.show_popup(PopupRegistryType.PopupId.MUSIC_APP_PLAYER)
 
 func navigate_back() -> void:
 	close_popup()
 
 func toggle_playback() -> void:
-	_library_controller.toggle_playback()
+	_player_controller.toggle_playback()
 
 func _toggle_like_current_track() -> void:
-	_library_controller.toggle_like_current_track()
+	_player_controller.toggle_like_current_track()
 
 func _play_previous() -> void:
-	_library_controller.play_previous_track()
+	_player_controller.play_previous_track()
 
 func _play_next() -> void:
-	_library_controller.play_next_track()
+	_player_controller.play_next_track()
 
-func _open_selected_playlist() -> void:
-	_library_controller.show_popup(PopupRegistryType.PopupId.MUSIC_APP_PLAYLIST)
+func _show_playback_queue() -> void:
+	_player_controller.show_playback_queue()
 
 func _format_seconds(total_seconds: int) -> String:
 	var minutes: int = int(float(total_seconds) / 60.0)

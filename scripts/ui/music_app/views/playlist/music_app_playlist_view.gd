@@ -1,16 +1,11 @@
 class_name MusicAppPlaylistView
 extends "res://dx/runtime/scripts/managers/popup/popup_view.gd"
 
-const MusicAppLibraryControllerType := preload("res://scripts/ui/music_app/controllers/music_app_library_controller.gd")
-const MusicAppShowcaseControllerType := preload("res://scripts/ui/music_app/music_app_showcase.gd")
-const MusicAppPlaylistSongRowType := preload("res://scripts/ui/music_app/views/playlist/music_app_playlist_song_row.gd")
-const PlaylistDataType := preload("res://scripts/save/music/playlist_data.gd")
-const PopupRegistryType := preload("res://dx/runtime/scripts/managers/popup/popup_registry.gd")
-const TrackDataType := preload("res://scripts/save/music/track_data.gd")
-const PLAYLIST_SONG_ROW_SCENE := preload("res://scenes/ui/music_app/playlist_song_row.tscn")
+const MusicAppScriptPathsType := preload("res://scripts/constants/music_app_script_paths.gd")
+const PLAYLIST_SONG_ROW_SCENE := preload(MusicAppScriptPathsType.PLAYLIST_SONG_ROW)
 
-var _controller: MusicAppShowcaseControllerType
-var _library_controller: MusicAppLibraryControllerType = MusicAppLibraryControllerType.new()
+var _controller: MusicAppShowcaseController
+var _playlist_controller: MusicAppPlaylistController = MusicAppPlaylistController.new()
 var _is_bound := false
 
 @onready var playlist_top_title: Label = %PlaylistTopTitle
@@ -28,9 +23,9 @@ var _is_bound := false
 @onready var song_list: VBoxContainer = $Margin/PlaylistVBox/PlaylistScroll/SongList
 @onready var song_bottom_space: Control = $Margin/PlaylistVBox/PlaylistScroll/SongList/SongBottomSpace
 
-var song_rows: Array[MusicAppPlaylistSongRowType] = []
+var song_rows: Array[MusicAppPlaylistSongRow] = []
 
-func setup(controller: MusicAppShowcaseControllerType) -> void:
+func setup(controller: MusicAppShowcaseController) -> void:
 	_controller = controller
 	bind()
 	refresh()
@@ -51,49 +46,46 @@ func refresh() -> void:
 		return
 
 
-	if _library_controller.get_playlists().is_empty():
+	if _playlist_controller.get_playlists().is_empty():
 		playlist_hero_mark_label.text = tr("music_app.playlist.favorites_mark")
 		playlist_hero_title_label.text = tr("music_app.playlist.favorites_title")
-		playlist_hero_count_label.text = _library_controller.format_total_track_count(0)
+		playlist_hero_count_label.text = _playlist_controller.format_total_track_count(0)
 		_sync_song_rows(0)
 		return
 
-	var playlist: PlaylistDataType = _library_controller.get_selected_playlist()
-	var tracks: Array[int] = _library_controller.get_selected_playlist_track_indices()
+	var playlist: PlaylistData = _playlist_controller.get_selected_playlist()
+	var tracks: Array[int] = _playlist_controller.get_selected_playlist_track_indices()
 
 	_sync_song_rows(tracks.size())
-	playlist_hero_title_label.text = _library_controller.get_playlist_display_title(playlist)
-	playlist_hero_count_label.text = _library_controller.format_total_track_count(playlist.count)
-	playlist_hero_mark_label.text = _library_controller.get_playlist_display_mark(playlist)
+	playlist_hero_title_label.text = _playlist_controller.get_playlist_display_title(playlist)
+	playlist_hero_count_label.text = _playlist_controller.format_total_track_count(playlist.count)
+	playlist_hero_mark_label.text = _playlist_controller.get_playlist_display_mark(playlist)
 
 	for index in song_rows.size():
 		var track_index: int = tracks[index]
-		var track: TrackDataType = _library_controller.get_track(track_index)
+		var track: TrackData = _playlist_controller.get_track(track_index)
 		song_rows[index].configure(index, track)
-
-func open_selected_playlist() -> void:
-	_library_controller.show_popup(PopupRegistryType.PopupId.MUSIC_APP_PLAYLIST)
 
 func close_page() -> void:
 	close_popup()
 
 func _play_playlist_from_start() -> void:
-	_library_controller.play_selected_playlist_from_start()
+	_playlist_controller.play_selected_playlist_from_start()
 
 func _select_song_from_playlist(slot_index: int) -> void:
-	_library_controller.play_selected_playlist_track(slot_index)
+	_playlist_controller.play_selected_playlist_track(slot_index)
 
 func _create_playlist_from_current() -> void:
-	_library_controller.create_playlist_from_current()
+	_playlist_controller.create_playlist_from_current()
 
 func _sync_song_rows(target_size: int) -> void:
 	while song_rows.size() < target_size:
-		var row := PLAYLIST_SONG_ROW_SCENE.instantiate() as MusicAppPlaylistSongRowType
+		var row := PLAYLIST_SONG_ROW_SCENE.instantiate() as MusicAppPlaylistSongRow
 		song_list.add_child(row)
 		song_list.move_child(row, song_bottom_space.get_index())
 		row.play_requested.connect(_select_song_from_playlist)
 		song_rows.append(row)
 
 	while song_rows.size() > target_size:
-		var row: MusicAppPlaylistSongRowType = song_rows.pop_back()
+		var row: MusicAppPlaylistSongRow = song_rows.pop_back()
 		row.queue_free()

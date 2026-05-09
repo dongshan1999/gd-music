@@ -1,7 +1,7 @@
 class_name MusicAppPlaylistSongRow
 extends Panel
 
-const TrackDataType := preload("res://scripts/save/music/track_data.gd")
+const MusicAppScriptPathsType := preload("res://scripts/constants/music_app_script_paths.gd")
 
 signal play_requested(index: int)
 signal more_requested(index: int)
@@ -31,7 +31,7 @@ func setup() -> void:
 	_more_button.pressed.connect(_on_more_pressed)
 	_play_button.pressed.connect(_on_play_pressed)
 
-func configure(slot_index: int, track: TrackDataType) -> void:
+func configure(slot_index: int, track: TrackData) -> void:
 	setup()
 	_slot_index = slot_index
 	_index_label.text = str(slot_index + 1)

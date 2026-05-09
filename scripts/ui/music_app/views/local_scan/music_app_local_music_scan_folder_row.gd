@@ -1,6 +1,8 @@
 class_name MusicAppLocalMusicScanFolderRow
 extends Panel
 
+const MusicAppUiSymbolsType := preload("res://scripts/constants/music_app_ui_symbols.gd")
+
 signal open_requested(path: String)
 signal selection_toggled(path: String, selected: bool)
 
@@ -26,7 +28,7 @@ func configure(folder_path: String, display_name: String, selected: bool) -> voi
 	setup()
 	_folder_path = folder_path
 	_selected = selected
-	_folder_button.text = "📁 %s" % display_name
+	_folder_button.text = "%s %s" % [MusicAppUiSymbolsType.FOLDER, display_name]
 	_toggle_button.text = "[x]" if _selected else "[ ]"
 
 func _on_open_pressed() -> void:
