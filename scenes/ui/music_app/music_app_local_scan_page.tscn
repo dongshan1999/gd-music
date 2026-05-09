@@ -1,6 +1,6 @@
 [gd_scene format=3 uid="uid://6xsr1dl3o4fh"]
 
-[ext_resource type="Script" uid="uid://bxlxk77s8dtmi" path="res://scripts/ui/music_app/modules/music_app_local_music_scan_module.gd" id="8_local_scan_script"]
+[ext_resource type="Script" path="res://scripts/ui/music_app/views/local_scan/music_app_local_scan_view.gd" id="8_local_scan_script"]
 [ext_resource type="Script" path="res://dx/runtime/scripts/managers/localization/localize_comp.gd" id="999_localize_comp"]
 
 [node name="LocalScanPage" type="Control" unique_id=767850004]

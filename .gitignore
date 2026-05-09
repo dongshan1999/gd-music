@@ -2,3 +2,5 @@
 .godot/
 /android/
 *.translation
+plugin_host/node_modules/
+plugin_host/data/

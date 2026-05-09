@@ -1,9 +1,10 @@
-class_name MusicAppHomeModule
+class_name MusicAppHomeView
 extends "res://dx/runtime/scripts/managers/popup/popup_view.gd"
 
-const HomeFeatureCardType = preload("res://scripts/ui/music_app/modules/music_app_home_feature_card.gd")
+const HomeFeatureCardType = preload("res://scripts/ui/music_app/views/home/music_app_home_feature_card.gd")
 const MusicAppShowcaseControllerType := preload("res://scripts/ui/music_app/music_app_showcase.gd")
-const MusicAppHomePlaylistRowType := preload("res://scripts/ui/music_app/modules/music_app_home_playlist_row.gd")
+const MusicAppLibraryControllerType := preload("res://scripts/ui/music_app/controllers/music_app_library_controller.gd")
+const MusicAppHomePlaylistRowType := preload("res://scripts/ui/music_app/views/home/music_app_home_playlist_row.gd")
 const PlaylistDataType := preload("res://scripts/save/music/playlist_data.gd")
 const PopupRegistryType := preload("res://dx/runtime/scripts/managers/popup/popup_registry.gd")
 const HOME_PLAYLIST_ROW_SCENE := preload("res://scenes/ui/music_app/home_playlist_row.tscn")
@@ -18,6 +19,7 @@ const FEATURE_CARD_KEYS := [
 const FEATURE_CARD_TARGETS := [0, 1, 0, FEATURE_ACTION_LOCAL_MUSIC]
 
 var _controller: MusicAppShowcaseControllerType
+var _library_controller: MusicAppLibraryControllerType = MusicAppLibraryControllerType.new()
 var _is_bound := false
 
 @onready var search_bar: Panel = %SearchBar
@@ -38,6 +40,7 @@ var home_playlist_rows: Array[MusicAppHomePlaylistRowType] = []
 func setup(controller: MusicAppShowcaseControllerType) -> void:
 	_controller = controller
 	bind()
+	refresh()
 
 func bind() -> void:
 	if _is_bound:
@@ -49,14 +52,26 @@ func bind() -> void:
 
 	new_playlist_button.pressed.connect(_create_playlist_from_current)
 	import_button.pressed.connect(_open_local_music)
+	search_bar.gui_input.connect(_on_search_bar_gui_input)
+	search_icon_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	search_prompt_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	if not _controller.state_changed.is_connected(refresh):
+		_controller.state_changed.connect(refresh)
 
 func refresh() -> void:
 	if _controller == null:
 		return
 
 	search_icon_label.text = "🔎"
-	my_playlists_label.text = tr("music_app.home.my_playlists_count").format({"count": _controller._playlists.size()})
-	favorite_playlists_label.text = tr("music_app.home.favorite_playlists_count").format({"count": 0})
+	var playlists := _library_controller.get_playlists()
+	my_playlists_label.text = tr("music_app.home.my_playlists_count").format({"count": playlists.size()})
+	var favorite_count := 0
+	var favorite_index := _library_controller.find_favorite_playlist_index()
+	if favorite_index >= 0:
+		favorite_count = playlists[favorite_index].count
+	favorite_playlists_label.text = tr("music_app.home.favorite_playlists_count").format(
+		{"count": favorite_count}
+	)
 
 	var feature_count := mini(feature_cards.size(), FEATURE_CARD_KEYS.size())
 	for index in feature_count:
@@ -64,27 +79,20 @@ func refresh() -> void:
 
 	_sync_home_playlist_rows()
 	for index in home_playlist_rows.size():
-		var playlist: PlaylistDataType = _controller._playlists[index]
+		var playlist: PlaylistDataType = playlists[index]
 		home_playlist_rows[index].configure(
 			index,
-			_controller._get_playlist_display_mark(playlist),
-			_controller._get_playlist_display_title(playlist),
+			_library_controller.get_playlist_display_mark(playlist),
+			_library_controller.get_playlist_display_title(playlist),
 			playlist.count,
 			playlist.deletable
 		)
 
 func _open_playlist(index: int) -> void:
-	if _controller._playlists.is_empty():
-		return
-
-	_controller._selected_playlist_index = clampi(index, 0, _controller._playlists.size() - 1)
-	_controller._refresh_home_page()
-	_controller._refresh_playlist_page()
-	_controller._save_app_state()
-	_show_popup(PopupRegistryType.PopupId.MUSIC_APP_PLAYLIST)
+	_library_controller.open_playlist(index)
 
 func _sync_home_playlist_rows() -> void:
-	var target_size := _controller._playlists.size()
+	var target_size := _library_controller.get_playlists().size()
 
 	while home_playlist_rows.size() < target_size:
 		var row := HOME_PLAYLIST_ROW_SCENE.instantiate() as MusicAppHomePlaylistRowType
@@ -108,41 +116,21 @@ func _on_feature_pressed(index: int) -> void:
 	_open_playlist(target_playlist)
 
 func _create_playlist_from_current() -> void:
-	if not _controller._try_create_playlist_from_current():
-		return
-
-	_controller._refresh_home_page()
-	_controller._refresh_playlist_page()
-	_controller._save_app_state()
+	_library_controller.create_playlist_from_current()
 
 func _open_local_music() -> void:
-	var popup = _show_popup(PopupRegistryType.PopupId.MUSIC_APP_LOCAL_MUSIC)
+	var popup = _library_controller.show_popup(PopupRegistryType.PopupId.MUSIC_APP_LOCAL_MUSIC)
 	if popup != null and popup.has_method("open_page"):
 		popup.open_page()
 
+func _open_plugin_browser() -> void:
+	_library_controller.show_popup(PopupRegistryType.PopupId.MUSIC_APP_PLUGIN_BROWSER)
+
+func _on_search_bar_gui_input(event: InputEvent) -> void:
+	if event is InputEventMouseButton:
+		var mouse_event := event as InputEventMouseButton
+		if mouse_event.button_index == MOUSE_BUTTON_LEFT and mouse_event.pressed:
+			_open_plugin_browser()
+
 func _delete_playlist(index: int) -> void:
-	if index < 0 or index >= _controller._playlists.size():
-		return
-
-	var playlist: PlaylistDataType = _controller._playlists[index]
-	if not playlist.deletable:
-		return
-
-	if index < _controller._selected_playlist_index:
-		_controller._selected_playlist_index -= 1
-
-	_controller._playlists.remove_at(index)
-	_controller._selected_playlist_index = clampi(_controller._selected_playlist_index, 0, maxi(_controller._playlists.size() - 1, 0))
-	_controller._refresh_home_page()
-	_controller._refresh_playlist_page()
-	_controller._save_app_state()
-
-func _show_popup(popup_id: int):
-	var manager = DX.popup
-	if manager == null:
-		return null
-
-	var popup = manager.show(popup_id)
-	if popup != null and popup.has_method("setup"):
-		popup.setup(_controller)
-	return popup
+	_library_controller.delete_playlist(index)

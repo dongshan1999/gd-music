@@ -19,10 +19,39 @@ const CountdownManagerScript := preload("res://dx/runtime/scripts/managers/count
 const PoolManagerScript := preload("res://dx/runtime/scripts/managers/pool_manager.gd")
 const SaveManagerScript := preload("res://dx/runtime/scripts/managers/save/save_manager.gd")
 const LocalizationManagerScript := preload("res://dx/runtime/scripts/managers/localization/localization_manager.gd")
+const MusicPluginManagerScript := preload("res://dx/runtime/scripts/managers/music_plugin_manager.gd")
 
 var popup:
 	get:
 		return get_manager(&"popup")
+
+var time:
+	get:
+		return get_manager(&"time")
+
+var logger:
+	get:
+		return get_manager(&"logger")
+
+var signals:
+	get:
+		return get_manager(&"signal")
+
+var data:
+	get:
+		return get_manager(&"data")
+
+var background_state:
+	get:
+		return get_manager(&"background_state")
+
+var countdown:
+	get:
+		return get_manager(&"countdown")
+
+var pool:
+	get:
+		return get_manager(&"pool")
 
 var save:
 	get:
@@ -32,15 +61,9 @@ var localization:
 	get:
 		return get_manager(&"localization")
 
-var time = TimeManagerScript.new()
-var logger = LoggerScript.new()
-var signals = SignalManagerScript.new()
-var data = DataManagerScript.new()
-var background_state = BackgroundStateManagerScript.new()
-var countdown = CountdownManagerScript.new()
-var pool = PoolManagerScript.new()
-var save_manager = SaveManagerScript.new()
-var localization_manager = LocalizationManagerScript.new()
+var music_plugins:
+	get:
+		return get_manager(&"music_plugins")
 
 var _manager_map: Dictionary = {}
 var _manager_order: Array = []
@@ -108,15 +131,16 @@ func _bootstrap() -> void:
 	if not _manager_order.is_empty():
 		return
 
-	register_manager(&"time", time)
-	register_manager(&"logger", logger)
-	register_manager(&"signal", signals)
-	register_manager(&"data", data)
-	register_manager(&"background_state", background_state)
-	register_manager(&"countdown", countdown)
-	register_manager(&"pool", pool)
-	register_manager(&"save", save_manager)
-	register_manager(&"localization", localization_manager)
+	register_manager(&"time", TimeManagerScript.new())
+	register_manager(&"logger", LoggerScript.new())
+	register_manager(&"signal", SignalManagerScript.new())
+	register_manager(&"data", DataManagerScript.new())
+	register_manager(&"background_state", BackgroundStateManagerScript.new())
+	register_manager(&"countdown", CountdownManagerScript.new())
+	register_manager(&"pool", PoolManagerScript.new())
+	register_manager(&"save", SaveManagerScript.new())
+	register_manager(&"localization", LocalizationManagerScript.new())
+	register_manager(&"music_plugins", MusicPluginManagerScript.new())
 
 func _register_popup_manager() -> void:
 	if has_manager(&"popup"):

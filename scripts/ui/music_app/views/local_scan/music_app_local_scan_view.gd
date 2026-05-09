@@ -1,11 +1,13 @@
-class_name MusicAppLocalMusicScanModule
+class_name MusicAppLocalScanView
 extends "res://dx/runtime/scripts/managers/popup/popup_view.gd"
 
+const MusicAppLocalScanControllerType := preload("res://scripts/ui/music_app/controllers/music_app_local_scan_controller.gd")
 const MusicAppShowcaseControllerType := preload("res://scripts/ui/music_app/music_app_showcase.gd")
-const MusicAppLocalMusicScanFolderRowType := preload("res://scripts/ui/music_app/modules/music_app_local_music_scan_folder_row.gd")
+const MusicAppLocalMusicScanFolderRowType := preload("res://scripts/ui/music_app/views/local_scan/music_app_local_music_scan_folder_row.gd")
 const SCAN_FOLDER_ROW_SCENE := preload("res://scenes/ui/music_app/local_music_scan_folder_row.tscn")
 
 var _controller: MusicAppShowcaseControllerType
+var _local_scan_controller: MusicAppLocalScanControllerType = MusicAppLocalScanControllerType.new()
 var _is_bound := false
 var _root_path := ""
 var _current_path := ""
@@ -24,6 +26,7 @@ var _folder_rows: Array[MusicAppLocalMusicScanFolderRowType] = []
 func setup(controller: MusicAppShowcaseControllerType) -> void:
 	_controller = controller
 	bind()
+	refresh()
 
 func bind() -> void:
 	if _is_bound:
@@ -33,6 +36,8 @@ func bind() -> void:
 	scan_back_button.pressed.connect(navigate_back)
 	scan_select_all_button.pressed.connect(_toggle_select_all)
 	start_scan_button.pressed.connect(_start_scan)
+	if not _controller.state_changed.is_connected(refresh):
+		_controller.state_changed.connect(refresh)
 
 func refresh() -> void:
 	if _controller == null:
@@ -41,12 +46,12 @@ func refresh() -> void:
 	scan_back_button.text = "←"
 
 	if _root_path.is_empty():
-		_root_path = _controller._get_scan_root_path()
+		_root_path = _local_scan_controller.get_scan_root_path()
 	if _current_path.is_empty():
 		_current_path = _root_path
 
-	_current_entries = _controller._list_scan_directories(_current_path)
-	scan_path_label.text = _controller._get_scan_display_path(_current_path)
+	_current_entries = _local_scan_controller.list_scan_directories(_current_path)
+	scan_path_label.text = _local_scan_controller.get_scan_display_path(_current_path)
 	scan_hint_label.visible = _current_entries.is_empty()
 	_update_select_all_button_text()
 
@@ -59,13 +64,12 @@ func refresh() -> void:
 
 func open_page() -> void:
 	if _root_path.is_empty():
-		_root_path = _controller._get_scan_root_path()
+		_root_path = _local_scan_controller.get_scan_root_path()
 	_selected_paths.clear()
 	_current_path = _root_path
 	refresh()
 
 func close_page() -> void:
-	_controller._refresh_local_music_page()
 	close_popup()
 
 func navigate_back() -> void:
@@ -73,7 +77,7 @@ func navigate_back() -> void:
 		close_page()
 		return
 
-	_current_path = _controller._get_scan_parent_path(_current_path, _root_path)
+	_current_path = _local_scan_controller.get_scan_parent_path(_current_path, _root_path)
 	refresh()
 
 func _sync_rows(target_size: int) -> void:
@@ -128,27 +132,26 @@ func _start_scan() -> void:
 	for path in _selected_paths.keys():
 		target_paths.append(str(path))
 	if target_paths.is_empty():
-		if _controller._is_scan_virtual_root(_current_path):
-			_controller._show_common_alert(
+		if _local_scan_controller.is_scan_virtual_root(_current_path):
+			_local_scan_controller.show_common_alert(
 				tr("music_app.scan.select_folder_title"),
 				tr("music_app.scan.select_folder_message")
 			)
 			return
 		target_paths.append(_current_path)
 
-	var imported_count := _controller._scan_local_music_directories(target_paths)
+	var imported_count := _local_scan_controller.scan_local_music_directories(target_paths)
 	_selected_paths.clear()
-	_controller._refresh_local_music_page()
 
 	if imported_count <= 0:
-		_controller._show_common_alert(
+		_local_scan_controller.show_common_alert(
 			tr("music_app.scan.not_found_title"),
 			tr("music_app.scan.not_found_message")
 		)
 		refresh()
 		return
 
-	_controller._show_common_alert(
+	_local_scan_controller.show_common_alert(
 		tr("music_app.scan.complete_title"),
 		tr("music_app.scan.complete_message").format({"count": imported_count})
 	)
