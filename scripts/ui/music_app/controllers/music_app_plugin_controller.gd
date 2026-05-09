@@ -80,7 +80,8 @@ func import_music_plugin_search_results(
 	notify_state_changed()
 	save_app_state()
 	if autoplay_first:
-		_library_controller.select_track(imported_indices[0], true)
+		var start_slot := maxi(0, target_playlist.tracks.size() - imported_indices.size())
+		_library_controller.play_track_list(target_playlist.tracks, start_slot, true)
 	return imported_indices
 
 func resolve_track_plugin_source(track_index: int, quality: String = "standard") -> Dictionary:

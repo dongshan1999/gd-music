@@ -93,7 +93,7 @@ func _play_track(track_index: int) -> void:
 	_hide_menu()
 	if track_index < 0 or track_index >= _visible_track_indices.size():
 		return
-	if _library_controller.select_track(_visible_track_indices[track_index], true):
+	if _library_controller.play_track_list(_visible_track_indices, track_index, true):
 		_library_controller.show_popup(PopupRegistryType.PopupId.MUSIC_APP_PLAYER)
 
 func _toggle_menu() -> void:

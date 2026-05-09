@@ -29,6 +29,10 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 
+[node name="AudioPlayer" type="AudioStreamPlayer" parent="." unique_id=2045941312]
+unique_name_in_owner = true
+bus = &"Master"
+
 [node name="PhoneShell" type="Panel" parent="PreviewRoot" unique_id=1571802138]
 unique_name_in_owner = true
 clip_contents = true

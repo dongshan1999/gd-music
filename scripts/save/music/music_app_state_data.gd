@@ -4,9 +4,10 @@ extends "res://dx/runtime/scripts/serializer/json_object.gd"
 const TrackDataType := preload("res://scripts/save/music/track_data.gd")
 const PlaylistDataType := preload("res://scripts/save/music/playlist_data.gd")
 
-const SAVE_VERSION := 1
+const SAVE_VERSION := 2
 const DEFAULT_SELECTED_PLAYLIST_INDEX := 0
 const DEFAULT_SELECTED_TRACK_INDEX := 0
+const DEFAULT_PLAYBACK_QUEUE_INDEX := 0
 const DEFAULT_ELAPSED_SECONDS := 0
 const DEFAULT_IS_PLAYING := false
 const DEFAULT_LIKED_TRACKS := {}
@@ -17,6 +18,8 @@ var tracks: Array[TrackDataType] = []
 var playlists: Array[PlaylistDataType] = []
 var selected_playlist_index: int = DEFAULT_SELECTED_PLAYLIST_INDEX
 var selected_track_index: int = DEFAULT_SELECTED_TRACK_INDEX
+var playback_track_indices: Array[int] = []
+var playback_queue_index: int = DEFAULT_PLAYBACK_QUEUE_INDEX
 var elapsed_seconds: int = DEFAULT_ELAPSED_SECONDS
 var is_playing: bool = DEFAULT_IS_PLAYING
 var liked_tracks: Dictionary = {}
@@ -52,6 +55,8 @@ func _init() -> void:
 	playlists = _build_default_playlists()
 	selected_playlist_index = DEFAULT_SELECTED_PLAYLIST_INDEX
 	selected_track_index = DEFAULT_SELECTED_TRACK_INDEX
+	playback_track_indices = []
+	playback_queue_index = DEFAULT_PLAYBACK_QUEUE_INDEX
 	elapsed_seconds = DEFAULT_ELAPSED_SECONDS
 	is_playing = DEFAULT_IS_PLAYING
 	liked_tracks = DEFAULT_LIKED_TRACKS.duplicate(true)
@@ -63,6 +68,8 @@ func normalize() -> void:
 	_normalize_playlists()
 	selected_playlist_index = _clamp_index(selected_playlist_index, playlists.size())
 	selected_track_index = _clamp_index(selected_track_index, tracks.size())
+	playback_track_indices = _normalize_playback_track_indices(playback_track_indices)
+	playback_queue_index = _clamp_index(playback_queue_index, playback_track_indices.size())
 	elapsed_seconds = maxi(0, elapsed_seconds)
 	liked_tracks = _normalize_liked_tracks(liked_tracks)
 
@@ -70,6 +77,8 @@ func normalize() -> void:
 		elapsed_seconds = 0
 		is_playing = false
 	else:
+		if not playback_track_indices.is_empty():
+			selected_track_index = playback_track_indices[playback_queue_index]
 		elapsed_seconds = clampi(elapsed_seconds, 0, tracks[selected_track_index].duration)
 
 func _normalize_tracks() -> void:
@@ -108,6 +117,14 @@ func _normalize_liked_tracks(source_liked_tracks: Dictionary) -> Dictionary:
 	var result := {}
 	for key in source_liked_tracks:
 		result[str(key)] = bool(source_liked_tracks[key])
+	return result
+
+func _normalize_playback_track_indices(source_track_indices: Array) -> Array[int]:
+	var result: Array[int] = []
+	for track_index in source_track_indices:
+		if track_index < 0 or track_index >= tracks.size():
+			continue
+		result.append(track_index)
 	return result
 
 func _clamp_index(index: int, size: int) -> int:

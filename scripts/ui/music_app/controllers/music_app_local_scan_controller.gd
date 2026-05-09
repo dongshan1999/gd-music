@@ -7,10 +7,7 @@ const WINDOWS_SCAN_ROOT := "windows://drives"
 const AUDIO_EXTENSIONS := {
 	"mp3": true,
 	"wav": true,
-	"ogg": true,
-	"flac": true,
-	"m4a": true,
-	"aac": true
+	"ogg": true
 }
 
 var _library_controller: MusicAppLibraryControllerType = MusicAppLibraryControllerType.new()
