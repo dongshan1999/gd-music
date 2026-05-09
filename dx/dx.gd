@@ -1,3 +1,4 @@
+class_name DX_DXRoot
 extends Node
 
 const SIGNAL_APP_PAUSE := &"app/pause"

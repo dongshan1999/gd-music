@@ -2,7 +2,6 @@ class_name MusicAppPluginBrowserView
 extends "res://dx/runtime/scripts/managers/popup/popup_view.gd"
 
 const MusicAppScriptPathsType := preload("res://scripts/constants/music_app_script_paths.gd")
-const MusicPluginManagerType := preload("res://dx/runtime/scripts/managers/music_plugin_manager.gd")
 
 var _controller: MusicAppShowcaseController
 var _plugin_controller: MusicAppPluginController = MusicAppPluginController.new()
@@ -226,7 +225,7 @@ func _normalize_dictionary_array(value: Variant) -> Array[Dictionary]:
 			result.append(item)
 	return result
 
-func _get_plugin_manager() -> MusicPluginManagerType:
+func _get_plugin_manager() -> DX_MusicPluginManager:
 	if _plugin_controller == null:
 		return null
 	return _plugin_controller.get_music_plugin_manager()

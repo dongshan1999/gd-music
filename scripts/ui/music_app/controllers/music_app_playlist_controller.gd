@@ -1,8 +1,6 @@
 class_name MusicAppPlaylistController
 extends "res://scripts/ui/music_app/controllers/music_app_controller_base.gd"
 
-const PopupRegistryType := preload("res://dx/runtime/scripts/managers/popup/popup_registry.gd")
-
 var _playback_controller: MusicAppPlaybackController = MusicAppPlaybackController.new()
 
 ## 返回当前全部歌单列表。
@@ -94,7 +92,7 @@ func _play_track_list(track_indices: Array[int], start_slot_index: int, autoplay
 		return false
 	if not _playback_controller.play_queue_index(_playback_controller.get_playback_queue_index(), autoplay):
 		return false
-	show_popup(PopupRegistryType.PopupId.MUSIC_APP_PLAYER)
+	show_popup(DX_PopupRegistry.PopupId.MUSIC_APP_PLAYER)
 	return true
 
 ## 生成一个新的不重复歌单标题。

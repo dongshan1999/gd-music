@@ -1,3 +1,4 @@
+class_name DX_DateTime
 extends RefCounted
 
 const SCRIPT_PATH := "res://dx/runtime/scripts/utility/datetime.gd"

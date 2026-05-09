@@ -1,3 +1,4 @@
+class_name DX_PopupView
 extends Control
 
 enum PopupLayer {

@@ -1,8 +1,6 @@
-class_name MusicPluginManager
+class_name DX_MusicPluginManager
 extends RefCounted
 
-const MusicPluginSettingsDataType := preload("res://scripts/save/music/music_plugin_settings_data.gd")
-const AppSaveManagerType := preload("res://dx/runtime/scripts/managers/save/save_manager.gd")
 const BUNDLED_SERVER_PATH := "res://plugin_host/src/server.js"
 const BUNDLED_NODE_MODULES_PATH := "res://plugin_host/node_modules"
 
@@ -15,17 +13,17 @@ func in_ready() -> void:
 func in_quit() -> void:
 	_stop_local_host()
 
-func get_settings() -> MusicPluginSettingsDataType:
-	var save_manager := dx.save as AppSaveManagerType
+func get_settings() -> MusicPluginSettingsData:
+	var save_manager := dx.save as DX_SaveManager
 	if save_manager == null or save_manager.data == null:
-		return MusicPluginSettingsDataType.new()
+		return MusicPluginSettingsData.new()
 	if save_manager.data.music_plugins == null:
-		save_manager.data.music_plugins = MusicPluginSettingsDataType.new()
+		save_manager.data.music_plugins = MusicPluginSettingsData.new()
 	save_manager.data.music_plugins.normalize()
 	return save_manager.data.music_plugins
 
 func save_settings() -> void:
-	var save_manager := dx.save as AppSaveManagerType
+	var save_manager := dx.save as DX_SaveManager
 	if save_manager != null:
 		save_manager.save_data()
 

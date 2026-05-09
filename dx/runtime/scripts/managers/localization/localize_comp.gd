@@ -1,4 +1,5 @@
 @tool
+class_name DX_LocalizeComp
 extends Node
 
 @export_placeholder("music_app.home.search_prompt")

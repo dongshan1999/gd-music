@@ -1,3 +1,4 @@
+class_name DX_CountdownInfo
 extends RefCounted
 
 enum CountdownStatus {

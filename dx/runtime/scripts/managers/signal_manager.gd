@@ -1,3 +1,4 @@
+class_name DX_SignalManager
 extends RefCounted
 
 var dx: Node

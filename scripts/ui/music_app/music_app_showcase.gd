@@ -6,13 +6,9 @@ signal state_changed
 static var instance = null
 
 const MusicAppScriptPathsType := preload("res://scripts/constants/music_app_script_paths.gd")
-const AppSaveManagerType := preload("res://dx/runtime/scripts/managers/save/save_manager.gd")
-const PopupRegistryType := preload("res://dx/runtime/scripts/managers/popup/popup_registry.gd")
-const PopupManagerType := preload("res://dx/runtime/scripts/managers/popup/popup_manager.gd")
-const PopupViewType := preload("res://dx/runtime/scripts/managers/popup/popup_view.gd")
 
-const HOME_POPUP_ID := PopupRegistryType.PopupId.MUSIC_APP_HOME
-const TOAST_POPUP_ID := PopupRegistryType.PopupId.COMMON_TOAST
+const HOME_POPUP_ID := DX_PopupRegistry.PopupId.MUSIC_APP_HOME
+const TOAST_POPUP_ID := DX_PopupRegistry.PopupId.COMMON_TOAST
 const SUPPORTED_AUDIO_LOADERS := ["mp3", "ogg", "wav"]
 const REMOTE_STREAM_TIMEOUT_SECONDS := 20.0
 
@@ -28,10 +24,10 @@ var _loaded_track_key := ""
 
 var _state: MusicAppStateData:
 	get:
-		var save_manager := DX.save as AppSaveManagerType
+		var save_manager := DX.save as DX_SaveManager
 		return save_manager.data.music if save_manager != null else _fallback_state
 	set(value):
-		var save_manager := DX.save as AppSaveManagerType
+		var save_manager := DX.save as DX_SaveManager
 		if save_manager != null:
 			save_manager.data.music = value
 		else:
@@ -178,7 +174,7 @@ func _get_current_duration() -> int:
 
 ## 将当前音乐状态写回存档管理器。
 func _save_app_state() -> void:
-	var save_manager := DX.save as AppSaveManagerType
+	var save_manager := DX.save as DX_SaveManager
 	if save_manager != null:
 		save_manager.save_data()
 
@@ -189,7 +185,7 @@ func _show_common_alert(title: String, message: String) -> void:
 		push_error("Popup autoload is not available.")
 		return
 
-	var popup: PopupViewType = popup_manager.show(PopupRegistryType.PopupId.COMMON_DIALOG)
+	var popup: DX_PopupView = popup_manager.show(DX_PopupRegistry.PopupId.COMMON_DIALOG)
 	if popup is CommonDialogPopup:
 		var dialog: CommonDialogPopup = popup as CommonDialogPopup
 		dialog.show_alert(title, message)
@@ -499,8 +495,8 @@ func _on_audio_finished() -> void:
 	MusicAppPlaybackController.new(self).step_queue(1, true)
 
 ## 返回全局弹窗管理器。
-func _get_popup_manager() -> PopupManagerType:
-	return DX.popup as PopupManagerType
+func _get_popup_manager() -> DX_PopupManager:
+	return DX.popup as DX_PopupManager
 
 ## 按弹窗 ID 获取已创建的弹窗实例。
 func _get_popup(popup_id: int):
@@ -537,7 +533,7 @@ func _show_toast(message: String) -> void:
 	if popup_manager == null:
 		return
 
-	var popup: PopupViewType = popup_manager.show(TOAST_POPUP_ID)
+	var popup: DX_PopupView = popup_manager.show(TOAST_POPUP_ID)
 	if popup is CommonToastPopup:
 		var toast_popup := popup as CommonToastPopup
 		toast_popup.show_message(message, 104.0 if mini_player.visible else 28.0)

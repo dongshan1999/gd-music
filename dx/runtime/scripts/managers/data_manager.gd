@@ -1,3 +1,4 @@
+class_name DX_DataManager
 extends RefCounted
 
 var dx: Node
