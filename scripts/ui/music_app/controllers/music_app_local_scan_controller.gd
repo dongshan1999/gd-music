@@ -92,7 +92,7 @@ func list_windows_drive_entries() -> Array[Dictionary]:
 
 ## 递归扫描所选目录并导入新的本地音乐曲目。
 func scan_local_music_directories(paths: Array[String]) -> int:
-	var tracks := get_tracks_ref()
+	var tracks: Array[TrackData] = get_tracks_ref()
 	var existing_paths := {}
 	for track in tracks:
 		if track == null or track.file_path.is_empty():

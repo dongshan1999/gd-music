@@ -4,7 +4,7 @@ extends "res://dx/runtime/scripts/managers/popup/popup_view.gd"
 const MusicAppScriptPathsType := preload("res://scripts/constants/music_app_script_paths.gd")
 
 var _controller: MusicAppShowcaseController
-var _plugin_controller: MusicAppPluginController = MusicAppPluginController.new()
+var _plugin_controller: MusicAppPluginController
 var _is_bound := false
 var _plugins: Array[Dictionary] = []
 var _search_results: Array[Dictionary] = []
@@ -34,6 +34,7 @@ func _ready() -> void:
 
 func setup(controller: MusicAppShowcaseController) -> void:
 	_controller = controller
+	_plugin_controller = MusicAppPluginController.new(controller)
 	bind()
 	refresh()
 	_request_reload_plugins()

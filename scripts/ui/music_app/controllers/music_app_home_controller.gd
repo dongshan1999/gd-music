@@ -7,11 +7,8 @@ func get_playlists() -> Array:
 
 ## 查找系统“我喜欢”歌单在当前歌单列表中的索引。
 func find_favorite_playlist_index() -> int:
-	var playlists := get_playlists_ref()
-	for index in playlists.size():
-		if MusicAppStateData.is_system_favorite_playlist(playlists[index]):
-			return index
-	return -1
+	var playlist_state_controller = get_playlist_state_controller()
+	return playlist_state_controller.find_favorite_playlist_index() if playlist_state_controller != null else -1
 
 ## 返回歌单在首页卡片上的显示标题。
 func get_playlist_display_title(playlist) -> String:
@@ -30,7 +27,7 @@ func get_playlist_display_mark(playlist) -> String:
 
 ## 创建一个新的空歌单，并切换为当前选中歌单。
 func create_playlist_from_current() -> bool:
-	var playlists := get_playlists_ref()
+	var playlists: Array[PlaylistData] = get_playlists_ref()
 	var title := _next_playlist_title()
 	var playlist := PlaylistData.new()
 	playlist.title = title
@@ -46,7 +43,7 @@ func create_playlist_from_current() -> bool:
 
 ## 删除指定索引的歌单，并修正当前选中项。
 func delete_playlist(index: int) -> bool:
-	var playlists := get_playlists_ref()
+	var playlists: Array[PlaylistData] = get_playlists_ref()
 	if index < 0 or index >= playlists.size():
 		return false
 
@@ -91,7 +88,7 @@ func open_feature_card(index: int) -> bool:
 
 ## 选中指定歌单并同步状态。
 func _select_playlist(index: int) -> bool:
-	var playlists := get_playlists_ref()
+	var playlists: Array[PlaylistData] = get_playlists_ref()
 	if playlists.is_empty():
 		return false
 	set_selected_playlist_index(clampi(index, 0, playlists.size() - 1))

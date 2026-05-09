@@ -1,15 +1,13 @@
 class_name MusicAppPlaylistController
 extends "res://scripts/ui/music_app/controllers/music_app_controller_base.gd"
 
-var _playback_controller: MusicAppPlaybackController = MusicAppPlaybackController.new()
-
 ## 返回当前全部歌单列表。
 func get_playlists() -> Array:
 	return get_playlists_ref()
 
 ## 返回当前选中的歌单对象。
 func get_selected_playlist():
-	var playlists := get_playlists_ref()
+	var playlists: Array[PlaylistData] = get_playlists_ref()
 	var playlist_index := get_selected_playlist_index()
 	if playlist_index < 0 or playlist_index >= playlists.size():
 		return null
@@ -21,14 +19,15 @@ func get_selected_playlist_track_indices() -> Array[int]:
 
 ## 根据全量曲目索引获取曲目对象。
 func get_track(track_index: int):
-	var tracks := get_tracks_ref()
+	var tracks: Array[TrackData] = get_tracks_ref()
 	if track_index < 0 or track_index >= tracks.size():
 		return null
 	return tracks[track_index]
 
 ## 返回歌单详情页展示标题。
 func get_playlist_display_title(playlist) -> String:
-	if MusicAppStateData.is_system_favorite_playlist(playlist):
+	var playlist_state_controller = get_playlist_state_controller()
+	if playlist_state_controller != null and MusicAppStateData.is_system_favorite_playlist(playlist):
 		return tr("music_app.playlist.favorites_title")
 	return playlist.title
 
@@ -61,7 +60,7 @@ func play_selected_playlist_track(slot_index: int) -> bool:
 
 ## 创建一个新的空歌单并切换到它。
 func create_playlist_from_current() -> bool:
-	var playlists := get_playlists_ref()
+	var playlists: Array[PlaylistData] = get_playlists_ref()
 	var title := _next_playlist_title()
 	var playlist := PlaylistData.new()
 	playlist.title = title
@@ -77,7 +76,7 @@ func create_playlist_from_current() -> bool:
 
 ## 返回指定歌单中的曲目索引列表副本。
 func _get_playlist_track_indices(index: int) -> Array[int]:
-	var playlists := get_playlists_ref()
+	var playlists: Array[PlaylistData] = get_playlists_ref()
 	if index < 0 or index >= playlists.size():
 		return []
 
@@ -88,9 +87,12 @@ func _get_playlist_track_indices(index: int) -> Array[int]:
 
 ## 按给定顺序构建播放队列并跳到目标槽位。
 func _play_track_list(track_indices: Array[int], start_slot_index: int, autoplay: bool = true) -> bool:
-	if not _playback_controller.set_playback_queue(track_indices, start_slot_index):
+	var playback_controller = get_playback_controller()
+	if playback_controller == null:
 		return false
-	if not _playback_controller.play_queue_index(_playback_controller.get_playback_queue_index(), autoplay):
+	if not playback_controller.set_playback_queue(track_indices, start_slot_index):
+		return false
+	if not playback_controller.play_queue_index(playback_controller.get_playback_queue_index(), autoplay):
 		return false
 	show_popup(DX_PopupRegistry.PopupId.MUSIC_APP_PLAYER)
 	return true
