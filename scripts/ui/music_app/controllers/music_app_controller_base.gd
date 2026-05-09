@@ -17,6 +17,10 @@ func get_tracks_ref() -> Array:
 	var resolved_controller := get_showcase()
 	return resolved_controller._tracks if resolved_controller != null else []
 
+func get_playback_track_indices_ref() -> Array:
+	var resolved_controller := get_showcase()
+	return resolved_controller._playback_track_indices if resolved_controller != null else []
+
 func get_playlists_ref() -> Array:
 	var resolved_controller := get_showcase()
 	return resolved_controller._playlists if resolved_controller != null else []
@@ -38,6 +42,15 @@ func set_selected_track_index(value: int) -> void:
 	var resolved_controller := get_showcase()
 	if resolved_controller != null:
 		resolved_controller._selected_track_index = value
+
+func get_playback_queue_index() -> int:
+	var resolved_controller := get_showcase()
+	return resolved_controller._playback_queue_index if resolved_controller != null else 0
+
+func set_playback_queue_index(value: int) -> void:
+	var resolved_controller := get_showcase()
+	if resolved_controller != null:
+		resolved_controller._playback_queue_index = value
 
 func get_elapsed_seconds() -> int:
 	var resolved_controller := get_showcase()
@@ -75,6 +88,11 @@ func save_app_state() -> void:
 	var resolved_controller := get_showcase()
 	if resolved_controller != null:
 		resolved_controller._save_app_state()
+
+func request_audio_sync() -> void:
+	var resolved_controller := get_showcase()
+	if resolved_controller != null and resolved_controller.has_method("request_audio_sync"):
+		resolved_controller.request_audio_sync()
 
 func show_popup(popup_id: int):
 	var resolved_controller := get_showcase()
