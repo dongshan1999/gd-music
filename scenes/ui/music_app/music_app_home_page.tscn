@@ -1,8 +1,8 @@
 [gd_scene format=3 uid="uid://icxomk0v5mvw"]
 
-[ext_resource type="Script" uid="uid://b7ibq16q80ngu" path="res://scripts/ui/music_app/modules/music_app_home_module.gd" id="2_script"]
-[ext_resource type="PackedScene" uid="uid://dci3stsofj54o" path="res://scenes/ui/music_app/home_feature_card.tscn" id="6_feature_card"]
-[ext_resource type="Script" uid="uid://bym33i5tdjhtg" path="res://dx/runtime/scripts/managers/localization/localize_comp.gd" id="999_localize_comp"]
+[ext_resource type="Script" path="res://scripts/ui/music_app/views/home/music_app_home_view.gd" id="2_script"]
+[ext_resource type="PackedScene" path="res://scenes/ui/music_app/home_feature_card.tscn" id="6_feature_card"]
+[ext_resource type="Script" path="res://dx/runtime/scripts/managers/localization/localize_comp.gd" id="999_localize_comp"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_feature_card_panel"]
 bg_color = Color(0.192157, 0.192157, 0.2, 1)

@@ -1,12 +1,14 @@
-class_name MusicAppLocalMusicModule
+class_name MusicAppLocalMusicView
 extends "res://dx/runtime/scripts/managers/popup/popup_view.gd"
 
+const MusicAppLibraryControllerType := preload("res://scripts/ui/music_app/controllers/music_app_library_controller.gd")
 const MusicAppShowcaseControllerType := preload("res://scripts/ui/music_app/music_app_showcase.gd")
-const MusicAppLocalMusicRowType := preload("res://scripts/ui/music_app/modules/music_app_local_music_row.gd")
+const MusicAppLocalMusicRowType := preload("res://scripts/ui/music_app/views/local_music/music_app_local_music_row.gd")
 const PopupRegistryType := preload("res://dx/runtime/scripts/managers/popup/popup_registry.gd")
 const LOCAL_MUSIC_ROW_SCENE := preload("res://scenes/ui/music_app/local_music_row.tscn")
 
 var _controller: MusicAppShowcaseControllerType
+var _library_controller: MusicAppLibraryControllerType = MusicAppLibraryControllerType.new()
 var _is_bound := false
 var _visible_track_indices: Array[int] = []
 
@@ -28,6 +30,7 @@ var _rows: Array[MusicAppLocalMusicRowType] = []
 func setup(controller: MusicAppShowcaseControllerType) -> void:
 	_controller = controller
 	bind()
+	refresh()
 
 func bind() -> void:
 	if _is_bound:
@@ -41,6 +44,8 @@ func bind() -> void:
 	scan_music_button.pressed.connect(_open_scan_page)
 	edit_music_button.pressed.connect(_show_stub_edit)
 	download_list_button.pressed.connect(_show_stub_download)
+	if not _controller.state_changed.is_connected(refresh):
+		_controller.state_changed.connect(refresh)
 
 func refresh() -> void:
 	if _controller == null:
@@ -54,18 +59,18 @@ func refresh() -> void:
 		tr("music_app.local.empty_line2")
 	]
 
-	_visible_track_indices = _controller._get_local_track_indices()
+	_visible_track_indices = _library_controller.get_local_track_indices()
 	var track_count := _visible_track_indices.size()
 	_sync_rows(track_count)
 	local_music_empty_label.visible = track_count == 0
 
 	for index in _rows.size():
 		var track_index := _visible_track_indices[index]
-		_rows[index].configure(index, _controller._tracks[track_index])
+		_rows[index].configure(index, _library_controller.get_track(track_index))
 
 func open_page() -> void:
 	_hide_menu()
-	_controller._refresh_local_music_page()
+	refresh()
 
 func close_page() -> void:
 	_hide_menu()
@@ -88,8 +93,8 @@ func _play_track(track_index: int) -> void:
 	_hide_menu()
 	if track_index < 0 or track_index >= _visible_track_indices.size():
 		return
-	_controller._select_track(_visible_track_indices[track_index], true)
-	_show_popup(PopupRegistryType.PopupId.MUSIC_APP_PLAYER)
+	if _library_controller.select_track(_visible_track_indices[track_index], true):
+		_library_controller.show_popup(PopupRegistryType.PopupId.MUSIC_APP_PLAYER)
 
 func _toggle_menu() -> void:
 	var next_visible := not local_music_menu_panel.visible
@@ -102,39 +107,26 @@ func _hide_menu() -> void:
 
 func _open_scan_page() -> void:
 	_hide_menu()
-	var popup = _show_popup(PopupRegistryType.PopupId.MUSIC_APP_LOCAL_SCAN)
+	var popup = _library_controller.show_popup(PopupRegistryType.PopupId.MUSIC_APP_LOCAL_SCAN)
 	if popup != null and popup.has_method("open_page"):
 		popup.open_page()
 
 func _show_stub_search() -> void:
-	_controller._show_common_alert(
-		tr("music_app.local.search_title"),
-		tr("music_app.local.search_message")
-	)
+	_library_controller.show_popup(PopupRegistryType.PopupId.MUSIC_APP_PLUGIN_BROWSER)
 
 func _show_stub_edit() -> void:
 	_hide_menu()
-	_controller._show_common_alert(
+	_library_controller.show_common_alert(
 		tr("music_app.local.edit_title"),
 		tr("music_app.local.edit_message")
 	)
 
 func _show_stub_download() -> void:
 	_hide_menu()
-	_controller._show_common_alert(
+	_library_controller.show_common_alert(
 		tr("music_app.local.download_title"),
 		tr("music_app.local.download_message")
 	)
 
 func _show_row_menu(_track_index: int) -> void:
 	_toggle_menu()
-
-func _show_popup(popup_id: int):
-	var manager = DX.popup
-	if manager == null:
-		return null
-
-	var popup = manager.show(popup_id)
-	if popup != null and popup.has_method("setup"):
-		popup.setup(_controller)
-	return popup

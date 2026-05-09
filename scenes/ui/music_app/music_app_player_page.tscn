@@ -1,6 +1,6 @@
 [gd_scene format=3 uid="uid://bm2c4vapaiaqf"]
 
-[ext_resource type="Script" uid="uid://2xj1d207a5qg" path="res://scripts/ui/music_app/modules/music_app_player_module.gd" id="4_script"]
+[ext_resource type="Script" path="res://scripts/ui/music_app/views/player/music_app_player_view.gd" id="4_script"]
 [ext_resource type="Script" path="res://dx/runtime/scripts/managers/localization/localize_comp.gd" id="999_localize_comp"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_player_cover_panel"]

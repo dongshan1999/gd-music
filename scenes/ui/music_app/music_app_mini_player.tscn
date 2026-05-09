@@ -1,6 +1,6 @@
 [gd_scene format=3 uid="uid://cgs5gwcepfoow"]
 
-[ext_resource type="Script" uid="uid://p8v8hpaoo7fe" path="res://scripts/ui/music_app/modules/music_app_mini_player_module.gd" id="5_script"]
+[ext_resource type="Script" path="res://scripts/ui/music_app/views/mini_player/music_app_mini_player_view.gd" id="5_script"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_mini_cover_panel"]
 bg_color = Color(0.18, 0.18, 0.2, 1)

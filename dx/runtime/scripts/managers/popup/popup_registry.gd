@@ -8,6 +8,7 @@ enum PopupId {
 	MUSIC_APP_PLAYER,
 	MUSIC_APP_LOCAL_MUSIC,
 	MUSIC_APP_LOCAL_SCAN,
+	MUSIC_APP_PLUGIN_BROWSER,
 }
 
 const POPUP_SCENES := {
@@ -18,6 +19,7 @@ const POPUP_SCENES := {
 	PopupId.MUSIC_APP_PLAYER: preload("res://scenes/ui/music_app/music_app_player_page.tscn"),
 	PopupId.MUSIC_APP_LOCAL_MUSIC: preload("res://scenes/ui/music_app/music_app_local_music_page.tscn"),
 	PopupId.MUSIC_APP_LOCAL_SCAN: preload("res://scenes/ui/music_app/music_app_local_scan_page.tscn"),
+	PopupId.MUSIC_APP_PLUGIN_BROWSER: preload("res://scenes/ui/music_app/music_app_plugin_browser_page.tscn"),
 }
 
 static func has_popup(popup_id: int) -> bool:

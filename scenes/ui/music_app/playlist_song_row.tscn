@@ -1,6 +1,6 @@
 [gd_scene load_steps=3 format=3]
 
-[ext_resource type="Script" path="res://scripts/ui/music_app/modules/music_app_playlist_song_row.gd" id="1_script"]
+[ext_resource type="Script" path="res://scripts/ui/music_app/views/playlist/music_app_playlist_song_row.gd" id="1_script"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_playlist_song_row_panel"]
 bg_color = Color(0.160784, 0.160784, 0.168627, 1)
