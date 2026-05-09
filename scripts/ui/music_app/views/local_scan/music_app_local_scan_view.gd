@@ -1,19 +1,18 @@
 class_name MusicAppLocalScanView
 extends "res://dx/runtime/scripts/managers/popup/popup_view.gd"
 
-const MusicAppLocalScanControllerType := preload("res://scripts/ui/music_app/controllers/music_app_local_scan_controller.gd")
-const MusicAppShowcaseControllerType := preload("res://scripts/ui/music_app/music_app_showcase.gd")
-const MusicAppLocalMusicScanFolderRowType := preload("res://scripts/ui/music_app/views/local_scan/music_app_local_music_scan_folder_row.gd")
-const SCAN_FOLDER_ROW_SCENE := preload("res://scenes/ui/music_app/local_music_scan_folder_row.tscn")
+const MusicAppScriptPathsType := preload("res://scripts/constants/music_app_script_paths.gd")
+const MusicAppUiSymbolsType := preload("res://scripts/constants/music_app_ui_symbols.gd")
+const SCAN_FOLDER_ROW_SCENE := preload(MusicAppScriptPathsType.LOCAL_SCAN_FOLDER_ROW)
 
-var _controller: MusicAppShowcaseControllerType
-var _local_scan_controller: MusicAppLocalScanControllerType = MusicAppLocalScanControllerType.new()
+var _controller: MusicAppShowcaseController
+var _local_scan_controller: MusicAppLocalScanController = MusicAppLocalScanController.new()
 var _is_bound := false
 var _root_path := ""
 var _current_path := ""
 var _selected_paths := {}
 var _current_entries: Array[Dictionary] = []
-var _folder_rows: Array[MusicAppLocalMusicScanFolderRowType] = []
+var _folder_rows: Array[MusicAppLocalMusicScanFolderRow] = []
 
 @onready var scan_back_button: Button = %ScanBackButton
 @onready var scan_path_label: Label = %ScanPathLabel
@@ -23,7 +22,7 @@ var _folder_rows: Array[MusicAppLocalMusicScanFolderRowType] = []
 @onready var scan_folder_bottom_space: Control = %ScanFolderBottomSpace
 @onready var start_scan_button: Button = %StartScanButton
 
-func setup(controller: MusicAppShowcaseControllerType) -> void:
+func setup(controller: MusicAppShowcaseController) -> void:
 	_controller = controller
 	bind()
 	refresh()
@@ -43,7 +42,7 @@ func refresh() -> void:
 	if _controller == null:
 		return
 
-	scan_back_button.text = "←"
+	scan_back_button.text = MusicAppUiSymbolsType.BACK
 
 	if _root_path.is_empty():
 		_root_path = _local_scan_controller.get_scan_root_path()
@@ -82,7 +81,7 @@ func navigate_back() -> void:
 
 func _sync_rows(target_size: int) -> void:
 	while _folder_rows.size() < target_size:
-		var row := SCAN_FOLDER_ROW_SCENE.instantiate() as MusicAppLocalMusicScanFolderRowType
+		var row := SCAN_FOLDER_ROW_SCENE.instantiate() as MusicAppLocalMusicScanFolderRow
 		scan_folder_list.add_child(row)
 		scan_folder_list.move_child(row, scan_folder_bottom_space.get_index())
 		row.open_requested.connect(_open_folder)
@@ -90,7 +89,7 @@ func _sync_rows(target_size: int) -> void:
 		_folder_rows.append(row)
 
 	while _folder_rows.size() > target_size:
-		var row: MusicAppLocalMusicScanFolderRowType = _folder_rows.pop_back()
+		var row: MusicAppLocalMusicScanFolderRow = _folder_rows.pop_back()
 		row.queue_free()
 
 func _open_folder(path: String) -> void:

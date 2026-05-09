@@ -1,12 +1,11 @@
 class_name MusicAppPluginBrowserView
 extends "res://dx/runtime/scripts/managers/popup/popup_view.gd"
 
-const MusicAppShowcaseControllerType := preload("res://scripts/ui/music_app/music_app_showcase.gd")
-const MusicAppPluginControllerType := preload("res://scripts/ui/music_app/controllers/music_app_plugin_controller.gd")
+const MusicAppScriptPathsType := preload("res://scripts/constants/music_app_script_paths.gd")
 const MusicPluginManagerType := preload("res://dx/runtime/scripts/managers/music_plugin_manager.gd")
 
-var _controller: MusicAppShowcaseControllerType
-var _plugin_controller: MusicAppPluginControllerType = MusicAppPluginControllerType.new()
+var _controller: MusicAppShowcaseController
+var _plugin_controller: MusicAppPluginController = MusicAppPluginController.new()
 var _is_bound := false
 var _plugins: Array[Dictionary] = []
 var _search_results: Array[Dictionary] = []
@@ -34,7 +33,7 @@ var _results_box: VBoxContainer
 func _ready() -> void:
 	_build_ui()
 
-func setup(controller: MusicAppShowcaseControllerType) -> void:
+func setup(controller: MusicAppShowcaseController) -> void:
 	_controller = controller
 	bind()
 	refresh()

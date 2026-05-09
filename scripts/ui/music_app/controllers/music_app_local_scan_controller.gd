@@ -1,8 +1,6 @@
 class_name MusicAppLocalScanController
 extends "res://scripts/ui/music_app/controllers/music_app_controller_base.gd"
 
-const MusicAppLibraryControllerType := preload("res://scripts/ui/music_app/controllers/music_app_library_controller.gd")
-const TrackDataType := preload("res://scripts/save/music/track_data.gd")
 const WINDOWS_SCAN_ROOT := "windows://drives"
 const AUDIO_EXTENSIONS := {
 	"mp3": true,
@@ -10,8 +8,7 @@ const AUDIO_EXTENSIONS := {
 	"ogg": true
 }
 
-var _library_controller: MusicAppLibraryControllerType = MusicAppLibraryControllerType.new()
-
+## 返回本地扫描的起始目录。
 func get_scan_root_path() -> String:
 	var os_name := OS.get_name()
 	if os_name == "Android":
@@ -29,12 +26,14 @@ func get_scan_root_path() -> String:
 		base_path = ProjectSettings.globalize_path("res://")
 	return path_root(base_path)
 
+## 返回当前扫描路径用于界面展示的文案。
 func get_scan_display_path(path: String) -> String:
 	var normalized_path := normalize_path(path)
 	if is_scan_virtual_root(normalized_path):
 		return tr("music_app.scan.windows_root")
 	return normalized_path
 
+## 计算当前路径的上一级目录，并保证不会退回到扫描根目录之外。
 func get_scan_parent_path(current_path: String, root_path: String) -> String:
 	var normalized_current := normalize_path(current_path)
 	var normalized_root := normalize_path(root_path)
@@ -52,6 +51,7 @@ func get_scan_parent_path(current_path: String, root_path: String) -> String:
 		return normalized_root
 	return parent
 
+## 列出指定目录下可供扫描选择的子目录。
 func list_scan_directories(path: String) -> Array[Dictionary]:
 	var normalized_path := normalize_path(path)
 	if is_scan_virtual_root(normalized_path):
@@ -73,6 +73,7 @@ func list_scan_directories(path: String) -> Array[Dictionary]:
 		)
 	return result
 
+## 返回 Windows 盘符根目录列表。
 func list_windows_drive_entries() -> Array[Dictionary]:
 	var result: Array[Dictionary] = []
 	var letters := "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
@@ -89,15 +90,16 @@ func list_windows_drive_entries() -> Array[Dictionary]:
 		)
 	return result
 
+## 递归扫描所选目录并导入新的本地音乐曲目。
 func scan_local_music_directories(paths: Array[String]) -> int:
-	var tracks := _library_controller.get_tracks()
+	var tracks := get_tracks_ref()
 	var existing_paths := {}
 	for track in tracks:
 		if track == null or track.file_path.is_empty():
 			continue
 		existing_paths[normalize_path(track.file_path)] = true
 
-	var imported_tracks: Array[TrackDataType] = []
+	var imported_tracks: Array[TrackData] = []
 	var unique_targets := {}
 	for raw_path in paths:
 		var target_path := normalize_path(str(raw_path))
@@ -115,10 +117,11 @@ func scan_local_music_directories(paths: Array[String]) -> int:
 
 	return imported_tracks.size()
 
+## 递归收集目录下符合条件的音频文件并转成曲目数据。
 func _collect_audio_tracks(
 	root_path: String,
 	existing_paths: Dictionary,
-	imported_tracks: Array[TrackDataType]
+	imported_tracks: Array[TrackData]
 ) -> void:
 	var normalized_root := normalize_path(root_path)
 	if not DirAccess.dir_exists_absolute(normalized_root):
@@ -148,11 +151,13 @@ func _collect_audio_tracks(
 		imported_tracks.append(make_local_track_from_path(item_path))
 	directory.list_dir_end()
 
+## 判断指定路径是否为支持导入的音频文件。
 func is_audio_file(path: String) -> bool:
 	var extension := path.get_extension().to_lower()
 	return AUDIO_EXTENSIONS.has(extension)
 
-func make_local_track_from_path(path: String) -> TrackDataType:
+## 根据文件路径构造一条本地曲目数据。
+func make_local_track_from_path(path: String) -> TrackData:
 	var normalized_path := normalize_path(path)
 	var file_stem := normalized_path.get_file().get_basename()
 	var title := file_stem
@@ -167,7 +172,7 @@ func make_local_track_from_path(path: String) -> TrackDataType:
 
 	var subtitle := normalized_path.get_base_dir().get_file()
 
-	var track := TrackDataType.new()
+	var track := TrackData.new()
 	track.title = title
 	track.artist = artist
 	track.subtitle = subtitle
@@ -179,6 +184,7 @@ func make_local_track_from_path(path: String) -> TrackDataType:
 	track.normalize()
 	return track
 
+## 解析给定路径所属的根目录。
 func path_root(path: String) -> String:
 	var normalized := normalize_path(path)
 	var drive_index := normalized.find(":/")
@@ -188,14 +194,17 @@ func path_root(path: String) -> String:
 		return "/"
 	return normalized
 
+## 统一路径分隔符并移除多余尾部斜杠。
 func normalize_path(path: String) -> String:
 	var normalized := path.replace("\\", "/")
 	if normalized.ends_with("/") and normalized.length() > 1 and not normalized.ends_with(":/"):
 		normalized = normalized.left(normalized.length() - 1)
 	return normalized
 
+## 判断路径是否为虚拟的 Windows 盘符根入口。
 func is_scan_virtual_root(path: String) -> bool:
 	return normalize_path(path) == WINDOWS_SCAN_ROOT
 
+## 判断路径是否是 Windows 单个盘符根目录。
 func is_windows_drive_root(path: String) -> bool:
 	return path.length() == 3 and path.substr(1, 1) == ":" and path.ends_with("/")
