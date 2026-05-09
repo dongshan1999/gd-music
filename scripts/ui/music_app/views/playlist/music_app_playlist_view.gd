@@ -5,7 +5,7 @@ const MusicAppScriptPathsType := preload("res://scripts/constants/music_app_scri
 const PLAYLIST_SONG_ROW_SCENE := preload(MusicAppScriptPathsType.PLAYLIST_SONG_ROW)
 
 var _controller: MusicAppShowcaseController
-var _playlist_controller: MusicAppPlaylistController = MusicAppPlaylistController.new()
+var _playlist_controller: MusicAppPlaylistController
 var _is_bound := false
 
 @onready var playlist_top_title: Label = %PlaylistTopTitle
@@ -27,6 +27,7 @@ var song_rows: Array[MusicAppPlaylistSongRow] = []
 
 func setup(controller: MusicAppShowcaseController) -> void:
 	_controller = controller
+	_playlist_controller = MusicAppPlaylistController.new(controller)
 	bind()
 	refresh()
 

@@ -1,8 +1,6 @@
 class_name MusicAppPluginController
 extends "res://scripts/ui/music_app/controllers/music_app_controller_base.gd"
 
-var _playback_controller: MusicAppPlaybackController = MusicAppPlaybackController.new()
-
 ## 返回全局音乐插件管理器。
 func get_music_plugin_manager() -> DX_MusicPluginManager:
 	return DX.music_plugins as DX_MusicPluginManager
@@ -65,7 +63,7 @@ func import_music_plugin_search_results(
 	var target_playlist := _get_plugin_target_playlist(plugin_id, target_playlist_index)
 	if target_playlist == null:
 		return imported_indices
-	var tracks := get_tracks_ref()
+	var tracks: Array[TrackData] = get_tracks_ref()
 	for item in results:
 		var track := _make_remote_track_from_plugin_item(plugin_id, item)
 		if track == null:
@@ -152,7 +150,7 @@ func _make_remote_track_from_plugin_item(plugin_id: String, item) -> TrackData:
 
 ## 获取插件导入的目标歌单，不存在时自动创建。
 func _get_plugin_target_playlist(plugin_id: String, target_playlist_index: int) -> PlaylistData:
-	var playlists := get_playlists_ref()
+	var playlists: Array[PlaylistData] = get_playlists_ref()
 
 	if target_playlist_index >= 0 and target_playlist_index < playlists.size():
 		return playlists[target_playlist_index]
@@ -165,7 +163,7 @@ func _get_plugin_target_playlist(plugin_id: String, target_playlist_index: int) 
 
 ## 为插件导入结果创建新的歌单。
 func _create_playlist_for_plugin(plugin_id: String) -> PlaylistData:
-	var playlists := get_playlists_ref()
+	var playlists: Array[PlaylistData] = get_playlists_ref()
 
 	var title := plugin_id if not plugin_id.is_empty() else _next_playlist_title()
 	if _playlist_title_exists(title):
@@ -190,14 +188,14 @@ func build_plugin_error(message: String, extra: Dictionary = {}) -> Dictionary:
 
 ## 根据全量曲目索引返回曲目对象。
 func _get_track(track_index: int) -> TrackData:
-	var tracks := get_tracks_ref()
+	var tracks: Array[TrackData] = get_tracks_ref()
 	if track_index < 0 or track_index >= tracks.size():
 		return null
 	return tracks[track_index]
 
 ## 返回当前选中的歌单对象。
 func _get_selected_playlist() -> PlaylistData:
-	var playlists := get_playlists_ref()
+	var playlists: Array[PlaylistData] = get_playlists_ref()
 	var playlist_index := get_selected_playlist_index()
 	if playlist_index < 0 or playlist_index >= playlists.size():
 		return null
@@ -205,9 +203,12 @@ func _get_selected_playlist() -> PlaylistData:
 
 ## 按给定曲目顺序构建播放队列，并切到目标槽位播放。
 func _play_track_list(track_indices: Array[int], start_slot_index: int, autoplay: bool = true) -> bool:
-	if not _playback_controller.set_playback_queue(track_indices, start_slot_index):
+	var playback_controller = get_playback_controller()
+	if playback_controller == null:
 		return false
-	return _playback_controller.play_queue_index(_playback_controller.get_playback_queue_index(), autoplay)
+	if not playback_controller.set_playback_queue(track_indices, start_slot_index):
+		return false
+	return playback_controller.play_queue_index(playback_controller.get_playback_queue_index(), autoplay)
 
 ## 生成一个新的不重复歌单标题。
 func _next_playlist_title() -> String:

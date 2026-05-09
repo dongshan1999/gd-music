@@ -19,7 +19,7 @@ const FEATURE_CARD_KEYS := [
 ]
 
 var _controller: MusicAppShowcaseController
-var _home_controller: MusicAppHomeController = MusicAppHomeController.new()
+var _home_controller: MusicAppHomeController
 var _is_bound := false
 
 @onready var search_bar: Panel = %SearchBar
@@ -39,6 +39,7 @@ var home_playlist_rows: Array[MusicAppHomePlaylistRow] = []
 
 func setup(controller: MusicAppShowcaseController) -> void:
 	_controller = controller
+	_home_controller = MusicAppHomeController.new(controller)
 	bind()
 	refresh()
 
@@ -63,7 +64,7 @@ func refresh() -> void:
 		return
 
 	search_icon_label.text = MusicAppUiSymbolsType.SEARCH
-	var playlists := _home_controller.get_playlists()
+	var playlists = _home_controller.get_playlists()
 	my_playlists_label.text = tr("music_app.home.my_playlists_count").format({"count": playlists.size()})
 	var favorite_count := 0
 	var favorite_index := _home_controller.find_favorite_playlist_index()

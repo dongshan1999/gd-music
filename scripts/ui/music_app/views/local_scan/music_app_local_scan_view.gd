@@ -6,7 +6,7 @@ const MusicAppUiSymbolsType := preload("res://scripts/constants/music_app_ui_sym
 const SCAN_FOLDER_ROW_SCENE := preload(MusicAppScriptPathsType.LOCAL_SCAN_FOLDER_ROW)
 
 var _controller: MusicAppShowcaseController
-var _local_scan_controller: MusicAppLocalScanController = MusicAppLocalScanController.new()
+var _local_scan_controller: MusicAppLocalScanController
 var _is_bound := false
 var _root_path := ""
 var _current_path := ""
@@ -24,6 +24,7 @@ var _folder_rows: Array[MusicAppLocalMusicScanFolderRow] = []
 
 func setup(controller: MusicAppShowcaseController) -> void:
 	_controller = controller
+	_local_scan_controller = MusicAppLocalScanController.new(controller)
 	bind()
 	refresh()
 

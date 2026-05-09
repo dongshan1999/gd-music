@@ -5,7 +5,7 @@ const MusicAppScriptPathsType := preload("res://scripts/constants/music_app_scri
 const MusicAppUiSymbolsType := preload("res://scripts/constants/music_app_ui_symbols.gd")
 
 var _controller: MusicAppShowcaseController
-var _player_controller: MusicAppPlayerController = MusicAppPlayerController.new()
+var _player_controller: MusicAppPlayerController
 var _is_bound := false
 
 @onready var close_player_button: Button = %ClosePlayerButton
@@ -31,6 +31,7 @@ var _is_bound := false
 
 func setup(controller: MusicAppShowcaseController) -> void:
 	_controller = controller
+	_player_controller = MusicAppPlayerController.new(controller)
 	bind()
 	refresh()
 

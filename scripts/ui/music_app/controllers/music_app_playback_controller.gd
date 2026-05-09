@@ -7,12 +7,8 @@ const QUEUE_EMPTY_MESSAGE := "当前没有播放内容。"
 
 ## 返回当前播放列表中的曲目索引序列。
 func get_playback_track_indices() -> Array[int]:
-	var resolved_controller := get_showcase()
-	if resolved_controller == null:
-		return []
-
 	var result: Array[int] = []
-	for track_index in resolved_controller._playback_track_indices:
+	for track_index in get_playback_track_indices_ref():
 		result.append(track_index)
 	return result
 
@@ -22,14 +18,11 @@ func get_playback_track_count() -> int:
 
 ## 返回当前播放列表的游标位置。
 func get_playback_queue_index() -> int:
-	var resolved_controller := get_showcase()
-	return resolved_controller._playback_queue_index if resolved_controller != null else 0
+	return super.get_playback_queue_index()
 
 ## 设置当前播放列表的游标位置。
 func set_playback_queue_index(value: int) -> void:
-	var resolved_controller := get_showcase()
-	if resolved_controller != null:
-		resolved_controller._playback_queue_index = value
+	super.set_playback_queue_index(value)
 
 ## 判断当前是否存在有效的播放列表。
 func has_playback_queue() -> bool:
@@ -74,12 +67,8 @@ func get_current_playback_track_index() -> int:
 
 ## 返回当前播放列表对应的当前曲目对象。
 func get_current_playback_track() -> TrackData:
-	var resolved_controller := get_showcase()
-	if resolved_controller == null:
-		return null
-
 	var track_index := get_current_playback_track_index()
-	var tracks := resolved_controller._tracks
+	var tracks: Array[TrackData] = get_tracks_ref()
 	if track_index < 0 or track_index >= tracks.size():
 		return null
 	return tracks[track_index]
@@ -144,16 +133,12 @@ func append_tracks_to_queue(track_indices: Array[int]) -> int:
 	return appended_count
 
 func get_playback_queue_summary() -> String:
-	var resolved_controller := get_showcase()
-	if resolved_controller == null:
-		return ""
-
 	var playback_track_indices := get_playback_track_indices()
 	if playback_track_indices.is_empty():
 		return ""
 
 	var current_queue_index := get_playback_queue_index()
-	var tracks := resolved_controller._tracks
+	var tracks: Array[TrackData] = get_tracks_ref()
 	var lines: Array[String] = []
 	for queue_index in playback_track_indices.size():
 		var track_index := playback_track_indices[queue_index]
@@ -177,13 +162,14 @@ func show_playback_queue_dialog() -> void:
 
 ## 覆盖写入当前播放队列的曲目索引数组。
 func set_playback_track_indices(track_indices: Array[int]) -> void:
-	var resolved_controller := get_showcase()
-	if resolved_controller != null:
-		resolved_controller._playback_track_indices = track_indices.duplicate()
+	var copied_indices: Array[int] = []
+	for track_index in track_indices:
+		copied_indices.append(track_index)
+	get_app_state().playback_track_indices = copied_indices
 
 ## 过滤非法曲目索引，确保播放队列只包含有效曲目。
 func _sanitize_track_indices(track_indices: Array[int]) -> Array[int]:
-	var tracks := get_tracks_ref()
+	var tracks: Array[TrackData] = get_tracks_ref()
 	var result: Array[int] = []
 	for track_index in track_indices:
 		if track_index < 0 or track_index >= tracks.size():

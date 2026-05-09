@@ -5,7 +5,7 @@ const MusicAppScriptPathsType := preload("res://scripts/constants/music_app_scri
 const MusicAppUiSymbolsType := preload("res://scripts/constants/music_app_ui_symbols.gd")
 
 var _controller: MusicAppShowcaseController
-var _mini_player_controller: MusicAppMiniPlayerController = MusicAppMiniPlayerController.new()
+var _mini_player_controller: MusicAppMiniPlayerController
 var _is_bound := false
 
 @onready var mini_cover_mark_label: Label = %MiniCoverMarkLabel
@@ -16,6 +16,7 @@ var _is_bound := false
 
 func setup(controller: MusicAppShowcaseController) -> void:
 	_controller = controller
+	_mini_player_controller = MusicAppMiniPlayerController.new(controller)
 	bind()
 	refresh()
 

@@ -6,7 +6,7 @@ const MusicAppUiSymbolsType := preload("res://scripts/constants/music_app_ui_sym
 const LOCAL_MUSIC_ROW_SCENE := preload(MusicAppScriptPathsType.LOCAL_MUSIC_ROW)
 
 var _controller: MusicAppShowcaseController
-var _local_music_controller: MusicAppLocalMusicController = MusicAppLocalMusicController.new()
+var _local_music_controller: MusicAppLocalMusicController
 var _is_bound := false
 var _visible_track_indices: Array[int] = []
 
@@ -27,6 +27,7 @@ var _rows: Array[MusicAppLocalMusicRow] = []
 
 func setup(controller: MusicAppShowcaseController) -> void:
 	_controller = controller
+	_local_music_controller = MusicAppLocalMusicController.new(controller)
 	bind()
 	refresh()
 

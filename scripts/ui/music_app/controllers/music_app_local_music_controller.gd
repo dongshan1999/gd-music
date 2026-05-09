@@ -1,12 +1,10 @@
 class_name MusicAppLocalMusicController
 extends "res://scripts/ui/music_app/controllers/music_app_controller_base.gd"
 
-var _playback_controller: MusicAppPlaybackController = MusicAppPlaybackController.new()
-
 ## 返回全部本地曲目在全量曲目数组中的索引列表。
 func get_local_track_indices() -> Array[int]:
 	var result: Array[int] = []
-	var tracks := get_tracks_ref()
+	var tracks: Array[TrackData] = get_tracks_ref()
 	for index in tracks.size():
 		var track = tracks[index]
 		if track == null:
@@ -17,7 +15,7 @@ func get_local_track_indices() -> Array[int]:
 
 ## 根据全量曲目索引返回对应曲目对象。
 func get_track(track_index: int):
-	var tracks := get_tracks_ref()
+	var tracks: Array[TrackData] = get_tracks_ref()
 	if track_index < 0 or track_index >= tracks.size():
 		return null
 	return tracks[track_index]
@@ -55,6 +53,9 @@ func show_download_placeholder() -> void:
 
 ## 用指定曲目顺序替换播放队列，并切到目标槽位播放。
 func _play_track_list(track_indices: Array[int], start_slot_index: int, autoplay: bool = true) -> bool:
-	if not _playback_controller.set_playback_queue(track_indices, start_slot_index):
+	var playback_controller = get_playback_controller()
+	if playback_controller == null:
 		return false
-	return _playback_controller.play_queue_index(_playback_controller.get_playback_queue_index(), autoplay)
+	if not playback_controller.set_playback_queue(track_indices, start_slot_index):
+		return false
+	return playback_controller.play_queue_index(playback_controller.get_playback_queue_index(), autoplay)
