@@ -15,12 +15,12 @@ enum PopupId {
 const POPUP_SCENES := {
 	PopupId.COMMON_DIALOG: preload("res://scenes/popup/common_dialog_popup.tscn"),
 	PopupId.COMMON_TOAST: preload("res://scenes/popup/common_toast_popup.tscn"),
-	PopupId.MUSIC_APP_HOME: preload("res://scenes/ui/music_app/music_app_home_page.tscn"),
-	PopupId.MUSIC_APP_PLAYLIST: preload("res://scenes/ui/music_app/music_app_playlist_page.tscn"),
-	PopupId.MUSIC_APP_PLAYER: preload("res://scenes/ui/music_app/music_app_player_page.tscn"),
-	PopupId.MUSIC_APP_LOCAL_MUSIC: preload("res://scenes/ui/music_app/music_app_local_music_page.tscn"),
-	PopupId.MUSIC_APP_LOCAL_SCAN: preload("res://scenes/ui/music_app/music_app_local_scan_page.tscn"),
-	PopupId.MUSIC_APP_PLUGIN_BROWSER: preload("res://scenes/ui/music_app/music_app_plugin_browser_page.tscn"),
+	PopupId.MUSIC_APP_HOME: preload("res://scenes/ui/music_app/home/music_app_home_page.tscn"),
+	PopupId.MUSIC_APP_PLAYLIST: preload("res://scenes/ui/music_app/playlist/music_app_playlist_page.tscn"),
+	PopupId.MUSIC_APP_PLAYER: preload("res://scenes/ui/music_app/player/music_app_player_page.tscn"),
+	PopupId.MUSIC_APP_LOCAL_MUSIC: preload("res://scenes/ui/music_app/local_music/music_app_local_music_page.tscn"),
+	PopupId.MUSIC_APP_LOCAL_SCAN: preload("res://scenes/ui/music_app/local_scan/music_app_local_scan_page.tscn"),
+	PopupId.MUSIC_APP_PLUGIN_BROWSER: preload("res://scenes/ui/music_app/plugin_browser/music_app_plugin_browser_page.tscn"),
 }
 
 static func has_popup(popup_id: int) -> bool:

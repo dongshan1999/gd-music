@@ -38,7 +38,6 @@ func bind() -> void:
 
 	playlist_back_button.pressed.connect(close_page)
 	play_all_button.pressed.connect(_play_playlist_from_start)
-	playlist_add_button.pressed.connect(_create_playlist_from_current)
 	if not _controller.state_changed.is_connected(refresh):
 		_controller.state_changed.connect(refresh)
 
@@ -75,9 +74,6 @@ func _play_playlist_from_start() -> void:
 
 func _select_song_from_playlist(slot_index: int) -> void:
 	_playlist_controller.play_selected_playlist_track(slot_index)
-
-func _create_playlist_from_current() -> void:
-	_playlist_controller.create_playlist_from_current()
 
 func _sync_song_rows(target_size: int) -> void:
 	while song_rows.size() < target_size:

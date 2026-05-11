@@ -29,7 +29,7 @@ const COMMON_DIALOG_POPUP := "res://scripts/popup/common_dialog_popup.gd"
 const COMMON_TOAST_POPUP := "res://scripts/popup/common_toast_popup.gd"
 
 # 场景路径
-const HOME_PLAYLIST_ROW := "res://scenes/ui/music_app/home_playlist_row.tscn"
-const LOCAL_MUSIC_ROW := "res://scenes/ui/music_app/local_music_row.tscn"
-const LOCAL_SCAN_FOLDER_ROW := "res://scenes/ui/music_app/local_music_scan_folder_row.tscn"
-const PLAYLIST_SONG_ROW := "res://scenes/ui/music_app/playlist_song_row.tscn"
+const HOME_PLAYLIST_ROW := "res://scenes/ui/music_app/home/home_playlist_row.tscn"
+const LOCAL_MUSIC_ROW := "res://scenes/ui/music_app/local_music/local_music_row.tscn"
+const LOCAL_SCAN_FOLDER_ROW := "res://scenes/ui/music_app/local_scan/local_music_scan_folder_row.tscn"
+const PLAYLIST_SONG_ROW := "res://scenes/ui/music_app/playlist/playlist_song_row.tscn"
