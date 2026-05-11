@@ -1,7 +1,7 @@
 [gd_scene format=3 uid="uid://icxomk0v5mvw"]
 
 [ext_resource type="Script" path="res://scripts/ui/music_app/views/home/music_app_home_view.gd" id="2_script"]
-[ext_resource type="PackedScene" path="res://scenes/ui/music_app/home_feature_card.tscn" id="6_feature_card"]
+[ext_resource type="PackedScene" path="res://scenes/ui/music_app/home/home_feature_card.tscn" id="6_feature_card"]
 [ext_resource type="Script" path="res://dx/runtime/scripts/managers/localization/localize_comp.gd" id="999_localize_comp"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_feature_card_panel"]

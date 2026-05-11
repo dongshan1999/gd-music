@@ -122,12 +122,6 @@ func get_manager_names() -> Array[StringName]:
 		result.append(key)
 	return result
 
-func get_save_manager():
-	return save
-
-func get_popup_manager():
-	return popup
-
 func _bootstrap() -> void:
 	if not _manager_order.is_empty():
 		return

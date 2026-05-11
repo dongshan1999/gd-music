@@ -1,7 +1,7 @@
 [gd_scene format=3 uid="uid://dqb3yk0oe8330"]
 
 [ext_resource type="Script" uid="uid://crnuaxlx02ks7" path="res://scripts/ui/music_app/music_app_showcase.gd" id="1_script"]
-[ext_resource type="PackedScene" uid="uid://cgs5gwcepfoow" path="res://scenes/ui/music_app/music_app_mini_player.tscn" id="5_mini_player"]
+[ext_resource type="PackedScene" uid="uid://cgs5gwcepfoow" path="res://scenes/ui/music_app/mini_player/music_app_mini_player.tscn" id="5_mini_player"]
 
 [node name="MusicAppShowcase" type="Control" unique_id=1976821598]
 custom_minimum_size = Vector2(430, 932)
