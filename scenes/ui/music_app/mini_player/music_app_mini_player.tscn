@@ -1,15 +1,24 @@
-[gd_scene format=3 uid="uid://cgs5gwcepfoow"]
+[gd_scene load_steps=7 format=3 uid="uid://cgs5gwcepfoow"]
 
 [ext_resource type="Script" path="res://scripts/ui/music_app/views/mini_player/music_app_mini_player_view.gd" id="5_script"]
+[ext_resource type="Script" path="res://scripts/ui/music_app/views/mini_player/music_app_ring_progress.gd" id="6_script"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_mini_cover_panel"]
-bg_color = Color(0.18, 0.18, 0.2, 1)
-corner_radius_top_left = 18
-corner_radius_top_right = 18
-corner_radius_bottom_right = 18
-corner_radius_bottom_left = 18
+bg_color = Color(0.203922, 0.215686, 0.247059, 1)
+corner_radius_top_left = 999
+corner_radius_top_right = 999
+corner_radius_bottom_right = 999
+corner_radius_bottom_left = 999
 
 [sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_hy7py"]
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_mini_play_button"]
+
+[sub_resource type="Shader" id="Shader_mini_cover_mask"]
+code = "shader_type canvas_item;\n\nvoid fragment() {\n\tvec2 centered_uv = UV * 2.0 - 1.0;\n\tif (dot(centered_uv, centered_uv) > 1.0) {\n\t\tdiscard;\n\t}\n\tCOLOR = texture(TEXTURE, UV) * COLOR;\n}\n"
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_mini_cover_mask"]
+shader = SubResource("Shader_mini_cover_mask")
 
 [node name="MiniPlayer" type="Panel" unique_id=651896687]
 unique_name_in_owner = true
@@ -46,6 +55,16 @@ custom_minimum_size = Vector2(56, 56)
 layout_mode = 2
 theme_override_styles/panel = SubResource("StyleBoxFlat_mini_cover_panel")
 
+[node name="MiniCoverTextureRect" type="TextureRect" parent="Margin/Row/MiniCoverPanel" unique_id=864731828]
+unique_name_in_owner = true
+layout_mode = 0
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+material = SubResource("ShaderMaterial_mini_cover_mask")
+stretch_mode = 6
+
 [node name="MiniCoverMarkLabel" type="Label" parent="Margin/Row/MiniCoverPanel" unique_id=985287164]
 unique_name_in_owner = true
 layout_mode = 0
@@ -76,10 +95,44 @@ text_overrun_behavior = 3
 text = "虚拟 - 陈粒"
 vertical_alignment = 1
 
-[node name="MiniPlayButton" type="Button" parent="Margin/Row" unique_id=1634867500]
-unique_name_in_owner = true
+[node name="MiniPlaySlot" type="Control" parent="Margin/Row" unique_id=121992597]
 custom_minimum_size = Vector2(60, 60)
 layout_mode = 2
+
+[node name="MiniPlayRing" type="Control" parent="Margin/Row/MiniPlaySlot" unique_id=106226173]
+unique_name_in_owner = true
+layout_mode = 0
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+script = ExtResource("6_script")
+progress = 0.42
+track_color = Color(1, 1, 1, 0.18)
+progress_color = Color(1, 1, 1, 0.98)
+ring_width = 2.5
+
+[node name="MiniPlayButton" type="Button" parent="Margin/Row/MiniPlaySlot" unique_id=1634867500]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(44, 44)
+layout_mode = 0
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -22.0
+offset_top = -22.0
+offset_right = 22.0
+offset_bottom = 22.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_styles/disabled = SubResource("StyleBoxEmpty_mini_play_button")
+theme_override_styles/focus = SubResource("StyleBoxEmpty_mini_play_button")
+theme_override_styles/hover = SubResource("StyleBoxEmpty_mini_play_button")
+theme_override_styles/normal = SubResource("StyleBoxEmpty_mini_play_button")
+theme_override_styles/pressed = SubResource("StyleBoxEmpty_mini_play_button")
 text = "▶"
 
 [node name="MiniListButton" type="Button" parent="Margin/Row" unique_id=1603467272]
@@ -94,7 +147,7 @@ layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
-offset_right = -146.0
+offset_right = -134.0
 grow_horizontal = 2
 grow_vertical = 2
 theme_override_styles/normal = SubResource("StyleBoxEmpty_hy7py")
