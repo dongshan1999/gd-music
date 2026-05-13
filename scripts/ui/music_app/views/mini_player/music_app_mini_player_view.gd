@@ -2,7 +2,7 @@ class_name MusicAppMiniPlayerView
 extends Panel
 
 const MusicAppScriptPathsType := preload("res://scripts/constants/music_app_script_paths.gd")
-const MusicAppUiSymbolsType := preload("res://scripts/constants/music_app_ui_symbols.gd")
+const MusicAppIconsType := preload("res://scripts/constants/music_app_icons.gd")
 
 var _controller: MusicAppShowcaseController
 var _mini_player_controller: MusicAppMiniPlayerController
@@ -38,17 +38,20 @@ func refresh() -> void:
 	if not _mini_player_controller.has_tracks():
 		mini_cover_mark_label.text = ""
 		mini_track_label.text = tr("music_app.mini_player.empty")
-		mini_play_button.text = MusicAppUiSymbolsType.PLAY
+		MusicAppIconsType.apply_icon_button(mini_play_button, MusicAppIconsType.PLAY)
+		MusicAppIconsType.apply_icon_button(mini_list_button, MusicAppIconsType.PLAYLIST)
 		return
 
 	var track: TrackData = _mini_player_controller.get_current_track()
 	mini_cover_mark_label.text = track.mark
 	mini_track_label.text = "%s - %s" % [track.title, _mini_player_controller.get_track_display_artist(track)]
-	mini_play_button.text = (
-		MusicAppUiSymbolsType.PAUSE
+	MusicAppIconsType.apply_icon_button(
+		mini_play_button,
+		MusicAppIconsType.PAUSE
 		if _mini_player_controller.is_playing()
-		else MusicAppUiSymbolsType.PLAY
+		else MusicAppIconsType.PLAY
 	)
+	MusicAppIconsType.apply_icon_button(mini_list_button, MusicAppIconsType.PLAYLIST)
 
 func _toggle_playback() -> void:
 	if not _mini_player_controller.has_tracks():

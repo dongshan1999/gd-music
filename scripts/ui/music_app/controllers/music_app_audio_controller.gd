@@ -78,6 +78,34 @@ func toggle_playback() -> void:
 	notify_state_changed()
 	save_app_state()
 
+## 将底层播放器与全局状态同步到指定秒数。
+func seek_to_elapsed_seconds(value: int, persist_state: bool = true) -> void:
+	if not has_tracks():
+		return
+
+	var track := get_current_track()
+	if track == null:
+		return
+
+	var target_seconds := clampi(value, 0, get_current_duration())
+	if target_seconds == get_elapsed_seconds():
+		if persist_state:
+			save_app_state()
+		return
+
+	set_elapsed_seconds(target_seconds)
+
+	var audio_player = _get_audio_player()
+	var desired_track_key := _get_track_playback_key(track)
+	if audio_player != null and audio_player.stream != null and _loaded_track_key == desired_track_key:
+		_apply_audio_seek(audio_player, target_seconds)
+	elif is_playing():
+		request_audio_sync()
+
+	notify_state_changed()
+	if persist_state:
+		save_app_state()
+
 ## 发起一次异步音频状态同步请求。
 func request_audio_sync() -> void:
 	_audio_sync_request_id += 1
@@ -312,6 +340,17 @@ func _get_track_playback_key(track: TrackData) -> String:
 	if track.is_plugin_track():
 		return "plugin:%s:%s" % [track.platform, track.remote_id]
 	return "title:%s:%s" % [track.title, track.artist]
+
+func _apply_audio_seek(audio_player: AudioStreamPlayer, target_seconds: int) -> void:
+	var should_resume := is_playing()
+	var was_paused := audio_player.stream_paused
+
+	if audio_player.playing:
+		audio_player.seek(float(target_seconds))
+	elif should_resume:
+		audio_player.play(float(target_seconds))
+
+	audio_player.stream_paused = was_paused or not should_resume
 
 func _get_audio_position_seconds() -> int:
 	var audio_player = _get_audio_player()

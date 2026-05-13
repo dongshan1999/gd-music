@@ -2,7 +2,7 @@ class_name MusicAppLocalScanView
 extends "res://dx/runtime/scripts/managers/popup/popup_view.gd"
 
 const MusicAppScriptPathsType := preload("res://scripts/constants/music_app_script_paths.gd")
-const MusicAppUiSymbolsType := preload("res://scripts/constants/music_app_ui_symbols.gd")
+const MusicAppIconsType := preload("res://scripts/constants/music_app_icons.gd")
 const SCAN_FOLDER_ROW_SCENE := preload(MusicAppScriptPathsType.LOCAL_SCAN_FOLDER_ROW)
 
 var _controller: MusicAppShowcaseController
@@ -43,7 +43,7 @@ func refresh() -> void:
 	if _controller == null:
 		return
 
-	scan_back_button.text = MusicAppUiSymbolsType.BACK
+	MusicAppIconsType.apply_icon_button(scan_back_button, MusicAppIconsType.ARROW_LEFT)
 
 	if _root_path.is_empty():
 		_root_path = _local_scan_controller.get_scan_root_path()

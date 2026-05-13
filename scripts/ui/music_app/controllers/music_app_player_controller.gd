@@ -20,6 +20,21 @@ func get_current_duration() -> int:
 func get_current_elapsed_seconds() -> int:
 	return get_elapsed_seconds()
 
+## 将播放进度跳转到指定秒数。
+func seek_to_elapsed_seconds(value: int, persist_state: bool = true) -> void:
+	var playback_state_controller = get_playback_state_controller()
+	if playback_state_controller != null:
+		playback_state_controller.seek_to_elapsed_seconds(value, persist_state)
+
+## 按比例跳转播放器进度。
+func seek_to_progress_ratio(progress_ratio: float, persist_state: bool = true) -> void:
+	var duration := get_current_duration()
+	if duration <= 0:
+		seek_to_elapsed_seconds(0, persist_state)
+		return
+	var target_seconds := roundi(clampf(progress_ratio, 0.0, 1.0) * float(duration))
+	seek_to_elapsed_seconds(target_seconds, persist_state)
+
 ## 返回播放器展示用的歌手文案。
 func get_track_display_artist(track: TrackData) -> String:
 	if not track.artist.is_empty():

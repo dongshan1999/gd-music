@@ -40,7 +40,6 @@ func start_local_host() -> Dictionary:
 	if not _is_desktop_platform():
 		return _error_result("Local plugin host startup is only supported on desktop platforms.")
 
-	var settings := get_settings()
 	var launch_config := _build_local_host_launch_config()
 	if not bool(launch_config.get("ok", false)):
 		return _error_result(str(launch_config.get("error", "Local plugin host command is not configured.")))

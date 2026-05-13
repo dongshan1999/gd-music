@@ -2,6 +2,7 @@ class_name MusicAppPlaylistView
 extends "res://dx/runtime/scripts/managers/popup/popup_view.gd"
 
 const MusicAppScriptPathsType := preload("res://scripts/constants/music_app_script_paths.gd")
+const MusicAppIconsType := preload("res://scripts/constants/music_app_icons.gd")
 const PLAYLIST_SONG_ROW_SCENE := preload(MusicAppScriptPathsType.PLAYLIST_SONG_ROW)
 
 var _controller: MusicAppShowcaseController
@@ -44,6 +45,13 @@ func bind() -> void:
 func refresh() -> void:
 	if _controller == null:
 		return
+
+	MusicAppIconsType.apply_icon_button(playlist_back_button, MusicAppIconsType.ARROW_LEFT)
+	MusicAppIconsType.apply_icon_button(playlist_search_button, MusicAppIconsType.SEARCH)
+	MusicAppIconsType.apply_icon_button(playlist_more_button, MusicAppIconsType.MORE)
+	MusicAppIconsType.apply_icon_button(play_all_button, MusicAppIconsType.PLAY, true, false)
+	MusicAppIconsType.apply_icon_button(playlist_add_button, MusicAppIconsType.PLUS)
+	MusicAppIconsType.apply_icon_button(playlist_edit_button, MusicAppIconsType.EDIT)
 
 
 	if _playlist_controller.get_playlists().is_empty():

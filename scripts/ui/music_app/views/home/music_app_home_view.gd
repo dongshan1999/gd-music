@@ -2,14 +2,14 @@ class_name MusicAppHomeView
 extends "res://dx/runtime/scripts/managers/popup/popup_view.gd"
 
 const MusicAppScriptPathsType := preload("res://scripts/constants/music_app_script_paths.gd")
-const MusicAppUiSymbolsType := preload("res://scripts/constants/music_app_ui_symbols.gd")
+const MusicAppIconsType := preload("res://scripts/constants/music_app_icons.gd")
 const HomeFeatureCardType = preload(MusicAppScriptPathsType.MUSIC_APP_HOME_FEATURE_CARD_VIEW)
 const HOME_PLAYLIST_ROW_SCENE := preload(MusicAppScriptPathsType.HOME_PLAYLIST_ROW)
 const FEATURE_CARD_ICONS := [
-	MusicAppUiSymbolsType.FEATURE_RECOMMENDED,
-	MusicAppUiSymbolsType.FEATURE_CHARTS,
-	MusicAppUiSymbolsType.FEATURE_HISTORY,
-	MusicAppUiSymbolsType.FEATURE_LOCAL_MUSIC
+	MusicAppIconsType.FIRE,
+	MusicAppIconsType.TROPHY,
+	MusicAppIconsType.CLOCK,
+	MusicAppIconsType.FOLDER_MUSIC
 ]
 const FEATURE_CARD_KEYS := [
 	"music_app.home.feature.recommended",
@@ -23,7 +23,7 @@ var _home_controller: MusicAppHomeController
 var _is_bound := false
 
 @onready var search_bar: Panel = %SearchBar
-@onready var search_icon_label: Label = $Margin/HomeVBox/SearchRow/SearchBar/Margin/SearchHBox/SearchIconLabel
+@onready var search_icon_rect: TextureRect = %SearchIconRect
 @onready var search_prompt_label: Label = %SearchPromptLabel
 @onready var feature_grid: GridContainer = %FeatureGrid
 @onready var home_menu_button: Button = %HomeMenuButton
@@ -54,7 +54,7 @@ func bind() -> void:
 	new_playlist_button.pressed.connect(_create_playlist_from_current)
 	import_button.pressed.connect(_open_local_music)
 	search_bar.gui_input.connect(_on_search_bar_gui_input)
-	search_icon_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	search_icon_rect.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	search_prompt_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	if not _controller.state_changed.is_connected(refresh):
 		_controller.state_changed.connect(refresh)
@@ -63,7 +63,10 @@ func refresh() -> void:
 	if _controller == null:
 		return
 
-	search_icon_label.text = MusicAppUiSymbolsType.SEARCH
+	MusicAppIconsType.apply_texture_icon(search_icon_rect, MusicAppIconsType.SEARCH)
+	MusicAppIconsType.apply_icon_button(home_menu_button, MusicAppIconsType.MENU)
+	MusicAppIconsType.apply_icon_button(new_playlist_button, MusicAppIconsType.PLUS)
+	MusicAppIconsType.apply_icon_button(import_button, MusicAppIconsType.DOWNLOAD)
 	var playlists = _home_controller.get_playlists()
 	my_playlists_label.text = tr("music_app.home.my_playlists_count").format({"count": playlists.size()})
 	var favorite_count := 0
