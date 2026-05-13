@@ -66,6 +66,27 @@ func play_next_track() -> bool:
 	var playback_controller = get_playback_controller()
 	return playback_controller.step_queue(1, true) if playback_controller != null else false
 
+## 返回当前播放模式对应的文案 key。
+func get_playback_mode_label_key() -> String:
+	var playback_controller = get_playback_controller()
+	if playback_controller == null:
+		return "music_app.queue.mode.loop_all"
+	return playback_controller.get_playback_mode_label_key()
+
+## 返回当前播放模式对应的图标。
+func get_playback_mode_icon() -> Texture2D:
+	var playback_controller = get_playback_controller()
+	return playback_controller.get_playback_mode_icon() if playback_controller != null else null
+
+## 切换播放器的全局播放模式。
+func cycle_playback_mode() -> int:
+	var playback_controller = get_playback_controller()
+	return (
+		playback_controller.cycle_playback_mode()
+		if playback_controller != null
+		else MusicAppStateDataType.PlaybackMode.LOOP_ALL
+	)
+
 ## 切换当前播放曲目的收藏状态，并同步“我喜欢”歌单。
 func toggle_like_current_track() -> bool:
 	if not has_tracks():
@@ -97,9 +118,7 @@ func toggle_like_current_track() -> bool:
 
 ## 展示当前播放队列弹窗。
 func show_playback_queue() -> void:
-	var playback_controller = get_playback_controller()
-	if playback_controller != null:
-		playback_controller.show_playback_queue_dialog()
+	show_popup(DX_PopupRegistry.PopupId.MUSIC_APP_PLAYBACK_QUEUE)
 
 ## 生成曲目的唯一标识，用于收藏状态映射。
 func _track_key(track: TrackData) -> String:

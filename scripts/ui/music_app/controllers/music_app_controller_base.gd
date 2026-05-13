@@ -87,6 +87,14 @@ func get_playback_queue_index() -> int:
 func set_playback_queue_index(value: int) -> void:
 	get_app_state().playback_queue_index = value
 
+## 返回当前全局播放模式。
+func get_playback_mode() -> int:
+	return get_app_state().playback_mode
+
+## 设置当前全局播放模式。
+func set_playback_mode(value: int) -> void:
+	get_app_state().playback_mode = value
+
 ## 返回当前累计播放秒数。
 func get_elapsed_seconds() -> int:
 	return get_app_state().elapsed_seconds

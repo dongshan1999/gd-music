@@ -6,6 +6,10 @@ signal state_changed
 static var instance = null
 
 const MusicAppScriptPathsType := preload("res://scripts/constants/music_app_script_paths.gd")
+const PlaybackControllerScript := preload(MusicAppScriptPathsType.MUSIC_APP_PLAYBACK_CONTROLLER)
+const PlaybackStateControllerScript := preload(MusicAppScriptPathsType.MUSIC_APP_PLAYBACK_STATE_CONTROLLER)
+const PlaylistStateControllerScript := preload(MusicAppScriptPathsType.MUSIC_APP_PLAYLIST_STATE_CONTROLLER)
+const PopupRouterControllerScript := preload(MusicAppScriptPathsType.MUSIC_APP_POPUP_ROUTER_CONTROLLER)
 
 @onready var normal_popup_host: Control = %NormalPopupHost
 @onready var mini_player: Control = %MiniPlayer
@@ -13,10 +17,10 @@ const MusicAppScriptPathsType := preload("res://scripts/constants/music_app_scri
 @onready var audio_player: AudioStreamPlayer = %AudioPlayer
 
 var _timer: Timer = Timer.new()
-var _playback_controller: MusicAppPlaybackController = MusicAppPlaybackController.new(self)
-var _playback_state_controller: MusicAppPlaybackStateController = MusicAppPlaybackStateController.new(self)
-var _playlist_state_controller: MusicAppPlaylistStateController = MusicAppPlaylistStateController.new(self)
-var _popup_router_controller: MusicAppPopupRouterController = MusicAppPopupRouterController.new(self)
+var _playback_controller = PlaybackControllerScript.new(self)
+var _playback_state_controller = PlaybackStateControllerScript.new(self)
+var _playlist_state_controller = PlaylistStateControllerScript.new(self)
+var _popup_router_controller = PopupRouterControllerScript.new(self)
 
 ## 初始化音乐应用展示层，挂接弹窗宿主、播放器与定时同步逻辑。
 func _ready() -> void:
