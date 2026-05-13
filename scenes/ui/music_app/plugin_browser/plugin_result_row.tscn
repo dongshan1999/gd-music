@@ -1,0 +1,88 @@
+[gd_scene load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://scripts/ui/music_app/views/plugin_browser/music_app_plugin_result_row.gd" id="1_script"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_result_chip"]
+bg_color = Color(0.247059, 0.247059, 0.258824, 1)
+corner_radius_top_left = 999
+corner_radius_top_right = 999
+corner_radius_bottom_right = 999
+corner_radius_bottom_left = 999
+
+[node name="PluginResultRow" type="Control"]
+custom_minimum_size = Vector2(0, 78)
+layout_mode = 2
+size_flags_horizontal = 3
+script = ExtResource("1_script")
+
+[node name="MainRow" type="HBoxContainer" parent="." unique_id=1463813942]
+layout_mode = 0
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/separation = 12
+
+[node name="TextBox" type="VBoxContainer" parent="MainRow"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 5
+alignment = 1
+
+[node name="TitleLabel" type="Label" parent="MainRow/TextBox" unique_id=2094490082]
+unique_name_in_owner = true
+layout_mode = 2
+text = "屋顶"
+text_overrun_behavior = 3
+vertical_alignment = 1
+
+[node name="SubtitleLabel" type="Label" parent="MainRow/TextBox" unique_id=1203544860]
+unique_name_in_owner = true
+layout_mode = 2
+text = "周杰伦 - 男女情歌对唱冠军全纪录"
+text_overrun_behavior = 3
+vertical_alignment = 1
+
+[node name="SourceChip" type="PanelContainer" parent="MainRow" unique_id=2107628720]
+custom_minimum_size = Vector2(84, 30)
+layout_mode = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_result_chip")
+
+[node name="Margin" type="MarginContainer" parent="MainRow/SourceChip"]
+layout_mode = 2
+theme_override_constants/margin_left = 12
+theme_override_constants/margin_top = 5
+theme_override_constants/margin_right = 12
+theme_override_constants/margin_bottom = 5
+
+[node name="SourceLabel" type="Label" parent="MainRow/SourceChip/Margin" unique_id=749396262]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_font_sizes/font_size = 13
+text = "网易云音乐"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="MoreLabel" type="Label" parent="MainRow" unique_id=2117045211]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(18, 0)
+layout_mode = 2
+theme_override_font_sizes/font_size = 18
+text = "⋮"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="HitButton" type="Button" parent="." unique_id=1626362455]
+unique_name_in_owner = true
+layout_mode = 0
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_styles/disabled = null
+theme_override_styles/focus = null
+theme_override_styles/hover = null
+theme_override_styles/normal = null
+theme_override_styles/pressed = null
+flat = true
+text = ""

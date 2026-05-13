@@ -1,58 +1,68 @@
 class_name MusicAppPluginBrowserView
 extends "res://dx/runtime/scripts/managers/popup/popup_view.gd"
 
+const MusicAppScriptPathsType := preload("res://scripts/constants/music_app_script_paths.gd")
 const MusicAppIconsType := preload("res://scripts/constants/music_app_icons.gd")
+const HISTORY_TAG_SCENE := preload(MusicAppScriptPathsType.PLUGIN_BROWSER_HISTORY_TAG)
+const SEARCH_TAB_SCENE := preload(MusicAppScriptPathsType.PLUGIN_BROWSER_SEARCH_TAB)
+const RESULT_ROW_SCENE := preload(MusicAppScriptPathsType.PLUGIN_BROWSER_RESULT_ROW)
 
 const DEFAULT_SEARCH_TYPE := "music"
-const PANEL_BG := Color(0.12, 0.13, 0.15, 1.0)
-const PANEL_BG_SOFT := Color(0.09, 0.10, 0.12, 1.0)
-const PANEL_BORDER := Color(0.22, 0.24, 0.28, 1.0)
-const MUTED_TEXT := Color(0.70, 0.73, 0.78, 1.0)
-const STRONG_TEXT := Color(0.95, 0.96, 0.98, 1.0)
+const EMPTY_HISTORY_TEXT := "暂无搜索记录"
+const EMPTY_READY_TEXT := "请选择插件并输入搜索关键字"
+const EMPTY_RESULT_TEXT := "暂无搜索结果"
 
 var _controller: MusicAppShowcaseController
-var _plugin_controller: MusicAppPluginController
+var _plugin_controller: MusicAppPluginBrowserController
 var _is_bound := false
 var _plugins: Array[Dictionary] = []
 var _search_results: Array[Dictionary] = []
+var _search_history: Array[String] = []
 var _reload_requested := false
 var _current_page := 1
 var _last_query := ""
 var _last_is_end := true
 var _is_searching := false
+var _selected_plugin_id := ""
+var _selected_search_type := DEFAULT_SEARCH_TYPE
 
-var _back_button: Button
-var _title_label: Label
-var _host_status_label: Label
-var _start_host_button: Button
-var _refresh_plugins_button: Button
-var _manage_toggle_button: Button
-var _install_file_input: LineEdit
-var _install_file_button: Button
-var _install_url_input: LineEdit
-var _install_url_button: Button
-var _plugin_selector: OptionButton
-var _search_type_selector: OptionButton
-var _load_vars_button: Button
-var _save_vars_button: Button
-var _plugin_info_label: Label
-var _vars_editor: TextEdit
-var _query_input: LineEdit
-var _search_button: Button
-var _import_all_button: Button
-var _prev_page_button: Button
-var _next_page_button: Button
-var _result_summary_label: Label
-var _results_box: VBoxContainer
-var _management_panel: Control
+@onready var back_button: Button = %BackButton
+@onready var search_icon_rect: TextureRect = %SearchIconRect
+@onready var query_input: LineEdit = %QueryInput
+@onready var clear_query_button: Button = %ClearQueryButton
+@onready var submit_search_button: Button = %SubmitSearchButton
+@onready var search_content: VBoxContainer = %SearchContent
+@onready var history_section: VBoxContainer = %HistorySection
+@onready var clear_history_button: Button = %ClearHistoryButton
+@onready var history_tags_container: FlowContainer = %HistoryTagsContainer
+@onready var history_empty_label: Label = %HistoryEmptyLabel
+@onready var results_section: VBoxContainer = %ResultsSection
+@onready var search_type_tabs: HBoxContainer = %SearchTypeTabs
+@onready var plugin_tabs: HBoxContainer = %PluginTabs
+@onready var results_list: VBoxContainer = %ResultsList
+@onready var empty_results_label: Label = %EmptyResultsLabel
+@onready var management_panel: PanelContainer = %ManagementPanel
+@onready var host_status_label: Label = %HostStatusLabel
+@onready var manage_toggle_button: Button = %ManageToggleButton
+@onready var start_host_button: Button = %StartHostButton
+@onready var refresh_plugins_button: Button = %RefreshPluginsButton
+@onready var install_file_input: LineEdit = %InstallFileInput
+@onready var install_file_button: Button = %InstallFileButton
+@onready var install_url_input: LineEdit = %InstallUrlInput
+@onready var install_url_button: Button = %InstallUrlButton
+@onready var plugin_info_label: Label = %PluginInfoLabel
+@onready var load_vars_button: Button = %LoadVarsButton
+@onready var save_vars_button: Button = %SaveVarsButton
+@onready var vars_editor: TextEdit = %VarsEditor
 
-func _ready() -> void:
-	_build_ui()
-	_render_results()
+var _history_tag_nodes: Array = []
+var _search_type_tab_nodes: Array = []
+var _plugin_tab_nodes: Array = []
+var _result_row_nodes: Array = []
 
 func setup(controller: MusicAppShowcaseController) -> void:
 	_controller = controller
-	_plugin_controller = MusicAppPluginController.new(controller)
+	_plugin_controller = MusicAppPluginBrowserController.new(controller)
 	bind()
 	refresh()
 	_request_reload_plugins()
@@ -62,20 +72,19 @@ func bind() -> void:
 		return
 	_is_bound = true
 
-	_back_button.pressed.connect(close_popup)
-	_start_host_button.pressed.connect(_on_start_host_pressed)
-	_refresh_plugins_button.pressed.connect(_on_refresh_plugins_pressed)
-	_manage_toggle_button.pressed.connect(_on_manage_toggle_pressed)
-	_install_file_button.pressed.connect(_on_install_file_pressed)
-	_install_url_button.pressed.connect(_on_install_url_pressed)
-	_plugin_selector.item_selected.connect(_on_plugin_selected)
-	_load_vars_button.pressed.connect(_on_load_vars_pressed)
-	_save_vars_button.pressed.connect(_on_save_vars_pressed)
-	_search_button.pressed.connect(_on_search_pressed)
-	_import_all_button.pressed.connect(_on_import_all_pressed)
-	_prev_page_button.pressed.connect(_on_prev_page_pressed)
-	_next_page_button.pressed.connect(_on_next_page_pressed)
-	_query_input.text_submitted.connect(_on_query_submitted)
+	back_button.pressed.connect(close_popup)
+	clear_query_button.pressed.connect(_on_clear_query_pressed)
+	submit_search_button.pressed.connect(_on_search_pressed)
+	query_input.text_submitted.connect(_on_query_submitted)
+	query_input.text_changed.connect(_on_query_text_changed)
+	clear_history_button.pressed.connect(_on_clear_history_pressed)
+	manage_toggle_button.pressed.connect(_on_manage_toggle_pressed)
+	start_host_button.pressed.connect(_on_start_host_pressed)
+	refresh_plugins_button.pressed.connect(_on_refresh_plugins_pressed)
+	install_file_button.pressed.connect(_on_install_file_pressed)
+	install_url_button.pressed.connect(_on_install_url_pressed)
+	load_vars_button.pressed.connect(_on_load_vars_pressed)
+	save_vars_button.pressed.connect(_on_save_vars_pressed)
 	if _controller != null and not _controller.state_changed.is_connected(refresh):
 		_controller.state_changed.connect(refresh)
 
@@ -84,337 +93,155 @@ func on_popup_shown() -> void:
 	_request_reload_plugins()
 
 func refresh() -> void:
-	if _title_label != null:
-		_title_label.text = "Plugin Search"
-	if _back_button != null:
-		MusicAppIconsType.apply_icon_button(_back_button, MusicAppIconsType.ARROW_LEFT)
-	if _search_button != null:
-		MusicAppIconsType.apply_icon_button(_search_button, MusicAppIconsType.SEARCH, true, false)
+	MusicAppIconsType.apply_icon_button(back_button, MusicAppIconsType.ARROW_LEFT)
+	MusicAppIconsType.apply_texture_icon(search_icon_rect, MusicAppIconsType.SEARCH)
+	_search_history = _copy_string_array(
+		_plugin_controller.get_plugin_search_history() if _plugin_controller != null else []
+	)
+	_sync_query_state()
+	_render_history()
+	_render_tabs()
+	_render_results()
+	_set_plugin_info()
 	_sync_action_state()
 
-func _build_ui() -> void:
-	if get_child_count() > 0:
+func _sync_query_state() -> void:
+	var query := query_input.text.strip_edges()
+	clear_query_button.visible = not query.is_empty()
+	var showing_results := not _last_query.is_empty()
+	history_section.visible = not showing_results
+	results_section.visible = showing_results
+	if not showing_results:
+		empty_results_label.text = EMPTY_READY_TEXT
+
+func _render_history() -> void:
+	for node in _history_tag_nodes:
+		node.queue_free()
+	_history_tag_nodes.clear()
+
+	history_empty_label.visible = _search_history.is_empty()
+	history_empty_label.text = EMPTY_HISTORY_TEXT
+	clear_history_button.visible = not _search_history.is_empty()
+	for text in _search_history:
+		var chip = HISTORY_TAG_SCENE.instantiate()
+		history_tags_container.add_child(chip)
+		chip.configure(text)
+		chip.pressed.connect(_on_history_tag_pressed)
+		chip.remove_requested.connect(_on_history_tag_remove_requested)
+		_history_tag_nodes.append(chip)
+
+func _render_tabs() -> void:
+	_sync_tab_row(
+		search_type_tabs,
+		_search_type_tab_nodes,
+		_get_search_type_tab_items(),
+		_selected_search_type,
+		_on_search_type_tab_selected
+	)
+	_sync_tab_row(
+		plugin_tabs,
+		_plugin_tab_nodes,
+		_get_plugin_tab_items(),
+		_selected_plugin_id,
+		_on_plugin_tab_selected
+	)
+
+func _sync_tab_row(
+	container: HBoxContainer,
+	storage: Array,
+	items: Array[Dictionary],
+	selected_id: String,
+	callback: Callable
+) -> void:
+	for node in storage:
+		node.queue_free()
+	storage.clear()
+
+	for item in items:
+		var tab = SEARCH_TAB_SCENE.instantiate()
+		container.add_child(tab)
+		tab.configure(
+			str(item.get("id", "")),
+			str(item.get("text", "")),
+			str(item.get("id", "")) == selected_id
+		)
+		tab.selected.connect(callback)
+		storage.append(tab)
+
+func _get_search_type_tab_items() -> Array[Dictionary]:
+	var plugin := _get_selected_plugin()
+	var search_types := _string_list_from_array(plugin.get("supportedSearchType", []))
+	if search_types.is_empty():
+		search_types.append(DEFAULT_SEARCH_TYPE)
+
+	var items: Array[Dictionary] = []
+	for search_type in search_types:
+		items.append({
+			"id": search_type,
+			"text": _get_search_type_label(search_type),
+		})
+	return items
+
+func _get_plugin_tab_items() -> Array[Dictionary]:
+	var items: Array[Dictionary] = []
+	for plugin in _plugins:
+		items.append({
+			"id": _plugin_key(plugin),
+			"text": str(plugin.get("name", _plugin_key(plugin))),
+		})
+	return items
+
+func _render_results() -> void:
+	for node in _result_row_nodes:
+		node.queue_free()
+	_result_row_nodes.clear()
+
+	var showing_results := not _last_query.is_empty()
+	if not showing_results:
+		empty_results_label.visible = false
 		return
 
-	var background := ColorRect.new()
-	background.name = "Background"
-	background.anchor_right = 1.0
-	background.anchor_bottom = 1.0
-	background.mouse_filter = Control.MOUSE_FILTER_STOP
-	background.color = Color(0.06, 0.07, 0.08, 1.0)
-	add_child(background)
+	if _search_results.is_empty():
+		empty_results_label.visible = true
+		empty_results_label.text = EMPTY_RESULT_TEXT if not _last_query.is_empty() else EMPTY_READY_TEXT
+		return
 
-	var margin := MarginContainer.new()
-	margin.name = "Margin"
-	margin.anchor_right = 1.0
-	margin.anchor_bottom = 1.0
-	margin.offset_left = 14
-	margin.offset_top = 10
-	margin.offset_right = -14
-	margin.offset_bottom = -14
-	add_child(margin)
+	empty_results_label.visible = false
+	for index in _search_results.size():
+		var item := _search_results[index]
+		var row = RESULT_ROW_SCENE.instantiate()
+		results_list.add_child(row)
+		row.configure(
+			index,
+			_result_title(item),
+			_result_subtitle(item),
+			str(item.get("platform", _get_selected_plugin_id()))
+		)
+		row.play_requested.connect(_on_result_row_pressed)
+		_result_row_nodes.append(row)
 
-	var layout := VBoxContainer.new()
-	layout.name = "Layout"
-	layout.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	layout.size_flags_vertical = Control.SIZE_EXPAND_FILL
-	layout.add_theme_constant_override("separation", 10)
-	margin.add_child(layout)
-
-	var top_row := HBoxContainer.new()
-	top_row.add_theme_constant_override("separation", 10)
-	layout.add_child(top_row)
-
-	_back_button = Button.new()
-	_back_button.custom_minimum_size = Vector2(44, 42)
-	_back_button.tooltip_text = "Back"
-	top_row.add_child(_back_button)
-
-	_title_label = Label.new()
-	_title_label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	_title_label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
-	_title_label.text = "Plugin Search"
-	_title_label.add_theme_font_size_override("font_size", 20)
-	_title_label.add_theme_color_override("font_color", STRONG_TEXT)
-	top_row.add_child(_title_label)
-
-	_manage_toggle_button = Button.new()
-	_manage_toggle_button.custom_minimum_size = Vector2(86, 42)
-	_manage_toggle_button.text = "Manage"
-	top_row.add_child(_manage_toggle_button)
-
-	_host_status_label = Label.new()
-	_host_status_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	_host_status_label.text = "Checking plugin host..."
-	_host_status_label.add_theme_color_override("font_color", MUTED_TEXT)
-	layout.add_child(_host_status_label)
-
-	layout.add_child(_build_search_panel())
-	layout.add_child(_build_results_toolbar())
-
-	var results_scroll := ScrollContainer.new()
-	results_scroll.size_flags_vertical = Control.SIZE_EXPAND_FILL
-	results_scroll.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	results_scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
-	layout.add_child(results_scroll)
-
-	_results_box = VBoxContainer.new()
-	_results_box.add_theme_constant_override("separation", 8)
-	_results_box.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	results_scroll.add_child(_results_box)
-
-	_management_panel = _build_management_panel()
-	_management_panel.visible = false
-	layout.add_child(_management_panel)
-
-func _build_search_panel() -> Control:
-	var panel := PanelContainer.new()
-	panel.add_theme_stylebox_override("panel", _make_panel_style(PANEL_BG))
-	panel.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-
-	var margin := MarginContainer.new()
-	margin.add_theme_constant_override("margin_left", 12)
-	margin.add_theme_constant_override("margin_top", 12)
-	margin.add_theme_constant_override("margin_right", 12)
-	margin.add_theme_constant_override("margin_bottom", 12)
-	panel.add_child(margin)
-
-	var layout := VBoxContainer.new()
-	layout.add_theme_constant_override("separation", 10)
-	margin.add_child(layout)
-
-	var plugin_row := HBoxContainer.new()
-	plugin_row.add_theme_constant_override("separation", 8)
-	layout.add_child(plugin_row)
-
-	var source_label := _make_field_label("Source")
-	source_label.custom_minimum_size = Vector2(58, 0)
-	plugin_row.add_child(source_label)
-
-	_plugin_selector = OptionButton.new()
-	_plugin_selector.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	plugin_row.add_child(_plugin_selector)
-
-	_start_host_button = Button.new()
-	_start_host_button.custom_minimum_size = Vector2(72, 36)
-	_start_host_button.text = "Start"
-	plugin_row.add_child(_start_host_button)
-
-	_refresh_plugins_button = Button.new()
-	_refresh_plugins_button.custom_minimum_size = Vector2(78, 36)
-	_refresh_plugins_button.text = "Refresh"
-	plugin_row.add_child(_refresh_plugins_button)
-
-	var search_row := HBoxContainer.new()
-	search_row.add_theme_constant_override("separation", 8)
-	layout.add_child(search_row)
-
-	_search_type_selector = OptionButton.new()
-	_search_type_selector.custom_minimum_size = Vector2(96, 38)
-	search_row.add_child(_search_type_selector)
-
-	_query_input = LineEdit.new()
-	_query_input.placeholder_text = "Search songs, artists, albums"
-	_query_input.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	search_row.add_child(_query_input)
-
-	_search_button = Button.new()
-	_search_button.custom_minimum_size = Vector2(86, 38)
-	_search_button.text = "Search"
-	search_row.add_child(_search_button)
-
-	return panel
-
-func _build_results_toolbar() -> Control:
-	var toolbar := HBoxContainer.new()
-	toolbar.add_theme_constant_override("separation", 8)
-
-	_result_summary_label = Label.new()
-	_result_summary_label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	_result_summary_label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
-	_result_summary_label.text = "Choose a plugin and search."
-	_result_summary_label.add_theme_color_override("font_color", MUTED_TEXT)
-	toolbar.add_child(_result_summary_label)
-
-	_import_all_button = Button.new()
-	_import_all_button.custom_minimum_size = Vector2(76, 36)
-	_import_all_button.text = "Add All"
-	toolbar.add_child(_import_all_button)
-
-	_prev_page_button = Button.new()
-	_prev_page_button.custom_minimum_size = Vector2(42, 36)
-	_prev_page_button.text = "<"
-	toolbar.add_child(_prev_page_button)
-
-	_next_page_button = Button.new()
-	_next_page_button.custom_minimum_size = Vector2(42, 36)
-	_next_page_button.text = ">"
-	toolbar.add_child(_next_page_button)
-
-	return toolbar
-
-func _build_management_panel() -> Control:
-	var panel := PanelContainer.new()
-	panel.add_theme_stylebox_override("panel", _make_panel_style(PANEL_BG_SOFT))
-	panel.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-
-	var margin := MarginContainer.new()
-	margin.add_theme_constant_override("margin_left", 12)
-	margin.add_theme_constant_override("margin_top", 12)
-	margin.add_theme_constant_override("margin_right", 12)
-	margin.add_theme_constant_override("margin_bottom", 12)
-	panel.add_child(margin)
-
-	var layout := VBoxContainer.new()
-	layout.add_theme_constant_override("separation", 8)
-	margin.add_child(layout)
-
-	layout.add_child(_make_section_label("Install plugin"))
-
-	var install_file_row := HBoxContainer.new()
-	install_file_row.add_theme_constant_override("separation", 8)
-	layout.add_child(install_file_row)
-
-	_install_file_input = LineEdit.new()
-	_install_file_input.placeholder_text = "Path to MusicFree .js plugin"
-	_install_file_input.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	install_file_row.add_child(_install_file_input)
-
-	_install_file_button = Button.new()
-	_install_file_button.custom_minimum_size = Vector2(70, 36)
-	_install_file_button.text = "Install"
-	install_file_row.add_child(_install_file_button)
-
-	var install_url_row := HBoxContainer.new()
-	install_url_row.add_theme_constant_override("separation", 8)
-	layout.add_child(install_url_row)
-
-	_install_url_input = LineEdit.new()
-	_install_url_input.placeholder_text = "https://..."
-	_install_url_input.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	install_url_row.add_child(_install_url_input)
-
-	_install_url_button = Button.new()
-	_install_url_button.custom_minimum_size = Vector2(70, 36)
-	_install_url_button.text = "Install"
-	install_url_row.add_child(_install_url_button)
-
-	layout.add_child(_make_section_label("Selected plugin"))
-
-	_plugin_info_label = Label.new()
-	_plugin_info_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	_plugin_info_label.text = "No plugin selected."
-	_plugin_info_label.add_theme_color_override("font_color", MUTED_TEXT)
-	layout.add_child(_plugin_info_label)
-
-	var vars_row := HBoxContainer.new()
-	vars_row.add_theme_constant_override("separation", 8)
-	layout.add_child(vars_row)
-
-	_load_vars_button = Button.new()
-	_load_vars_button.custom_minimum_size = Vector2(96, 34)
-	_load_vars_button.text = "Load Vars"
-	vars_row.add_child(_load_vars_button)
-
-	_save_vars_button = Button.new()
-	_save_vars_button.custom_minimum_size = Vector2(96, 34)
-	_save_vars_button.text = "Save Vars"
-	vars_row.add_child(_save_vars_button)
-
-	_vars_editor = TextEdit.new()
-	_vars_editor.custom_minimum_size = Vector2(0, 96)
-	_vars_editor.text = "{}"
-	layout.add_child(_vars_editor)
-
-	return panel
-
-func _make_panel_style(color: Color) -> StyleBoxFlat:
-	var style := StyleBoxFlat.new()
-	style.bg_color = color
-	style.border_color = PANEL_BORDER
-	style.border_width_left = 1
-	style.border_width_top = 1
-	style.border_width_right = 1
-	style.border_width_bottom = 1
-	style.corner_radius_top_left = 8
-	style.corner_radius_top_right = 8
-	style.corner_radius_bottom_left = 8
-	style.corner_radius_bottom_right = 8
-	return style
-
-func _make_section_label(text: String) -> Label:
-	var label := Label.new()
-	label.text = text
-	label.add_theme_color_override("font_color", STRONG_TEXT)
-	label.add_theme_font_size_override("font_size", 15)
-	return label
-
-func _make_field_label(text: String) -> Label:
-	var label := Label.new()
-	label.text = text
-	label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
-	label.add_theme_color_override("font_color", MUTED_TEXT)
-	return label
-
-func _make_muted_label(text: String) -> Label:
-	var label := Label.new()
-	label.text = text
-	label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	label.add_theme_color_override("font_color", MUTED_TEXT)
-	return label
-
-func _normalize_dictionary_array(value: Variant) -> Array[Dictionary]:
-	var result: Array[Dictionary] = []
-	if not (value is Array):
-		return result
-	for item in value:
-		if item is Dictionary:
-			result.append(item)
-	return result
-
-func _get_plugin_manager() -> DX_MusicPluginManager:
-	if _plugin_controller == null:
-		return null
-	return _plugin_controller.get_music_plugin_manager()
+func _plugin_key(plugin: Dictionary) -> String:
+	return str(plugin.get("name", plugin.get("id", "")))
 
 func _get_selected_plugin() -> Dictionary:
-	if _plugin_selector == null or _plugin_selector.item_count == 0:
-		return {}
-	var selected_index := _plugin_selector.selected
-	if selected_index < 0 or selected_index >= _plugin_selector.item_count:
-		return {}
-	var metadata = _plugin_selector.get_item_metadata(selected_index)
-	if metadata is Dictionary:
-		return metadata
+	for plugin in _plugins:
+		if _plugin_key(plugin) == _selected_plugin_id:
+			return plugin
 	return {}
 
 func _get_selected_plugin_id() -> String:
-	var plugin := _get_selected_plugin()
-	if plugin.is_empty():
-		return ""
-	return str(plugin.get("name", plugin.get("id", "")))
+	return _selected_plugin_id
 
 func _get_selected_search_type() -> String:
-	if _search_type_selector == null or _search_type_selector.item_count == 0:
-		return DEFAULT_SEARCH_TYPE
-	var selected_index := _search_type_selector.selected
-	if selected_index < 0 or selected_index >= _search_type_selector.item_count:
-		return DEFAULT_SEARCH_TYPE
-	var metadata = _search_type_selector.get_item_metadata(selected_index)
-	if metadata is String:
-		return metadata
-	return DEFAULT_SEARCH_TYPE
+	return _selected_search_type if not _selected_search_type.is_empty() else DEFAULT_SEARCH_TYPE
 
 func _set_status(text: String) -> void:
-	if _host_status_label != null:
-		_host_status_label.text = text
+	host_status_label.text = text
 
 func _set_plugin_info() -> void:
-	if _plugin_info_label == null:
-		return
 	var plugin := _get_selected_plugin()
 	if plugin.is_empty():
-		_plugin_info_label.text = "No plugin selected. Install a MusicFree-compatible plugin before searching."
+		plugin_info_label.text = "No plugin selected. Install a MusicFree-compatible plugin before searching."
 		return
 
 	var search_types := _string_list_from_array(plugin.get("supportedSearchType", []))
@@ -429,7 +256,7 @@ func _set_plugin_info() -> void:
 		details.append("Author: %s" % str(plugin.get("author", "")))
 	if not str(plugin.get("description", "")).is_empty():
 		details.append(str(plugin.get("description", "")))
-	_plugin_info_label.text = "\n".join(details)
+	plugin_info_label.text = "\n".join(details)
 
 func _string_list_from_array(value: Variant) -> PackedStringArray:
 	var result := PackedStringArray()
@@ -441,166 +268,24 @@ func _string_list_from_array(value: Variant) -> PackedStringArray:
 			result.append(text)
 	return result
 
-func _sync_plugin_selector() -> void:
-	_plugin_selector.clear()
-	for plugin in _plugins:
-		var label := str(plugin.get("name", plugin.get("id", "")))
-		if label.is_empty():
-			label = "Unnamed Plugin"
-		_plugin_selector.add_item(label)
-		_plugin_selector.set_item_metadata(_plugin_selector.item_count - 1, plugin)
-
-	if _plugin_selector.item_count == 0:
-		_plugin_selector.add_item("No plugins installed")
-		_plugin_selector.set_item_disabled(0, true)
-		_plugin_selector.select(0)
-	else:
-		_plugin_selector.select(0)
-
-	_sync_search_type_selector()
-	_set_plugin_info()
-	_render_results()
-	_sync_action_state()
-
-func _sync_search_type_selector() -> void:
-	_search_type_selector.clear()
-	var plugin := _get_selected_plugin()
-	var search_types := _string_list_from_array(plugin.get("supportedSearchType", []))
-	if search_types.is_empty():
-		search_types.append(DEFAULT_SEARCH_TYPE)
-
-	var default_type := str(plugin.get("defaultSearchType", DEFAULT_SEARCH_TYPE))
-	var default_index := 0
-	for index in search_types.size():
-		var search_type := search_types[index]
-		if search_type == default_type:
-			default_index = index
-		_search_type_selector.add_item(_get_search_type_label(search_type))
-		_search_type_selector.set_item_metadata(index, search_type)
-	_search_type_selector.select(default_index)
-	_search_type_selector.disabled = search_types.size() <= 1
+func _copy_string_array(value: Array) -> Array[String]:
+	var result: Array[String] = []
+	for item in value:
+		result.append(str(item))
+	return result
 
 func _get_search_type_label(search_type: String) -> String:
 	match search_type:
 		"music":
-			return "Song"
+			return "单曲"
 		"album":
-			return "Album"
+			return "专辑"
 		"artist":
-			return "Artist"
+			return "作者"
 		"playlist":
-			return "Playlist"
+			return "歌单"
 		_:
 			return search_type.capitalize()
-
-func _render_results() -> void:
-	if _results_box == null:
-		return
-	for child in _results_box.get_children():
-		child.queue_free()
-
-	if _search_results.is_empty():
-		var empty_text := "Choose a plugin, enter a keyword, and search."
-		if _plugins.is_empty():
-			empty_text = "No plugins are installed. Open Manage to install a MusicFree-compatible .js plugin."
-		elif not _last_query.is_empty():
-			empty_text = "No results for \"%s\"." % _last_query
-		_results_box.add_child(_make_empty_state(empty_text))
-		if _result_summary_label != null:
-			if _plugins.is_empty():
-				_result_summary_label.text = "No searchable plugin available."
-			elif _last_query.is_empty():
-				_result_summary_label.text = "Ready to search."
-			else:
-				_result_summary_label.text = "No results on page %d." % _current_page
-		_sync_action_state()
-		return
-
-	if _result_summary_label != null:
-		var end_text := "end" if _last_is_end else "more"
-		_result_summary_label.text = "%d results - page %d - %s" % [
-			_search_results.size(),
-			_current_page,
-			end_text
-		]
-
-	for index in _search_results.size():
-		_results_box.add_child(_make_result_row(index, _search_results[index]))
-	_sync_action_state()
-
-func _make_empty_state(text: String) -> Control:
-	var panel := PanelContainer.new()
-	panel.add_theme_stylebox_override("panel", _make_panel_style(PANEL_BG_SOFT))
-	panel.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-
-	var margin := MarginContainer.new()
-	margin.add_theme_constant_override("margin_left", 18)
-	margin.add_theme_constant_override("margin_top", 24)
-	margin.add_theme_constant_override("margin_right", 18)
-	margin.add_theme_constant_override("margin_bottom", 24)
-	panel.add_child(margin)
-
-	var label := _make_muted_label(text)
-	label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
-	label.custom_minimum_size = Vector2(0, 120)
-	margin.add_child(label)
-	return panel
-
-func _make_result_row(index: int, item: Dictionary) -> Control:
-	var panel := PanelContainer.new()
-	panel.add_theme_stylebox_override("panel", _make_panel_style(PANEL_BG_SOFT))
-	panel.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-
-	var margin := MarginContainer.new()
-	margin.add_theme_constant_override("margin_left", 12)
-	margin.add_theme_constant_override("margin_top", 10)
-	margin.add_theme_constant_override("margin_right", 12)
-	margin.add_theme_constant_override("margin_bottom", 10)
-	panel.add_child(margin)
-
-	var row := HBoxContainer.new()
-	row.add_theme_constant_override("separation", 10)
-	margin.add_child(row)
-
-	var ordinal := Label.new()
-	ordinal.custom_minimum_size = Vector2(30, 0)
-	ordinal.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
-	ordinal.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
-	ordinal.text = str(index + 1 + ((_current_page - 1) * _search_results.size()))
-	ordinal.add_theme_color_override("font_color", MUTED_TEXT)
-	row.add_child(ordinal)
-
-	var text_box := VBoxContainer.new()
-	text_box.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	text_box.add_theme_constant_override("separation", 2)
-	row.add_child(text_box)
-
-	var title_label := Label.new()
-	title_label.text = _result_title(item)
-	title_label.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
-	title_label.add_theme_color_override("font_color", STRONG_TEXT)
-	text_box.add_child(title_label)
-
-	var subtitle_label := Label.new()
-	subtitle_label.text = _result_subtitle(item)
-	subtitle_label.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
-	subtitle_label.add_theme_color_override("font_color", MUTED_TEXT)
-	text_box.add_child(subtitle_label)
-
-	var add_button := Button.new()
-	add_button.custom_minimum_size = Vector2(58, 36)
-	add_button.text = "Add"
-	add_button.pressed.connect(_on_import_result_pressed.bind(index))
-	row.add_child(add_button)
-
-	var play_button := Button.new()
-	play_button.custom_minimum_size = Vector2(58, 36)
-	play_button.text = "Play"
-	play_button.pressed.connect(_on_play_result_pressed.bind(index))
-	row.add_child(play_button)
-
-	return panel
 
 func _result_title(item: Dictionary) -> String:
 	var title := str(item.get("title", "")).strip_edges()
@@ -614,22 +299,14 @@ func _result_subtitle(item: Dictionary) -> String:
 	var parts := PackedStringArray()
 	var artist := str(item.get("artist", "")).strip_edges()
 	var album := str(item.get("album", "")).strip_edges()
-	var platform := str(item.get("platform", _get_selected_plugin_id())).strip_edges()
-	var duration := int(item.get("duration", 0))
 	if not artist.is_empty():
 		parts.append(artist)
-	if not album.is_empty():
+	if not album.is_empty() and album != artist:
 		parts.append(album)
-	if duration > 0:
-		parts.append(_format_duration(duration))
-	if not platform.is_empty():
-		parts.append(platform)
-	return " - ".join(parts) if not parts.is_empty() else "Unknown artist"
-
-func _format_duration(seconds: int) -> String:
-	var clamped_seconds := maxi(0, seconds)
-	var minutes := floori(float(clamped_seconds) / 60.0)
-	return "%d:%02d" % [minutes, clamped_seconds % 60]
+	if parts.is_empty():
+		var raw_text := JSON.stringify(item)
+		return raw_text.left(96) if raw_text.length() > 96 else raw_text
+	return " - ".join(parts)
 
 func _show_error(message: String) -> void:
 	if _plugin_controller != null:
@@ -646,27 +323,34 @@ func _ensure_controller() -> bool:
 	return false
 
 func _sync_action_state() -> void:
-	if _plugin_selector == null:
-		return
 	var has_plugin := not _get_selected_plugin().is_empty()
-	_plugin_selector.disabled = _plugins.is_empty()
-	_search_type_selector.disabled = _search_type_selector.item_count <= 1 or not has_plugin or _is_searching
-	_query_input.editable = has_plugin and not _is_searching
-	_search_button.disabled = not has_plugin or _is_searching
-	_import_all_button.disabled = not has_plugin or _search_results.is_empty() or _is_searching
-	_prev_page_button.disabled = _is_searching or _current_page <= 1 or _last_query.is_empty()
-	_next_page_button.disabled = _is_searching or _last_is_end or _last_query.is_empty()
-	_load_vars_button.disabled = not has_plugin or _is_searching
-	_save_vars_button.disabled = not has_plugin or _is_searching
-	_refresh_plugins_button.disabled = _is_searching
-	_start_host_button.disabled = _is_searching
+	var has_query := not query_input.text.strip_edges().is_empty()
+	submit_search_button.disabled = not has_plugin or not has_query or _is_searching
+	start_host_button.disabled = _is_searching
+	refresh_plugins_button.disabled = _is_searching
+	load_vars_button.disabled = not has_plugin or _is_searching
+	save_vars_button.disabled = not has_plugin or _is_searching
+	clear_history_button.disabled = _search_history.is_empty() or _is_searching
+	manage_toggle_button.text = "Hide" if management_panel.visible else "Manage"
 
 func _set_searching(value: bool) -> void:
 	_is_searching = value
-	_search_button.text = "Searching" if value else "Search"
-	if not value:
-		MusicAppIconsType.apply_icon_button(_search_button, MusicAppIconsType.SEARCH, true, false)
+	submit_search_button.text = "搜索中" if value else "搜索"
 	_sync_action_state()
+
+func _normalize_dictionary_array(value: Variant) -> Array[Dictionary]:
+	var result: Array[Dictionary] = []
+	if not (value is Array):
+		return result
+	for item in value:
+		if item is Dictionary:
+			result.append(item)
+	return result
+
+func _get_plugin_manager() -> DX_MusicPluginManager:
+	if _plugin_controller == null:
+		return null
+	return _plugin_controller.get_music_plugin_manager()
 
 func _request_reload_plugins() -> void:
 	if _reload_requested:
@@ -680,11 +364,71 @@ func _reload_plugins_deferred() -> void:
 		return
 	await _reload_plugins(true)
 
-func _on_manage_toggle_pressed() -> void:
-	if _management_panel == null:
+func _on_query_text_changed(_text: String) -> void:
+	_sync_query_state()
+	_sync_action_state()
+
+func _on_clear_query_pressed() -> void:
+	query_input.text = ""
+	_last_query = ""
+	_search_results = []
+	_current_page = 1
+	_last_is_end = true
+	_sync_query_state()
+	_render_results()
+	_sync_action_state()
+
+func _on_clear_history_pressed() -> void:
+	_plugin_controller.clear_plugin_search_history()
+	_search_history = _copy_string_array(_plugin_controller.get_plugin_search_history())
+	_render_history()
+	_sync_action_state()
+
+func _on_history_tag_pressed(text: String) -> void:
+	query_input.text = text
+	await _search_page(1)
+
+func _on_history_tag_remove_requested(text: String) -> void:
+	_plugin_controller.remove_plugin_search_history(text)
+	_search_history = _copy_string_array(_plugin_controller.get_plugin_search_history())
+	_render_history()
+	_sync_action_state()
+
+func _on_search_type_tab_selected(search_type: String) -> void:
+	if search_type == _selected_search_type:
 		return
-	_management_panel.visible = not _management_panel.visible
-	_manage_toggle_button.text = "Hide" if _management_panel.visible else "Manage"
+	_selected_search_type = search_type
+	_render_tabs()
+	if not _last_query.is_empty():
+		await _search_page(1)
+
+func _on_plugin_tab_selected(plugin_id: String) -> void:
+	if plugin_id == _selected_plugin_id:
+		return
+	_selected_plugin_id = plugin_id
+	var plugin := _get_selected_plugin()
+	var supported_types := _string_list_from_array(plugin.get("supportedSearchType", []))
+	if supported_types.is_empty():
+		supported_types.append(DEFAULT_SEARCH_TYPE)
+	if not supported_types.has(_selected_search_type):
+		_selected_search_type = supported_types[0]
+	_set_plugin_info()
+	_render_tabs()
+	_sync_action_state()
+	if not _last_query.is_empty():
+		await _search_page(1)
+
+func _on_result_row_pressed(index: int) -> void:
+	if index < 0 or index >= _search_results.size():
+		return
+	if _get_selected_search_type() != "music":
+		_toast("当前只实现了单曲导入和播放。")
+		return
+	_import_results([_search_results[index]], true)
+
+func _on_manage_toggle_pressed() -> void:
+	management_panel.visible = not management_panel.visible
+	_sync_action_state()
 
 func _on_start_host_pressed() -> void:
 	if not _ensure_controller():
@@ -707,7 +451,7 @@ func _on_refresh_plugins_pressed() -> void:
 func _on_install_file_pressed() -> void:
 	if not _ensure_controller():
 		return
-	var plugin_path := _install_file_input.text.strip_edges()
+	var plugin_path := install_file_input.text.strip_edges()
 	if plugin_path.is_empty():
 		_show_error("Please enter a plugin file path.")
 		return
@@ -721,7 +465,7 @@ func _on_install_file_pressed() -> void:
 func _on_install_url_pressed() -> void:
 	if not _ensure_controller():
 		return
-	var plugin_url := _install_url_input.text.strip_edges()
+	var plugin_url := install_url_input.text.strip_edges()
 	if plugin_url.is_empty():
 		_show_error("Please enter a plugin URL.")
 		return
@@ -731,16 +475,6 @@ func _on_install_url_pressed() -> void:
 		return
 	_toast("Plugin installed from URL.")
 	await _reload_plugins(false)
-
-func _on_plugin_selected(_index: int) -> void:
-	_current_page = 1
-	_last_query = ""
-	_last_is_end = true
-	_search_results = []
-	_sync_search_type_selector()
-	_set_plugin_info()
-	_render_results()
-	_sync_action_state()
 
 func _on_load_vars_pressed() -> void:
 	var plugin_id := _get_selected_plugin_id()
@@ -759,7 +493,7 @@ func _on_load_vars_pressed() -> void:
 	var values: Dictionary = {}
 	if payload is Dictionary:
 		values = payload.get("values", {})
-	_vars_editor.text = JSON.stringify(values, "\t")
+	vars_editor.text = JSON.stringify(values, "\t")
 
 func _on_save_vars_pressed() -> void:
 	var plugin_id := _get_selected_plugin_id()
@@ -768,7 +502,7 @@ func _on_save_vars_pressed() -> void:
 		return
 
 	var json := JSON.new()
-	if json.parse(_vars_editor.text) != OK or not (json.data is Dictionary):
+	if json.parse(vars_editor.text) != OK or not (json.data is Dictionary):
 		_show_error("Plugin vars must be a JSON object.")
 		return
 
@@ -781,7 +515,6 @@ func _on_save_vars_pressed() -> void:
 	if not bool(result.get("ok", false)):
 		_show_error(str(result.get("error", "Failed to save plugin vars.")))
 		return
-
 	_toast("Plugin vars saved.")
 
 func _on_query_submitted(_text: String) -> void:
@@ -789,16 +522,6 @@ func _on_query_submitted(_text: String) -> void:
 
 func _on_search_pressed() -> void:
 	await _search_page(1)
-
-func _on_prev_page_pressed() -> void:
-	if _current_page <= 1:
-		return
-	await _search_page(_current_page - 1)
-
-func _on_next_page_pressed() -> void:
-	if _last_is_end:
-		return
-	await _search_page(_current_page + 1)
 
 func _search_page(page: int) -> void:
 	if not _ensure_controller() or _is_searching:
@@ -812,50 +535,43 @@ func _search_page(page: int) -> void:
 		_show_error("Selected plugin does not support search.")
 		return
 
-	var query := _query_input.text.strip_edges()
+	var query := query_input.text.strip_edges()
 	if query.is_empty():
 		_show_error("Please enter a search keyword.")
 		return
 
-	var media_type := _get_selected_search_type()
 	_current_page = maxi(1, page)
 	_last_query = query
-	_result_summary_label.text = "Searching \"%s\"..." % query
+	_sync_query_state()
 	_set_searching(true)
 
-	var result := await _plugin_controller.search_music_plugin(plugin_id, query, _current_page, media_type)
+	var result := await _plugin_controller.search_music_plugin(
+		plugin_id,
+		query,
+		_current_page,
+		_get_selected_search_type()
+	)
 	_set_searching(false)
 	if not bool(result.get("ok", false)):
 		_search_results = []
 		_last_is_end = true
-		_result_summary_label.text = "Search failed."
 		_render_results()
 		_show_error(str(result.get("error", "Search failed.")))
 		return
+
+	_plugin_controller.push_plugin_search_history(query)
+	_search_history = _copy_string_array(_plugin_controller.get_plugin_search_history())
+	_render_history()
 
 	var payload = result.get("data", {})
 	if payload is Dictionary:
 		_search_results = _normalize_dictionary_array(payload.get("data", []))
 		_last_is_end = bool(payload.get("isEnd", true))
 	else:
-		_search_results = _normalize_dictionary_array(null)
+		_search_results = []
 		_last_is_end = true
 	_render_results()
-
-func _on_import_result_pressed(index: int) -> void:
-	if index < 0 or index >= _search_results.size():
-		return
-	_import_results([_search_results[index]], false)
-
-func _on_play_result_pressed(index: int) -> void:
-	if index < 0 or index >= _search_results.size():
-		return
-	_import_results([_search_results[index]], true)
-
-func _on_import_all_pressed() -> void:
-	if _search_results.is_empty():
-		return
-	_import_results(_search_results.duplicate(), false)
+	_sync_action_state()
 
 func _import_results(results: Array, autoplay_first: bool) -> void:
 	if not _ensure_controller():
@@ -891,7 +607,11 @@ func _reload_plugins(auto_start: bool) -> void:
 
 	if not bool(health_result.get("ok", false)):
 		_plugins = []
-		_sync_plugin_selector()
+		_selected_plugin_id = ""
+		_search_results = []
+		_last_is_end = true
+		_render_tabs()
+		_render_results()
 		_set_status("Host unavailable: %s" % str(health_result.get("error", "Unknown error.")))
 		return
 
@@ -899,7 +619,9 @@ func _reload_plugins(auto_start: bool) -> void:
 	var list_result := await manager.list_plugins()
 	if not bool(list_result.get("ok", false)):
 		_plugins = []
-		_sync_plugin_selector()
+		_selected_plugin_id = ""
+		_render_tabs()
+		_render_results()
 		_set_status("Host ready, but plugins could not be listed: %s" % str(list_result.get("error", "")))
 		return
 
@@ -909,7 +631,23 @@ func _reload_plugins(auto_start: bool) -> void:
 	else:
 		_plugins = []
 
-	_sync_plugin_selector()
+	if _plugins.is_empty():
+		_selected_plugin_id = ""
+		_selected_search_type = DEFAULT_SEARCH_TYPE
+	else:
+		if _selected_plugin_id.is_empty() or _get_selected_plugin().is_empty():
+			_selected_plugin_id = _plugin_key(_plugins[0])
+		var plugin := _get_selected_plugin()
+		var search_types := _string_list_from_array(plugin.get("supportedSearchType", []))
+		if search_types.is_empty():
+			search_types.append(DEFAULT_SEARCH_TYPE)
+		if not search_types.has(_selected_search_type):
+			_selected_search_type = search_types[0]
+
+	_render_tabs()
+	_set_plugin_info()
+	_render_results()
+	_sync_action_state()
 	if _plugins.is_empty():
 		_set_status("Host ready. No plugins installed yet.")
 	else:

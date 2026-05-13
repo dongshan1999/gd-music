@@ -221,7 +221,7 @@ func _resolve_stream_for_track(track: TrackData, sync_request_id: int) -> AudioS
 		return _load_local_stream(track.file_path)
 
 	if track.stream_url.is_empty() and track.is_plugin_track():
-		var plugin_controller := MusicAppPluginController.new(get_showcase())
+		var plugin_controller := MusicAppPluginBrowserController.new(get_showcase())
 		var resolve_result = await plugin_controller.resolve_track_plugin_source(get_selected_track_index())
 		if sync_request_id != _audio_sync_request_id:
 			return null

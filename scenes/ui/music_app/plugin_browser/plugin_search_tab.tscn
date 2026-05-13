@@ -1,0 +1,49 @@
+[gd_scene load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/ui/music_app/views/plugin_browser/music_app_plugin_search_tab.gd" id="1_script"]
+
+[node name="PluginSearchTab" type="Control"]
+custom_minimum_size = Vector2(0, 48)
+layout_mode = 2
+size_flags_horizontal = 3
+script = ExtResource("1_script")
+
+[node name="TitleLabel" type="Label" parent="." unique_id=1873842239]
+unique_name_in_owner = true
+layout_mode = 0
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_bottom = -4.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_colors/font_color = Color(0.968627, 0.968627, 0.972549, 1)
+theme_override_font_sizes/font_size = 17
+text = "单曲"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="Underline" type="ColorRect" parent="." unique_id=301138548]
+unique_name_in_owner = true
+layout_mode = 0
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_top = -3.0
+color = Color(0.34902, 0.815686, 1, 1)
+
+[node name="HitButton" type="Button" parent="." unique_id=1999306079]
+unique_name_in_owner = true
+layout_mode = 0
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_styles/disabled = null
+theme_override_styles/focus = null
+theme_override_styles/hover = null
+theme_override_styles/normal = null
+theme_override_styles/pressed = null
+flat = true
+text = ""

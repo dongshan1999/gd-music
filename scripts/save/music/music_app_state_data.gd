@@ -1,7 +1,7 @@
 class_name MusicAppStateData
 extends "res://dx/runtime/scripts/serializer/json_object.gd"
 
-const SAVE_VERSION := 3
+const SAVE_VERSION := 4
 const DEFAULT_SELECTED_PLAYLIST_INDEX := 0
 const DEFAULT_SELECTED_TRACK_INDEX := 0
 const DEFAULT_PLAYBACK_QUEUE_INDEX := 0
@@ -28,6 +28,7 @@ var playback_mode: int = DEFAULT_PLAYBACK_MODE
 var elapsed_seconds: int = DEFAULT_ELAPSED_SECONDS
 var is_playing: bool = DEFAULT_IS_PLAYING
 var liked_tracks: Dictionary = {}
+var plugin_search_history: Array[String] = []
 
 static func is_system_favorite_playlist(playlist) -> bool:
 	if playlist == null:
@@ -66,6 +67,7 @@ func _init() -> void:
 	elapsed_seconds = DEFAULT_ELAPSED_SECONDS
 	is_playing = DEFAULT_IS_PLAYING
 	liked_tracks = DEFAULT_LIKED_TRACKS.duplicate(true)
+	plugin_search_history = []
 	normalize()
 
 func normalize() -> void:
@@ -79,6 +81,7 @@ func normalize() -> void:
 	playback_mode = clampi(playback_mode, PlaybackMode.LOOP_ALL, PlaybackMode.SHUFFLE)
 	elapsed_seconds = maxi(0, elapsed_seconds)
 	liked_tracks = _normalize_liked_tracks(liked_tracks)
+	plugin_search_history = _normalize_string_array(plugin_search_history, 10)
 
 	if tracks.is_empty():
 		elapsed_seconds = 0
@@ -124,6 +127,17 @@ func _normalize_liked_tracks(source_liked_tracks: Dictionary) -> Dictionary:
 	var result := {}
 	for key in source_liked_tracks:
 		result[str(key)] = bool(source_liked_tracks[key])
+	return result
+
+func _normalize_string_array(source: Array, max_count: int = -1) -> Array[String]:
+	var result: Array[String] = []
+	for item in source:
+		var text := str(item).strip_edges()
+		if text.is_empty() or result.has(text):
+			continue
+		result.append(text)
+		if max_count > 0 and result.size() >= max_count:
+			break
 	return result
 
 func _normalize_playback_track_indices(source_track_indices: Array) -> Array[int]:

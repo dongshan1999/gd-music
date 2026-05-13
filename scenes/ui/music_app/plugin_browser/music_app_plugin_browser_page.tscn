@@ -1,8 +1,35 @@
-[gd_scene load_steps=2 format=3]
+[gd_scene load_steps=6 format=3]
 
 [ext_resource type="Script" path="res://scripts/ui/music_app/views/plugin_browser/music_app_plugin_browser_view.gd" id="1_script"]
+[ext_resource type="PackedScene" path="res://scenes/ui/music_app/plugin_browser/plugin_search_tab.tscn" id="2_search_tab"]
 
-[node name="PluginBrowserPage" type="Control"]
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_search_bar"]
+bg_color = Color(0.129412, 0.133333, 0.145098, 1)
+corner_radius_top_left = 20
+corner_radius_top_right = 20
+corner_radius_bottom_right = 20
+corner_radius_bottom_left = 20
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_management_panel"]
+bg_color = Color(0.14902, 0.152941, 0.164706, 1)
+border_width_bottom = 1
+border_width_left = 1
+border_width_right = 1
+border_width_top = 1
+border_color = Color(0.215686, 0.223529, 0.247059, 1)
+corner_radius_top_left = 10
+corner_radius_top_right = 10
+corner_radius_bottom_right = 10
+corner_radius_bottom_left = 10
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_plugin_history_title"]
+bg_color = Color(0.203922, 0.203922, 0.215686, 1)
+corner_radius_top_left = 6
+corner_radius_top_right = 6
+corner_radius_bottom_right = 6
+corner_radius_bottom_left = 6
+
+[node name="MusicAppPluginBrowserView" type="Control"]
 layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0
@@ -10,3 +37,274 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 script = ExtResource("1_script")
+
+[node name="Background" type="ColorRect" parent="."]
+layout_mode = 0
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0.137255, 0.137255, 0.145098, 1)
+
+[node name="Margin" type="MarginContainer" parent="."]
+layout_mode = 0
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/margin_left = 14
+theme_override_constants/margin_top = 10
+theme_override_constants/margin_right = 14
+theme_override_constants/margin_bottom = 10
+
+[node name="RootVBox" type="VBoxContainer" parent="Margin"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+theme_override_constants/separation = 10
+
+[node name="SearchRow" type="HBoxContainer" parent="Margin/RootVBox"]
+layout_mode = 2
+custom_minimum_size = Vector2(0, 46)
+theme_override_constants/separation = 10
+
+[node name="BackButton" type="Button" parent="Margin/RootVBox/SearchRow" unique_id=1695653304]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(42, 42)
+layout_mode = 2
+flat = true
+text = "←"
+
+[node name="SearchBarPanel" type="PanelContainer" parent="Margin/RootVBox/SearchRow"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_styles/panel = SubResource("StyleBoxFlat_search_bar")
+
+[node name="SearchBarMargin" type="MarginContainer" parent="Margin/RootVBox/SearchRow/SearchBarPanel"]
+layout_mode = 2
+theme_override_constants/margin_left = 12
+theme_override_constants/margin_top = 6
+theme_override_constants/margin_right = 12
+theme_override_constants/margin_bottom = 6
+
+[node name="SearchBarRow" type="HBoxContainer" parent="Margin/RootVBox/SearchRow/SearchBarPanel/SearchBarMargin"]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="SearchIconRect" type="TextureRect" parent="Margin/RootVBox/SearchRow/SearchBarPanel/SearchBarMargin/SearchBarRow" unique_id=1436246680]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(18, 18)
+layout_mode = 2
+stretch_mode = 5
+
+[node name="QueryInput" type="LineEdit" parent="Margin/RootVBox/SearchRow/SearchBarPanel/SearchBarMargin/SearchBarRow" unique_id=374152739]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+flat = true
+placeholder_text = "输入要搜索的歌曲"
+
+[node name="ClearQueryButton" type="Button" parent="Margin/RootVBox/SearchRow/SearchBarPanel/SearchBarMargin/SearchBarRow" unique_id=2106999030]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(24, 24)
+visible = false
+layout_mode = 2
+flat = true
+text = "×"
+
+[node name="SubmitSearchButton" type="Button" parent="Margin/RootVBox/SearchRow" unique_id=161286635]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(52, 42)
+layout_mode = 2
+flat = true
+text = "搜索"
+
+[node name="SearchContent" type="VBoxContainer" parent="Margin/RootVBox" unique_id=1882077670]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_vertical = 3
+theme_override_constants/separation = 12
+
+[node name="HistorySection" type="VBoxContainer" parent="Margin/RootVBox/SearchContent"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_constants/separation = 12
+
+[node name="HistoryHeader" type="HBoxContainer" parent="Margin/RootVBox/SearchContent/HistorySection"]
+layout_mode = 2
+
+[node name="HistoryTitleLabel" type="Label" parent="Margin/RootVBox/SearchContent/HistorySection/HistoryHeader" unique_id=1968642383]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_colors/font_color = Color(0.968627, 0.968627, 0.972549, 1)
+theme_override_font_sizes/font_size = 17
+text = "历史记录"
+
+[node name="ClearHistoryButton" type="Button" parent="Margin/RootVBox/SearchContent/HistorySection/HistoryHeader" unique_id=1277190165]
+unique_name_in_owner = true
+layout_mode = 2
+flat = true
+text = "清空"
+
+[node name="HistoryTagsContainer" type="FlowContainer" parent="Margin/RootVBox/SearchContent/HistorySection" unique_id=832174555]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_constants/h_separation = 8
+theme_override_constants/v_separation = 10
+
+[node name="HistoryEmptyLabel" type="Label" parent="Margin/RootVBox/SearchContent/HistorySection" unique_id=528048365]
+unique_name_in_owner = true
+visible = false
+layout_mode = 2
+theme_override_colors/font_color = Color(0.643137, 0.65098, 0.690196, 1)
+text = "暂无搜索记录"
+
+[node name="ResultsSection" type="VBoxContainer" parent="Margin/RootVBox/SearchContent"]
+unique_name_in_owner = true
+visible = false
+layout_mode = 2
+size_flags_vertical = 3
+theme_override_constants/separation = 0
+
+[node name="SearchTypeTabs" type="HBoxContainer" parent="Margin/RootVBox/SearchContent/ResultsSection" unique_id=1242667516]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 48)
+layout_mode = 2
+
+[node name="SearchTypeTabTemplate" parent="Margin/RootVBox/SearchContent/ResultsSection/SearchTypeTabs" instance=ExtResource("2_search_tab")]
+visible = false
+
+[node name="PluginTabs" type="HBoxContainer" parent="Margin/RootVBox/SearchContent/ResultsSection" unique_id=168431907]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 46)
+layout_mode = 2
+
+[node name="ResultsScroll" type="ScrollContainer" parent="Margin/RootVBox/SearchContent/ResultsSection" unique_id=957302576]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_vertical = 3
+horizontal_scroll_mode = 0
+
+[node name="ResultsList" type="VBoxContainer" parent="Margin/RootVBox/SearchContent/ResultsSection/ResultsScroll" unique_id=1798120618]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 6
+
+[node name="EmptyResultsLabel" type="Label" parent="Margin/RootVBox/SearchContent/ResultsSection/ResultsScroll/ResultsList" unique_id=964878243]
+unique_name_in_owner = true
+visible = false
+custom_minimum_size = Vector2(0, 120)
+layout_mode = 2
+theme_override_colors/font_color = Color(0.643137, 0.65098, 0.690196, 1)
+text = "请选择插件并输入搜索关键字"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="ManagementPanel" type="PanelContainer" parent="Margin/RootVBox"]
+unique_name_in_owner = true
+visible = false
+layout_mode = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_management_panel")
+
+[node name="ManagementMargin" type="MarginContainer" parent="Margin/RootVBox/ManagementPanel"]
+layout_mode = 2
+theme_override_constants/margin_left = 12
+theme_override_constants/margin_top = 12
+theme_override_constants/margin_right = 12
+theme_override_constants/margin_bottom = 12
+
+[node name="ManagementVBox" type="VBoxContainer" parent="Margin/RootVBox/ManagementPanel/ManagementMargin"]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="HostStatusLabel" type="Label" parent="Margin/RootVBox/ManagementPanel/ManagementMargin/ManagementVBox" unique_id=1710614442]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_colors/font_color = Color(0.643137, 0.65098, 0.690196, 1)
+text = "Checking plugin host..."
+autowrap_mode = 2
+
+[node name="ManagementToolbar" type="HBoxContainer" parent="Margin/RootVBox/ManagementPanel/ManagementMargin/ManagementVBox"]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="ManageToggleButton" type="Button" parent="Margin/RootVBox/ManagementPanel/ManagementMargin/ManagementVBox/ManagementToolbar" unique_id=1637107076]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(86, 36)
+layout_mode = 2
+text = "Hide"
+
+[node name="StartHostButton" type="Button" parent="Margin/RootVBox/ManagementPanel/ManagementMargin/ManagementVBox/ManagementToolbar" unique_id=1637082929]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(72, 36)
+layout_mode = 2
+text = "Start"
+
+[node name="RefreshPluginsButton" type="Button" parent="Margin/RootVBox/ManagementPanel/ManagementMargin/ManagementVBox/ManagementToolbar" unique_id=793187867]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(78, 36)
+layout_mode = 2
+text = "Refresh"
+
+[node name="InstallFileRow" type="HBoxContainer" parent="Margin/RootVBox/ManagementPanel/ManagementMargin/ManagementVBox"]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="InstallFileInput" type="LineEdit" parent="Margin/RootVBox/ManagementPanel/ManagementMargin/ManagementVBox/InstallFileRow" unique_id=1641197667]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+placeholder_text = "Path to MusicFree .js plugin"
+
+[node name="InstallFileButton" type="Button" parent="Margin/RootVBox/ManagementPanel/ManagementMargin/ManagementVBox/InstallFileRow" unique_id=924461270]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(70, 36)
+layout_mode = 2
+text = "Install"
+
+[node name="InstallUrlRow" type="HBoxContainer" parent="Margin/RootVBox/ManagementPanel/ManagementMargin/ManagementVBox"]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="InstallUrlInput" type="LineEdit" parent="Margin/RootVBox/ManagementPanel/ManagementMargin/ManagementVBox/InstallUrlRow" unique_id=156944659]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+placeholder_text = "https://..."
+
+[node name="InstallUrlButton" type="Button" parent="Margin/RootVBox/ManagementPanel/ManagementMargin/ManagementVBox/InstallUrlRow" unique_id=156238477]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(70, 36)
+layout_mode = 2
+text = "Install"
+
+[node name="PluginInfoLabel" type="Label" parent="Margin/RootVBox/ManagementPanel/ManagementMargin/ManagementVBox" unique_id=1406908151]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_colors/font_color = Color(0.643137, 0.65098, 0.690196, 1)
+text = "No plugin selected."
+autowrap_mode = 2
+
+[node name="PluginVarsToolbar" type="HBoxContainer" parent="Margin/RootVBox/ManagementPanel/ManagementMargin/ManagementVBox"]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="LoadVarsButton" type="Button" parent="Margin/RootVBox/ManagementPanel/ManagementMargin/ManagementVBox/PluginVarsToolbar" unique_id=1863536038]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(96, 34)
+layout_mode = 2
+text = "Load Vars"
+
+[node name="SaveVarsButton" type="Button" parent="Margin/RootVBox/ManagementPanel/ManagementMargin/ManagementVBox/PluginVarsToolbar" unique_id=1537376860]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(96, 34)
+layout_mode = 2
+text = "Save Vars"
+
+[node name="VarsEditor" type="TextEdit" parent="Margin/RootVBox/ManagementPanel/ManagementMargin/ManagementVBox" unique_id=1085558026]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 96)
+layout_mode = 2
+text = "{}"
