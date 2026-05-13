@@ -2,7 +2,7 @@ class_name MusicAppLocalMusicView
 extends "res://dx/runtime/scripts/managers/popup/popup_view.gd"
 
 const MusicAppScriptPathsType := preload("res://scripts/constants/music_app_script_paths.gd")
-const MusicAppUiSymbolsType := preload("res://scripts/constants/music_app_ui_symbols.gd")
+const MusicAppIconsType := preload("res://scripts/constants/music_app_icons.gd")
 const LOCAL_MUSIC_ROW_SCENE := preload(MusicAppScriptPathsType.LOCAL_MUSIC_ROW)
 
 var _controller: MusicAppShowcaseController
@@ -37,7 +37,7 @@ func bind() -> void:
 	_is_bound = true
 
 	local_music_back_button.pressed.connect(close_page)
-	local_music_search_button.pressed.connect(_show_stub_search)
+	local_music_search_button.pressed.connect(_open_plugin_search)
 	local_music_more_button.pressed.connect(_toggle_menu)
 	local_music_menu_scrim.pressed.connect(_hide_menu)
 	scan_music_button.pressed.connect(_open_scan_page)
@@ -50,9 +50,12 @@ func refresh() -> void:
 	if _controller == null:
 		return
 
-	local_music_back_button.text = MusicAppUiSymbolsType.BACK
-	local_music_search_button.text = MusicAppUiSymbolsType.SEARCH
-	local_music_more_button.text = MusicAppUiSymbolsType.MORE
+	MusicAppIconsType.apply_icon_button(local_music_back_button, MusicAppIconsType.ARROW_LEFT)
+	MusicAppIconsType.apply_icon_button(local_music_search_button, MusicAppIconsType.SEARCH)
+	MusicAppIconsType.apply_icon_button(local_music_more_button, MusicAppIconsType.MORE)
+	MusicAppIconsType.apply_icon_button(scan_music_button, MusicAppIconsType.FOLDER_MUSIC, true, false)
+	MusicAppIconsType.apply_icon_button(edit_music_button, MusicAppIconsType.EDIT, true, false)
+	MusicAppIconsType.apply_icon_button(download_list_button, MusicAppIconsType.DOWNLOAD, true, false)
 	local_music_empty_label.text = "%s\n%s" % [
 		tr("music_app.local.empty_line1"),
 		tr("music_app.local.empty_line2")
@@ -107,7 +110,7 @@ func _open_scan_page() -> void:
 	_hide_menu()
 	_local_music_controller.open_scan_page()
 
-func _show_stub_search() -> void:
+func _open_plugin_search() -> void:
 	_local_music_controller.open_plugin_browser()
 
 func _show_stub_edit() -> void:

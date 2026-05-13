@@ -2,7 +2,7 @@ class_name MusicAppLocalMusicRow
 extends Panel
 
 const MusicAppScriptPathsType := preload("res://scripts/constants/music_app_script_paths.gd")
-const MusicAppUiSymbolsType := preload("res://scripts/constants/music_app_ui_symbols.gd")
+const MusicAppIconsType := preload("res://scripts/constants/music_app_icons.gd")
 
 signal play_requested(index: int)
 signal more_requested(index: int)
@@ -28,7 +28,7 @@ func setup() -> void:
 	_source_label = $Margin/Row/SourceChip/Margin/SourceLabel
 	_more_button = $Margin/Row/MoreButton
 	_open_button = $OpenButton
-	_more_button.text = MusicAppUiSymbolsType.MORE
+	MusicAppIconsType.apply_icon_button(_more_button, MusicAppIconsType.MORE)
 
 	_more_button.pressed.connect(_on_more_pressed)
 	_open_button.pressed.connect(_on_open_pressed)
@@ -47,7 +47,7 @@ func _build_subtitle(track: TrackData) -> String:
 		subtitle = "%s - %s" % [subtitle, track.subtitle] if not subtitle.is_empty() else track.subtitle
 	if subtitle.is_empty():
 		subtitle = tr("music_app.track.local_file")
-	return "%s %s" % [MusicAppUiSymbolsType.BULLET, subtitle]
+	return subtitle
 
 func _on_open_pressed() -> void:
 	if _track_index < 0:

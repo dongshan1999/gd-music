@@ -77,9 +77,12 @@ theme_override_constants/margin_bottom = 14
 layout_mode = 2
 theme_override_constants/separation = 12
 
-[node name="SearchIconLabel" type="Label" parent="Margin/HomeVBox/SearchRow/SearchBar/Margin/SearchHBox" unique_id=90974247]
+[node name="SearchIconRect" type="TextureRect" parent="Margin/HomeVBox/SearchRow/SearchBar/Margin/SearchHBox" unique_id=90974247]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(18, 18)
 layout_mode = 2
-text = "⌕"
+mouse_filter = 2
+stretch_mode = 5
 
 [node name="SearchPromptLabel" type="Label" parent="Margin/HomeVBox/SearchRow/SearchBar/Margin/SearchHBox" unique_id=1417647797]
 unique_name_in_owner = true
