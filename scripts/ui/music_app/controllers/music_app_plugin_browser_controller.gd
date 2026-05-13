@@ -1,9 +1,49 @@
-class_name MusicAppPluginController
+class_name MusicAppPluginBrowserController
 extends "res://scripts/ui/music_app/controllers/music_app_controller_base.gd"
+
+const MAX_SEARCH_HISTORY := 10
 
 ## 返回全局音乐插件管理器。
 func get_music_plugin_manager() -> DX_MusicPluginManager:
 	return DX.music_plugins as DX_MusicPluginManager
+
+## 返回插件搜索历史。
+func get_plugin_search_history() -> Array[String]:
+	var result: Array[String] = []
+	for item in get_app_state().plugin_search_history:
+		result.append(item)
+	return result
+
+## 将搜索关键字写入历史，自动去重并限制数量。
+func push_plugin_search_history(query: String) -> void:
+	var normalized_query := query.strip_edges()
+	if normalized_query.is_empty():
+		return
+
+	var next_history := get_plugin_search_history()
+	next_history.erase(normalized_query)
+	next_history.push_front(normalized_query)
+	if next_history.size() > MAX_SEARCH_HISTORY:
+		next_history.resize(MAX_SEARCH_HISTORY)
+	get_app_state().plugin_search_history = next_history
+	save_app_state()
+
+## 删除单个搜索历史。
+func remove_plugin_search_history(query: String) -> void:
+	var normalized_query := query.strip_edges()
+	if normalized_query.is_empty():
+		return
+	var next_history := get_plugin_search_history()
+	next_history.erase(normalized_query)
+	get_app_state().plugin_search_history = next_history
+	save_app_state()
+
+## 清空插件搜索历史。
+func clear_plugin_search_history() -> void:
+	if get_app_state().plugin_search_history.is_empty():
+		return
+	get_app_state().plugin_search_history = []
+	save_app_state()
 
 ## 启动本地音乐插件宿主服务。
 func start_music_plugin_host() -> Dictionary:

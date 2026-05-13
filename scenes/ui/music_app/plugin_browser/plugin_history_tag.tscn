@@ -1,0 +1,47 @@
+[gd_scene load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://scripts/ui/music_app/views/plugin_browser/music_app_plugin_history_tag.gd" id="1_script"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_history_tag"]
+bg_color = Color(0.247059, 0.247059, 0.258824, 1)
+corner_radius_top_left = 999
+corner_radius_top_right = 999
+corner_radius_bottom_right = 999
+corner_radius_bottom_left = 999
+
+[node name="PluginHistoryTag" type="PanelContainer"]
+custom_minimum_size = Vector2(0, 38)
+layout_mode = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_history_tag")
+script = ExtResource("1_script")
+
+[node name="Row" type="HBoxContainer" parent="."]
+layout_mode = 2
+theme_override_constants/separation = 2
+
+[node name="HitButton" type="Button" parent="Row" unique_id=747198847]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 38)
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_colors/font_color = Color(0.952941, 0.956863, 0.972549, 1)
+theme_override_styles/disabled = null
+theme_override_styles/focus = null
+theme_override_styles/hover = null
+theme_override_styles/normal = null
+theme_override_styles/pressed = null
+flat = true
+text = "周杰伦"
+
+[node name="RemoveButton" type="Button" parent="Row" unique_id=281496193]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(32, 38)
+layout_mode = 2
+theme_override_colors/font_color = Color(0.854902, 0.862745, 0.894118, 1)
+theme_override_styles/disabled = null
+theme_override_styles/focus = null
+theme_override_styles/hover = null
+theme_override_styles/normal = null
+theme_override_styles/pressed = null
+flat = true
+text = "×"

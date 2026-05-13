@@ -59,7 +59,7 @@ func _notification(what: int) -> void:
 
 ## 延迟触发插件宿主自动启动流程。
 func _auto_start_plugin_host() -> void:
-	await MusicAppPluginController.new(self).auto_start_music_plugin_host()
+	await MusicAppPluginBrowserController.new(self).auto_start_music_plugin_host()
 
 ## 每秒同步一次播放进度，并在状态变化时刷新界面。
 func _on_tick() -> void:
