@@ -11,6 +11,22 @@ func get_current_track() -> TrackData:
 	var playback_controller = get_playback_controller()
 	return playback_controller.get_current_playback_track() if playback_controller != null else null
 
+## 返回迷你播放器当前曲目的总时长。
+func get_current_duration() -> int:
+	var track := get_current_track()
+	return track.duration if track != null else 0
+
+## 返回迷你播放器当前曲目的已播放秒数。
+func get_current_elapsed_seconds() -> int:
+	return get_elapsed_seconds()
+
+## 返回迷你播放器的播放进度比例。
+func get_playback_progress_ratio() -> float:
+	var duration := get_current_duration()
+	if duration <= 0:
+		return 0.0
+	return clampf(float(get_current_elapsed_seconds()) / float(duration), 0.0, 1.0)
+
 ## 返回曲目在迷你播放器上的展示歌手名。
 func get_track_display_artist(track: TrackData) -> String:
 	if not track.artist.is_empty():
