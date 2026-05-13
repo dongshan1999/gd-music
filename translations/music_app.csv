@@ -27,6 +27,12 @@ music_app.player.placeholder_artist,Chen Li,陈粒,陈粒
 music_app.player.placeholder_source,Yuanli QQ,元力QQ,元力QQ
 music_app.player.fx,FX,音效,音效
 music_app.player.comments_short,Cmts,评,评
+music_app.queue.title_with_count,Playback Queue ({count}),播放列表 ({count}首),播放列表 ({count}首)
+music_app.queue.mode.loop_all,Loop All,循环播放,循环播放
+music_app.queue.mode.repeat_one,Repeat One,单曲循环,单曲循环
+music_app.queue.mode.shuffle,Shuffle,随机播放,随机播放
+music_app.queue.clear,Clear,清空,清空
+music_app.queue.empty,The playback queue is empty.,当前播放列表为空,当前播放列表为空
 music_app.mini_player.empty,"No tracks, import music first","暂无歌曲，请先导入","暂无歌曲，请先导入"
 music_app.mini_player.placeholder_track,Virtual - Chen Li,虚拟 - 陈粒,虚拟 - 陈粒
 music_app.local.title,Local Music,本地音乐,本地音乐

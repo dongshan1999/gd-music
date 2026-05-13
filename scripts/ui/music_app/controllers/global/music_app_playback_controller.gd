@@ -1,6 +1,7 @@
 class_name MusicAppPlaybackController
 extends "res://scripts/ui/music_app/controllers/music_app_controller_base.gd"
 
+const MusicAppIconsType := preload("res://scripts/constants/music_app_icons.gd")
 const MusicAppUiSymbolsType := preload("res://scripts/constants/music_app_ui_symbols.gd")
 const QUEUE_ALERT_TITLE := "播放队列"
 const QUEUE_EMPTY_MESSAGE := "当前没有播放内容。"
@@ -23,6 +24,37 @@ func get_playback_queue_index() -> int:
 ## 设置当前播放列表的游标位置。
 func set_playback_queue_index(value: int) -> void:
 	super.set_playback_queue_index(value)
+
+## 返回当前全局播放模式。
+func get_playback_mode() -> int:
+	return super.get_playback_mode()
+
+## 设置当前全局播放模式。
+func set_playback_mode(value: int, persist_state: bool = true, emit_state_changed: bool = true) -> void:
+	var clamped_mode := clampi(
+		value,
+		MusicAppStateDataType.PlaybackMode.LOOP_ALL,
+		MusicAppStateDataType.PlaybackMode.SHUFFLE
+	)
+	if get_playback_mode() == clamped_mode:
+		if persist_state:
+			save_app_state()
+		return
+
+	super.set_playback_mode(clamped_mode)
+	if emit_state_changed:
+		notify_state_changed()
+	if persist_state:
+		save_app_state()
+
+## 循环切换播放模式，并返回切换后的值。
+func cycle_playback_mode() -> int:
+	var next_mode := posmod(
+		get_playback_mode() + 1,
+		MusicAppStateDataType.PlaybackMode.size()
+	)
+	set_playback_mode(next_mode)
+	return next_mode
 
 ## 判断当前是否存在有效的播放列表。
 func has_playback_queue() -> bool:
@@ -87,8 +119,23 @@ func step_queue(offset: int, autoplay: bool = true) -> bool:
 	if playback_track_indices.is_empty():
 		return false
 
-	var next_queue_index := posmod(get_playback_queue_index() + offset, playback_track_indices.size())
+	var next_queue_index := _resolve_step_target_index(offset)
 	return play_queue_index(next_queue_index, autoplay)
+
+## 根据当前播放模式，在曲目结束后自动推进到下一首。
+func advance_after_finish() -> bool:
+	var playback_track_indices := get_playback_track_indices()
+	if playback_track_indices.is_empty():
+		return false
+
+	var current_queue_index := clampi(get_playback_queue_index(), 0, playback_track_indices.size() - 1)
+	match get_playback_mode():
+		MusicAppStateDataType.PlaybackMode.REPEAT_ONE:
+			return play_queue_index(current_queue_index, true)
+		MusicAppStateDataType.PlaybackMode.SHUFFLE:
+			return play_queue_index(_pick_random_queue_index(true), true)
+		_:
+			return play_queue_index(posmod(current_queue_index + 1, playback_track_indices.size()), true)
 
 ## 播放播放列表中指定槽位的曲目。
 func play_queue_index(queue_index: int, autoplay: bool = true) -> bool:
@@ -102,6 +149,41 @@ func play_queue_index(queue_index: int, autoplay: bool = true) -> bool:
 	set_selected_track_index(playback_track_indices[queue_index])
 	set_elapsed_seconds(get_current_duration_preview_start())
 	set_is_playing(autoplay)
+	request_audio_sync()
+	notify_state_changed()
+	save_app_state()
+	return true
+
+## 从播放队列中移除指定槽位的曲目。
+func remove_track_from_queue(queue_index: int) -> bool:
+	var playback_track_indices := get_playback_track_indices()
+	if queue_index < 0 or queue_index >= playback_track_indices.size():
+		return false
+
+	if playback_track_indices.size() == 1:
+		clear_playback_queue()
+		return true
+
+	var current_queue_index := clampi(get_playback_queue_index(), 0, playback_track_indices.size() - 1)
+	var is_removing_current := queue_index == current_queue_index
+	var next_queue := get_playback_track_indices()
+	next_queue.remove_at(queue_index)
+
+	if next_queue.is_empty():
+		clear_playback_queue()
+		return true
+
+	var next_queue_index := current_queue_index
+	if queue_index < current_queue_index:
+		next_queue_index -= 1
+	elif is_removing_current:
+		next_queue_index = mini(queue_index, next_queue.size() - 1)
+
+	set_playback_track_indices(next_queue)
+	set_playback_queue_index(next_queue_index)
+	set_selected_track_index(next_queue[next_queue_index])
+	if is_removing_current:
+		set_elapsed_seconds(_get_preview_start_for_track_index(next_queue[next_queue_index]))
 	request_audio_sync()
 	notify_state_changed()
 	save_app_state()
@@ -160,6 +242,26 @@ func show_playback_queue_dialog() -> void:
 		return
 	show_common_alert(QUEUE_ALERT_TITLE, summary)
 
+## 返回播放模式对应的文案 key。
+func get_playback_mode_label_key() -> String:
+	match get_playback_mode():
+		MusicAppStateDataType.PlaybackMode.REPEAT_ONE:
+			return "music_app.queue.mode.repeat_one"
+		MusicAppStateDataType.PlaybackMode.SHUFFLE:
+			return "music_app.queue.mode.shuffle"
+		_:
+			return "music_app.queue.mode.loop_all"
+
+## 返回播放模式对应的图标。
+func get_playback_mode_icon() -> Texture2D:
+	match get_playback_mode():
+		MusicAppStateDataType.PlaybackMode.REPEAT_ONE:
+			return MusicAppIconsType.REPEAT_ONE
+		MusicAppStateDataType.PlaybackMode.SHUFFLE:
+			return MusicAppIconsType.SHUFFLE
+		_:
+			return MusicAppIconsType.LOOP_ALL
+
 ## 覆盖写入当前播放队列的曲目索引数组。
 func set_playback_track_indices(track_indices: Array[int]) -> void:
 	var copied_indices: Array[int] = []
@@ -176,6 +278,34 @@ func _sanitize_track_indices(track_indices: Array[int]) -> Array[int]:
 			continue
 		result.append(track_index)
 	return result
+
+func _resolve_step_target_index(offset: int) -> int:
+	var playback_track_indices := get_playback_track_indices()
+	if playback_track_indices.is_empty():
+		return -1
+
+	if get_playback_mode() == MusicAppStateDataType.PlaybackMode.SHUFFLE:
+		return _pick_random_queue_index(true)
+	return posmod(get_playback_queue_index() + offset, playback_track_indices.size())
+
+func _pick_random_queue_index(exclude_current: bool) -> int:
+	var queue_size := get_playback_track_count()
+	if queue_size <= 0:
+		return -1
+
+	var current_queue_index := clampi(get_playback_queue_index(), 0, queue_size - 1)
+	if queue_size == 1:
+		return current_queue_index
+	if not exclude_current:
+		return randi() % queue_size
+	return posmod(current_queue_index + 1 + (randi() % (queue_size - 1)), queue_size)
+
+func _get_preview_start_for_track_index(track_index: int) -> int:
+	var tracks: Array[TrackData] = get_tracks_ref()
+	if track_index < 0 or track_index >= tracks.size():
+		return 0
+	var track: TrackData = tracks[track_index]
+	return track.preview_start if track != null else 0
 
 ## 返回曲目展示所需的歌手文案。
 func _get_track_display_artist(track: TrackData) -> String:

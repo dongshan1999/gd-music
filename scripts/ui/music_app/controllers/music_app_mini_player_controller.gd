@@ -31,6 +31,4 @@ func open_player_page() -> void:
 
 ## 展示当前播放队列对话框。
 func show_playback_queue() -> void:
-	var playback_controller = get_playback_controller()
-	if playback_controller != null:
-		playback_controller.show_playback_queue_dialog()
+	show_popup(DX_PopupRegistry.PopupId.MUSIC_APP_PLAYBACK_QUEUE)

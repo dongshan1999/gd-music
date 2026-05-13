@@ -140,7 +140,7 @@ func on_audio_finished() -> void:
 	_loaded_track_key = ""
 	var playback_controller = get_playback_controller()
 	if playback_controller != null:
-		playback_controller.step_queue(1, true)
+		playback_controller.advance_after_finish()
 
 ## 停止底层音频播放，并按需清空已挂载的音频流。
 func stop_audio_playback(clear_stream: bool) -> void:

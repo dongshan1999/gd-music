@@ -1,14 +1,21 @@
 class_name MusicAppStateData
 extends "res://dx/runtime/scripts/serializer/json_object.gd"
 
-const SAVE_VERSION := 2
+const SAVE_VERSION := 3
 const DEFAULT_SELECTED_PLAYLIST_INDEX := 0
 const DEFAULT_SELECTED_TRACK_INDEX := 0
 const DEFAULT_PLAYBACK_QUEUE_INDEX := 0
+const DEFAULT_PLAYBACK_MODE := PlaybackMode.LOOP_ALL
 const DEFAULT_ELAPSED_SECONDS := 0
 const DEFAULT_IS_PLAYING := false
 const DEFAULT_LIKED_TRACKS := {}
 const SYSTEM_FAVORITE_PLAYLIST_ID := "__music_app.favorite_playlist__"
+
+enum PlaybackMode {
+	LOOP_ALL,
+	REPEAT_ONE,
+	SHUFFLE
+}
 
 var version: int = SAVE_VERSION
 var tracks: Array[TrackData] = []
@@ -17,6 +24,7 @@ var selected_playlist_index: int = DEFAULT_SELECTED_PLAYLIST_INDEX
 var selected_track_index: int = DEFAULT_SELECTED_TRACK_INDEX
 var playback_track_indices: Array[int] = []
 var playback_queue_index: int = DEFAULT_PLAYBACK_QUEUE_INDEX
+var playback_mode: int = DEFAULT_PLAYBACK_MODE
 var elapsed_seconds: int = DEFAULT_ELAPSED_SECONDS
 var is_playing: bool = DEFAULT_IS_PLAYING
 var liked_tracks: Dictionary = {}
@@ -54,6 +62,7 @@ func _init() -> void:
 	selected_track_index = DEFAULT_SELECTED_TRACK_INDEX
 	playback_track_indices = []
 	playback_queue_index = DEFAULT_PLAYBACK_QUEUE_INDEX
+	playback_mode = DEFAULT_PLAYBACK_MODE
 	elapsed_seconds = DEFAULT_ELAPSED_SECONDS
 	is_playing = DEFAULT_IS_PLAYING
 	liked_tracks = DEFAULT_LIKED_TRACKS.duplicate(true)
@@ -67,6 +76,7 @@ func normalize() -> void:
 	selected_track_index = _clamp_index(selected_track_index, tracks.size())
 	playback_track_indices = _normalize_playback_track_indices(playback_track_indices)
 	playback_queue_index = _clamp_index(playback_queue_index, playback_track_indices.size())
+	playback_mode = clampi(playback_mode, PlaybackMode.LOOP_ALL, PlaybackMode.SHUFFLE)
 	elapsed_seconds = maxi(0, elapsed_seconds)
 	liked_tracks = _normalize_liked_tracks(liked_tracks)
 

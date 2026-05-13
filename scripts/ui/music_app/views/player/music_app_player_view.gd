@@ -46,6 +46,7 @@ func bind() -> void:
 	player_prev_button.pressed.connect(_play_previous)
 	player_play_button.pressed.connect(toggle_playback)
 	player_next_button.pressed.connect(_play_next)
+	shuffle_button.pressed.connect(_cycle_playback_mode)
 	like_button.pressed.connect(_toggle_like_current_track)
 	player_queue_button.pressed.connect(_show_playback_queue)
 	player_list_button.pressed.connect(_show_playback_queue)
@@ -62,10 +63,14 @@ func refresh() -> void:
 	MusicAppIconsType.apply_icon_button(tone_button, MusicAppIconsType.TONE)
 	MusicAppIconsType.apply_icon_button(comment_button, MusicAppIconsType.COMMENT)
 	MusicAppIconsType.apply_icon_button(player_queue_button, MusicAppIconsType.MORE)
-	MusicAppIconsType.apply_icon_button(shuffle_button, MusicAppIconsType.SHUFFLE)
+	MusicAppIconsType.apply_icon_button(
+		shuffle_button,
+		_player_controller.get_playback_mode_icon()
+	)
 	MusicAppIconsType.apply_icon_button(player_prev_button, MusicAppIconsType.SKIP_LEFT)
 	MusicAppIconsType.apply_icon_button(player_next_button, MusicAppIconsType.SKIP_RIGHT)
 	MusicAppIconsType.apply_icon_button(player_list_button, MusicAppIconsType.PLAYLIST)
+	shuffle_button.tooltip_text = tr(_player_controller.get_playback_mode_label_key())
 
 	if not _player_controller.has_tracks():
 		now_title_label.text = tr("music_app.player.empty_title")
@@ -129,6 +134,9 @@ func _play_next() -> void:
 
 func _show_playback_queue() -> void:
 	_player_controller.show_playback_queue()
+
+func _cycle_playback_mode() -> void:
+	_player_controller.cycle_playback_mode()
 
 func _input(event: InputEvent) -> void:
 	if not _is_progress_dragging:
