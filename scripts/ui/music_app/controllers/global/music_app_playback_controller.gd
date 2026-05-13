@@ -2,9 +2,6 @@ class_name MusicAppPlaybackController
 extends "res://scripts/ui/music_app/controllers/music_app_controller_base.gd"
 
 const MusicAppIconsType := preload("res://scripts/constants/music_app_icons.gd")
-const MusicAppUiSymbolsType := preload("res://scripts/constants/music_app_ui_symbols.gd")
-const QUEUE_ALERT_TITLE := "播放队列"
-const QUEUE_EMPTY_MESSAGE := "当前没有播放内容。"
 
 ## 返回当前播放列表中的曲目索引序列。
 func get_playback_track_indices() -> Array[int]:
@@ -213,34 +210,6 @@ func append_tracks_to_queue(track_indices: Array[int]) -> int:
 		set_playback_track_indices(next_queue)
 		save_app_state()
 	return appended_count
-
-func get_playback_queue_summary() -> String:
-	var playback_track_indices := get_playback_track_indices()
-	if playback_track_indices.is_empty():
-		return ""
-
-	var current_queue_index := get_playback_queue_index()
-	var tracks: Array[TrackData] = get_tracks_ref()
-	var lines: Array[String] = []
-	for queue_index in playback_track_indices.size():
-		var track_index := playback_track_indices[queue_index]
-		if track_index < 0 or track_index >= tracks.size():
-			continue
-		var track: TrackData = tracks[track_index]
-		if track == null:
-			continue
-		var prefix := MusicAppUiSymbolsType.PLAY if queue_index == current_queue_index else ""
-		var artist := _get_track_display_artist(track)
-		lines.append("%s%d. %s - %s" % [prefix, queue_index + 1, track.title, artist])
-	return "\n".join(PackedStringArray(lines))
-
-## 弹出当前播放队列摘要对话框。
-func show_playback_queue_dialog() -> void:
-	var summary := get_playback_queue_summary()
-	if summary.is_empty():
-		show_common_alert(QUEUE_ALERT_TITLE, QUEUE_EMPTY_MESSAGE)
-		return
-	show_common_alert(QUEUE_ALERT_TITLE, summary)
 
 ## 返回播放模式对应的文案 key。
 func get_playback_mode_label_key() -> String:
