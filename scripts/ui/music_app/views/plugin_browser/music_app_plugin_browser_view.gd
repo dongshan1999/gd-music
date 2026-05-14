@@ -85,9 +85,6 @@ func bind() -> void:
 	install_url_button.pressed.connect(_on_install_url_pressed)
 	load_vars_button.pressed.connect(_on_load_vars_pressed)
 	save_vars_button.pressed.connect(_on_save_vars_pressed)
-	if _controller != null and not _controller.state_changed.is_connected(refresh):
-		_controller.state_changed.connect(refresh)
-
 func on_popup_shown() -> void:
 	refresh()
 	_request_reload_plugins()
@@ -347,10 +344,10 @@ func _normalize_dictionary_array(value: Variant) -> Array[Dictionary]:
 			result.append(item)
 	return result
 
-func _get_plugin_manager() -> DX_MusicPluginManager:
+func _get_plugin_controller():
 	if _plugin_controller == null:
 		return null
-	return _plugin_controller.get_music_plugin_manager()
+	return _plugin_controller.get_plugin_controller()
 
 func _request_reload_plugins() -> void:
 	if _reload_requested:
@@ -421,10 +418,7 @@ func _on_plugin_tab_selected(plugin_id: String) -> void:
 func _on_result_row_pressed(index: int) -> void:
 	if index < 0 or index >= _search_results.size():
 		return
-	if _get_selected_search_type() != "music":
-		_toast("当前只实现了单曲导入和播放。")
-		return
-	_import_results([_search_results[index]], true)
+	_toast("当前搜索结果仅展示，不执行导入或播放。")
 
 func _on_manage_toggle_pressed() -> void:
 	management_panel.visible = not management_panel.visible
@@ -434,7 +428,7 @@ func _on_start_host_pressed() -> void:
 	if not _ensure_controller():
 		return
 	_set_status("Starting plugin host...")
-	var result := await _plugin_controller.start_music_plugin_host()
+	var result: Dictionary = await _plugin_controller.start_music_plugin_host()
 	if not bool(result.get("ok", false)):
 		_set_status("Host start failed: %s" % str(result.get("error", "Unknown error.")))
 		_show_error(str(result.get("error", "Failed to start host.")))
@@ -455,7 +449,7 @@ func _on_install_file_pressed() -> void:
 	if plugin_path.is_empty():
 		_show_error("Please enter a plugin file path.")
 		return
-	var result := await _plugin_controller.install_music_plugin_from_file(plugin_path)
+	var result: Dictionary = await _plugin_controller.install_music_plugin_from_file(plugin_path)
 	if not bool(result.get("ok", false)):
 		_show_error(str(result.get("error", "Install failed.")))
 		return
@@ -469,7 +463,7 @@ func _on_install_url_pressed() -> void:
 	if plugin_url.is_empty():
 		_show_error("Please enter a plugin URL.")
 		return
-	var result := await _plugin_controller.install_music_plugin_from_url(plugin_url)
+	var result: Dictionary = await _plugin_controller.install_music_plugin_from_url(plugin_url)
 	if not bool(result.get("ok", false)):
 		_show_error(str(result.get("error", "Install failed.")))
 		return
@@ -481,11 +475,11 @@ func _on_load_vars_pressed() -> void:
 	if plugin_id.is_empty():
 		_show_error("Please select a plugin first.")
 		return
-	var manager := _get_plugin_manager()
-	if manager == null:
-		_show_error("Plugin manager is not available.")
+	var plugin_controller = _get_plugin_controller()
+	if plugin_controller == null:
+		_show_error("Plugin controller is not available.")
 		return
-	var result := await manager.get_plugin_user_variables(plugin_id)
+	var result: Dictionary = await plugin_controller.get_plugin_user_variables(plugin_id)
 	if not bool(result.get("ok", false)):
 		_show_error(str(result.get("error", "Failed to load plugin vars.")))
 		return
@@ -506,12 +500,12 @@ func _on_save_vars_pressed() -> void:
 		_show_error("Plugin vars must be a JSON object.")
 		return
 
-	var manager := _get_plugin_manager()
-	if manager == null:
-		_show_error("Plugin manager is not available.")
+	var plugin_controller = _get_plugin_controller()
+	if plugin_controller == null:
+		_show_error("Plugin controller is not available.")
 		return
 
-	var result := await manager.set_plugin_user_variables(plugin_id, json.data)
+	var result: Dictionary = await plugin_controller.set_plugin_user_variables(plugin_id, json.data)
 	if not bool(result.get("ok", false)):
 		_show_error(str(result.get("error", "Failed to save plugin vars.")))
 		return
@@ -545,7 +539,7 @@ func _search_page(page: int) -> void:
 	_sync_query_state()
 	_set_searching(true)
 
-	var result := await _plugin_controller.search_music_plugin(
+	var result: Dictionary = await _plugin_controller.search_music_plugin(
 		plugin_id,
 		query,
 		_current_page,
@@ -573,34 +567,14 @@ func _search_page(page: int) -> void:
 	_render_results()
 	_sync_action_state()
 
-func _import_results(results: Array, autoplay_first: bool) -> void:
-	if not _ensure_controller():
-		return
-	var plugin_id := _get_selected_plugin_id()
-	if plugin_id.is_empty():
-		_show_error("Please select a plugin first.")
-		return
-	var imported_indices := _plugin_controller.import_music_plugin_search_results(
-		plugin_id,
-		results,
-		-1,
-		autoplay_first
-	)
-	if imported_indices.is_empty():
-		_show_error("Failed to import search result.")
-		return
-	if autoplay_first and _controller != null:
-		_controller.show_popup(DX_PopupRegistry.PopupId.MUSIC_APP_PLAYER)
-	_toast("Imported %d track(s)." % imported_indices.size())
-
 func _reload_plugins(auto_start: bool) -> void:
-	var manager := _get_plugin_manager()
-	if manager == null:
-		_set_status("Plugin manager unavailable.")
+	var plugin_controller = _get_plugin_controller()
+	if plugin_controller == null:
+		_set_status("Plugin controller unavailable.")
 		return
 
-	_set_status("Checking plugin host at %s..." % manager.get_base_url())
-	var health_result := await manager.ping()
+	_set_status("Checking plugin host at %s..." % plugin_controller.get_base_url())
+	var health_result: Dictionary = await plugin_controller.ping()
 	if not bool(health_result.get("ok", false)) and auto_start:
 		_set_status("Starting plugin host...")
 		health_result = await _plugin_controller.start_music_plugin_host()
@@ -615,8 +589,8 @@ func _reload_plugins(auto_start: bool) -> void:
 		_set_status("Host unavailable: %s" % str(health_result.get("error", "Unknown error.")))
 		return
 
-	_set_status("Host ready at %s" % manager.get_base_url())
-	var list_result := await manager.list_plugins()
+	_set_status("Host ready at %s" % plugin_controller.get_base_url())
+	var list_result: Dictionary = await plugin_controller.list_plugins()
 	if not bool(list_result.get("ok", false)):
 		_plugins = []
 		_selected_plugin_id = ""

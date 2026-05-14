@@ -43,9 +43,6 @@ func bind() -> void:
 	scan_music_button.pressed.connect(_open_scan_page)
 	edit_music_button.pressed.connect(_show_stub_edit)
 	download_list_button.pressed.connect(_show_stub_download)
-	if not _controller.state_changed.is_connected(refresh):
-		_controller.state_changed.connect(refresh)
-
 func refresh() -> void:
 	if _controller == null:
 		return

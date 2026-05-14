@@ -1,10 +1,9 @@
-class_name DX_MusicPluginManager
-extends RefCounted
+class_name MusicAppPluginController
+extends "res://scripts/ui/music_app/controllers/music_app_controller_base.gd"
 
 const BUNDLED_SERVER_PATH := "res://plugin_host/src/server.js"
 const BUNDLED_NODE_MODULES_PATH := "res://plugin_host/node_modules"
 
-var dx: Node
 var _local_host_pid: int = -1
 
 func in_ready() -> void:
@@ -14,7 +13,7 @@ func in_quit() -> void:
 	_stop_local_host()
 
 func get_settings() -> MusicPluginSettingsData:
-	var save_manager := dx.save as DX_SaveManager
+	var save_manager = get_save_manager()
 	if save_manager == null or save_manager.data == null:
 		return MusicPluginSettingsData.new()
 	if save_manager.data.music_plugins == null:
@@ -23,7 +22,7 @@ func get_settings() -> MusicPluginSettingsData:
 	return save_manager.data.music_plugins
 
 func save_settings() -> void:
-	var save_manager := dx.save as DX_SaveManager
+	var save_manager = get_save_manager()
 	if save_manager != null:
 		save_manager.save_data()
 
@@ -36,11 +35,22 @@ func get_last_started_pid() -> int:
 func is_local_host_configured() -> bool:
 	return _build_local_host_launch_config().get("ok", false)
 
+func auto_start_local_host() -> void:
+	var resolved_controller = get_showcase()
+	if resolved_controller == null:
+		return
+	if not get_settings().auto_start_local_host:
+		return
+	await resolved_controller.get_tree().process_frame
+	var result: Dictionary = await start_local_host()
+	if not bool(result.get("ok", false)):
+		push_warning("Music plugin host auto-start failed: %s" % str(result.get("error", "Unknown error.")))
+
 func start_local_host() -> Dictionary:
 	if not _is_desktop_platform():
 		return _error_result("Local plugin host startup is only supported on desktop platforms.")
 
-	var launch_config := _build_local_host_launch_config()
+	var launch_config = _build_local_host_launch_config()
 	if not bool(launch_config.get("ok", false)):
 		return _error_result(str(launch_config.get("error", "Local plugin host command is not configured.")))
 
@@ -48,9 +58,9 @@ func start_local_host() -> Dictionary:
 	if bool(health_result.get("ok", false)):
 		return health_result
 
-	var command := str(launch_config.get("command", ""))
+	var command = str(launch_config.get("command", ""))
 	var args: PackedStringArray = launch_config.get("args", PackedStringArray())
-	var pid := OS.create_process(command, args, false)
+	var pid = OS.create_process(command, args, false)
 	if pid <= 0:
 		return _error_result(
 			"Failed to start local plugin host process.",
@@ -62,7 +72,7 @@ func start_local_host() -> Dictionary:
 
 	_local_host_pid = pid
 
-	var attempts := 10
+	var attempts = 10
 	while attempts > 0:
 		await _delay_seconds(0.35)
 		health_result = await ping()
@@ -161,19 +171,20 @@ func get_toplists(plugin_id: String) -> Dictionary:
 	)
 
 func _request_json(method: HTTPClient.Method, endpoint: String, payload: Variant = null) -> Dictionary:
-	if dx == null:
-		return _error_result("DX manager is not available.")
+	var request_host = get_showcase()
+	if request_host == null:
+		return _error_result("Music app showcase is not available.")
 
-	var request := HTTPRequest.new()
+	var request = HTTPRequest.new()
 	request.timeout = get_settings().request_timeout_seconds
-	dx.add_child(request)
+	request_host.add_child(request)
 
-	var url := "%s%s" % [get_base_url(), endpoint]
-	var body := ""
+	var url = "%s%s" % [get_base_url(), endpoint]
+	var body = ""
 	if payload != null:
 		body = JSON.stringify(payload)
 
-	var err := request.request(url, _get_default_headers(), method, body)
+	var err = request.request(url, _get_default_headers(), method, body)
 	if err != OK:
 		request.queue_free()
 		return _error_result("Failed to dispatch HTTP request.", {"code": err, "url": url})
@@ -181,11 +192,11 @@ func _request_json(method: HTTPClient.Method, endpoint: String, payload: Variant
 	var signal_result: Array = await request.request_completed
 	request.queue_free()
 
-	var result_code := int(signal_result[0])
-	var response_code := int(signal_result[1])
+	var result_code = int(signal_result[0])
+	var response_code = int(signal_result[1])
 	var raw_headers: Array = signal_result[2]
 	var raw_body: PackedByteArray = signal_result[3]
-	var response_text := raw_body.get_string_from_utf8()
+	var response_text = raw_body.get_string_from_utf8()
 
 	if result_code != HTTPRequest.RESULT_SUCCESS:
 		return _error_result(
@@ -199,7 +210,7 @@ func _request_json(method: HTTPClient.Method, endpoint: String, payload: Variant
 
 	var parsed_body: Variant = {}
 	if not response_text.is_empty():
-		var json := JSON.new()
+		var json = JSON.new()
 		if json.parse(response_text) == OK:
 			parsed_body = json.data
 		else:
@@ -228,7 +239,7 @@ func _resolve_command_path(path: String) -> String:
 	return path
 
 func _build_local_host_launch_config() -> Dictionary:
-	var settings := get_settings()
+	var settings = get_settings()
 	if not settings.local_host_command.is_empty():
 		return {
 			"ok": true,
@@ -236,9 +247,9 @@ func _build_local_host_launch_config() -> Dictionary:
 			"args": PackedStringArray(settings.local_host_args)
 		}
 
-	var bundled_server := ProjectSettings.globalize_path(BUNDLED_SERVER_PATH)
+	var bundled_server = ProjectSettings.globalize_path(BUNDLED_SERVER_PATH)
 	if FileAccess.file_exists(bundled_server):
-		var bundled_node_modules := ProjectSettings.globalize_path(BUNDLED_NODE_MODULES_PATH)
+		var bundled_node_modules = ProjectSettings.globalize_path(BUNDLED_NODE_MODULES_PATH)
 		if not DirAccess.dir_exists_absolute(bundled_node_modules):
 			return _error_result("Bundled plugin_host dependencies are missing. Run `npm install` in `plugin_host/` first.")
 		return {
@@ -259,9 +270,10 @@ func _is_desktop_platform() -> bool:
 	return OS.has_feature("windows") or OS.has_feature("macos") or OS.has_feature("linuxbsd")
 
 func _delay_seconds(seconds: float) -> void:
-	if dx == null:
+	var request_host = get_showcase()
+	if request_host == null:
 		return
-	var timer := dx.get_tree().create_timer(seconds)
+	var timer = request_host.get_tree().create_timer(seconds)
 	await timer.timeout
 
 func _stop_local_host() -> void:
@@ -272,7 +284,7 @@ func _stop_local_host() -> void:
 	_local_host_pid = -1
 
 func _error_result(message: String, extra: Dictionary = {}) -> Dictionary:
-	var result := {"ok": false, "error": message}
+	var result = {"ok": false, "error": message}
 	for key in extra.keys():
 		result[key] = extra[key]
 	return result

@@ -13,6 +13,7 @@ const MUSIC_APP_PLAYBACK_CONTROLLER := "res://scripts/ui/music_app/controllers/g
 const MUSIC_APP_PLAYBACK_STATE_CONTROLLER := "res://scripts/ui/music_app/controllers/global/music_app_audio_controller.gd"
 const MUSIC_APP_PLAYLIST_STATE_CONTROLLER := "res://scripts/ui/music_app/controllers/global/music_app_playlist_state_controller.gd"
 const MUSIC_APP_POPUP_ROUTER_CONTROLLER := "res://scripts/ui/music_app/controllers/global/music_app_popup_router_controller.gd"
+const MUSIC_APP_PLUGIN_CONTROLLER := "res://scripts/ui/music_app/controllers/global/music_app_plugin_controller.gd"
 const MUSIC_APP_PLAYBACK_QUEUE_CONTROLLER := "res://scripts/ui/music_app/controllers/music_app_playback_queue_controller.gd"
 const MUSIC_APP_PLAYER_CONTROLLER := "res://scripts/ui/music_app/controllers/music_app_player_controller.gd"
 const MUSIC_APP_PLAYLIST_CONTROLLER := "res://scripts/ui/music_app/controllers/music_app_playlist_controller.gd"

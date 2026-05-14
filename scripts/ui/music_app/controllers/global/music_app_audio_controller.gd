@@ -38,9 +38,6 @@ func is_playing() -> bool:
 func set_is_playing(value: bool) -> void:
 	_get_base_controller().set_is_playing(value)
 
-func notify_state_changed() -> void:
-	_get_base_controller().notify_state_changed()
-
 func save_app_state() -> void:
 	_get_base_controller().save_app_state()
 
@@ -70,12 +67,10 @@ func toggle_playback() -> void:
 	if not has_tracks():
 		set_is_playing(false)
 		request_audio_sync()
-		notify_state_changed()
 		return
 
 	set_is_playing(not is_playing())
 	request_audio_sync()
-	notify_state_changed()
 	save_app_state()
 
 ## 将底层播放器与全局状态同步到指定秒数。
@@ -102,7 +97,6 @@ func seek_to_elapsed_seconds(value: int, persist_state: bool = true) -> void:
 	elif is_playing():
 		request_audio_sync()
 
-	notify_state_changed()
 	if persist_state:
 		save_app_state()
 
@@ -121,7 +115,6 @@ func tick_playback_progress() -> void:
 		if is_playing():
 			set_is_playing(false)
 			request_audio_sync()
-			notify_state_changed()
 		return
 
 	if not is_playing() or audio_player.stream == null or not audio_player.playing or audio_player.stream_paused:
@@ -131,7 +124,6 @@ func tick_playback_progress() -> void:
 	if next_elapsed == get_elapsed_seconds():
 		return
 	set_elapsed_seconds(next_elapsed)
-	notify_state_changed()
 
 ## 响应音频播放完成事件，自动切到队列下一首。
 func on_audio_finished() -> void:
@@ -167,7 +159,6 @@ func _sync_audio_state(sync_request_id: int) -> void:
 		stop_audio_playback(true)
 		if is_playing():
 			set_is_playing(false)
-			notify_state_changed()
 			save_app_state()
 		return
 
@@ -177,7 +168,6 @@ func _sync_audio_state(sync_request_id: int) -> void:
 		stop_audio_playback(true)
 		if is_playing():
 			set_is_playing(false)
-			notify_state_changed()
 			save_app_state()
 		return
 
@@ -187,7 +177,6 @@ func _sync_audio_state(sync_request_id: int) -> void:
 			var paused_elapsed := _get_audio_position_seconds()
 			if paused_elapsed != get_elapsed_seconds():
 				set_elapsed_seconds(paused_elapsed)
-				notify_state_changed()
 			audio_player.stream_paused = true
 		elif audio_player.stream != null and _loaded_track_key != desired_track_key:
 			_loaded_track_key = ""
@@ -370,7 +359,6 @@ func _sync_track_duration_from_stream(track: TrackData, stream: AudioStream) -> 
 	track.duration = resolved_duration
 	track.normalize()
 	set_elapsed_seconds(clampi(get_elapsed_seconds(), 0, track.duration))
-	notify_state_changed()
 	save_app_state()
 
 func _mark_playback_unavailable(track: TrackData) -> void:
@@ -380,7 +368,6 @@ func _mark_playback_unavailable(track: TrackData) -> void:
 		return
 	set_is_playing(false)
 	set_elapsed_seconds(track.preview_start)
-	notify_state_changed()
 	save_app_state()
 
 func _get_audio_player() -> AudioStreamPlayer:

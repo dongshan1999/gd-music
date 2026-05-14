@@ -20,7 +20,6 @@ const CountdownManagerScript := preload("res://dx/runtime/scripts/managers/count
 const PoolManagerScript := preload("res://dx/runtime/scripts/managers/pool_manager.gd")
 const SaveManagerScript := preload("res://dx/runtime/scripts/managers/save/save_manager.gd")
 const LocalizationManagerScript := preload("res://dx/runtime/scripts/managers/localization/localization_manager.gd")
-const MusicPluginManagerScript := preload("res://dx/runtime/scripts/managers/music_plugin_manager.gd")
 
 var popup:
 	get:
@@ -61,10 +60,6 @@ var save:
 var localization:
 	get:
 		return get_manager(&"localization")
-
-var music_plugins:
-	get:
-		return get_manager(&"music_plugins")
 
 var _manager_map: Dictionary = {}
 var _manager_order: Array = []
@@ -135,8 +130,6 @@ func _bootstrap() -> void:
 	register_manager(&"pool", PoolManagerScript.new())
 	register_manager(&"save", SaveManagerScript.new())
 	register_manager(&"localization", LocalizationManagerScript.new())
-	register_manager(&"music_plugins", MusicPluginManagerScript.new())
-
 func _register_popup_manager() -> void:
 	if has_manager(&"popup"):
 		return
