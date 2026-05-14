@@ -1,11 +1,17 @@
 [gd_scene format=3 uid="uid://bb8gp81m2lq40"]
 
-[ext_resource type="Script" path="res://scripts/ui/music_app/views/local_music/music_app_local_music_view.gd" id="7_local_music_script"]
-[ext_resource type="Script" path="res://dx/runtime/scripts/managers/localization/localize_comp.gd" id="999_localize_comp"]
+[ext_resource type="Texture2D" uid="uid://c2kbdu1mp5y13" path="res://textures/magnifying-glass.svg" id="3_fq6oh"]
+[ext_resource type="Texture2D" uid="uid://c7774k8kqtfij" path="res://textures/ellipsis-vertical.svg" id="4_cln7v"]
+[ext_resource type="Texture2D" uid="uid://ce5stibbp74yi" path="res://textures/pencil-outline.svg" id="5_ur60a"]
+[ext_resource type="Texture2D" uid="uid://casrni7xdp13e" path="res://textures/inbox-arrow-down.svg" id="6_sppb8"]
+[ext_resource type="Script" uid="uid://dbmbxfaq7rbyk" path="res://scripts/ui/music_app/views/local_music/music_app_local_music_view.gd" id="7_local_music_script"]
+[ext_resource type="Script" uid="uid://bym33i5tdjhtg" path="res://dx/runtime/scripts/managers/localization/localize_comp.gd" id="999_localize_comp"]
+
+[sub_resource type="CompressedTexture2D" id="CompressedTexture2D_pnlqs"]
+load_path = "res://.godot/imported/arrow-left.svg-15ca7f2f7c94de7423aad0019b413bff.ctex"
 
 [node name="LocalMusicPage" type="Control" unique_id=1377588459]
 unique_name_in_owner = true
-visible = false
 layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0
@@ -46,7 +52,7 @@ theme_override_constants/separation = 10
 [node name="LocalMusicBackButton" type="Button" parent="Margin/LocalMusicVBox/LocalMusicTopRow" unique_id=1695007080]
 unique_name_in_owner = true
 layout_mode = 2
-text = "←"
+icon = SubResource("CompressedTexture2D_pnlqs")
 
 [node name="LocalMusicTitleLabel" type="Label" parent="Margin/LocalMusicVBox/LocalMusicTopRow" unique_id=648830172]
 unique_name_in_owner = true
@@ -66,12 +72,12 @@ size_flags_horizontal = 3
 [node name="LocalMusicSearchButton" type="Button" parent="Margin/LocalMusicVBox/LocalMusicTopRow" unique_id=1891825845]
 unique_name_in_owner = true
 layout_mode = 2
-text = "⌕"
+icon = ExtResource("3_fq6oh")
 
 [node name="LocalMusicMoreButton" type="Button" parent="Margin/LocalMusicVBox/LocalMusicTopRow" unique_id=617966820]
 unique_name_in_owner = true
 layout_mode = 2
-text = "⋮"
+icon = ExtResource("4_cln7v")
 
 [node name="LocalMusicScroll" type="ScrollContainer" parent="Margin/LocalMusicVBox" unique_id=1747168716]
 layout_mode = 2
@@ -87,7 +93,7 @@ theme_override_constants/separation = 8
 [node name="LocalMusicEmptyLabel" type="Label" parent="Margin/LocalMusicVBox/LocalMusicScroll/LocalMusicList" unique_id=1758484510]
 unique_name_in_owner = true
 layout_mode = 2
-text = "🎵 暂无本地音乐"
+text = "暂无本地音乐"
 horizontal_alignment = 1
 vertical_alignment = 1
 autowrap_mode = 3
@@ -139,7 +145,8 @@ theme_override_constants/separation = 10
 [node name="ScanMusicButton" type="Button" parent="LocalMusicMenuPanel/Margin/MenuVBox" unique_id=990709116]
 unique_name_in_owner = true
 layout_mode = 2
-text = "🔍 扫描本地音乐"
+text = "扫描本地音乐"
+icon = ExtResource("3_fq6oh")
 flat = true
 alignment = 0
 
@@ -150,7 +157,8 @@ tr_key = "music_app.local.menu.scan"
 [node name="EditMusicButton" type="Button" parent="LocalMusicMenuPanel/Margin/MenuVBox" unique_id=1609157111]
 unique_name_in_owner = true
 layout_mode = 2
-text = "✏️ 批量编辑"
+text = "批量编辑"
+icon = ExtResource("5_ur60a")
 flat = true
 alignment = 0
 
@@ -161,7 +169,8 @@ tr_key = "music_app.local.menu.edit"
 [node name="DownloadListButton" type="Button" parent="LocalMusicMenuPanel/Margin/MenuVBox" unique_id=199534854]
 unique_name_in_owner = true
 layout_mode = 2
-text = "⬇️ 下载列表"
+text = "下载列表"
+icon = ExtResource("6_sppb8")
 flat = true
 alignment = 0
 
