@@ -56,9 +56,6 @@ func bind() -> void:
 	search_bar.gui_input.connect(_on_search_bar_gui_input)
 	search_icon_rect.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	search_prompt_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	if not _controller.state_changed.is_connected(refresh):
-		_controller.state_changed.connect(refresh)
-
 func refresh() -> void:
 	if _controller == null:
 		return

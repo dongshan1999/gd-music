@@ -36,9 +36,6 @@ func bind() -> void:
 	scan_back_button.pressed.connect(navigate_back)
 	scan_select_all_button.pressed.connect(_toggle_select_all)
 	start_scan_button.pressed.connect(_start_scan)
-	if not _controller.state_changed.is_connected(refresh):
-		_controller.state_changed.connect(refresh)
-
 func refresh() -> void:
 	if _controller == null:
 		return

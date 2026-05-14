@@ -36,9 +36,6 @@ func bind() -> void:
 	mini_play_button.pressed.connect(_toggle_playback)
 	mini_list_button.pressed.connect(_show_playback_queue)
 	mini_open_button.pressed.connect(_open_player_from_current)
-	if not _controller.state_changed.is_connected(refresh):
-		_controller.state_changed.connect(refresh)
-
 func refresh() -> void:
 	if _controller == null:
 		return

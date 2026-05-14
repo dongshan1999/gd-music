@@ -39,9 +39,6 @@ func bind() -> void:
 
 	playlist_back_button.pressed.connect(close_page)
 	play_all_button.pressed.connect(_play_playlist_from_start)
-	if not _controller.state_changed.is_connected(refresh):
-		_controller.state_changed.connect(refresh)
-
 func refresh() -> void:
 	if _controller == null:
 		return

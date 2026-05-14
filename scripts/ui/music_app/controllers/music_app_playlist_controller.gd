@@ -70,7 +70,6 @@ func create_playlist_from_current() -> bool:
 	playlist.deletable = true
 	playlists.append(playlist)
 	set_selected_playlist_index(playlists.size() - 1)
-	notify_state_changed()
 	save_app_state()
 	return true
 

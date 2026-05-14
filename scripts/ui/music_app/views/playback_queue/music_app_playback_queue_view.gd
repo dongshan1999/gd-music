@@ -39,9 +39,6 @@ func bind() -> void:
 	close_backdrop_button.pressed.connect(close_popup)
 	playback_mode_button.pressed.connect(_cycle_playback_mode)
 	clear_queue_button.pressed.connect(_clear_queue)
-	if not _controller.state_changed.is_connected(refresh):
-		_controller.state_changed.connect(refresh)
-
 func on_popup_shown() -> void:
 	refresh()
 	call_deferred("_scroll_to_current_row")

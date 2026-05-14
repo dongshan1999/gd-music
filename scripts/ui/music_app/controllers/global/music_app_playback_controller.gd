@@ -27,7 +27,7 @@ func get_playback_mode() -> int:
 	return super.get_playback_mode()
 
 ## 设置当前全局播放模式。
-func set_playback_mode(value: int, persist_state: bool = true, emit_state_changed: bool = true) -> void:
+func set_playback_mode(value: int, persist_state: bool = true) -> void:
 	var clamped_mode := clampi(
 		value,
 		MusicAppStateDataType.PlaybackMode.LOOP_ALL,
@@ -39,8 +39,6 @@ func set_playback_mode(value: int, persist_state: bool = true, emit_state_change
 		return
 
 	super.set_playback_mode(clamped_mode)
-	if emit_state_changed:
-		notify_state_changed()
 	if persist_state:
 		save_app_state()
 
@@ -78,7 +76,6 @@ func clear_playback_queue() -> void:
 	set_playback_queue_index(0)
 	set_is_playing(false)
 	request_audio_sync()
-	notify_state_changed()
 	save_app_state()
 
 ## 基于单首曲目构建播放列表。
@@ -147,7 +144,6 @@ func play_queue_index(queue_index: int, autoplay: bool = true) -> bool:
 	set_elapsed_seconds(get_current_duration_preview_start())
 	set_is_playing(autoplay)
 	request_audio_sync()
-	notify_state_changed()
 	save_app_state()
 	return true
 
@@ -182,7 +178,6 @@ func remove_track_from_queue(queue_index: int) -> bool:
 	if is_removing_current:
 		set_elapsed_seconds(_get_preview_start_for_track_index(next_queue[next_queue_index]))
 	request_audio_sync()
-	notify_state_changed()
 	save_app_state()
 	return true
 

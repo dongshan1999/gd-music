@@ -108,7 +108,6 @@ func toggle_like_current_track() -> bool:
 	set_liked_tracks(liked_tracks)
 	sync_favorite_playlist_from_likes()
 	save_app_state()
-	notify_state_changed()
 	show_toast(
 		tr("music_app.toast.favorite_added")
 		if next_state

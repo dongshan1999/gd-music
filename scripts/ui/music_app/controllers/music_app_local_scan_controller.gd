@@ -112,7 +112,6 @@ func scan_local_music_directories(paths: Array[String]) -> int:
 		tracks.append(track)
 
 	if not imported_tracks.is_empty():
-		notify_state_changed()
 		save_app_state()
 
 	return imported_tracks.size()

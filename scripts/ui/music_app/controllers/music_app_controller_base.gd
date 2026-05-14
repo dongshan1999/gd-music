@@ -51,6 +51,11 @@ func get_popup_router_controller():
 	var resolved_controller = get_showcase()
 	return resolved_controller._popup_router_controller if resolved_controller != null else null
 
+## 返回全局插件控制器。
+func get_plugin_controller():
+	var resolved_controller = get_showcase()
+	return resolved_controller._plugin_controller if resolved_controller != null else null
+
 ## 返回曲目数组引用，供子控制器直接读写全局状态。
 func get_tracks_ref() -> Array[TrackData]:
 	return get_app_state().tracks
@@ -118,12 +123,6 @@ func get_liked_tracks() -> Dictionary:
 ## 设置已收藏曲目映射表。
 func set_liked_tracks(value: Dictionary) -> void:
 	get_app_state().liked_tracks = value
-
-## 通知界面层刷新当前状态。
-func notify_state_changed() -> void:
-	var resolved_controller = get_showcase()
-	if resolved_controller != null:
-		resolved_controller.notify_state_changed()
 
 ## 触发 showcase 持久化当前音乐应用状态。
 func save_app_state() -> void:

@@ -51,9 +51,6 @@ func bind() -> void:
 	player_queue_button.pressed.connect(_show_playback_queue)
 	player_list_button.pressed.connect(_show_playback_queue)
 	_bind_player_progress_bar_input()
-	if not _controller.state_changed.is_connected(refresh):
-		_controller.state_changed.connect(refresh)
-
 func refresh() -> void:
 	if _controller == null:
 		return
