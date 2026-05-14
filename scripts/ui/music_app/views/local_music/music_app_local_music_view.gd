@@ -46,13 +46,6 @@ func bind() -> void:
 func refresh() -> void:
 	if _controller == null:
 		return
-
-	MusicAppIconsType.apply_icon_button(local_music_back_button, MusicAppIconsType.ARROW_LEFT)
-	MusicAppIconsType.apply_icon_button(local_music_search_button, MusicAppIconsType.SEARCH)
-	MusicAppIconsType.apply_icon_button(local_music_more_button, MusicAppIconsType.MORE)
-	MusicAppIconsType.apply_icon_button(scan_music_button, MusicAppIconsType.FOLDER_MUSIC, true, false)
-	MusicAppIconsType.apply_icon_button(edit_music_button, MusicAppIconsType.EDIT, true, false)
-	MusicAppIconsType.apply_icon_button(download_list_button, MusicAppIconsType.DOWNLOAD, true, false)
 	local_music_empty_label.text = "%s\n%s" % [
 		tr("music_app.local.empty_line1"),
 		tr("music_app.local.empty_line2")
