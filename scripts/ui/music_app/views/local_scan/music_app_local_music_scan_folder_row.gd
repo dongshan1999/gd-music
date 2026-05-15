@@ -29,7 +29,6 @@ func configure(folder_path: String, display_name: String, selected: bool) -> voi
 	_folder_path = folder_path
 	_selected = selected
 	_folder_button.text = display_name
-	MusicAppIconsType.apply_icon_button(_folder_button, MusicAppIconsType.FOLDER, true, false)
 	MusicAppIconsType.apply_icon_button(
 		_toggle_button,
 		MusicAppIconsType.CHECKED if _selected else MusicAppIconsType.UNCHECKED

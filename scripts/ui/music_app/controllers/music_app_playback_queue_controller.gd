@@ -1,6 +1,7 @@
 class_name MusicAppPlaybackQueueController
 extends "res://scripts/ui/music_app/controllers/music_app_controller_base.gd"
 
+## 返回当前是否存在可展示的播放队列。
 func has_tracks() -> bool:
 	var playback_controller = get_playback_controller()
 	return playback_controller != null and playback_controller.has_playback_queue()
@@ -40,6 +41,7 @@ func remove_queue_track(queue_index: int) -> bool:
 	var playback_controller = get_playback_controller()
 	return playback_controller.remove_track_from_queue(queue_index) if playback_controller != null else false
 
+## 将当前播放队列转换成供界面直接渲染的行数据。
 func get_queue_rows() -> Array[Dictionary]:
 	var playback_controller = get_playback_controller()
 	if playback_controller == null:
@@ -66,6 +68,7 @@ func get_queue_rows() -> Array[Dictionary]:
 		})
 	return rows
 
+## 生成播放队列行的标题文案。
 func _get_track_display_title(track: TrackData) -> String:
 	if not track.title.is_empty():
 		return track.title
@@ -73,6 +76,7 @@ func _get_track_display_title(track: TrackData) -> String:
 		return track.file_path.get_file().get_basename()
 	return tr("music_app.player.empty_title")
 
+## 生成播放队列行的副标题文案。
 func _get_track_display_subtitle(track: TrackData) -> String:
 	if not track.artist.is_empty() and not track.subtitle.is_empty() and track.artist != track.subtitle:
 		return "%s - %s" % [track.artist, track.subtitle]
@@ -82,6 +86,7 @@ func _get_track_display_subtitle(track: TrackData) -> String:
 		return track.subtitle
 	return tr("music_app.track.local_file")
 
+## 生成播放队列行的来源标签文案。
 func _get_track_source(track: TrackData) -> String:
 	if not track.source.is_empty():
 		return track.source

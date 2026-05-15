@@ -37,12 +37,14 @@ var _is_bound := false
 
 var home_playlist_rows: Array[MusicAppHomePlaylistRow] = []
 
+## 注入首页控制器并完成首次绑定与渲染。
 func setup(controller: MusicAppShowcaseController) -> void:
 	_controller = controller
 	_home_controller = MusicAppHomeController.new(controller)
 	bind()
 	refresh()
 
+## 绑定首页静态按钮和卡片事件，避免重复连接信号。
 func bind() -> void:
 	if _is_bound:
 		return
@@ -56,14 +58,11 @@ func bind() -> void:
 	search_bar.gui_input.connect(_on_search_bar_gui_input)
 	search_icon_rect.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	search_prompt_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
+
+## 根据当前歌单数据刷新首页统计、功能卡片与歌单列表。
 func refresh() -> void:
 	if _controller == null:
 		return
-
-	MusicAppIconsType.apply_texture_icon(search_icon_rect, MusicAppIconsType.SEARCH)
-	MusicAppIconsType.apply_icon_button(home_menu_button, MusicAppIconsType.MENU)
-	MusicAppIconsType.apply_icon_button(new_playlist_button, MusicAppIconsType.PLUS)
-	MusicAppIconsType.apply_icon_button(import_button, MusicAppIconsType.DOWNLOAD)
 	var playlists = _home_controller.get_playlists()
 	my_playlists_label.text = tr("music_app.home.my_playlists_count").format({"count": playlists.size()})
 	var favorite_count := 0
@@ -92,6 +91,7 @@ func refresh() -> void:
 func _open_playlist(index: int) -> void:
 	_home_controller.open_playlist(index)
 
+## 按当前歌单数量增删行节点，保持首页歌单列表与数据同步。
 func _sync_home_playlist_rows() -> void:
 	var target_size := _home_controller.get_playlists().size()
 
@@ -111,6 +111,7 @@ func _on_feature_pressed(index: int) -> void:
 
 func _create_playlist_from_current() -> void:
 	_home_controller.create_playlist_from_current()
+	refresh()
 
 func _open_local_music() -> void:
 	_home_controller.open_local_music()
@@ -126,3 +127,4 @@ func _on_search_bar_gui_input(event: InputEvent) -> void:
 
 func _delete_playlist(index: int) -> void:
 	_home_controller.delete_playlist(index)
+	refresh()

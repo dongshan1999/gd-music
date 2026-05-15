@@ -1,6 +1,12 @@
 [gd_scene format=3 uid="uid://dkg816xqi54py"]
 
 [ext_resource type="Script" path="res://scripts/ui/music_app/views/playlist/music_app_playlist_view.gd" id="3_script"]
+[ext_resource type="Texture2D" path="res://textures/arrow-left.svg" id="4_arrow_left"]
+[ext_resource type="Texture2D" path="res://textures/magnifying-glass.svg" id="5_search"]
+[ext_resource type="Texture2D" path="res://textures/ellipsis-vertical.svg" id="6_more"]
+[ext_resource type="Texture2D" path="res://textures/play.svg" id="7_play"]
+[ext_resource type="Texture2D" path="res://textures/plus.svg" id="8_plus"]
+[ext_resource type="Texture2D" path="res://textures/pencil-square.svg" id="9_edit"]
 [ext_resource type="Script" path="res://dx/runtime/scripts/managers/localization/localize_comp.gd" id="999_localize_comp"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_playlist_hero_cover"]
@@ -54,7 +60,10 @@ theme_override_constants/separation = 8
 unique_name_in_owner = true
 custom_minimum_size = Vector2(44, 44)
 layout_mode = 2
-text = "←"
+icon = ExtResource("4_arrow_left")
+expand_icon = true
+icon_alignment = 1
+vertical_icon_alignment = 1
 
 [node name="PlaylistTopTitle" type="Label" parent="Margin/PlaylistVBox/PlaylistTopRow" unique_id=1119246384]
 unique_name_in_owner = true
@@ -73,13 +82,19 @@ size_flags_horizontal = 3
 unique_name_in_owner = true
 custom_minimum_size = Vector2(44, 44)
 layout_mode = 2
-text = "⌕"
+icon = ExtResource("5_search")
+expand_icon = true
+icon_alignment = 1
+vertical_icon_alignment = 1
 
 [node name="PlaylistMoreButton" type="Button" parent="Margin/PlaylistVBox/PlaylistTopRow" unique_id=706924577]
 unique_name_in_owner = true
 custom_minimum_size = Vector2(44, 44)
 layout_mode = 2
-text = "⋯"
+icon = ExtResource("6_more")
+expand_icon = true
+icon_alignment = 1
+vertical_icon_alignment = 1
 
 [node name="PlaylistHeroPanel" type="Panel" parent="Margin/PlaylistVBox" unique_id=1234494683]
 unique_name_in_owner = true
@@ -157,6 +172,8 @@ theme_override_constants/separation = 14
 unique_name_in_owner = true
 layout_mode = 2
 size_flags_horizontal = 3
+icon = ExtResource("7_play")
+expand_icon = false
 text = "▶ 播放全部"
 
 [node name="LocalizeComp" type="Node" parent="Margin/PlaylistVBox/PlaylistActionsRow/PlayAllButton" unique_id=247668619]
@@ -167,13 +184,19 @@ tr_key = "music_app.playlist.play_all"
 unique_name_in_owner = true
 custom_minimum_size = Vector2(52, 52)
 layout_mode = 2
-text = "+"
+icon = ExtResource("8_plus")
+expand_icon = true
+icon_alignment = 1
+vertical_icon_alignment = 1
 
 [node name="PlaylistEditButton" type="Button" parent="Margin/PlaylistVBox/PlaylistActionsRow" unique_id=1508249865]
 unique_name_in_owner = true
 custom_minimum_size = Vector2(52, 52)
 layout_mode = 2
-text = "✎"
+icon = ExtResource("9_edit")
+expand_icon = true
+icon_alignment = 1
+vertical_icon_alignment = 1
 
 [node name="PlaylistScroll" type="ScrollContainer" parent="Margin/PlaylistVBox" unique_id=859457217]
 layout_mode = 2

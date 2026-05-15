@@ -47,8 +47,3 @@ static func apply_icon_button(
 		button.text = ""
 		button.icon_alignment = HORIZONTAL_ALIGNMENT_CENTER
 		button.vertical_icon_alignment = VERTICAL_ALIGNMENT_CENTER
-
-static func apply_texture_icon(texture_rect: TextureRect, icon: Texture2D) -> void:
-	if texture_rect == null:
-		return
-	texture_rect.texture = icon

@@ -12,6 +12,7 @@ const REMOTE_STREAM_TIMEOUT_SECONDS := 20.0
 var _audio_sync_request_id := 0
 var _loaded_track_key := ""
 
+## 记录当前全局播放状态控制器所属的 showcase。
 func _init(owner = null) -> void:
 	controller = owner
 
@@ -144,9 +145,11 @@ func stop_audio_playback(clear_stream: bool) -> void:
 	if clear_stream:
 		audio_player.stream = null
 
+## 通过 deferred 调度一次异步音频状态同步。
 func _sync_audio_state_deferred(sync_request_id: int) -> void:
 	await _sync_audio_state(sync_request_id)
 
+## 将全局播放状态与底层 AudioStreamPlayer 同步到一致状态。
 func _sync_audio_state(sync_request_id: int) -> void:
 	var audio_player = _get_audio_player()
 	if audio_player == null:
@@ -205,6 +208,7 @@ func _sync_audio_state(sync_request_id: int) -> void:
 	audio_player.play(float(get_elapsed_seconds()))
 	audio_player.stream_paused = false
 
+## 为当前曲目解析可播放音频流，支持本地文件、远程地址和插件来源。
 func _resolve_stream_for_track(track: TrackData, sync_request_id: int) -> AudioStream:
 	if not track.file_path.is_empty():
 		return _load_local_stream(track.file_path)
@@ -230,6 +234,7 @@ func _resolve_stream_for_track(track: TrackData, sync_request_id: int) -> AudioS
 
 	return _load_local_stream(track.stream_url)
 
+## 从本地文件系统读取音频字节并解码为 AudioStream。
 func _load_local_stream(path: String) -> AudioStream:
 	if path.is_empty():
 		return null
@@ -244,6 +249,7 @@ func _load_local_stream(path: String) -> AudioStream:
 
 	return _load_stream_from_buffer(bytes, _get_audio_extension(path))
 
+## 通过 HTTP 下载远程音频流并解码为 AudioStream。
 func _load_remote_stream(
 	url: String,
 	headers: Dictionary,
@@ -283,6 +289,7 @@ func _load_remote_stream(
 
 	return _load_stream_from_buffer(body, _get_audio_extension(url))
 
+## 按候选格式顺序尝试从二进制缓冲区构建音频流。
 func _load_stream_from_buffer(buffer: PackedByteArray, preferred_extension: String) -> AudioStream:
 	for loader_name in _get_audio_loader_candidates(preferred_extension):
 		var stream: AudioStream = null
@@ -297,6 +304,7 @@ func _load_stream_from_buffer(buffer: PackedByteArray, preferred_extension: Stri
 			return stream
 	return null
 
+## 根据文件后缀生成音频解码器候选顺序。
 func _get_audio_loader_candidates(preferred_extension: String) -> Array[String]:
 	var normalized_extension := preferred_extension.to_lower()
 	var candidates: Array[String] = []
@@ -308,19 +316,23 @@ func _get_audio_loader_candidates(preferred_extension: String) -> Array[String]:
 		candidates.append(loader_name)
 	return candidates
 
+## 将字典形式的请求头转换为 HTTPRequest 所需的字符串数组。
 func _build_http_headers(headers: Dictionary) -> PackedStringArray:
 	var formatted_headers := PackedStringArray()
 	for key in headers.keys():
 		formatted_headers.append("%s: %s" % [str(key), str(headers[key])])
 	return formatted_headers
 
+## 从路径或 URL 中提取音频资源扩展名。
 func _get_audio_extension(path_or_url: String) -> String:
 	var sanitized := path_or_url.split("?")[0].split("#")[0]
 	return sanitized.get_extension().to_lower()
 
+## 判断给定来源是否属于远程 HTTP 音频。
 func _is_remote_stream_url(path_or_url: String) -> bool:
 	return path_or_url.begins_with("http://") or path_or_url.begins_with("https://")
 
+## 生成当前曲目的播放唯一键，用于判断是否需要重新装载音频流。
 func _get_track_playback_key(track: TrackData) -> String:
 	if not track.file_path.is_empty():
 		return "file:%s" % track.file_path
@@ -330,6 +342,7 @@ func _get_track_playback_key(track: TrackData) -> String:
 		return "plugin:%s:%s" % [track.platform, track.remote_id]
 	return "title:%s:%s" % [track.title, track.artist]
 
+## 在已存在的 AudioStreamPlayer 上应用 seek，并维持暂停/播放状态。
 func _apply_audio_seek(audio_player: AudioStreamPlayer, target_seconds: int) -> void:
 	var should_resume := is_playing()
 	var was_paused := audio_player.stream_paused
@@ -341,12 +354,14 @@ func _apply_audio_seek(audio_player: AudioStreamPlayer, target_seconds: int) -> 
 
 	audio_player.stream_paused = was_paused or not should_resume
 
+## 读取底层播放器当前秒数，并约束到曲目时长范围内。
 func _get_audio_position_seconds() -> int:
 	var audio_player = _get_audio_player()
 	if audio_player == null:
 		return 0
 	return clampi(int(floor(audio_player.get_playback_position())), 0, get_current_duration())
 
+## 当底层流提供时长信息时，回写曲目时长并同步当前进度。
 func _sync_track_duration_from_stream(track: TrackData, stream: AudioStream) -> void:
 	var stream_length := stream.get_length()
 	if stream_length <= 0.0:
@@ -361,6 +376,7 @@ func _sync_track_duration_from_stream(track: TrackData, stream: AudioStream) -> 
 	set_elapsed_seconds(clampi(get_elapsed_seconds(), 0, track.duration))
 	save_app_state()
 
+## 在当前曲目无法播放时停止音频并回退到可恢复状态。
 func _mark_playback_unavailable(track: TrackData) -> void:
 	push_warning("Unable to play track \"%s\" with the currently supported audio loaders." % track.title)
 	stop_audio_playback(true)
@@ -370,6 +386,7 @@ func _mark_playback_unavailable(track: TrackData) -> void:
 	set_elapsed_seconds(track.preview_start)
 	save_app_state()
 
+## 返回 showcase 上实际承载播放的 AudioStreamPlayer。
 func _get_audio_player() -> AudioStreamPlayer:
 	var resolved_controller = get_showcase()
 	return resolved_controller.audio_player if resolved_controller != null else null

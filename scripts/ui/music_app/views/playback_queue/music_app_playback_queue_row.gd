@@ -24,10 +24,7 @@ func setup() -> void:
 	if _is_bound:
 		return
 	_is_bound = true
-
-	MusicAppIconsType.apply_texture_icon(current_icon_rect, MusicAppIconsType.MUSICAL_NOTE)
 	current_icon_rect.self_modulate = ACTIVE_TEXT
-	MusicAppIconsType.apply_icon_button(remove_button, MusicAppIconsType.X_MARK)
 
 	remove_button.pressed.connect(_on_remove_pressed)
 	open_button.pressed.connect(_on_open_pressed)

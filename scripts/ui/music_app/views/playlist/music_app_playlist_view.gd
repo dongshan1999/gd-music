@@ -43,14 +43,6 @@ func refresh() -> void:
 	if _controller == null:
 		return
 
-	MusicAppIconsType.apply_icon_button(playlist_back_button, MusicAppIconsType.ARROW_LEFT)
-	MusicAppIconsType.apply_icon_button(playlist_search_button, MusicAppIconsType.SEARCH)
-	MusicAppIconsType.apply_icon_button(playlist_more_button, MusicAppIconsType.MORE)
-	MusicAppIconsType.apply_icon_button(play_all_button, MusicAppIconsType.PLAY, true, false)
-	MusicAppIconsType.apply_icon_button(playlist_add_button, MusicAppIconsType.PLUS)
-	MusicAppIconsType.apply_icon_button(playlist_edit_button, MusicAppIconsType.EDIT)
-
-
 	if _playlist_controller.get_playlists().is_empty():
 		playlist_hero_mark_label.text = tr("music_app.playlist.favorites_mark")
 		playlist_hero_title_label.text = tr("music_app.playlist.favorites_title")

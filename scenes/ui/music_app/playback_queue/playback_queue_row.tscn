@@ -1,6 +1,8 @@
-[gd_scene load_steps=4 format=3]
+[gd_scene format=3 uid="uid://d3dbw1b8mt1lt"]
 
-[ext_resource type="Script" path="res://scripts/ui/music_app/views/playback_queue/music_app_playback_queue_row.gd" id="1_script"]
+[ext_resource type="Script" uid="uid://cfk46trj1vivd" path="res://scripts/ui/music_app/views/playback_queue/music_app_playback_queue_row.gd" id="1_script"]
+[ext_resource type="Texture2D" uid="uid://dbe0ctn8q7vry" path="res://textures/musical-note.svg" id="2_dted5"]
+[ext_resource type="Texture2D" uid="uid://cubqft3yh86od" path="res://textures/x-mark.svg" id="3_1s7ss"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_source_chip"]
 bg_color = Color(0.231373, 0.231373, 0.25098, 1)
@@ -11,13 +13,14 @@ corner_radius_bottom_left = 999
 
 [sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_open_button"]
 
-[node name="PlaybackQueueRow" type="Control"]
+[node name="PlaybackQueueRow" type="Control" unique_id=785226465]
 custom_minimum_size = Vector2(0, 60)
-layout_mode = 2
+layout_mode = 3
+anchors_preset = 0
 size_flags_horizontal = 3
 script = ExtResource("1_script")
 
-[node name="Margin" type="MarginContainer" parent="."]
+[node name="Margin" type="MarginContainer" parent="." unique_id=46488022]
 layout_mode = 0
 anchor_right = 1.0
 anchor_bottom = 1.0
@@ -28,7 +31,7 @@ theme_override_constants/margin_top = 8
 theme_override_constants/margin_right = 8
 theme_override_constants/margin_bottom = 8
 
-[node name="Row" type="HBoxContainer" parent="Margin"]
+[node name="Row" type="HBoxContainer" parent="Margin" unique_id=33645740]
 layout_mode = 2
 theme_override_constants/separation = 10
 alignment = 1
@@ -37,9 +40,10 @@ alignment = 1
 unique_name_in_owner = true
 custom_minimum_size = Vector2(18, 18)
 layout_mode = 2
+texture = ExtResource("2_dted5")
 stretch_mode = 5
 
-[node name="Info" type="VBoxContainer" parent="Margin/Row"]
+[node name="Info" type="VBoxContainer" parent="Margin/Row" unique_id=410402750]
 layout_mode = 2
 size_flags_horizontal = 3
 theme_override_constants/separation = 4
@@ -63,12 +67,12 @@ theme_override_font_sizes/font_size = 14
 text = "Artist - Album"
 vertical_alignment = 1
 
-[node name="SourceChip" type="PanelContainer" parent="Margin/Row"]
+[node name="SourceChip" type="PanelContainer" parent="Margin/Row" unique_id=653180886]
 custom_minimum_size = Vector2(66, 30)
 layout_mode = 2
 theme_override_styles/panel = SubResource("StyleBoxFlat_source_chip")
 
-[node name="Margin" type="MarginContainer" parent="Margin/Row/SourceChip"]
+[node name="Margin" type="MarginContainer" parent="Margin/Row/SourceChip" unique_id=1135580180]
 layout_mode = 2
 theme_override_constants/margin_left = 12
 theme_override_constants/margin_top = 6
@@ -88,8 +92,8 @@ vertical_alignment = 1
 unique_name_in_owner = true
 custom_minimum_size = Vector2(34, 34)
 layout_mode = 2
+icon = ExtResource("3_1s7ss")
 flat = true
-text = "×"
 
 [node name="OpenButton" type="Button" parent="." unique_id=1119164959]
 unique_name_in_owner = true
@@ -99,10 +103,9 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 focus_mode = 0
-flat = true
-theme_override_styles/disabled = SubResource("StyleBoxEmpty_open_button")
-theme_override_styles/focus = SubResource("StyleBoxEmpty_open_button")
-theme_override_styles/hover = SubResource("StyleBoxEmpty_open_button")
 theme_override_styles/normal = SubResource("StyleBoxEmpty_open_button")
 theme_override_styles/pressed = SubResource("StyleBoxEmpty_open_button")
-text = ""
+theme_override_styles/hover = SubResource("StyleBoxEmpty_open_button")
+theme_override_styles/disabled = SubResource("StyleBoxEmpty_open_button")
+theme_override_styles/focus = SubResource("StyleBoxEmpty_open_button")
+flat = true

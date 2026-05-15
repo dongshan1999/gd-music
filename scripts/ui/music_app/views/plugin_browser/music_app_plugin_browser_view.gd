@@ -60,6 +60,7 @@ var _search_type_tab_nodes: Array = []
 var _plugin_tab_nodes: Array = []
 var _result_row_nodes: Array = []
 
+## 注入插件浏览页控制器，并触发首轮插件列表加载。
 func setup(controller: MusicAppShowcaseController) -> void:
 	_controller = controller
 	_plugin_controller = MusicAppPluginBrowserController.new(controller)
@@ -67,6 +68,7 @@ func setup(controller: MusicAppShowcaseController) -> void:
 	refresh()
 	_request_reload_plugins()
 
+## 绑定插件浏览页所有固定交互事件。
 func bind() -> void:
 	if _is_bound:
 		return
@@ -85,13 +87,14 @@ func bind() -> void:
 	install_url_button.pressed.connect(_on_install_url_pressed)
 	load_vars_button.pressed.connect(_on_load_vars_pressed)
 	save_vars_button.pressed.connect(_on_save_vars_pressed)
+
+## 弹窗显示时刷新界面并重新请求插件状态。
 func on_popup_shown() -> void:
 	refresh()
 	_request_reload_plugins()
 
+## 刷新搜索历史、分页结果、标签页和管理区状态。
 func refresh() -> void:
-	MusicAppIconsType.apply_icon_button(back_button, MusicAppIconsType.ARROW_LEFT)
-	MusicAppIconsType.apply_texture_icon(search_icon_rect, MusicAppIconsType.SEARCH)
 	_search_history = _copy_string_array(
 		_plugin_controller.get_plugin_search_history() if _plugin_controller != null else []
 	)
@@ -102,6 +105,7 @@ func refresh() -> void:
 	_set_plugin_info()
 	_sync_action_state()
 
+## 根据当前查询内容切换历史区与结果区可见性。
 func _sync_query_state() -> void:
 	var query := query_input.text.strip_edges()
 	clear_query_button.visible = not query.is_empty()
@@ -111,6 +115,7 @@ func _sync_query_state() -> void:
 	if not showing_results:
 		empty_results_label.text = EMPTY_READY_TEXT
 
+## 重新生成搜索历史标签区域。
 func _render_history() -> void:
 	for node in _history_tag_nodes:
 		node.queue_free()
@@ -127,6 +132,7 @@ func _render_history() -> void:
 		chip.remove_requested.connect(_on_history_tag_remove_requested)
 		_history_tag_nodes.append(chip)
 
+## 重新生成搜索类型标签和插件标签。
 func _render_tabs() -> void:
 	_sync_tab_row(
 		search_type_tabs,
@@ -143,6 +149,7 @@ func _render_tabs() -> void:
 		_on_plugin_tab_selected
 	)
 
+## 复用统一逻辑重建某一行 Tab 节点并设置选中态。
 func _sync_tab_row(
 	container: HBoxContainer,
 	storage: Array,
@@ -165,6 +172,7 @@ func _sync_tab_row(
 		tab.selected.connect(callback)
 		storage.append(tab)
 
+## 根据当前插件支持的搜索类型生成顶部搜索分类标签数据。
 func _get_search_type_tab_items() -> Array[Dictionary]:
 	var plugin := _get_selected_plugin()
 	var search_types := _string_list_from_array(plugin.get("supportedSearchType", []))
@@ -179,6 +187,7 @@ func _get_search_type_tab_items() -> Array[Dictionary]:
 		})
 	return items
 
+## 根据当前已加载插件列表生成插件标签数据。
 func _get_plugin_tab_items() -> Array[Dictionary]:
 	var items: Array[Dictionary] = []
 	for plugin in _plugins:
@@ -188,6 +197,7 @@ func _get_plugin_tab_items() -> Array[Dictionary]:
 		})
 	return items
 
+## 根据当前搜索结果重新生成结果列表与空态。
 func _render_results() -> void:
 	for node in _result_row_nodes:
 		node.queue_free()
@@ -235,6 +245,7 @@ func _get_selected_search_type() -> String:
 func _set_status(text: String) -> void:
 	host_status_label.text = text
 
+## 汇总当前选中插件的元数据并展示在管理面板。
 func _set_plugin_info() -> void:
 	var plugin := _get_selected_plugin()
 	if plugin.is_empty():
@@ -255,6 +266,7 @@ func _set_plugin_info() -> void:
 		details.append(str(plugin.get("description", "")))
 	plugin_info_label.text = "\n".join(details)
 
+## 将任意数组值规范成去重后的字符串数组。
 func _string_list_from_array(value: Variant) -> PackedStringArray:
 	var result := PackedStringArray()
 	if not (value is Array):
@@ -265,12 +277,14 @@ func _string_list_from_array(value: Variant) -> PackedStringArray:
 			result.append(text)
 	return result
 
+## 复制字符串数组，避免直接持有外部引用。
 func _copy_string_array(value: Array) -> Array[String]:
 	var result: Array[String] = []
 	for item in value:
 		result.append(str(item))
 	return result
 
+## 将搜索类型标识转换为界面显示文案。
 func _get_search_type_label(search_type: String) -> String:
 	match search_type:
 		"music":
@@ -284,6 +298,7 @@ func _get_search_type_label(search_type: String) -> String:
 		_:
 			return search_type.capitalize()
 
+## 解析搜索结果项的主标题。
 func _result_title(item: Dictionary) -> String:
 	var title := str(item.get("title", "")).strip_edges()
 	if title.is_empty():
@@ -292,6 +307,7 @@ func _result_title(item: Dictionary) -> String:
 		title = "Untitled"
 	return title
 
+## 解析搜索结果项的副标题，优先展示作者与专辑。
 func _result_subtitle(item: Dictionary) -> String:
 	var parts := PackedStringArray()
 	var artist := str(item.get("artist", "")).strip_edges()
@@ -319,6 +335,7 @@ func _ensure_controller() -> bool:
 	_set_status("Plugin search controller is not ready.")
 	return false
 
+## 根据插件、查询和加载状态统一刷新所有操作按钮可用性。
 func _sync_action_state() -> void:
 	var has_plugin := not _get_selected_plugin().is_empty()
 	var has_query := not query_input.text.strip_edges().is_empty()
@@ -330,11 +347,13 @@ func _sync_action_state() -> void:
 	clear_history_button.disabled = _search_history.is_empty() or _is_searching
 	manage_toggle_button.text = "Hide" if management_panel.visible else "Manage"
 
+## 切换搜索中状态，并同步按钮禁用与文案。
 func _set_searching(value: bool) -> void:
 	_is_searching = value
 	submit_search_button.text = "搜索中" if value else "搜索"
 	_sync_action_state()
 
+## 过滤并复制结果数组中的字典项。
 func _normalize_dictionary_array(value: Variant) -> Array[Dictionary]:
 	var result: Array[Dictionary] = []
 	if not (value is Array):
@@ -355,6 +374,7 @@ func _request_reload_plugins() -> void:
 	_reload_requested = true
 	call_deferred("_reload_plugins_deferred")
 
+## 延迟执行插件刷新，合并同一帧内的重复请求。
 func _reload_plugins_deferred() -> void:
 	_reload_requested = false
 	if not _ensure_controller():
@@ -517,6 +537,7 @@ func _on_query_submitted(_text: String) -> void:
 func _on_search_pressed() -> void:
 	await _search_page(1)
 
+## 执行指定页的插件搜索，并同步历史、结果与空态。
 func _search_page(page: int) -> void:
 	if not _ensure_controller() or _is_searching:
 		return
@@ -567,6 +588,7 @@ func _search_page(page: int) -> void:
 	_render_results()
 	_sync_action_state()
 
+## 检测插件宿主状态，必要时自动启动，并重新加载插件列表。
 func _reload_plugins(auto_start: bool) -> void:
 	var plugin_controller = _get_plugin_controller()
 	if plugin_controller == null:
