@@ -1,0 +1,2 @@
+class_name DX_SignalEvent
+extends RefCounted

@@ -1,8 +1,9 @@
 class_name DX_CountdownManager
 extends RefCounted
 
-const SIGNAL_APP_BACKGROUND := &"app/background"
 const DX_CountdownInfoScript = preload("res://dx/runtime/scripts/managers/countdown_info.gd")
+const DX_ScriptPathsType := preload("res://dx/runtime/scripts/constants/dx_script_paths.gd")
+const AppBackgroundEventScript := preload(DX_ScriptPathsType.APP_BACKGROUND_EVENT)
 
 var dx: Node
 var _active: Dictionary = {}
@@ -11,10 +12,10 @@ var _is_background := false
 var _background_entered_unix := 0
 
 func in_ready() -> void:
-	dx.signals.subscribe(SIGNAL_APP_BACKGROUND, _on_app_background_changed)
+	dx.signals.subscribe(AppBackgroundEventScript, _on_app_background_changed)
 
 func in_exit_tree() -> void:
-	dx.signals.unsubscribe(SIGNAL_APP_BACKGROUND, _on_app_background_changed)
+	dx.signals.unsubscribe(AppBackgroundEventScript, _on_app_background_changed)
 
 func in_process(_delta: float) -> void:
 	_refresh_all()
@@ -155,8 +156,10 @@ func _finalize_countdown(id: StringName) -> void:
 	else:
 		_inactive[id] = info
 
-func _on_app_background_changed(value: Variant) -> void:
-	var background: bool = bool(value)
+func _on_app_background_changed(event: DX_AppBackgroundEvent) -> void:
+	if event == null:
+		return
+	var background: bool = event.is_background
 	if background == _is_background:
 		return
 
