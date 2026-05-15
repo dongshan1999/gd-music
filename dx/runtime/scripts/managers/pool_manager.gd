@@ -3,6 +3,8 @@ extends RefCounted
 
 const DEFAULT_MAX_CAPACITY := 100
 const DEFAULT_EXPIRATION_SECONDS := 300.0
+const ACTIVE_ROOT_NAME := "PoolActive"
+const INACTIVE_ROOT_NAME := "PoolInactive"
 
 var dx: Node
 var _active_root: Node
@@ -20,18 +22,27 @@ func in_process(delta: float) -> void:
 	_cleanup_timer = 0.0
 	_cleanup_expired_objects()
 
-func initialize_scene_pool(
+func init(
 	name: StringName,
-	scene: PackedScene,
+	template: Node,
 	max_capacity: int = DEFAULT_MAX_CAPACITY,
 	expiration_seconds: float = DEFAULT_EXPIRATION_SECONDS
 ) -> bool:
-	if scene == null:
-		dx.logger.error("Pool", "初始化对象池失败，scene 不能为空: %s" % String(name))
+	if template == null:
+		dx.logger.error("Pool", "初始化对象池失败，template 不能为空: %s" % String(name))
 		return false
 
+	_ensure_roots()
+	_clear_pool_entries(name)
+
+	if template.get_parent() != null:
+		template.reparent(_inactive_root)
+	else:
+		_inactive_root.add_child(template)
+	_set_node_active_state(template, false)
+
 	_pools[name] = {
-		"scene": scene,
+		"template": template,
 		"items": [],
 		"max_capacity": maxi(1, max_capacity),
 		"expiration_seconds": maxf(0.0, expiration_seconds),
@@ -59,8 +70,13 @@ func pop(name: StringName, parent: Node = null) -> Node:
 			instance = candidate
 
 	if instance == null:
-		var scene: PackedScene = pool["scene"] as PackedScene
-		instance = scene.instantiate()
+		var template: Node = pool.get("template") as Node
+		if not is_instance_valid(template):
+			dx.logger.error("Pool", "对象池模板无效: %s" % String(name))
+			pool["items"] = items
+			_pools[name] = pool
+			return null
+		instance = template.duplicate()
 
 	pool["items"] = items
 	_pools[name] = pool
@@ -71,6 +87,8 @@ func pop(name: StringName, parent: Node = null) -> Node:
 	else:
 		target_parent.add_child(instance)
 	_set_node_active_state(instance, true)
+	if instance.has_method("on_pool_pop"):
+		instance.call("on_pool_pop")
 	return instance
 
 func push(name: StringName, node: Node, parent: Node = null) -> bool:
@@ -96,10 +114,12 @@ func push(name: StringName, node: Node, parent: Node = null) -> bool:
 	else:
 		target_parent.add_child(node)
 	_set_node_active_state(node, false)
+	if node.has_method("on_pool_push"):
+		node.call("on_pool_push")
 
 	items.append({
 		"node": node,
-		"returned_at": Time.get_unix_time_from_system(),
+		"returned_at": dx.time.now_unix(),
 	})
 	pool["items"] = items
 	_pools[name] = pool
@@ -110,6 +130,12 @@ func clear(name: StringName = &"") -> void:
 		for key in _pools.keys():
 			_clear_pool_entries(key)
 		_pools.clear()
+		if is_instance_valid(_active_root):
+			_active_root.queue_free()
+			_active_root = null
+		if is_instance_valid(_inactive_root):
+			_inactive_root.queue_free()
+			_inactive_root = null
 		return
 
 	_clear_pool_entries(name)
@@ -118,11 +144,11 @@ func clear(name: StringName = &"") -> void:
 func _ensure_roots() -> void:
 	if _active_root == null:
 		_active_root = Node.new()
-		_active_root.name = "PoolActive"
+		_active_root.name = ACTIVE_ROOT_NAME
 		dx.add_child(_active_root)
 	if _inactive_root == null:
 		_inactive_root = Node.new()
-		_inactive_root.name = "PoolInactive"
+		_inactive_root.name = INACTIVE_ROOT_NAME
 		dx.add_child(_inactive_root)
 
 func _cleanup_expired_objects() -> void:
@@ -138,7 +164,7 @@ func _cleanup_pool(name: StringName) -> void:
 	if expiration_seconds <= 0.0:
 		return
 
-	var now := Time.get_unix_time_from_system()
+	var now := dx.time.now_unix()
 	var items: Array = pool["items"]
 	for index in range(items.size() - 1, -1, -1):
 		var entry: Dictionary = items[index]
@@ -165,6 +191,9 @@ func _clear_pool_entries(name: StringName) -> void:
 		var candidate := (entry as Dictionary).get("node") as Node
 		if is_instance_valid(candidate):
 			candidate.queue_free()
+	var template := pool.get("template") as Node
+	if is_instance_valid(template):
+		template.queue_free()
 
 func _set_node_active_state(node: Node, visible: bool) -> void:
 	if node is CanvasItem:

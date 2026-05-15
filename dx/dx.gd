@@ -1,4 +1,4 @@
-class_name DX_DXRoot
+class_name DX_Root
 extends Node
 
 const DX_ScriptPathsType := preload("res://dx/runtime/scripts/constants/dx_script_paths.gd")
