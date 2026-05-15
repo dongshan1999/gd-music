@@ -1,65 +1,77 @@
 class_name DX_DXRoot
 extends Node
 
-const SIGNAL_APP_PAUSE := &"app/pause"
-const SIGNAL_APP_FOCUS := &"app/focus"
-const SIGNAL_APP_BACKGROUND := &"app/background"
+const DX_ScriptPathsType := preload("res://dx/runtime/scripts/constants/dx_script_paths.gd")
+const LoggerScript := preload(DX_ScriptPathsType.LOGGER)
+const SignalManagerScript := preload(DX_ScriptPathsType.SIGNAL)
+const DataManagerScript := preload(DX_ScriptPathsType.DATA)
+const TimeManagerScript := preload(DX_ScriptPathsType.TIME)
+const BackgroundStateManagerScript := preload(DX_ScriptPathsType.BACKGROUND_STATE)
+const CountdownManagerScript := preload(DX_ScriptPathsType.COUNTDOWN)
+const PoolManagerScript := preload(DX_ScriptPathsType.POOL)
+const SaveManagerScript := preload(DX_ScriptPathsType.SAVE)
+const LocalizationManagerScript := preload(DX_ScriptPathsType.LOCALIZATION)
+
 const MANAGER_READY_METHOD := &"in_ready"
 const MANAGER_PROCESS_METHOD := &"in_process"
 const MANAGER_EXIT_TREE_METHOD := &"in_exit_tree"
 const MANAGER_QUIT_METHOD := &"in_quit"
 const MANAGER_PAUSE_METHOD := &"in_pause"
 const MANAGER_FOCUS_METHOD := &"in_focus"
+const MANAGER_TRANSLATION_CHANGED_METHOD := &"in_translation_changed"
 
-const LoggerScript := preload("res://dx/runtime/scripts/managers/logger.gd")
-const SignalManagerScript := preload("res://dx/runtime/scripts/managers/signal_manager.gd")
-const DataManagerScript := preload("res://dx/runtime/scripts/managers/data_manager.gd")
-const TimeManagerScript := preload("res://dx/runtime/scripts/managers/time_manager.gd")
-const BackgroundStateManagerScript := preload("res://dx/runtime/scripts/managers/background_state_manager.gd")
-const CountdownManagerScript := preload("res://dx/runtime/scripts/managers/countdown_manager.gd")
-const PoolManagerScript := preload("res://dx/runtime/scripts/managers/pool_manager.gd")
-const SaveManagerScript := preload("res://dx/runtime/scripts/managers/save/save_manager.gd")
-const LocalizationManagerScript := preload("res://dx/runtime/scripts/managers/localization/localization_manager.gd")
+const MANAGER_POPUP := &"popup"
+const MANAGER_TIME := &"time"
+const MANAGER_LOGGER := &"logger"
+const MANAGER_SIGNAL := &"signal"
+const MANAGER_DATA := &"data"
+const MANAGER_BACKGROUND_STATE := &"background_state"
+const MANAGER_COUNTDOWN := &"countdown"
+const MANAGER_POOL := &"pool"
+const MANAGER_SAVE := &"save"
+const MANAGER_LOCALIZATION := &"localization"
+
+const POPUP_NODE_PATH := ^"Popup"
 
 var popup:
 	get:
-		return get_manager(&"popup")
+		return get_manager(MANAGER_POPUP)
 
 var time:
 	get:
-		return get_manager(&"time")
+		return get_manager(MANAGER_TIME)
 
 var logger:
 	get:
-		return get_manager(&"logger")
+		return get_manager(MANAGER_LOGGER)
 
 var signals:
 	get:
-		return get_manager(&"signal")
+		return get_manager(MANAGER_SIGNAL)
 
 var data:
 	get:
-		return get_manager(&"data")
+		return get_manager(MANAGER_DATA)
 
 var background_state:
 	get:
-		return get_manager(&"background_state")
+		return get_manager(MANAGER_BACKGROUND_STATE)
 
 var countdown:
 	get:
-		return get_manager(&"countdown")
+		return get_manager(MANAGER_COUNTDOWN)
 
 var pool:
 	get:
-		return get_manager(&"pool")
+		return get_manager(MANAGER_POOL)
 
 var save:
 	get:
-		return get_manager(&"save")
+		return get_manager(MANAGER_SAVE)
 
 var localization:
 	get:
-		return get_manager(&"localization")
+		return get_manager(MANAGER_LOCALIZATION)
 
 var _manager_map: Dictionary = {}
 var _manager_order: Array = []
@@ -121,24 +133,24 @@ func _bootstrap() -> void:
 	if not _manager_order.is_empty():
 		return
 
-	register_manager(&"time", TimeManagerScript.new())
-	register_manager(&"logger", LoggerScript.new())
-	register_manager(&"signal", SignalManagerScript.new())
-	register_manager(&"data", DataManagerScript.new())
-	register_manager(&"background_state", BackgroundStateManagerScript.new())
-	register_manager(&"countdown", CountdownManagerScript.new())
-	register_manager(&"pool", PoolManagerScript.new())
-	register_manager(&"save", SaveManagerScript.new())
-	register_manager(&"localization", LocalizationManagerScript.new())
+	register_manager(MANAGER_TIME, TimeManagerScript.new())
+	register_manager(MANAGER_LOGGER, LoggerScript.new())
+	register_manager(MANAGER_SIGNAL, SignalManagerScript.new())
+	register_manager(MANAGER_DATA, DataManagerScript.new())
+	register_manager(MANAGER_BACKGROUND_STATE, BackgroundStateManagerScript.new())
+	register_manager(MANAGER_COUNTDOWN, CountdownManagerScript.new())
+	register_manager(MANAGER_POOL, PoolManagerScript.new())
+	register_manager(MANAGER_SAVE, SaveManagerScript.new())
+	register_manager(MANAGER_LOCALIZATION, LocalizationManagerScript.new())
 func _register_popup_manager() -> void:
-	if has_manager(&"popup"):
+	if has_manager(MANAGER_POPUP):
 		return
 
-	var popup_manager = get_node_or_null(^"Popup")
+	var popup_manager = get_node_or_null(POPUP_NODE_PATH)
 	if popup_manager == null:
 		push_error("DX popup manager node is missing.")
 		return
-	register_manager(&"popup", popup_manager)
+	register_manager(MANAGER_POPUP, popup_manager)
 
 func _broadcast_pause(paused: bool) -> void:
 	for manager in _manager_order:
@@ -150,7 +162,7 @@ func _broadcast_focus(has_focus: bool) -> void:
 
 func _broadcast_translation_changed() -> void:
 	for manager in _manager_order:
-		_call_manager_no_args(manager, &"in_translation_changed")
+		_call_manager_no_args(manager, MANAGER_TRANSLATION_CHANGED_METHOD)
 
 func _dispatch_quit() -> void:
 	if _quit_dispatched:
