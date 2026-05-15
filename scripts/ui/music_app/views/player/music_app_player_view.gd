@@ -31,12 +31,14 @@ var _active_progress_touch_index := -1
 @onready var player_next_button: Button = %PlayerNextButton
 @onready var player_list_button: Button = %PlayerListButton
 
+## 注入播放器控制器并完成首次绑定与渲染。
 func setup(controller: MusicAppShowcaseController) -> void:
 	_controller = controller
 	_player_controller = MusicAppPlayerController.new(controller)
 	bind()
 	refresh()
 
+## 绑定播放器固定按钮和进度条输入事件。
 func bind() -> void:
 	if _is_bound:
 		return
@@ -51,22 +53,16 @@ func bind() -> void:
 	player_queue_button.pressed.connect(_show_playback_queue)
 	player_list_button.pressed.connect(_show_playback_queue)
 	_bind_player_progress_bar_input()
+
+## 根据当前播放状态刷新播放器文案、图标和进度条。
 func refresh() -> void:
 	if _controller == null:
 		return
 
-	MusicAppIconsType.apply_icon_button(close_player_button, MusicAppIconsType.ARROW_LEFT)
-	MusicAppIconsType.apply_icon_button(player_share_button, MusicAppIconsType.SHARE)
-	MusicAppIconsType.apply_icon_button(tone_button, MusicAppIconsType.TONE)
-	MusicAppIconsType.apply_icon_button(comment_button, MusicAppIconsType.COMMENT)
-	MusicAppIconsType.apply_icon_button(player_queue_button, MusicAppIconsType.MORE)
 	MusicAppIconsType.apply_icon_button(
 		shuffle_button,
 		_player_controller.get_playback_mode_icon()
 	)
-	MusicAppIconsType.apply_icon_button(player_prev_button, MusicAppIconsType.SKIP_LEFT)
-	MusicAppIconsType.apply_icon_button(player_next_button, MusicAppIconsType.SKIP_RIGHT)
-	MusicAppIconsType.apply_icon_button(player_list_button, MusicAppIconsType.PLAYLIST)
 	shuffle_button.tooltip_text = tr(_player_controller.get_playback_mode_label_key())
 
 	if not _player_controller.has_tracks():
@@ -76,6 +72,10 @@ func refresh() -> void:
 		cover_mark_label.text = ""
 		MusicAppIconsType.apply_icon_button(like_button, MusicAppIconsType.HEART_OUTLINE)
 		MusicAppIconsType.apply_icon_button(player_play_button, MusicAppIconsType.PLAY)
+		MusicAppIconsType.apply_icon_button(
+			shuffle_button,
+			_player_controller.get_playback_mode_icon()
+		)
 		player_progress_bar.value = 0.0
 		elapsed_label.text = "00:00"
 		remaining_label.text = "00:00"
@@ -119,22 +119,28 @@ func navigate_back() -> void:
 
 func toggle_playback() -> void:
 	_player_controller.toggle_playback()
+	refresh()
 
 func _toggle_like_current_track() -> void:
 	_player_controller.toggle_like_current_track()
+	refresh()
 
 func _play_previous() -> void:
 	_player_controller.play_previous_track()
+	refresh()
 
 func _play_next() -> void:
 	_player_controller.play_next_track()
+	refresh()
 
 func _show_playback_queue() -> void:
 	_player_controller.show_playback_queue()
 
 func _cycle_playback_mode() -> void:
 	_player_controller.cycle_playback_mode()
+	refresh()
 
+## 处理拖拽进度条期间的鼠标与触摸输入，实时更新 seek 位置。
 func _input(event: InputEvent) -> void:
 	if not _is_progress_dragging:
 		return
@@ -166,16 +172,19 @@ func _input(event: InputEvent) -> void:
 			_finish_progress_drag()
 			get_viewport().set_input_as_handled()
 
+## 将秒数格式化为 mm:ss 文案。
 func _format_seconds(total_seconds: int) -> String:
 	var minutes: int = int(float(total_seconds) / 60.0)
 	var seconds: int = total_seconds % 60
 	return "%02d:%02d" % [minutes, seconds]
 
+## 为进度条绑定统一的输入处理入口。
 func _bind_player_progress_bar_input() -> void:
 	if not player_progress_bar.gui_input.is_connected(_on_player_progress_bar_gui_input):
 		player_progress_bar.gui_input.connect(_on_player_progress_bar_gui_input)
 	player_progress_bar.mouse_filter = Control.MOUSE_FILTER_STOP
 
+## 响应进度条点击和触摸，开始或结束拖拽 seek。
 func _on_player_progress_bar_gui_input(event: InputEvent) -> void:
 	if event is InputEventMouseButton:
 		var mouse_event := event as InputEventMouseButton
@@ -201,19 +210,23 @@ func _on_player_progress_bar_gui_input(event: InputEvent) -> void:
 			_finish_progress_drag()
 		accept_event()
 
+## 标记当前进入播放器进度拖拽状态。
 func _begin_progress_drag() -> void:
 	_is_progress_dragging = true
 
+## 结束拖拽并清理触摸跟踪状态。
 func _finish_progress_drag() -> void:
 	_is_progress_dragging = false
 	_active_progress_touch_index = -1
 
+## 根据全局横坐标计算进度比例，并同步到播放器控制器。
 func _seek_player_from_global_x(global_x: float, persist_state: bool) -> void:
 	if _player_controller == null or not _player_controller.has_tracks():
 		return
 	var progress_ratio := _get_progress_ratio_from_global_x(global_x)
 	_player_controller.seek_to_progress_ratio(progress_ratio, persist_state)
 
+## 将全局横坐标换算为进度条的 0 到 1 比例。
 func _get_progress_ratio_from_global_x(global_x: float) -> float:
 	var progress_rect := player_progress_bar.get_global_rect()
 	if progress_rect.size.x <= 0.0:

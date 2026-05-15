@@ -58,20 +58,6 @@ func play_selected_playlist_track(slot_index: int) -> bool:
 		return false
 	return _play_track_list(track_indices, slot_index, true)
 
-## 创建一个新的空歌单并切换到它。
-func create_playlist_from_current() -> bool:
-	var playlists: Array[PlaylistData] = get_playlists_ref()
-	var title := _next_playlist_title()
-	var playlist := PlaylistData.new()
-	playlist.title = title
-	playlist.count = 0
-	playlist.mark = title.left(1)
-	playlist.tracks = []
-	playlist.deletable = true
-	playlists.append(playlist)
-	set_selected_playlist_index(playlists.size() - 1)
-	save_app_state()
-	return true
 
 ## 返回指定歌单中的曲目索引列表副本。
 func _get_playlist_track_indices(index: int) -> Array[int]:
@@ -95,20 +81,3 @@ func _play_track_list(track_indices: Array[int], start_slot_index: int, autoplay
 		return false
 	show_popup(DX_PopupRegistry.PopupId.MUSIC_APP_PLAYER)
 	return true
-
-## 生成一个新的不重复歌单标题。
-func _next_playlist_title() -> String:
-	var base_title := tr("music_app.playlist.new_playlist")
-	var suffix := 1
-	var title := base_title
-	while _playlist_title_exists(title):
-		suffix += 1
-		title = "%s %d" % [base_title, suffix]
-	return title
-
-## 判断歌单标题是否已存在。
-func _playlist_title_exists(title: String) -> bool:
-	for playlist in get_playlists_ref():
-		if playlist.title == title:
-			return true
-	return false

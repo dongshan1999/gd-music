@@ -6,12 +6,15 @@ const BUNDLED_NODE_MODULES_PATH := "res://plugin_host/node_modules"
 
 var _local_host_pid: int = -1
 
+## 控制器进入运行期时预热插件设置对象。
 func in_ready() -> void:
 	get_settings()
 
+## 控制器退出运行期时关闭本地插件宿主进程。
 func in_quit() -> void:
 	_stop_local_host()
 
+## 读取并规范化音乐插件设置数据，不存在时返回默认值。
 func get_settings() -> MusicPluginSettingsData:
 	var save_manager = get_save_manager()
 	if save_manager == null or save_manager.data == null:
@@ -21,6 +24,7 @@ func get_settings() -> MusicPluginSettingsData:
 	save_manager.data.music_plugins.normalize()
 	return save_manager.data.music_plugins
 
+## 将当前插件设置写回存档。
 func save_settings() -> void:
 	var save_manager = get_save_manager()
 	if save_manager != null:
@@ -35,6 +39,7 @@ func get_last_started_pid() -> int:
 func is_local_host_configured() -> bool:
 	return _build_local_host_launch_config().get("ok", false)
 
+## 按设置在首帧后尝试自动启动本地插件宿主。
 func auto_start_local_host() -> void:
 	var resolved_controller = get_showcase()
 	if resolved_controller == null:
@@ -46,6 +51,7 @@ func auto_start_local_host() -> void:
 	if not bool(result.get("ok", false)):
 		push_warning("Music plugin host auto-start failed: %s" % str(result.get("error", "Unknown error.")))
 
+## 启动本地插件宿主进程，并轮询直到健康检查通过。
 func start_local_host() -> Dictionary:
 	if not _is_desktop_platform():
 		return _error_result("Local plugin host startup is only supported on desktop platforms.")
@@ -170,6 +176,7 @@ func get_toplists(plugin_id: String) -> Dictionary:
 		{"plugin_id": plugin_id}
 	)
 
+## 向插件宿主发起统一 JSON 请求，并解析标准响应结构。
 func _request_json(method: HTTPClient.Method, endpoint: String, payload: Variant = null) -> Dictionary:
 	var request_host = get_showcase()
 	if request_host == null:
@@ -233,11 +240,13 @@ func _request_json(method: HTTPClient.Method, endpoint: String, payload: Variant
 		"data": parsed_body
 	}
 
+## 将 Godot 资源路径解析为实际系统路径。
 func _resolve_command_path(path: String) -> String:
 	if path.begins_with("res://") or path.begins_with("user://"):
 		return ProjectSettings.globalize_path(path)
 	return path
 
+## 组装本地插件宿主的启动命令，优先使用用户配置，其次回退到内置 host。
 func _build_local_host_launch_config() -> Dictionary:
 	var settings = get_settings()
 	if not settings.local_host_command.is_empty():
@@ -260,6 +269,7 @@ func _build_local_host_launch_config() -> Dictionary:
 
 	return _error_result("Local plugin host command is not configured.")
 
+## 返回插件宿主 HTTP 请求默认头部。
 func _get_default_headers() -> PackedStringArray:
 	return PackedStringArray([
 		"Content-Type: application/json",
@@ -269,6 +279,7 @@ func _get_default_headers() -> PackedStringArray:
 func _is_desktop_platform() -> bool:
 	return OS.has_feature("windows") or OS.has_feature("macos") or OS.has_feature("linuxbsd")
 
+## 在 showcase 所在场景树上等待指定秒数。
 func _delay_seconds(seconds: float) -> void:
 	var request_host = get_showcase()
 	if request_host == null:
@@ -276,6 +287,7 @@ func _delay_seconds(seconds: float) -> void:
 	var timer = request_host.get_tree().create_timer(seconds)
 	await timer.timeout
 
+## 结束当前记录的本地插件宿主进程。
 func _stop_local_host() -> void:
 	if _local_host_pid <= 0:
 		return
@@ -283,6 +295,7 @@ func _stop_local_host() -> void:
 		OS.kill(_local_host_pid)
 	_local_host_pid = -1
 
+## 构造统一格式的插件控制器错误返回。
 func _error_result(message: String, extra: Dictionary = {}) -> Dictionary:
 	var result = {"ok": false, "error": message}
 	for key in extra.keys():

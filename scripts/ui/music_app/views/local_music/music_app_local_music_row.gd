@@ -28,7 +28,6 @@ func setup() -> void:
 	_source_label = $Margin/Row/SourceChip/Margin/SourceLabel
 	_more_button = $Margin/Row/MoreButton
 	_open_button = $OpenButton
-	MusicAppIconsType.apply_icon_button(_more_button, MusicAppIconsType.MORE)
 
 	_more_button.pressed.connect(_on_more_pressed)
 	_open_button.pressed.connect(_on_open_pressed)

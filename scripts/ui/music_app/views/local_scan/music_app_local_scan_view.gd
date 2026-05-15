@@ -22,12 +22,14 @@ var _folder_rows: Array[MusicAppLocalMusicScanFolderRow] = []
 @onready var scan_folder_bottom_space: Control = %ScanFolderBottomSpace
 @onready var start_scan_button: Button = %StartScanButton
 
+## 注入本地扫描控制器并完成首次界面绑定。
 func setup(controller: MusicAppShowcaseController) -> void:
 	_controller = controller
 	_local_scan_controller = MusicAppLocalScanController.new(controller)
 	bind()
 	refresh()
 
+## 绑定扫描页固定按钮事件。
 func bind() -> void:
 	if _is_bound:
 		return
@@ -36,12 +38,11 @@ func bind() -> void:
 	scan_back_button.pressed.connect(navigate_back)
 	scan_select_all_button.pressed.connect(_toggle_select_all)
 	start_scan_button.pressed.connect(_start_scan)
+
+## 根据当前路径刷新目录列表、路径文案和选中态。
 func refresh() -> void:
 	if _controller == null:
 		return
-
-	MusicAppIconsType.apply_icon_button(scan_back_button, MusicAppIconsType.ARROW_LEFT)
-
 	if _root_path.is_empty():
 		_root_path = _local_scan_controller.get_scan_root_path()
 	if _current_path.is_empty():
@@ -77,6 +78,7 @@ func navigate_back() -> void:
 	_current_path = _local_scan_controller.get_scan_parent_path(_current_path, _root_path)
 	refresh()
 
+## 按目录项数量增删文件夹行节点，并维持底部占位顺序。
 func _sync_rows(target_size: int) -> void:
 	while _folder_rows.size() < target_size:
 		var row := SCAN_FOLDER_ROW_SCENE.instantiate() as MusicAppLocalMusicScanFolderRow
@@ -113,6 +115,7 @@ func _toggle_select_all() -> void:
 			_selected_paths.erase(path)
 	refresh()
 
+## 判断当前列表中的目录是否已经全部被勾选。
 func _are_all_current_selected() -> bool:
 	if _current_entries.is_empty():
 		return false
@@ -121,9 +124,11 @@ func _are_all_current_selected() -> bool:
 			return false
 	return true
 
+## 根据当前勾选状态更新“全选/取消全选”按钮文案。
 func _update_select_all_button_text() -> void:
 	scan_select_all_button.text = tr("music_app.scan.unselect_all") if _are_all_current_selected() and not _current_entries.is_empty() else tr("music_app.scan.select_all")
 
+## 扫描所选目录并将新发现的音频文件导入全局曲库。
 func _start_scan() -> void:
 	var target_paths: Array[String] = []
 	for path in _selected_paths.keys():

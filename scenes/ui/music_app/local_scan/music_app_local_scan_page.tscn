@@ -1,7 +1,8 @@
 [gd_scene format=3 uid="uid://6xsr1dl3o4fh"]
 
-[ext_resource type="Script" path="res://scripts/ui/music_app/views/local_scan/music_app_local_scan_view.gd" id="8_local_scan_script"]
-[ext_resource type="Script" path="res://dx/runtime/scripts/managers/localization/localize_comp.gd" id="999_localize_comp"]
+[ext_resource type="Texture2D" uid="uid://l64plqxfd10g" path="res://textures/arrow-left.svg" id="2_xvpdw"]
+[ext_resource type="Script" uid="uid://bxlxk77s8dtmi" path="res://scripts/ui/music_app/views/local_scan/music_app_local_scan_view.gd" id="8_local_scan_script"]
+[ext_resource type="Script" uid="uid://bym33i5tdjhtg" path="res://dx/runtime/scripts/managers/localization/localize_comp.gd" id="999_localize_comp"]
 
 [node name="LocalScanPage" type="Control" unique_id=767850004]
 unique_name_in_owner = true
@@ -11,10 +12,9 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-popup_layer = 0
 script = ExtResource("8_local_scan_script")
 
-[node name="Background" type="ColorRect" parent="."]
+[node name="Background" type="ColorRect" parent="." unique_id=489759005]
 layout_mode = 0
 anchor_right = 1.0
 anchor_bottom = 1.0
@@ -45,7 +45,7 @@ theme_override_constants/separation = 10
 [node name="ScanBackButton" type="Button" parent="Margin/ScanVBox/ScanTopRow" unique_id=1643129048]
 unique_name_in_owner = true
 layout_mode = 2
-text = "←"
+icon = ExtResource("2_xvpdw")
 
 [node name="ScanPathLabel" type="Label" parent="Margin/ScanVBox/ScanTopRow" unique_id=1474766410]
 unique_name_in_owner = true

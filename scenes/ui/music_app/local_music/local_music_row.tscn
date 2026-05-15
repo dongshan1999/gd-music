@@ -1,6 +1,7 @@
-[gd_scene load_steps=4 format=3]
+[gd_scene load_steps=5 format=3]
 
 [ext_resource type="Script" path="res://scripts/ui/music_app/views/local_music/music_app_local_music_row.gd" id="1_script"]
+[ext_resource type="Texture2D" path="res://textures/ellipsis-vertical.svg" id="2_more"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_local_music_row_panel"]
 bg_color = Color(0.160784, 0.160784, 0.168627, 1)
@@ -87,7 +88,10 @@ vertical_alignment = 1
 [node name="MoreButton" type="Button" parent="Margin/Row"]
 custom_minimum_size = Vector2(34, 34)
 layout_mode = 2
-text = "..."
+icon = ExtResource("2_more")
+expand_icon = true
+icon_alignment = 1
+vertical_icon_alignment = 1
 
 [node name="OpenButton" type="Button" parent="."]
 layout_mode = 0

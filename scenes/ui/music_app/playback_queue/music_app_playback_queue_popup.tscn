@@ -1,6 +1,8 @@
 [gd_scene format=3 uid="uid://c1rcvybp22n2o"]
 
 [ext_resource type="Script" uid="uid://dk54lxh0xxjsr" path="res://scripts/ui/music_app/views/playback_queue/music_app_playback_queue_view.gd" id="1_script"]
+[ext_resource type="Texture2D" path="res://textures/arrow-path.svg" id="2_loop_all"]
+[ext_resource type="Texture2D" path="res://textures/trash-outline.svg" id="3_trash"]
 
 [sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_backdrop"]
 
@@ -84,6 +86,8 @@ vertical_alignment = 1
 unique_name_in_owner = true
 custom_minimum_size = Vector2(126, 38)
 layout_mode = 2
+icon = ExtResource("2_loop_all")
+expand_icon = true
 theme_override_colors/font_color = Color(0.968627, 0.968627, 0.972549, 1)
 theme_override_font_sizes/font_size = 14
 theme_override_styles/normal = SubResource("StyleBoxFlat_action_button")
@@ -97,6 +101,8 @@ text = "循环播放"
 unique_name_in_owner = true
 custom_minimum_size = Vector2(92, 38)
 layout_mode = 2
+icon = ExtResource("3_trash")
+expand_icon = true
 theme_override_colors/font_color = Color(0.968627, 0.968627, 0.972549, 1)
 theme_override_font_sizes/font_size = 14
 theme_override_styles/normal = SubResource("StyleBoxFlat_action_button")

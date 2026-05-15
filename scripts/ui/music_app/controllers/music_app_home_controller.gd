@@ -37,7 +37,6 @@ func create_playlist_from_current() -> bool:
 	playlist.deletable = true
 	playlists.append(playlist)
 	set_selected_playlist_index(playlists.size() - 1)
-	save_app_state()
 	return true
 
 ## 删除指定索引的歌单，并修正当前选中项。
@@ -56,7 +55,6 @@ func delete_playlist(index: int) -> bool:
 
 	playlists.remove_at(index)
 	set_selected_playlist_index(clampi(selected_playlist_index, 0, maxi(playlists.size() - 1, 0)))
-	save_app_state()
 	return true
 
 ## 选中并打开指定歌单详情弹窗。
@@ -90,7 +88,6 @@ func _select_playlist(index: int) -> bool:
 	if playlists.is_empty():
 		return false
 	set_selected_playlist_index(clampi(index, 0, playlists.size() - 1))
-	save_app_state()
 	return true
 
 ## 生成一个不与现有歌单重名的新歌单标题。

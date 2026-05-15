@@ -1,6 +1,17 @@
 [gd_scene format=3 uid="uid://bm2c4vapaiaqf"]
 
 [ext_resource type="Script" uid="uid://2xj1d207a5qg" path="res://scripts/ui/music_app/views/player/music_app_player_view.gd" id="4_script"]
+[ext_resource type="Texture2D" path="res://textures/arrow-left.svg" id="5_arrow_left"]
+[ext_resource type="Texture2D" path="res://textures/share.svg" id="6_share"]
+[ext_resource type="Texture2D" path="res://textures/cog-8-tooth.svg" id="7_tone"]
+[ext_resource type="Texture2D" path="res://textures/chat-bubble-oval-left-ellipsis.svg" id="8_comment"]
+[ext_resource type="Texture2D" path="res://textures/ellipsis-vertical.svg" id="9_more"]
+[ext_resource type="Texture2D" path="res://textures/skip-left.svg" id="10_skip_left"]
+[ext_resource type="Texture2D" path="res://textures/skip-right.svg" id="11_skip_right"]
+[ext_resource type="Texture2D" path="res://textures/playlist.svg" id="12_playlist"]
+[ext_resource type="Texture2D" path="res://textures/heart-outline.svg" id="13_heart_outline"]
+[ext_resource type="Texture2D" path="res://textures/arrow-path.svg" id="14_loop_all"]
+[ext_resource type="Texture2D" path="res://textures/play.svg" id="15_play"]
 [ext_resource type="Script" uid="uid://bym33i5tdjhtg" path="res://dx/runtime/scripts/managers/localization/localize_comp.gd" id="999_localize_comp"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_player_cover_panel"]
@@ -65,7 +76,10 @@ theme_override_constants/separation = 8
 unique_name_in_owner = true
 custom_minimum_size = Vector2(44, 44)
 layout_mode = 2
-text = "←"
+icon = ExtResource("5_arrow_left")
+expand_icon = true
+icon_alignment = 1
+vertical_icon_alignment = 1
 
 [node name="Spacer" type="Control" parent="PlayerMargin/PlayerVBox/PlayerTopRow" unique_id=1068371053]
 layout_mode = 2
@@ -75,7 +89,10 @@ size_flags_horizontal = 3
 unique_name_in_owner = true
 custom_minimum_size = Vector2(44, 44)
 layout_mode = 2
-text = "↗"
+icon = ExtResource("6_share")
+expand_icon = true
+icon_alignment = 1
+vertical_icon_alignment = 1
 
 [node name="PlayerTitleBlock" type="VBoxContainer" parent="PlayerMargin/PlayerVBox" unique_id=635078707]
 layout_mode = 2
@@ -200,7 +217,10 @@ alignment = 1
 unique_name_in_owner = true
 custom_minimum_size = Vector2(40, 40)
 layout_mode = 2
-text = "♡"
+icon = ExtResource("13_heart_outline")
+expand_icon = true
+icon_alignment = 1
+vertical_icon_alignment = 1
 
 [node name="PlayerFxLabel" type="Label" parent="PlayerMargin/PlayerVBox/PlayerMetaRow" unique_id=1133679788]
 unique_name_in_owner = true
@@ -215,7 +235,10 @@ tr_key = "music_app.player.fx"
 unique_name_in_owner = true
 custom_minimum_size = Vector2(40, 40)
 layout_mode = 2
-text = "◎"
+icon = ExtResource("7_tone")
+expand_icon = true
+icon_alignment = 1
+vertical_icon_alignment = 1
 
 [node name="SpeedLabel" type="Label" parent="PlayerMargin/PlayerVBox/PlayerMetaRow" unique_id=1551380707]
 unique_name_in_owner = true
@@ -226,7 +249,10 @@ text = "1.0x"
 unique_name_in_owner = true
 custom_minimum_size = Vector2(40, 40)
 layout_mode = 2
-text = "评"
+icon = ExtResource("8_comment")
+expand_icon = true
+icon_alignment = 1
+vertical_icon_alignment = 1
 
 [node name="LocalizeComp" type="Node" parent="PlayerMargin/PlayerVBox/PlayerMetaRow/CommentButton" unique_id=1134174078]
 script = ExtResource("999_localize_comp")
@@ -236,7 +262,10 @@ tr_key = "music_app.player.comments_short"
 unique_name_in_owner = true
 custom_minimum_size = Vector2(40, 40)
 layout_mode = 2
-text = "⋯"
+icon = ExtResource("9_more")
+expand_icon = true
+icon_alignment = 1
+vertical_icon_alignment = 1
 
 [node name="ProgressWrap" type="VBoxContainer" parent="PlayerMargin/PlayerVBox" unique_id=1782633426]
 layout_mode = 2
@@ -278,31 +307,46 @@ theme_override_constants/separation = 18
 unique_name_in_owner = true
 custom_minimum_size = Vector2(48, 48)
 layout_mode = 2
-text = "⇄"
+icon = ExtResource("14_loop_all")
+expand_icon = true
+icon_alignment = 1
+vertical_icon_alignment = 1
 
 [node name="PlayerPrevButton" type="Button" parent="PlayerMargin/PlayerVBox/ControlsCenter/ControlsRow" unique_id=749697126]
 unique_name_in_owner = true
 custom_minimum_size = Vector2(56, 56)
 layout_mode = 2
-text = "◀◀"
+icon = ExtResource("10_skip_left")
+expand_icon = true
+icon_alignment = 1
+vertical_icon_alignment = 1
 
 [node name="PlayerPlayButton" type="Button" parent="PlayerMargin/PlayerVBox/ControlsCenter/ControlsRow" unique_id=1869086045]
 unique_name_in_owner = true
 custom_minimum_size = Vector2(84, 84)
 layout_mode = 2
-text = "▶"
+icon = ExtResource("15_play")
+expand_icon = true
+icon_alignment = 1
+vertical_icon_alignment = 1
 
 [node name="PlayerNextButton" type="Button" parent="PlayerMargin/PlayerVBox/ControlsCenter/ControlsRow" unique_id=1153550113]
 unique_name_in_owner = true
 custom_minimum_size = Vector2(56, 56)
 layout_mode = 2
-text = "▶▶"
+icon = ExtResource("11_skip_right")
+expand_icon = true
+icon_alignment = 1
+vertical_icon_alignment = 1
 
 [node name="PlayerListButton" type="Button" parent="PlayerMargin/PlayerVBox/ControlsCenter/ControlsRow" unique_id=1334156431]
 unique_name_in_owner = true
 custom_minimum_size = Vector2(48, 48)
 layout_mode = 2
-text = "≡"
+icon = ExtResource("12_playlist")
+expand_icon = true
+icon_alignment = 1
+vertical_icon_alignment = 1
 
 [node name="BottomFiller" type="Control" parent="PlayerMargin/PlayerVBox" unique_id=280628813]
 layout_mode = 2

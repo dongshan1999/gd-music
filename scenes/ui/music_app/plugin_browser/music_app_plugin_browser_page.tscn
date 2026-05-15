@@ -1,7 +1,9 @@
-[gd_scene load_steps=6 format=3]
+[gd_scene format=3 uid="uid://b5nhc13nqobyx"]
 
-[ext_resource type="Script" path="res://scripts/ui/music_app/views/plugin_browser/music_app_plugin_browser_view.gd" id="1_script"]
+[ext_resource type="Script" uid="uid://bi3vl71m05w8y" path="res://scripts/ui/music_app/views/plugin_browser/music_app_plugin_browser_view.gd" id="1_script"]
 [ext_resource type="PackedScene" path="res://scenes/ui/music_app/plugin_browser/plugin_search_tab.tscn" id="2_search_tab"]
+[ext_resource type="Texture2D" uid="uid://l64plqxfd10g" path="res://textures/arrow-left.svg" id="2_sym7y"]
+[ext_resource type="Texture2D" uid="uid://c2kbdu1mp5y13" path="res://textures/magnifying-glass.svg" id="3_npfvv"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_search_bar"]
 bg_color = Color(0.129412, 0.133333, 0.145098, 1)
@@ -12,24 +14,17 @@ corner_radius_bottom_left = 20
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_management_panel"]
 bg_color = Color(0.14902, 0.152941, 0.164706, 1)
-border_width_bottom = 1
 border_width_left = 1
-border_width_right = 1
 border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
 border_color = Color(0.215686, 0.223529, 0.247059, 1)
 corner_radius_top_left = 10
 corner_radius_top_right = 10
 corner_radius_bottom_right = 10
 corner_radius_bottom_left = 10
 
-[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_plugin_history_title"]
-bg_color = Color(0.203922, 0.203922, 0.215686, 1)
-corner_radius_top_left = 6
-corner_radius_top_right = 6
-corner_radius_bottom_right = 6
-corner_radius_bottom_left = 6
-
-[node name="MusicAppPluginBrowserView" type="Control"]
+[node name="MusicAppPluginBrowserView" type="Control" unique_id=1267815916]
 layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0
@@ -38,7 +33,7 @@ grow_horizontal = 2
 grow_vertical = 2
 script = ExtResource("1_script")
 
-[node name="Background" type="ColorRect" parent="."]
+[node name="Background" type="ColorRect" parent="." unique_id=55041820]
 layout_mode = 0
 anchor_right = 1.0
 anchor_bottom = 1.0
@@ -46,7 +41,7 @@ grow_horizontal = 2
 grow_vertical = 2
 color = Color(0.137255, 0.137255, 0.145098, 1)
 
-[node name="Margin" type="MarginContainer" parent="."]
+[node name="Margin" type="MarginContainer" parent="." unique_id=1460156404]
 layout_mode = 0
 anchor_right = 1.0
 anchor_bottom = 1.0
@@ -57,37 +52,37 @@ theme_override_constants/margin_top = 10
 theme_override_constants/margin_right = 14
 theme_override_constants/margin_bottom = 10
 
-[node name="RootVBox" type="VBoxContainer" parent="Margin"]
+[node name="RootVBox" type="VBoxContainer" parent="Margin" unique_id=1855336854]
 layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 3
 theme_override_constants/separation = 10
 
-[node name="SearchRow" type="HBoxContainer" parent="Margin/RootVBox"]
-layout_mode = 2
+[node name="SearchRow" type="HBoxContainer" parent="Margin/RootVBox" unique_id=1580335352]
 custom_minimum_size = Vector2(0, 46)
+layout_mode = 2
 theme_override_constants/separation = 10
 
 [node name="BackButton" type="Button" parent="Margin/RootVBox/SearchRow" unique_id=1695653304]
 unique_name_in_owner = true
 custom_minimum_size = Vector2(42, 42)
 layout_mode = 2
+icon = ExtResource("2_sym7y")
 flat = true
-text = "←"
 
-[node name="SearchBarPanel" type="PanelContainer" parent="Margin/RootVBox/SearchRow"]
+[node name="SearchBarPanel" type="PanelContainer" parent="Margin/RootVBox/SearchRow" unique_id=1576339099]
 layout_mode = 2
 size_flags_horizontal = 3
 theme_override_styles/panel = SubResource("StyleBoxFlat_search_bar")
 
-[node name="SearchBarMargin" type="MarginContainer" parent="Margin/RootVBox/SearchRow/SearchBarPanel"]
+[node name="SearchBarMargin" type="MarginContainer" parent="Margin/RootVBox/SearchRow/SearchBarPanel" unique_id=2121772208]
 layout_mode = 2
 theme_override_constants/margin_left = 12
 theme_override_constants/margin_top = 6
 theme_override_constants/margin_right = 12
 theme_override_constants/margin_bottom = 6
 
-[node name="SearchBarRow" type="HBoxContainer" parent="Margin/RootVBox/SearchRow/SearchBarPanel/SearchBarMargin"]
+[node name="SearchBarRow" type="HBoxContainer" parent="Margin/RootVBox/SearchRow/SearchBarPanel/SearchBarMargin" unique_id=1466118223]
 layout_mode = 2
 theme_override_constants/separation = 8
 
@@ -95,29 +90,30 @@ theme_override_constants/separation = 8
 unique_name_in_owner = true
 custom_minimum_size = Vector2(18, 18)
 layout_mode = 2
+texture = ExtResource("3_npfvv")
 stretch_mode = 5
 
 [node name="QueryInput" type="LineEdit" parent="Margin/RootVBox/SearchRow/SearchBarPanel/SearchBarMargin/SearchBarRow" unique_id=374152739]
 unique_name_in_owner = true
 layout_mode = 2
 size_flags_horizontal = 3
-flat = true
 placeholder_text = "输入要搜索的歌曲"
+flat = true
 
 [node name="ClearQueryButton" type="Button" parent="Margin/RootVBox/SearchRow/SearchBarPanel/SearchBarMargin/SearchBarRow" unique_id=2106999030]
 unique_name_in_owner = true
-custom_minimum_size = Vector2(24, 24)
 visible = false
+custom_minimum_size = Vector2(24, 24)
 layout_mode = 2
-flat = true
 text = "×"
+flat = true
 
 [node name="SubmitSearchButton" type="Button" parent="Margin/RootVBox/SearchRow" unique_id=161286635]
 unique_name_in_owner = true
 custom_minimum_size = Vector2(52, 42)
 layout_mode = 2
-flat = true
 text = "搜索"
+flat = true
 
 [node name="SearchContent" type="VBoxContainer" parent="Margin/RootVBox" unique_id=1882077670]
 unique_name_in_owner = true
@@ -125,12 +121,12 @@ layout_mode = 2
 size_flags_vertical = 3
 theme_override_constants/separation = 12
 
-[node name="HistorySection" type="VBoxContainer" parent="Margin/RootVBox/SearchContent"]
+[node name="HistorySection" type="VBoxContainer" parent="Margin/RootVBox/SearchContent" unique_id=528802739]
 unique_name_in_owner = true
 layout_mode = 2
 theme_override_constants/separation = 12
 
-[node name="HistoryHeader" type="HBoxContainer" parent="Margin/RootVBox/SearchContent/HistorySection"]
+[node name="HistoryHeader" type="HBoxContainer" parent="Margin/RootVBox/SearchContent/HistorySection" unique_id=161366817]
 layout_mode = 2
 
 [node name="HistoryTitleLabel" type="Label" parent="Margin/RootVBox/SearchContent/HistorySection/HistoryHeader" unique_id=1968642383]
@@ -144,8 +140,8 @@ text = "历史记录"
 [node name="ClearHistoryButton" type="Button" parent="Margin/RootVBox/SearchContent/HistorySection/HistoryHeader" unique_id=1277190165]
 unique_name_in_owner = true
 layout_mode = 2
-flat = true
 text = "清空"
+flat = true
 
 [node name="HistoryTagsContainer" type="FlowContainer" parent="Margin/RootVBox/SearchContent/HistorySection" unique_id=832174555]
 unique_name_in_owner = true
@@ -160,7 +156,7 @@ layout_mode = 2
 theme_override_colors/font_color = Color(0.643137, 0.65098, 0.690196, 1)
 text = "暂无搜索记录"
 
-[node name="ResultsSection" type="VBoxContainer" parent="Margin/RootVBox/SearchContent"]
+[node name="ResultsSection" type="VBoxContainer" parent="Margin/RootVBox/SearchContent" unique_id=282897553]
 unique_name_in_owner = true
 visible = false
 layout_mode = 2
@@ -172,7 +168,7 @@ unique_name_in_owner = true
 custom_minimum_size = Vector2(0, 48)
 layout_mode = 2
 
-[node name="SearchTypeTabTemplate" parent="Margin/RootVBox/SearchContent/ResultsSection/SearchTypeTabs" instance=ExtResource("2_search_tab")]
+[node name="SearchTypeTabTemplate" parent="Margin/RootVBox/SearchContent/ResultsSection/SearchTypeTabs" unique_id=88470861 instance=ExtResource("2_search_tab")]
 visible = false
 
 [node name="PluginTabs" type="HBoxContainer" parent="Margin/RootVBox/SearchContent/ResultsSection" unique_id=168431907]
@@ -202,20 +198,20 @@ text = "请选择插件并输入搜索关键字"
 horizontal_alignment = 1
 vertical_alignment = 1
 
-[node name="ManagementPanel" type="PanelContainer" parent="Margin/RootVBox"]
+[node name="ManagementPanel" type="PanelContainer" parent="Margin/RootVBox" unique_id=165218174]
 unique_name_in_owner = true
 visible = false
 layout_mode = 2
 theme_override_styles/panel = SubResource("StyleBoxFlat_management_panel")
 
-[node name="ManagementMargin" type="MarginContainer" parent="Margin/RootVBox/ManagementPanel"]
+[node name="ManagementMargin" type="MarginContainer" parent="Margin/RootVBox/ManagementPanel" unique_id=50975363]
 layout_mode = 2
 theme_override_constants/margin_left = 12
 theme_override_constants/margin_top = 12
 theme_override_constants/margin_right = 12
 theme_override_constants/margin_bottom = 12
 
-[node name="ManagementVBox" type="VBoxContainer" parent="Margin/RootVBox/ManagementPanel/ManagementMargin"]
+[node name="ManagementVBox" type="VBoxContainer" parent="Margin/RootVBox/ManagementPanel/ManagementMargin" unique_id=657882036]
 layout_mode = 2
 theme_override_constants/separation = 8
 
@@ -226,7 +222,7 @@ theme_override_colors/font_color = Color(0.643137, 0.65098, 0.690196, 1)
 text = "Checking plugin host..."
 autowrap_mode = 2
 
-[node name="ManagementToolbar" type="HBoxContainer" parent="Margin/RootVBox/ManagementPanel/ManagementMargin/ManagementVBox"]
+[node name="ManagementToolbar" type="HBoxContainer" parent="Margin/RootVBox/ManagementPanel/ManagementMargin/ManagementVBox" unique_id=452061590]
 layout_mode = 2
 theme_override_constants/separation = 8
 
@@ -248,7 +244,7 @@ custom_minimum_size = Vector2(78, 36)
 layout_mode = 2
 text = "Refresh"
 
-[node name="InstallFileRow" type="HBoxContainer" parent="Margin/RootVBox/ManagementPanel/ManagementMargin/ManagementVBox"]
+[node name="InstallFileRow" type="HBoxContainer" parent="Margin/RootVBox/ManagementPanel/ManagementMargin/ManagementVBox" unique_id=1387254183]
 layout_mode = 2
 theme_override_constants/separation = 8
 
@@ -264,7 +260,7 @@ custom_minimum_size = Vector2(70, 36)
 layout_mode = 2
 text = "Install"
 
-[node name="InstallUrlRow" type="HBoxContainer" parent="Margin/RootVBox/ManagementPanel/ManagementMargin/ManagementVBox"]
+[node name="InstallUrlRow" type="HBoxContainer" parent="Margin/RootVBox/ManagementPanel/ManagementMargin/ManagementVBox" unique_id=475835168]
 layout_mode = 2
 theme_override_constants/separation = 8
 
@@ -287,7 +283,7 @@ theme_override_colors/font_color = Color(0.643137, 0.65098, 0.690196, 1)
 text = "No plugin selected."
 autowrap_mode = 2
 
-[node name="PluginVarsToolbar" type="HBoxContainer" parent="Margin/RootVBox/ManagementPanel/ManagementMargin/ManagementVBox"]
+[node name="PluginVarsToolbar" type="HBoxContainer" parent="Margin/RootVBox/ManagementPanel/ManagementMargin/ManagementVBox" unique_id=558320482]
 layout_mode = 2
 theme_override_constants/separation = 8
 

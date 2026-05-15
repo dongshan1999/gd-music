@@ -25,12 +25,14 @@ var _visible_track_indices: Array[int] = []
 
 var _rows: Array[MusicAppLocalMusicRow] = []
 
+## 注入本地音乐页控制器并完成首次绑定与渲染。
 func setup(controller: MusicAppShowcaseController) -> void:
 	_controller = controller
 	_local_music_controller = MusicAppLocalMusicController.new(controller)
 	bind()
 	refresh()
 
+## 绑定本地音乐页固定按钮事件，避免重复连接。
 func bind() -> void:
 	if _is_bound:
 		return
@@ -43,6 +45,8 @@ func bind() -> void:
 	scan_music_button.pressed.connect(_open_scan_page)
 	edit_music_button.pressed.connect(_show_stub_edit)
 	download_list_button.pressed.connect(_show_stub_download)
+
+## 刷新本地音乐列表、空态文案与当前可见曲目索引。
 func refresh() -> void:
 	if _controller == null:
 		return
@@ -68,6 +72,7 @@ func close_page() -> void:
 	_hide_menu()
 	close_popup()
 
+## 根据目标数量增删本地音乐行节点，并维持底部占位结构。
 func _sync_rows(target_size: int) -> void:
 	while _rows.size() < target_size:
 		var row := LOCAL_MUSIC_ROW_SCENE.instantiate() as MusicAppLocalMusicRow
@@ -92,6 +97,7 @@ func _toggle_menu() -> void:
 	local_music_menu_panel.visible = next_visible
 	local_music_menu_scrim.visible = next_visible
 
+## 隐藏本地音乐页右上角操作菜单。
 func _hide_menu() -> void:
 	local_music_menu_panel.visible = false
 	local_music_menu_scrim.visible = false

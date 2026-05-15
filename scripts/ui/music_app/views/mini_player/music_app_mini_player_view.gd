@@ -22,12 +22,14 @@ var _artwork_texture_cache := {}
 @onready var mini_list_button: Button = %MiniListButton
 @onready var mini_open_button: Button = %MiniOpenButton
 
+## 注入迷你播放器控制器并完成首次绑定与渲染。
 func setup(controller: MusicAppShowcaseController) -> void:
 	_controller = controller
 	_mini_player_controller = MusicAppMiniPlayerController.new(controller)
 	bind()
 	refresh()
 
+## 绑定迷你播放器按钮事件。
 func bind() -> void:
 	if _is_bound:
 		return
@@ -36,6 +38,8 @@ func bind() -> void:
 	mini_play_button.pressed.connect(_toggle_playback)
 	mini_list_button.pressed.connect(_show_playback_queue)
 	mini_open_button.pressed.connect(_open_player_from_current)
+
+## 根据当前播放状态刷新迷你播放器文案、图标和封面。
 func refresh() -> void:
 	if _controller == null:
 		return
@@ -45,7 +49,6 @@ func refresh() -> void:
 		mini_track_label.text = tr("music_app.mini_player.empty")
 		mini_play_ring.progress = 0.0
 		MusicAppIconsType.apply_icon_button(mini_play_button, MusicAppIconsType.PLAY)
-		MusicAppIconsType.apply_icon_button(mini_list_button, MusicAppIconsType.PLAYLIST)
 		return
 
 	var track: TrackData = _mini_player_controller.get_current_track()
@@ -58,12 +61,12 @@ func refresh() -> void:
 		if _mini_player_controller.is_playing()
 		else MusicAppIconsType.PLAY
 	)
-	MusicAppIconsType.apply_icon_button(mini_list_button, MusicAppIconsType.PLAYLIST)
 
 func _toggle_playback() -> void:
 	if not _mini_player_controller.has_tracks():
 		return
 	_mini_player_controller.toggle_playback()
+	refresh()
 
 func _show_playback_queue() -> void:
 	if not _mini_player_controller.has_tracks():
@@ -73,6 +76,7 @@ func _show_playback_queue() -> void:
 func _open_player_from_current() -> void:
 	_mini_player_controller.open_player_page()
 
+## 刷新当前曲目的封面展示，必要时触发异步加载。
 func _refresh_cover(track: TrackData) -> void:
 	if track == null:
 		_reset_cover_state()
@@ -103,6 +107,7 @@ func _refresh_cover(track: TrackData) -> void:
 
 	call_deferred("_load_cover_artwork", next_artwork_source, _artwork_request_id)
 
+## 重置封面到默认占位状态。
 func _reset_cover_state() -> void:
 	_artwork_source = ""
 	mini_cover_texture_rect.texture = null
@@ -111,11 +116,13 @@ func _reset_cover_state() -> void:
 	mini_cover_mark_label.text = ""
 	_apply_cover_colors(DEFAULT_COVER_BG, DEFAULT_COVER_FG)
 
+## 根据当前曲目主色与标记生成封面占位样式。
 func _apply_cover_placeholder(track: TrackData) -> void:
 	mini_cover_mark_label.visible = true
 	mini_cover_mark_label.text = track.mark if not track.mark.is_empty() else track.title.left(1)
 	_apply_cover_colors(track.tertiary, track.secondary)
 
+## 更新封面背景色和占位文字色。
 func _apply_cover_colors(background_color: Color, foreground_color: Color) -> void:
 	var panel_style := mini_cover_panel.get_theme_stylebox("panel")
 	if panel_style is StyleBoxFlat:
@@ -124,6 +131,7 @@ func _apply_cover_colors(background_color: Color, foreground_color: Color) -> vo
 		mini_cover_panel.add_theme_stylebox_override("panel", style_copy)
 	mini_cover_mark_label.add_theme_color_override("font_color", foreground_color)
 
+## 将成功解析到的封面纹理应用到界面。
 func _display_cover_texture(texture: Texture2D) -> void:
 	if texture == null:
 		mini_cover_texture_rect.texture = null
@@ -135,6 +143,7 @@ func _display_cover_texture(texture: Texture2D) -> void:
 	mini_cover_texture_rect.visible = true
 	mini_cover_mark_label.visible = false
 
+## 异步加载指定来源的封面，并校验请求是否仍然有效。
 func _load_cover_artwork(source: String, request_id: int) -> void:
 	var texture := await _resolve_cover_texture(source, request_id)
 	if request_id != _artwork_request_id or source != _artwork_source:
@@ -144,11 +153,13 @@ func _load_cover_artwork(source: String, request_id: int) -> void:
 	_artwork_texture_cache[source] = texture
 	_display_cover_texture(texture)
 
+## 按来源类型选择本地加载或远程下载封面纹理。
 func _resolve_cover_texture(source: String, request_id: int) -> Texture2D:
 	if source.begins_with("http://") or source.begins_with("https://"):
 		return await _load_remote_cover_texture(source, request_id)
 	return _load_local_cover_texture(source)
 
+## 从本地图片路径读取封面纹理。
 func _load_local_cover_texture(path: String) -> Texture2D:
 	if path.is_empty() or not FileAccess.file_exists(path):
 		return null
@@ -157,6 +168,7 @@ func _load_local_cover_texture(path: String) -> Texture2D:
 		return null
 	return ImageTexture.create_from_image(image)
 
+## 通过 HTTP 请求下载远程封面，并在返回后校验请求上下文。
 func _load_remote_cover_texture(url: String, request_id: int) -> Texture2D:
 	if _controller == null:
 		return null
@@ -187,6 +199,7 @@ func _load_remote_cover_texture(url: String, request_id: int) -> Texture2D:
 
 	return _load_texture_from_buffer(body, url)
 
+## 根据资源后缀或兜底尝试，将二进制图片数据解码成纹理。
 func _load_texture_from_buffer(buffer: PackedByteArray, source: String) -> Texture2D:
 	var image := Image.new()
 	var lower_source := source.to_lower()

@@ -25,12 +25,14 @@ var _is_bound := false
 
 var _queue_rows: Array = []
 
+## 注入播放队列控制器并完成首次渲染。
 func setup(controller: MusicAppShowcaseController) -> void:
 	_controller = controller
 	_queue_controller = MusicAppPlaybackQueueControllerType.new(controller)
 	bind()
 	refresh()
 
+## 绑定播放队列弹窗上的固定按钮事件。
 func bind() -> void:
 	if _is_bound:
 		return
@@ -39,10 +41,13 @@ func bind() -> void:
 	close_backdrop_button.pressed.connect(close_popup)
 	playback_mode_button.pressed.connect(_cycle_playback_mode)
 	clear_queue_button.pressed.connect(_clear_queue)
+
+## 弹窗显示后刷新列表，并滚动到当前播放项。
 func on_popup_shown() -> void:
 	refresh()
 	call_deferred("_scroll_to_current_row")
 
+## 根据当前播放队列刷新标题、模式按钮、空态和行列表。
 func refresh() -> void:
 	if _queue_controller == null:
 		return
@@ -60,7 +65,6 @@ func refresh() -> void:
 	)
 	playback_mode_button.text = tr(_queue_controller.get_playback_mode_label_key())
 	playback_mode_button.disabled = not has_tracks
-	MusicAppIconsType.apply_icon_button(clear_queue_button, MusicAppIconsType.TRASH, true)
 	clear_queue_button.text = tr("music_app.queue.clear")
 	clear_queue_button.disabled = not has_tracks
 
@@ -79,6 +83,7 @@ func refresh() -> void:
 	empty_label.visible = not has_tracks
 	empty_label.text = tr("music_app.queue.empty")
 
+## 按目标数量增删播放队列行节点。
 func _sync_queue_rows(target_size: int) -> void:
 	while _queue_rows.size() < target_size:
 		var row = PLAYBACK_QUEUE_ROW_SCENE.instantiate()
@@ -111,6 +116,7 @@ func _remove_queue_track(queue_index: int) -> void:
 		return
 	_queue_controller.remove_queue_track(queue_index)
 
+## 将滚动位置定位到当前播放的队列项。
 func _scroll_to_current_row() -> void:
 	if _queue_controller == null:
 		return

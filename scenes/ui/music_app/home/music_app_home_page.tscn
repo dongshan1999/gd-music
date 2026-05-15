@@ -1,8 +1,12 @@
 [gd_scene format=3 uid="uid://icxomk0v5mvw"]
 
-[ext_resource type="Script" path="res://scripts/ui/music_app/views/home/music_app_home_view.gd" id="2_script"]
-[ext_resource type="PackedScene" path="res://scenes/ui/music_app/home/home_feature_card.tscn" id="6_feature_card"]
-[ext_resource type="Script" path="res://dx/runtime/scripts/managers/localization/localize_comp.gd" id="999_localize_comp"]
+[ext_resource type="Texture2D" uid="uid://crjc6fo4cjnm8" path="res://textures/bars-3.svg" id="2_dyb2p"]
+[ext_resource type="Script" uid="uid://b7ibq16q80ngu" path="res://scripts/ui/music_app/views/home/music_app_home_view.gd" id="2_script"]
+[ext_resource type="Texture2D" uid="uid://c2kbdu1mp5y13" path="res://textures/magnifying-glass.svg" id="3_5ce5m"]
+[ext_resource type="PackedScene" uid="uid://dci3stsofj54o" path="res://scenes/ui/music_app/home/home_feature_card.tscn" id="6_feature_card"]
+[ext_resource type="Texture2D" uid="uid://bhxk8lmgal6jd" path="res://textures/plus.svg" id="6_gkt4o"]
+[ext_resource type="Texture2D" uid="uid://dlp84gvu4kqnb" path="res://textures/arrow-down-tray.svg" id="7_hy55w"]
+[ext_resource type="Script" uid="uid://bym33i5tdjhtg" path="res://dx/runtime/scripts/managers/localization/localize_comp.gd" id="999_localize_comp"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_feature_card_panel"]
 bg_color = Color(0.192157, 0.192157, 0.2, 1)
@@ -55,7 +59,7 @@ theme_override_constants/separation = 12
 unique_name_in_owner = true
 custom_minimum_size = Vector2(50, 50)
 layout_mode = 2
-text = "≡"
+icon = ExtResource("2_dyb2p")
 
 [node name="SearchBar" type="Panel" parent="Margin/HomeVBox/SearchRow" unique_id=539984825]
 unique_name_in_owner = true
@@ -82,6 +86,7 @@ unique_name_in_owner = true
 custom_minimum_size = Vector2(18, 18)
 layout_mode = 2
 mouse_filter = 2
+texture = ExtResource("3_5ce5m")
 stretch_mode = 5
 
 [node name="SearchPromptLabel" type="Label" parent="Margin/HomeVBox/SearchRow/SearchBar/Margin/SearchHBox" unique_id=1417647797]
@@ -152,13 +157,13 @@ size_flags_horizontal = 3
 unique_name_in_owner = true
 custom_minimum_size = Vector2(40, 40)
 layout_mode = 2
-text = "+"
+icon = ExtResource("6_gkt4o")
 
 [node name="ImportButton" type="Button" parent="Margin/HomeVBox/HomeTabsRow" unique_id=335780428]
 unique_name_in_owner = true
 custom_minimum_size = Vector2(40, 40)
 layout_mode = 2
-text = "↓"
+icon = ExtResource("7_hy55w")
 
 [node name="HomeTabUnderline" type="Panel" parent="Margin/HomeVBox" unique_id=1845383377]
 unique_name_in_owner = true
