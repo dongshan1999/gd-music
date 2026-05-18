@@ -3,6 +3,10 @@ extends RefCounted
 
 const MusicAppShowcaseControllerScript := preload("res://scripts/ui/music_app/music_app_showcase.gd")
 const MusicAppControllerBaseScript := preload("res://scripts/ui/music_app/controllers/music_app_controller_base.gd")
+const MusicAppScriptPathsType := preload("res://scripts/constants/music_app_script_paths.gd")
+const PlaybackStartedEventScript := preload(MusicAppScriptPathsType.MUSIC_APP_PLAYBACK_STARTED_EVENT)
+const PlaybackFinishedEventScript := preload(MusicAppScriptPathsType.MUSIC_APP_PLAYBACK_FINISHED_EVENT)
+const PlaybackProgressChangedEventScript := preload(MusicAppScriptPathsType.MUSIC_APP_PLAYBACK_PROGRESS_CHANGED_EVENT)
 
 var controller
 
@@ -72,6 +76,7 @@ func toggle_playback() -> void:
 
 	set_is_playing(not is_playing())
 	request_audio_sync()
+	_emit_playback_progress_changed()
 	save_app_state()
 
 ## 将底层播放器与全局状态同步到指定秒数。
@@ -98,6 +103,7 @@ func seek_to_elapsed_seconds(value: int, persist_state: bool = true) -> void:
 	elif is_playing():
 		request_audio_sync()
 
+	_emit_playback_progress_changed(track)
 	if persist_state:
 		save_app_state()
 
@@ -125,12 +131,15 @@ func tick_playback_progress() -> void:
 	if next_elapsed == get_elapsed_seconds():
 		return
 	set_elapsed_seconds(next_elapsed)
+	_emit_playback_progress_changed()
 
 ## 响应音频播放完成事件，自动切到队列下一首。
 func on_audio_finished() -> void:
 	if not has_tracks() or not is_playing():
 		return
+	var finished_track := get_current_track()
 	_loaded_track_key = ""
+	_emit_playback_finished(finished_track)
 	var playback_controller = get_playback_controller()
 	if playback_controller != null:
 		playback_controller.advance_after_finish()
@@ -187,10 +196,16 @@ func _sync_audio_state(sync_request_id: int) -> void:
 		return
 
 	if _loaded_track_key == desired_track_key and audio_player.stream != null:
+		var did_start := false
 		if not audio_player.playing:
 			audio_player.play(float(get_elapsed_seconds()))
+			did_start = true
 		if audio_player.stream_paused:
 			audio_player.stream_paused = false
+			did_start = true
+		if did_start:
+			_emit_playback_started(track)
+			_emit_playback_progress_changed(track)
 		return
 
 	var stream = await _resolve_stream_for_track(track, sync_request_id)
@@ -207,6 +222,8 @@ func _sync_audio_state(sync_request_id: int) -> void:
 	_sync_track_duration_from_stream(track, stream)
 	audio_player.play(float(get_elapsed_seconds()))
 	audio_player.stream_paused = false
+	_emit_playback_started(track)
+	_emit_playback_progress_changed(track)
 
 ## 为当前曲目解析可播放音频流，支持本地文件、远程地址和插件来源。
 func _resolve_stream_for_track(track: TrackData, sync_request_id: int) -> AudioStream:
@@ -374,6 +391,7 @@ func _sync_track_duration_from_stream(track: TrackData, stream: AudioStream) -> 
 	track.duration = resolved_duration
 	track.normalize()
 	set_elapsed_seconds(clampi(get_elapsed_seconds(), 0, track.duration))
+	_emit_playback_progress_changed(track)
 	save_app_state()
 
 ## 在当前曲目无法播放时停止音频并回退到可恢复状态。
@@ -390,3 +408,27 @@ func _mark_playback_unavailable(track: TrackData) -> void:
 func _get_audio_player() -> AudioStreamPlayer:
 	var resolved_controller = get_showcase()
 	return resolved_controller.audio_player if resolved_controller != null else null
+
+func _emit_playback_started(track = null) -> void:
+	var resolved_track = track if track != null else get_current_track()
+	if resolved_track == null:
+		return
+	DX.signals.fire(PlaybackStartedEventScript.new(resolved_track))
+
+func _emit_playback_finished(track = null) -> void:
+	var resolved_track = track if track != null else get_current_track()
+	if resolved_track == null:
+		return
+	DX.signals.fire(PlaybackFinishedEventScript.new(resolved_track))
+
+func _emit_playback_progress_changed(track = null) -> void:
+	var resolved_track = track if track != null else get_current_track()
+	if resolved_track == null:
+		return
+	DX.signals.fire(
+		PlaybackProgressChangedEventScript.new(
+			resolved_track,
+			get_elapsed_seconds(),
+			get_current_duration()
+		)
+	)

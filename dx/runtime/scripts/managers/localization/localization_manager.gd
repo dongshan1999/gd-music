@@ -3,6 +3,25 @@ extends RefCounted
 
 const TEXT_PROPERTY := &"text"
 
+enum Locale {
+	EN,
+	ZH,
+	ZH_CN,
+}
+
+
+const LOCALE_CODES := {
+	Locale.EN: "en",
+	Locale.ZH: "zh",
+	Locale.ZH_CN: "zh_CN",
+}
+const LOCALE_TYPES_BY_CODE := {
+	"en": Locale.EN,
+	"zh": Locale.ZH,
+	"zh_CN": Locale.ZH_CN,
+}
+const DEFAULT_LOCALE := Locale.ZH_CN
+
 var dx: Node
 var _bindings: Dictionary = {}
 
@@ -34,10 +53,17 @@ func unbind_text(target: Object) -> void:
 		return
 	_bindings.erase(target.get_instance_id())
 
-func set_locale(locale: String) -> void:
-	if locale.strip_edges().is_empty():
-		return
-	TranslationServer.set_locale(locale.strip_edges())
+func get_locale() -> String:
+	return TranslationServer.get_locale().strip_edges()
+
+func get_locale_type() -> Locale:
+	return LOCALE_TYPES_BY_CODE.get(get_locale(), DEFAULT_LOCALE)
+
+func get_locale_code(locale: Locale) -> String:
+	return str(LOCALE_CODES.get(locale, LOCALE_CODES[DEFAULT_LOCALE]))
+
+func set_locale(locale: Locale) -> void:
+	TranslationServer.set_locale(get_locale_code(locale))
 
 func refresh_all() -> void:
 	var stale_ids: Array[int] = []

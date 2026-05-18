@@ -1,7 +1,13 @@
 class_name MusicAppMiniPlayerView
 extends Panel
 
+const MusicAppScriptPathsType := preload("res://scripts/constants/music_app_script_paths.gd")
 const MusicAppIconsType := preload("res://scripts/constants/music_app_icons.gd")
+const PlaybackStartedEventScript := preload(MusicAppScriptPathsType.MUSIC_APP_PLAYBACK_STARTED_EVENT)
+const PlaybackFinishedEventScript := preload(MusicAppScriptPathsType.MUSIC_APP_PLAYBACK_FINISHED_EVENT)
+const PlaybackProgressChangedEventScript := preload(
+	MusicAppScriptPathsType.MUSIC_APP_PLAYBACK_PROGRESS_CHANGED_EVENT
+)
 const REMOTE_ARTWORK_TIMEOUT_SECONDS := 10.0
 const DEFAULT_COVER_BG := Color(0.203922, 0.215686, 0.247059, 1)
 const DEFAULT_COVER_FG := Color(0.968627, 0.968627, 0.972549, 1)
@@ -38,6 +44,9 @@ func bind() -> void:
 	mini_play_button.pressed.connect(_toggle_playback)
 	mini_list_button.pressed.connect(_show_playback_queue)
 	mini_open_button.pressed.connect(_open_player_from_current)
+	DX.signals.subscribe(PlaybackStartedEventScript, _on_playback_started)
+	DX.signals.subscribe(PlaybackFinishedEventScript, _on_playback_finished)
+	DX.signals.subscribe(PlaybackProgressChangedEventScript, _on_playback_progress_changed)
 
 ## 根据当前播放状态刷新迷你播放器文案、图标和封面。
 func refresh() -> void:
@@ -75,6 +84,20 @@ func _show_playback_queue() -> void:
 
 func _open_player_from_current() -> void:
 	_mini_player_controller.open_player_page()
+
+func _exit_tree() -> void:
+	DX.signals.unsubscribe(PlaybackStartedEventScript, _on_playback_started)
+	DX.signals.unsubscribe(PlaybackFinishedEventScript, _on_playback_finished)
+	DX.signals.unsubscribe(PlaybackProgressChangedEventScript, _on_playback_progress_changed)
+
+func _on_playback_started(_event: MusicAppPlaybackStartedEvent) -> void:
+	refresh()
+
+func _on_playback_finished(_event: MusicAppPlaybackFinishedEvent) -> void:
+	refresh()
+
+func _on_playback_progress_changed(_event: MusicAppPlaybackProgressChangedEvent) -> void:
+	refresh()
 
 ## 刷新当前曲目的封面展示，必要时触发异步加载。
 func _refresh_cover(track: TrackData) -> void:

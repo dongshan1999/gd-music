@@ -164,7 +164,7 @@ func _cleanup_pool(name: StringName) -> void:
 	if expiration_seconds <= 0.0:
 		return
 
-	var now := dx.time.now_unix()
+	var now: int = dx.time.now_unix()
 	var items: Array = pool["items"]
 	for index in range(items.size() - 1, -1, -1):
 		var entry: Dictionary = items[index]

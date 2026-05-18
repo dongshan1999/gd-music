@@ -447,7 +447,7 @@ var ok := DX.save.save("app/test.json", {"ok": true})
 ```gdscript
 var text := DX.localization.text("music_app.home.title")
 DX.localization.bind_text(label, "music_app.home.title")
-DX.localization.set_locale("zh_CN")
+DX.localization.set_locale(DX_LocalizationManager.Locale.ZH_CN)
 ```
 
 常用方法：
@@ -456,6 +456,7 @@ DX.localization.set_locale("zh_CN")
 - `bind_text(target, tr_key, format_payload := null)`
 - `unbind_text(target)`
 - `set_locale(locale)`
+  - Recommended: `DX_LocalizationManager.Locale.EN`, `DX_LocalizationManager.Locale.ZH`, `DX_LocalizationManager.Locale.ZH_CN`
 - `refresh_all()`
 
 ### DX_LocalizeComp

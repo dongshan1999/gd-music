@@ -1,0 +1,129 @@
+[gd_scene format=3 uid="uid://cl301lablysad"]
+
+[ext_resource type="Script" uid="uid://bmm5eq7meln03" path="res://scripts/ui/music_app/views/settings/music_app_plugin_management_item.gd" id="1_script"]
+[ext_resource type="Texture2D" uid="uid://c57cdu422vnen" path="res://textures/arrow-path.svg" id="2_update"]
+[ext_resource type="Texture2D" uid="uid://co23o4ymhpm6c" path="res://textures/share.svg" id="3_share"]
+[ext_resource type="Texture2D" uid="uid://cubqft3yh86od" path="res://textures/x-mark.svg" id="4_uninstall"]
+[ext_resource type="Texture2D" uid="uid://dfoct7ljwvbw0" path="res://textures/link-slash.svg" id="5_redirect"]
+[ext_resource type="Texture2D" uid="uid://cebtfbj6p3vwv" path="res://textures/arrow-right-end-on-rectangle.svg" id="6_import"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_card"]
+bg_color = Color(0.160784, 0.160784, 0.168627, 1)
+corner_radius_top_left = 8
+corner_radius_top_right = 8
+corner_radius_bottom_right = 8
+corner_radius_bottom_left = 8
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_button"]
+
+[node name="MusicAppPluginManagementItem" type="PanelContainer" unique_id=1886765696]
+size_flags_horizontal = 3
+theme_override_styles/panel = SubResource("StyleBoxFlat_card")
+script = ExtResource("1_script")
+
+[node name="Margin" type="MarginContainer" parent="." unique_id=1802016163]
+layout_mode = 2
+theme_override_constants/margin_left = 14
+theme_override_constants/margin_top = 14
+theme_override_constants/margin_right = 14
+theme_override_constants/margin_bottom = 14
+
+[node name="VBox" type="VBoxContainer" parent="Margin" unique_id=1522469408]
+layout_mode = 2
+theme_override_constants/separation = 12
+
+[node name="HeaderRow" type="HBoxContainer" parent="Margin/VBox" unique_id=1593221185]
+layout_mode = 2
+theme_override_constants/separation = 12
+
+[node name="TitleLabel" type="Label" parent="Margin/VBox/HeaderRow" unique_id=844675856]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_colors/font_color = Color(0.968627, 0.968627, 0.972549, 1)
+theme_override_font_sizes/font_size = 20
+text = "插件名称"
+vertical_alignment = 1
+
+[node name="EnabledCheckBox" type="CheckBox" parent="Margin/VBox/HeaderRow" unique_id=539109064]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(40, 38)
+layout_mode = 2
+
+[node name="UninstallButton" type="Button" parent="Margin/VBox/HeaderRow" unique_id=318580016]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 42)
+layout_mode = 2
+theme_override_styles/normal = SubResource("StyleBoxEmpty_button")
+theme_override_styles/pressed = SubResource("StyleBoxEmpty_button")
+theme_override_styles/hover = SubResource("StyleBoxEmpty_button")
+theme_override_styles/disabled = SubResource("StyleBoxEmpty_button")
+theme_override_styles/focus = SubResource("StyleBoxEmpty_button")
+icon = ExtResource("4_uninstall")
+alignment = 0
+
+[node name="MetaLabel" type="Label" parent="Margin/VBox" unique_id=1219905931]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_colors/font_color = Color(0.713726, 0.717647, 0.741176, 1)
+theme_override_font_sizes/font_size = 14
+text = "版本号: 0.0.0   作者: Unknown"
+autowrap_mode = 3
+
+[node name="ActionsGrid" type="GridContainer" parent="Margin/VBox" unique_id=1883445937]
+layout_mode = 2
+theme_override_constants/h_separation = 10
+theme_override_constants/v_separation = 10
+columns = 3
+
+[node name="UpdateButton" type="Button" parent="Margin/VBox/ActionsGrid" unique_id=1484324268]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 42)
+layout_mode = 2
+theme_override_styles/normal = SubResource("StyleBoxEmpty_button")
+theme_override_styles/pressed = SubResource("StyleBoxEmpty_button")
+theme_override_styles/hover = SubResource("StyleBoxEmpty_button")
+theme_override_styles/disabled = SubResource("StyleBoxEmpty_button")
+theme_override_styles/focus = SubResource("StyleBoxEmpty_button")
+text = "更新插件"
+icon = ExtResource("2_update")
+alignment = 0
+
+[node name="ShareButton" type="Button" parent="Margin/VBox/ActionsGrid" unique_id=416417031]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 42)
+layout_mode = 2
+theme_override_styles/normal = SubResource("StyleBoxEmpty_button")
+theme_override_styles/pressed = SubResource("StyleBoxEmpty_button")
+theme_override_styles/hover = SubResource("StyleBoxEmpty_button")
+theme_override_styles/disabled = SubResource("StyleBoxEmpty_button")
+theme_override_styles/focus = SubResource("StyleBoxEmpty_button")
+text = "分享插件"
+icon = ExtResource("3_share")
+alignment = 0
+
+[node name="SourceRedirectButton" type="Button" parent="Margin/VBox/ActionsGrid" unique_id=1828579680]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 42)
+layout_mode = 2
+theme_override_styles/normal = SubResource("StyleBoxEmpty_button")
+theme_override_styles/pressed = SubResource("StyleBoxEmpty_button")
+theme_override_styles/hover = SubResource("StyleBoxEmpty_button")
+theme_override_styles/disabled = SubResource("StyleBoxEmpty_button")
+theme_override_styles/focus = SubResource("StyleBoxEmpty_button")
+text = "音源重定向"
+icon = ExtResource("5_redirect")
+alignment = 0
+
+[node name="ImportPlaylistButton" type="Button" parent="Margin/VBox/ActionsGrid" unique_id=434763167]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 42)
+layout_mode = 2
+theme_override_styles/normal = SubResource("StyleBoxEmpty_button")
+theme_override_styles/pressed = SubResource("StyleBoxEmpty_button")
+theme_override_styles/hover = SubResource("StyleBoxEmpty_button")
+theme_override_styles/disabled = SubResource("StyleBoxEmpty_button")
+theme_override_styles/focus = SubResource("StyleBoxEmpty_button")
+text = "导入歌单"
+icon = ExtResource("6_import")
+alignment = 0
