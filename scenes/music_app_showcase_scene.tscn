@@ -4,7 +4,6 @@
 [ext_resource type="PackedScene" uid="uid://cgs5gwcepfoow" path="res://scenes/ui/music_app/mini_player/music_app_mini_player.tscn" id="5_mini_player"]
 
 [node name="MusicAppShowcase" type="Control" unique_id=1976821598]
-custom_minimum_size = Vector2(430, 932)
 layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0
@@ -23,7 +22,8 @@ color = Color(0.0823529, 0.0823529, 0.0862745, 1)
 
 [node name="PreviewRoot" type="Control" parent="." unique_id=18213997]
 unique_name_in_owner = true
-anchors_preset = 0
+layout_mode = 1
+anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
@@ -32,7 +32,8 @@ grow_vertical = 2
 [node name="PhoneShell" type="Panel" parent="PreviewRoot" unique_id=1571802138]
 unique_name_in_owner = true
 clip_contents = true
-layout_mode = 0
+layout_mode = 1
+anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
@@ -49,17 +50,11 @@ grow_vertical = 2
 mouse_filter = 2
 
 [node name="MiniPlayer" parent="PreviewRoot/PhoneShell" unique_id=888591116 instance=ExtResource("5_mini_player")]
-layout_mode = 0
-anchors_preset = 0
-anchor_top = 0.0
-anchor_right = 0.0
-anchor_bottom = 0.0
+layout_mode = 1
 offset_left = 0.0
-offset_top = 860.0
-offset_right = 430.0
-offset_bottom = 930.0
-grow_horizontal = 1
-grow_vertical = 1
+offset_top = -72.0
+offset_right = 0.0
+offset_bottom = 0.0
 
 [node name="FullscreenPopupHost" type="Control" parent="PreviewRoot/PhoneShell" unique_id=751598150]
 unique_name_in_owner = true
