@@ -129,7 +129,14 @@ func _get_format_payload():
 	return format_args.duplicate()
 
 func _get_localization_manager():
-	var dx = get_node_or_null("/root/DX")
+	if not is_inside_tree():
+		return null
+
+	var tree := get_tree()
+	if tree == null:
+		return null
+
+	var dx = tree.root.get_node_or_null("DX") if tree.root != null else null
 	if dx == null:
 		return null
 	return dx.localization
