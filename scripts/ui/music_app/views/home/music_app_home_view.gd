@@ -53,6 +53,7 @@ func bind() -> void:
 	for card in feature_cards:
 		card.pressed.connect(_on_feature_pressed)
 
+	home_menu_button.pressed.connect(_open_settings)
 	new_playlist_button.pressed.connect(_create_playlist_from_current)
 	import_button.pressed.connect(_open_local_music)
 	search_bar.gui_input.connect(_on_search_bar_gui_input)
@@ -118,6 +119,9 @@ func _open_local_music() -> void:
 
 func _open_plugin_browser() -> void:
 	_home_controller.open_plugin_browser()
+
+func _open_settings() -> void:
+	_home_controller.open_settings()
 
 func _on_search_bar_gui_input(event: InputEvent) -> void:
 	if event is InputEventMouseButton:

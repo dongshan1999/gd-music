@@ -1,0 +1,274 @@
+[gd_scene format=3 uid="uid://c4m6d1vqwgb03"]
+
+[ext_resource type="Script" uid="uid://dm1878q1kfobv" path="res://scripts/ui/music_app/views/settings/music_app_settings_view.gd" id="1_script"]
+[ext_resource type="Texture2D" uid="uid://l64plqxfd10g" path="res://textures/arrow-left.svg" id="2_back"]
+[ext_resource type="Texture2D" uid="uid://buobcvf1vcqw6" path="res://textures/cog-8-tooth.svg" id="3_cog"]
+[ext_resource type="Texture2D" uid="uid://dtuf7rfi24j0h" path="res://textures/code-bracket-square.svg" id="4_plugin"]
+[ext_resource type="Texture2D" uid="uid://dcd02dmq3mnf3" path="res://textures/t-shirt-outline.svg" id="5_theme"]
+[ext_resource type="Texture2D" uid="uid://byhuy6i3y04d" path="res://textures/language.svg" id="6_language"]
+[ext_resource type="Texture2D" uid="uid://bl8qoc14ad4xn" path="res://textures/clock-outline.svg" id="7_clock"]
+[ext_resource type="Texture2D" uid="uid://dk4mnlc7raitk" path="res://textures/circle-stack.svg" id="8_backup"]
+[ext_resource type="Texture2D" uid="uid://bcsh2l0ih710k" path="res://textures/shield-keyhole-outline.svg" id="9_permission"]
+[ext_resource type="Texture2D" uid="uid://daa8mdawufapj" path="res://textures/question-mark-circle.svg" id="10_update"]
+[ext_resource type="Texture2D" uid="uid://c60151fbm5sw8" path="res://textures/information-circle.svg" id="11_about"]
+[ext_resource type="Texture2D" uid="uid://siiria6wmspr" path="res://textures/home-outline.svg" id="12_home"]
+[ext_resource type="Texture2D" uid="uid://b0ppjf42h1sgv" path="res://textures/power-outline.svg" id="13_power"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_row"]
+content_margin_left = 14.0
+content_margin_top = 14.0
+content_margin_right = 14.0
+content_margin_bottom = 14.0
+bg_color = Color(0.12549, 0.129412, 0.141176, 1)
+corner_radius_top_left = 8
+corner_radius_top_right = 8
+corner_radius_bottom_right = 8
+corner_radius_bottom_left = 8
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_footer"]
+bg_color = Color(0.12549, 0.129412, 0.141176, 1)
+corner_radius_top_left = 8
+corner_radius_top_right = 8
+corner_radius_bottom_right = 8
+corner_radius_bottom_left = 8
+
+[node name="SettingsPage" type="Control" unique_id=1130362248]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_script")
+
+[node name="Background" type="ColorRect" parent="." unique_id=1542530738]
+layout_mode = 0
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+color = Color(0.086104214, 0.09320182, 0.09985284, 0.8)
+
+[node name="Margin" type="MarginContainer" parent="." unique_id=223210966]
+layout_mode = 0
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/margin_left = 14
+theme_override_constants/margin_top = 14
+theme_override_constants/margin_right = 200
+theme_override_constants/margin_bottom = 14
+
+[node name="RootVBox" type="VBoxContainer" parent="Margin" unique_id=1894789774]
+layout_mode = 2
+theme_override_constants/separation = 14
+
+[node name="TopRow" type="HBoxContainer" parent="Margin/RootVBox" unique_id=355697734]
+custom_minimum_size = Vector2(0, 44)
+layout_mode = 2
+theme_override_constants/separation = 10
+
+[node name="SettingsBackButton" type="Button" parent="Margin/RootVBox/TopRow" unique_id=15852019]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(40, 40)
+layout_mode = 2
+icon = ExtResource("2_back")
+
+[node name="TitleLabel" type="Label" parent="Margin/RootVBox/TopRow" unique_id=2082977046]
+layout_mode = 2
+theme_override_font_sizes/font_size = 28
+text = "GDMusic"
+vertical_alignment = 1
+
+[node name="TopSpacer" type="Control" parent="Margin/RootVBox/TopRow" unique_id=1630345644]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="Scroll" type="ScrollContainer" parent="Margin/RootVBox" unique_id=1356404825]
+layout_mode = 2
+size_flags_vertical = 3
+horizontal_scroll_mode = 0
+
+[node name="ContentVBox" type="VBoxContainer" parent="Margin/RootVBox/Scroll" unique_id=1916927106]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 18
+
+[node name="SettingsSection" type="VBoxContainer" parent="Margin/RootVBox/Scroll/ContentVBox" unique_id=701279474]
+layout_mode = 2
+theme_override_constants/separation = 10
+
+[node name="SettingsSectionLabel" type="Label" parent="Margin/RootVBox/Scroll/ContentVBox/SettingsSection" unique_id=630025393]
+layout_mode = 2
+theme_override_font_sizes/font_size = 18
+text = "设置"
+
+[node name="BasicSettingsButton" type="Button" parent="Margin/RootVBox/Scroll/ContentVBox/SettingsSection" unique_id=1584291346]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 64)
+layout_mode = 2
+theme_override_styles/normal = SubResource("StyleBoxFlat_row")
+theme_override_styles/pressed = SubResource("StyleBoxFlat_row")
+theme_override_styles/hover = SubResource("StyleBoxFlat_row")
+theme_override_styles/disabled = SubResource("StyleBoxFlat_row")
+theme_override_styles/focus = SubResource("StyleBoxFlat_row")
+text = "基本设置"
+icon = ExtResource("3_cog")
+alignment = 0
+
+[node name="PluginManagementButton" type="Button" parent="Margin/RootVBox/Scroll/ContentVBox/SettingsSection" unique_id=12058328]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 64)
+layout_mode = 2
+theme_override_styles/normal = SubResource("StyleBoxFlat_row")
+theme_override_styles/pressed = SubResource("StyleBoxFlat_row")
+theme_override_styles/hover = SubResource("StyleBoxFlat_row")
+theme_override_styles/disabled = SubResource("StyleBoxFlat_row")
+theme_override_styles/focus = SubResource("StyleBoxFlat_row")
+text = "插件管理"
+icon = ExtResource("4_plugin")
+alignment = 0
+
+[node name="ThemeSettingsButton" type="Button" parent="Margin/RootVBox/Scroll/ContentVBox/SettingsSection" unique_id=1790816329]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 64)
+layout_mode = 2
+theme_override_styles/normal = SubResource("StyleBoxFlat_row")
+theme_override_styles/pressed = SubResource("StyleBoxFlat_row")
+theme_override_styles/hover = SubResource("StyleBoxFlat_row")
+theme_override_styles/disabled = SubResource("StyleBoxFlat_row")
+theme_override_styles/focus = SubResource("StyleBoxFlat_row")
+text = "主题设置"
+icon = ExtResource("5_theme")
+alignment = 0
+
+[node name="LanguageSettingsButton" type="Button" parent="Margin/RootVBox/Scroll/ContentVBox/SettingsSection" unique_id=1425593028]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 64)
+layout_mode = 2
+theme_override_styles/normal = SubResource("StyleBoxFlat_row")
+theme_override_styles/pressed = SubResource("StyleBoxFlat_row")
+theme_override_styles/hover = SubResource("StyleBoxFlat_row")
+theme_override_styles/disabled = SubResource("StyleBoxFlat_row")
+theme_override_styles/focus = SubResource("StyleBoxFlat_row")
+text = "语言设置"
+icon = ExtResource("6_language")
+alignment = 0
+
+[node name="OtherSection" type="VBoxContainer" parent="Margin/RootVBox/Scroll/ContentVBox" unique_id=974697217]
+layout_mode = 2
+theme_override_constants/separation = 10
+
+[node name="OtherSectionLabel" type="Label" parent="Margin/RootVBox/Scroll/ContentVBox/OtherSection" unique_id=512064137]
+layout_mode = 2
+theme_override_font_sizes/font_size = 18
+text = "其他"
+
+[node name="SleepTimerButton" type="Button" parent="Margin/RootVBox/Scroll/ContentVBox/OtherSection" unique_id=2120679026]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 64)
+layout_mode = 2
+theme_override_styles/normal = SubResource("StyleBoxFlat_row")
+theme_override_styles/pressed = SubResource("StyleBoxFlat_row")
+theme_override_styles/hover = SubResource("StyleBoxFlat_row")
+theme_override_styles/disabled = SubResource("StyleBoxFlat_row")
+theme_override_styles/focus = SubResource("StyleBoxFlat_row")
+text = "定时关闭"
+icon = ExtResource("7_clock")
+alignment = 0
+
+[node name="BackupRestoreButton" type="Button" parent="Margin/RootVBox/Scroll/ContentVBox/OtherSection" unique_id=652394788]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 64)
+layout_mode = 2
+theme_override_styles/normal = SubResource("StyleBoxFlat_row")
+theme_override_styles/pressed = SubResource("StyleBoxFlat_row")
+theme_override_styles/hover = SubResource("StyleBoxFlat_row")
+theme_override_styles/disabled = SubResource("StyleBoxFlat_row")
+theme_override_styles/focus = SubResource("StyleBoxFlat_row")
+text = "备份与恢复"
+icon = ExtResource("8_backup")
+alignment = 0
+
+[node name="PermissionManagementButton" type="Button" parent="Margin/RootVBox/Scroll/ContentVBox/OtherSection" unique_id=737326878]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 64)
+layout_mode = 2
+theme_override_styles/normal = SubResource("StyleBoxFlat_row")
+theme_override_styles/pressed = SubResource("StyleBoxFlat_row")
+theme_override_styles/hover = SubResource("StyleBoxFlat_row")
+theme_override_styles/disabled = SubResource("StyleBoxFlat_row")
+theme_override_styles/focus = SubResource("StyleBoxFlat_row")
+text = "权限管理"
+icon = ExtResource("9_permission")
+alignment = 0
+
+[node name="SoftwareSection" type="VBoxContainer" parent="Margin/RootVBox/Scroll/ContentVBox" unique_id=1599736328]
+layout_mode = 2
+theme_override_constants/separation = 10
+
+[node name="SoftwareSectionLabel" type="Label" parent="Margin/RootVBox/Scroll/ContentVBox/SoftwareSection" unique_id=674122482]
+layout_mode = 2
+theme_override_font_sizes/font_size = 18
+text = "软件"
+
+[node name="CheckUpdateButton" type="Button" parent="Margin/RootVBox/Scroll/ContentVBox/SoftwareSection" unique_id=732123745]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 64)
+layout_mode = 2
+theme_override_styles/normal = SubResource("StyleBoxFlat_row")
+theme_override_styles/pressed = SubResource("StyleBoxFlat_row")
+theme_override_styles/hover = SubResource("StyleBoxFlat_row")
+theme_override_styles/disabled = SubResource("StyleBoxFlat_row")
+theme_override_styles/focus = SubResource("StyleBoxFlat_row")
+text = "检查更新"
+icon = ExtResource("10_update")
+alignment = 0
+
+[node name="AboutButton" type="Button" parent="Margin/RootVBox/Scroll/ContentVBox/SoftwareSection" unique_id=1946812731]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 64)
+layout_mode = 2
+theme_override_styles/normal = SubResource("StyleBoxFlat_row")
+theme_override_styles/pressed = SubResource("StyleBoxFlat_row")
+theme_override_styles/hover = SubResource("StyleBoxFlat_row")
+theme_override_styles/disabled = SubResource("StyleBoxFlat_row")
+theme_override_styles/focus = SubResource("StyleBoxFlat_row")
+text = "关于 MusicFree"
+icon = ExtResource("11_about")
+alignment = 0
+
+[node name="FooterPanel" type="Panel" parent="Margin/RootVBox/Scroll/ContentVBox" unique_id=1316545903]
+layout_mode = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_footer")
+
+[node name="FooterMargin" type="MarginContainer" parent="Margin/RootVBox/Scroll/ContentVBox/FooterPanel" unique_id=1136825583]
+layout_mode = 0
+theme_override_constants/margin_left = 14
+theme_override_constants/margin_top = 14
+theme_override_constants/margin_right = 14
+theme_override_constants/margin_bottom = 14
+
+[node name="FooterVBox" type="VBoxContainer" parent="Margin/RootVBox/Scroll/ContentVBox/FooterPanel/FooterMargin" unique_id=748007396]
+layout_mode = 2
+theme_override_constants/separation = 10
+
+[node name="BackHomeButton" type="Button" parent="Margin/RootVBox/Scroll/ContentVBox/FooterPanel/FooterMargin/FooterVBox" unique_id=1852115913]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 58)
+layout_mode = 2
+text = "返回桌面"
+icon = ExtResource("12_home")
+flat = true
+alignment = 0
+
+[node name="ExitAppButton" type="Button" parent="Margin/RootVBox/Scroll/ContentVBox/FooterPanel/FooterMargin/FooterVBox" unique_id=1673550678]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 58)
+layout_mode = 2
+text = "退出应用"
+icon = ExtResource("13_power")
+flat = true
+alignment = 0

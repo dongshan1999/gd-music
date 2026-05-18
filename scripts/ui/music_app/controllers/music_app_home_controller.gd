@@ -74,6 +74,9 @@ func open_local_music() -> void:
 func open_plugin_browser() -> void:
 	show_popup(DX_PopupRegistry.PopupId.MUSIC_APP_PLUGIN_BROWSER)
 
+func open_settings() -> void:
+	show_popup(DX_PopupRegistry.PopupId.MUSIC_APP_SETTINGS)
+
 ## 处理首页功能入口点击。
 func open_feature_card(index: int) -> bool:
 	if index == 3:

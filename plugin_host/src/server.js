@@ -103,8 +103,81 @@ class PluginHost {
 
   async installFromPath(inputPath) {
     const resolvedPath = path.resolve(inputPath);
-    const code = await fsp.readFile(resolvedPath, "utf8");
-    return this.installFromCode(code, { originalPath: resolvedPath });
+    const stat = await fsp.stat(resolvedPath);
+
+    if (stat.isFile()) {
+      if (!resolvedPath.endsWith(".js")) {
+        throw new Error("Selected file is not a .js plugin file.");
+      }
+      return await this.installPluginFile(resolvedPath, resolvedPath);
+    }
+
+    if (!stat.isDirectory()) {
+      throw new Error("Selected path is neither a plugin file nor a plugin folder.");
+    }
+
+    const jsFiles = await this.collectJsFilesRecursively(resolvedPath);
+    if (jsFiles.length === 0) {
+      throw new Error("Selected folder does not contain a .js plugin file.");
+    }
+
+    const installedPlugins = [];
+    const failedFiles = [];
+    for (const filePath of jsFiles) {
+      try {
+        const result = await this.installPluginFile(filePath, resolvedPath);
+        installedPlugins.push(result.plugin);
+      } catch (error) {
+        failedFiles.push({
+          path: filePath,
+          error: error?.message || "Invalid plugin file."
+        });
+        continue;
+      }
+    }
+
+    if (installedPlugins.length === 0) {
+      const firstFailure = failedFiles[0];
+      if (firstFailure) {
+        throw new Error(
+          `Selected folder does not contain a valid MusicFree plugin. First error: ${firstFailure.error}`
+        );
+      }
+      throw new Error("Selected folder does not contain a valid MusicFree plugin.");
+    }
+
+    return {
+      ok: true,
+      plugins: installedPlugins,
+      installed_count: installedPlugins.length,
+      failed_files: failedFiles
+    };
+  }
+
+  async collectJsFilesRecursively(directoryPath) {
+    const entries = await fsp.readdir(directoryPath, { withFileTypes: true });
+    const jsFiles = [];
+
+    for (const entry of entries) {
+      const entryPath = path.join(directoryPath, entry.name);
+      if (entry.isDirectory()) {
+        jsFiles.push(...await this.collectJsFilesRecursively(entryPath));
+        continue;
+      }
+      if (entry.isFile() && entry.name.endsWith(".js")) {
+        jsFiles.push(entryPath);
+      }
+    }
+
+    return jsFiles.sort((left, right) => left.localeCompare(right, "en"));
+  }
+
+  async installPluginFile(filePath, originalPath) {
+    const code = await fsp.readFile(filePath, "utf8");
+    return this.installFromCode(code, {
+      originalPath,
+      sourceFilePath: filePath
+    });
   }
 
   async installFromCode(code, options = {}) {
@@ -126,6 +199,22 @@ class PluginHost {
     return {
       ok: true,
       plugin: this.serializePlugin(mounted)
+    };
+  }
+
+  async uninstall(pluginId) {
+    const plugin = this.requirePlugin(pluginId);
+    if (plugin.path) {
+      await fsp.unlink(plugin.path).catch(() => undefined);
+    }
+    this.plugins.delete(plugin.id);
+    delete this.pluginMeta[plugin.id];
+    delete this.pluginMeta[`vars:${plugin.name}`];
+    await this.saveMeta();
+    return {
+      ok: true,
+      plugin_id: pluginId,
+      removed: plugin.name
     };
   }
 
@@ -436,6 +525,13 @@ async function main() {
           return;
         }
         sendJson(res, 400, { ok: false, error: "Missing url or path." });
+        return;
+      }
+
+      if (req.method === "POST" && url.pathname === "/uninstall") {
+        const body = await collectJsonBody(req);
+        const result = await host.uninstall(String(body.plugin_id || ""));
+        sendJson(res, 200, result);
         return;
       }
 

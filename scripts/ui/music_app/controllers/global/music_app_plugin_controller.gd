@@ -102,6 +102,13 @@ func ping() -> Dictionary:
 func list_plugins() -> Dictionary:
 	return await _request_json(HTTPClient.METHOD_GET, "/plugins")
 
+func uninstall_plugin(plugin_id: String) -> Dictionary:
+	return await _request_json(
+		HTTPClient.METHOD_POST,
+		"/uninstall",
+		{"plugin_id": plugin_id.strip_edges()}
+	)
+
 func get_plugin_user_variables(plugin_id: String) -> Dictionary:
 	return await _request_json(
 		HTTPClient.METHOD_GET,
@@ -131,6 +138,23 @@ func install_plugin_from_file(plugin_path: String) -> Dictionary:
 		"/install",
 		{"path": _resolve_command_path(plugin_path.strip_edges())}
 	)
+
+func is_plugin_enabled(plugin_id: String) -> bool:
+	var normalized_plugin_id := plugin_id.strip_edges()
+	if normalized_plugin_id.is_empty():
+		return false
+	return not get_settings().disabled_plugin_ids.has(normalized_plugin_id)
+
+func set_plugin_enabled(plugin_id: String, enabled: bool) -> void:
+	var settings := get_settings()
+	var normalized_plugin_id := plugin_id.strip_edges()
+	if normalized_plugin_id.is_empty():
+		return
+	settings.disabled_plugin_ids.erase(normalized_plugin_id)
+	if not enabled:
+		settings.disabled_plugin_ids.append(normalized_plugin_id)
+	settings.normalize()
+	save_settings()
 
 func search(plugin_id: String, query: String, page: int = 1, media_type: String = "music") -> Dictionary:
 	return await _request_json(
@@ -224,8 +248,13 @@ func _request_json(method: HTTPClient.Method, endpoint: String, payload: Variant
 			parsed_body = {"raw": response_text}
 
 	if response_code < 200 or response_code >= 300:
+		var error_message := "Plugin host returned an error response."
+		if parsed_body is Dictionary:
+			var parsed_error := str((parsed_body as Dictionary).get("error", "")).strip_edges()
+			if not parsed_error.is_empty():
+				error_message = parsed_error
 		return _error_result(
-			"Plugin host returned an error response.",
+			error_message,
 			{
 				"status_code": response_code,
 				"headers": raw_headers,

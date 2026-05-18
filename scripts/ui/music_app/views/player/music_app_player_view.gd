@@ -3,6 +3,11 @@ extends "res://dx/runtime/scripts/managers/popup/popup_view.gd"
 
 const MusicAppScriptPathsType := preload("res://scripts/constants/music_app_script_paths.gd")
 const MusicAppIconsType := preload("res://scripts/constants/music_app_icons.gd")
+const PlaybackStartedEventScript := preload(MusicAppScriptPathsType.MUSIC_APP_PLAYBACK_STARTED_EVENT)
+const PlaybackFinishedEventScript := preload(MusicAppScriptPathsType.MUSIC_APP_PLAYBACK_FINISHED_EVENT)
+const PlaybackProgressChangedEventScript := preload(
+	MusicAppScriptPathsType.MUSIC_APP_PLAYBACK_PROGRESS_CHANGED_EVENT
+)
 
 var _controller: MusicAppShowcaseController
 var _player_controller: MusicAppPlayerController
@@ -53,6 +58,9 @@ func bind() -> void:
 	player_queue_button.pressed.connect(_show_playback_queue)
 	player_list_button.pressed.connect(_show_playback_queue)
 	_bind_player_progress_bar_input()
+	DX.signals.subscribe(PlaybackStartedEventScript, _on_playback_started)
+	DX.signals.subscribe(PlaybackFinishedEventScript, _on_playback_finished)
+	DX.signals.subscribe(PlaybackProgressChangedEventScript, _on_playback_progress_changed)
 
 ## 根据当前播放状态刷新播放器文案、图标和进度条。
 func refresh() -> void:
@@ -113,6 +121,14 @@ func refresh() -> void:
 
 func open_from_current() -> void:
 	_player_controller.show_popup(DX_PopupRegistry.PopupId.MUSIC_APP_PLAYER)
+
+func on_popup_shown() -> void:
+	refresh()
+
+func _exit_tree() -> void:
+	DX.signals.unsubscribe(PlaybackStartedEventScript, _on_playback_started)
+	DX.signals.unsubscribe(PlaybackFinishedEventScript, _on_playback_finished)
+	DX.signals.unsubscribe(PlaybackProgressChangedEventScript, _on_playback_progress_changed)
 
 func navigate_back() -> void:
 	close_popup()
@@ -196,6 +212,7 @@ func _on_player_progress_bar_gui_input(event: InputEvent) -> void:
 		else:
 			_seek_player_from_global_x(get_global_mouse_position().x, true)
 			_finish_progress_drag()
+			refresh()
 		accept_event()
 		return
 
@@ -208,6 +225,7 @@ func _on_player_progress_bar_gui_input(event: InputEvent) -> void:
 		elif touch_event.index == _active_progress_touch_index:
 			_seek_player_from_global_x(touch_event.position.x, true)
 			_finish_progress_drag()
+			refresh()
 		accept_event()
 
 ## 标记当前进入播放器进度拖拽状态。
@@ -232,3 +250,12 @@ func _get_progress_ratio_from_global_x(global_x: float) -> float:
 	if progress_rect.size.x <= 0.0:
 		return 0.0
 	return clampf((global_x - progress_rect.position.x) / progress_rect.size.x, 0.0, 1.0)
+
+func _on_playback_started(_event: MusicAppPlaybackStartedEvent) -> void:
+	refresh()
+
+func _on_playback_finished(_event: MusicAppPlaybackFinishedEvent) -> void:
+	refresh()
+
+func _on_playback_progress_changed(_event: MusicAppPlaybackProgressChangedEvent) -> void:
+	refresh()

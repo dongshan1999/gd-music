@@ -55,19 +55,6 @@ func auto_start_music_plugin_host() -> void:
 		return
 	await plugin_controller.auto_start_local_host()
 
-## 从远程 URL 安装音乐插件。
-func install_music_plugin_from_url(plugin_url: String) -> Dictionary:
-	var plugin_controller = get_plugin_controller()
-	if plugin_controller == null:
-		return build_plugin_error("Music plugin controller is not available.")
-	return await plugin_controller.install_plugin_from_url(plugin_url)
-
-## 从本地文件安装音乐插件。
-func install_music_plugin_from_file(plugin_path: String) -> Dictionary:
-	var plugin_controller = get_plugin_controller()
-	if plugin_controller == null:
-		return build_plugin_error("Music plugin controller is not available.")
-	return await plugin_controller.install_plugin_from_file(plugin_path)
 
 ## 调用指定插件执行音乐搜索。
 func search_music_plugin(plugin_id: String, query: String, page: int = 1, media_type: String = "music") -> Dictionary:

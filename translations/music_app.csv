@@ -68,3 +68,21 @@ music_app.alert.deleted_title,Deleted,已删除,已删除
 music_app.alert.deleted_message,"Playlist ""{title}"" was deleted.",歌单《{title}》已删除。,歌单《{title}》已删除。
 music_app.toast.favorite_added,Added to Liked,已添加到我喜欢,已添加到我喜欢
 music_app.toast.favorite_removed,Removed from Liked,已从我喜欢移除,已从我喜欢移除
+music_app.plugin_management.status.loading,Loading...,加载中...,加载中...
+music_app.plugin_management.status.checking_host,Checking plugin host...,检查插件宿主...,检查插件宿主...
+music_app.plugin_management.status.host_unavailable,Plugin host is unavailable.,插件宿主不可用。,插件宿主不可用。
+music_app.plugin_management.status.loading_plugins,Loading plugin list...,读取插件列表...,读取插件列表...
+music_app.plugin_management.status.load_failed,Failed to load plugin list.,读取插件列表失败。,读取插件列表失败。
+music_app.plugin_management.status.loaded_count,Loaded {count} plugins,已加载 {count} 个插件,已加载 {count} 个插件
+music_app.plugin_management.install.title,Install Plugin,安装插件,安装插件
+music_app.plugin_management.install.local_failed,Local install failed.\n{error},本地安装失败。\n{error},本地安装失败。\n{error}
+music_app.plugin_management.install.success,Plugin installed successfully.,插件安装成功。,插件安装成功。
+music_app.plugin_management.install.url_unavailable,This page shell is ready, but URL install input is not wired yet.,当前界面仅完成铺设，网络安装地址输入还未接入。,当前界面仅完成铺设，网络安装地址输入还未接入。
+music_app.plugin_management.common.unknown_error,Unknown error.,未知错误。,未知错误。
+music_app.plugin_management.toast.enabled,Plugin enabled.,插件已启用。,插件已启用。
+music_app.plugin_management.toast.disabled,Plugin disabled.,插件已停用。,插件已停用。
+music_app.plugin_management.uninstall.title,Uninstall Plugin,卸载插件,卸载插件
+music_app.plugin_management.uninstall.failed,Uninstall failed.,卸载失败。,卸载失败。
+music_app.plugin_management.uninstall.success,Plugin uninstalled.,插件已卸载。,插件已卸载。
+music_app.plugin_management.item.version,Version: {value},版本号: {value},版本号: {value}
+music_app.plugin_management.item.author,Author: {value},作者: {value},作者: {value}

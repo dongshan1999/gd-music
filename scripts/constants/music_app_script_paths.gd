@@ -18,6 +18,12 @@ const MUSIC_APP_PLAYBACK_QUEUE_CONTROLLER := "res://scripts/ui/music_app/control
 const MUSIC_APP_PLAYER_CONTROLLER := "res://scripts/ui/music_app/controllers/music_app_player_controller.gd"
 const MUSIC_APP_PLAYLIST_CONTROLLER := "res://scripts/ui/music_app/controllers/music_app_playlist_controller.gd"
 const MUSIC_APP_PLUGIN_BROWSER_CONTROLLER := "res://scripts/ui/music_app/controllers/music_app_plugin_browser_controller.gd"
+const MUSIC_APP_SETTINGS_CONTROLLER := "res://scripts/ui/music_app/controllers/music_app_settings_controller.gd"
+const MUSIC_APP_PLUGIN_MANAGEMENT_CONTROLLER := "res://scripts/ui/music_app/controllers/music_app_plugin_management_controller.gd"
+
+const MUSIC_APP_PLAYBACK_STARTED_EVENT := "res://scripts/ui/music_app/events/music_app_playback_started_event.gd"
+const MUSIC_APP_PLAYBACK_FINISHED_EVENT := "res://scripts/ui/music_app/events/music_app_playback_finished_event.gd"
+const MUSIC_APP_PLAYBACK_PROGRESS_CHANGED_EVENT := "res://scripts/ui/music_app/events/music_app_playback_progress_changed_event.gd"
 
 const MUSIC_APP_HOME_FEATURE_CARD_VIEW := "res://scripts/ui/music_app/views/home/music_app_home_feature_card.gd"
 const MUSIC_APP_HOME_PLAYLIST_ROW_VIEW := "res://scripts/ui/music_app/views/home/music_app_home_playlist_row.gd"
@@ -26,6 +32,7 @@ const MUSIC_APP_LOCAL_SCAN_FOLDER_ROW_VIEW := "res://scripts/ui/music_app/views/
 const MUSIC_APP_PLUGIN_BROWSER_HISTORY_TAG_VIEW := "res://scripts/ui/music_app/views/plugin_browser/music_app_plugin_history_tag.gd"
 const MUSIC_APP_PLUGIN_BROWSER_SEARCH_TAB_VIEW := "res://scripts/ui/music_app/views/plugin_browser/music_app_plugin_search_tab.gd"
 const MUSIC_APP_PLUGIN_BROWSER_RESULT_ROW_VIEW := "res://scripts/ui/music_app/views/plugin_browser/music_app_plugin_result_row.gd"
+const MUSIC_APP_PLUGIN_MANAGEMENT_ITEM_VIEW := "res://scripts/ui/music_app/views/settings/music_app_plugin_management_item.gd"
 const MUSIC_APP_PLAYBACK_QUEUE_ROW_VIEW := "res://scripts/ui/music_app/views/playback_queue/music_app_playback_queue_row.gd"
 const MUSIC_APP_PLAYLIST_SONG_ROW_VIEW := "res://scripts/ui/music_app/views/playlist/music_app_playlist_song_row.gd"
 
@@ -44,5 +51,6 @@ const LOCAL_SCAN_FOLDER_ROW := "res://scenes/ui/music_app/local_scan/local_music
 const PLUGIN_BROWSER_HISTORY_TAG := "res://scenes/ui/music_app/plugin_browser/plugin_history_tag.tscn"
 const PLUGIN_BROWSER_SEARCH_TAB := "res://scenes/ui/music_app/plugin_browser/plugin_search_tab.tscn"
 const PLUGIN_BROWSER_RESULT_ROW := "res://scenes/ui/music_app/plugin_browser/plugin_result_row.tscn"
+const PLUGIN_MANAGEMENT_ITEM := "res://scenes/ui/music_app/settings/music_app_plugin_management_item.tscn"
 const PLAYBACK_QUEUE_ROW := "res://scenes/ui/music_app/playback_queue/playback_queue_row.tscn"
 const PLAYLIST_SONG_ROW := "res://scenes/ui/music_app/playlist/playlist_song_row.tscn"
