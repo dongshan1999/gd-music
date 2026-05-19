@@ -22,7 +22,6 @@ func push_plugin_search_history(query: String) -> void:
 	if next_history.size() > MAX_SEARCH_HISTORY:
 		next_history.resize(MAX_SEARCH_HISTORY)
 	get_app_state().plugin_search_history = next_history
-	save_app_state()
 
 ## 删除单个搜索历史。
 func remove_plugin_search_history(query: String) -> void:
@@ -32,36 +31,26 @@ func remove_plugin_search_history(query: String) -> void:
 	var next_history := get_plugin_search_history()
 	next_history.erase(normalized_query)
 	get_app_state().plugin_search_history = next_history
-	save_app_state()
 
 ## 清空插件搜索历史。
 func clear_plugin_search_history() -> void:
 	if get_app_state().plugin_search_history.is_empty():
 		return
 	get_app_state().plugin_search_history = []
-	save_app_state()
 
-## 启动本地音乐插件宿主服务。
-func start_music_plugin_host() -> Dictionary:
+## 刷新外部 GDScript 插件目录并重新加载插件列表。
+func refresh_music_plugins() -> Dictionary:
 	var plugin_controller = get_plugin_controller()
 	if plugin_controller == null:
 		return build_plugin_error("Music plugin controller is not available.")
-	return await plugin_controller.start_local_host()
+	return await plugin_controller.refresh_plugins()
 
-## 按配置尝试自动启动本地音乐插件宿主服务。
-func auto_start_music_plugin_host() -> void:
+## 控制器进入后预热外部插件目录。
+func auto_refresh_music_plugins() -> void:
 	var plugin_controller = get_plugin_controller()
 	if plugin_controller == null:
 		return
-	await plugin_controller.auto_start_local_host()
-
-
-## 调用指定插件执行音乐搜索。
-func search_music_plugin(plugin_id: String, query: String, page: int = 1, media_type: String = "music") -> Dictionary:
-	var plugin_controller = get_plugin_controller()
-	if plugin_controller == null:
-		return build_plugin_error("Music plugin controller is not available.")
-	return await plugin_controller.search(plugin_id, query, page, media_type)
+	await plugin_controller.refresh_plugins()
 
 ## 解析指定插件曲目的可播放音频源。
 func resolve_track_plugin_source(track_index: int, quality: String = "standard") -> Dictionary:
@@ -78,7 +67,6 @@ func resolve_track_plugin_source(track_index: int, quality: String = "standard")
 	var result: Dictionary = await plugin_controller.get_media_source(track, quality)
 	if bool(result.get("ok", false)) and result.get("data", null) is Dictionary:
 		track.apply_plugin_source(result.data)
-		save_app_state()
 	return result
 
 ## 解析指定插件曲目的歌词数据。
@@ -96,7 +84,6 @@ func resolve_track_plugin_lyric(track_index: int) -> Dictionary:
 	var result: Dictionary = await plugin_controller.get_lyric(track)
 	if bool(result.get("ok", false)) and result.get("data", null) is Dictionary:
 		track.apply_plugin_lyric(result.data)
-		save_app_state()
 	return result
 
 ## 构造统一格式的插件错误返回。

@@ -42,7 +42,7 @@ func _ready() -> void:
 
 	_popup_router_controller.show_home_popup()
 	_playback_state_controller.request_audio_sync()
-	call_deferred("_auto_start_plugin_host")
+	call_deferred("_auto_refresh_plugins")
 
 ## 退出场景树时回收音频与弹窗宿主引用。
 func _exit_tree() -> void:
@@ -54,12 +54,11 @@ func _exit_tree() -> void:
 
 ## 处理翻译切换和窗口关闭时的状态刷新与保存。
 func _notification(what: int) -> void:
-	if what == NOTIFICATION_WM_CLOSE_REQUEST or what == NOTIFICATION_PREDELETE:
-		_popup_router_controller.save_app_state()
+	pass
 
-## 延迟触发插件宿主自动启动流程。
-func _auto_start_plugin_host() -> void:
-	await _plugin_controller.auto_start_local_host()
+## 延迟刷新外部插件目录。
+func _auto_refresh_plugins() -> void:
+	await _plugin_controller.refresh_plugins()
 
 ## 每秒同步一次播放进度，并在状态变化时刷新界面。
 func _on_tick() -> void:

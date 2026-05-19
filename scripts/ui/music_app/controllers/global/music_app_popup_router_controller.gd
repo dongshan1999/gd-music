@@ -45,9 +45,6 @@ func detach_popup_hosts(normal_host: Control, fullscreen_host: Control) -> void:
 	popup_manager.clear_normal_host(normal_host)
 	popup_manager.clear_fullscreen_host(fullscreen_host)
 
-## 将当前音乐状态写回存档管理器。
-func save_app_state() -> void:
-	_get_base_controller().save_app_state()
 
 ## 返回全局弹窗管理器。
 func get_popup_manager() -> DX_PopupManager:

@@ -3,93 +3,95 @@ extends RefCounted
 
 const SAVE_ROOT := "user://save_data"
 const DEFAULT_DATA_PATH := "app/data.json"
+const AUTO_SAVE_INTERVAL_MSEC := 60 * 1000
+const AUTO_SAVE_DELAY_EXTENSION_MSEC := 3 * 1000
 
 var dx: Node
 var data = DX_SaveData.new()
-var _data_path: String = DEFAULT_DATA_PATH
+var _is_dirty: bool = false
+var _next_save_at_msec: int = -1
 
 func in_ready() -> void:
-	_ensure_dir("")
-	load_data()
+	_ensure_save_dir()
+	load()
 
-func save(relative_path: String, value: Variant) -> bool:
-	var encoded = _encode_save_value(value)
-	if not bool(encoded.get("ok", false)):
-		return false
-	return _save_json(relative_path, encoded.get("value"))
+func in_process(_delta: float) -> void:
+	if not _is_dirty or _next_save_at_msec < 0:
+		return
+	if Time.get_ticks_msec() < _next_save_at_msec:
+		return
+	_flush_pending_save()
 
-func load(relative_path: String, default_value: Variant = null):
-	if _is_json_object(default_value):
-		return _load_object(relative_path, default_value)
-	return _load_json(relative_path, default_value)
+func in_quit() -> void:
+	_flush_pending_save(true)
 
-func load_data(relative_path: String = DEFAULT_DATA_PATH):
-	_data_path = relative_path
-	var has_existing_file := _file_exists(_data_path)
+func in_pause(paused: bool) -> void:
+	if paused:
+		_flush_pending_save(true)
+
+func in_focus(has_focus: bool) -> void:
+	if not has_focus:
+		_flush_pending_save(true)
+
+func save(force: bool = true) -> bool:
+	if not force:
+		_mark_dirty()
+		return true
+
+	return _flush_pending_save(true)
+
+func load():
+	var save_file_path := SAVE_ROOT.path_join(DEFAULT_DATA_PATH)
+	var has_existing_file := FileAccess.file_exists(save_file_path)
 	var fallback_data = DX_SaveData.new()
-	data = self.load(_data_path, fallback_data)
+	data = _load_main_object(fallback_data)
 	if data == null:
 		data = _clone_object(fallback_data)
 	_normalize_object(data)
+	_reset_pending_state()
 	if not has_existing_file:
-		save_data()
+		save(true)
 	return data
 
-func save_data(relative_path: String = "") -> bool:
-	var target_path := _data_path if relative_path.is_empty() else relative_path
-	_data_path = target_path
-	return save(_data_path, data)
-
-func _get_user_path(relative_path: String = "") -> String:
-	var cleaned := _normalize_relative_path(relative_path)
-	if cleaned.is_empty():
-		return SAVE_ROOT
-	return "%s/%s" % [SAVE_ROOT, cleaned]
-
-func _get_native_path(relative_path: String = "") -> String:
-	return ProjectSettings.globalize_path(_get_user_path(relative_path))
-
-func _ensure_dir(relative_dir: String = "") -> bool:
-	var native_path := _get_native_path(relative_dir)
+func _ensure_save_dir() -> bool:
+	var native_path := ProjectSettings.globalize_path(SAVE_ROOT)
 	var err := DirAccess.make_dir_recursive_absolute(native_path)
 	return err == OK or err == ERR_ALREADY_EXISTS
 
-func _file_exists(relative_path: String) -> bool:
-	return FileAccess.file_exists(_get_user_path(relative_path))
-
-func _save_json(relative_path: String, payload: Variant, pretty: bool = true) -> bool:
-	if not _ensure_parent_dir(relative_path):
+func _save_main_json(payload: Variant, pretty: bool = true) -> bool:
+	if not _ensure_save_dir():
 		return false
 
-	var file := FileAccess.open(_get_user_path(relative_path), FileAccess.WRITE)
+	var file := FileAccess.open(SAVE_ROOT.path_join(DEFAULT_DATA_PATH), FileAccess.WRITE)
 	if file == null:
 		return false
 
 	file.store_string(JSON.stringify(payload, "\t" if pretty else ""))
 	return true
 
-func _load_json(relative_path: String, default_value: Variant = null) -> Variant:
-	var user_path := _get_user_path(relative_path)
-	if not FileAccess.file_exists(user_path):
-		return _duplicate_value(default_value)
+func _load_main_json() -> Variant:
+	var save_path := SAVE_ROOT.path_join(DEFAULT_DATA_PATH)
+	if not FileAccess.file_exists(save_path):
+		return null
 
-	var file := FileAccess.open(user_path, FileAccess.READ)
+	var file := FileAccess.open(save_path, FileAccess.READ)
 	if file == null:
-		return _duplicate_value(default_value)
+		return null
 
+	var raw_text := file.get_as_text()
 	var json := JSON.new()
-	if json.parse(file.get_as_text()) != OK:
-		return _duplicate_value(default_value)
+	if json.parse(raw_text) != OK:
+		return null
 	return json.data
 
-func _load_object(relative_path: String, default_object):
+func _load_main_object(default_object):
 	if default_object == null:
 		return null
 
 	var loaded_object = _clone_object(default_object)
 	if loaded_object == null:
 		return null
-	var parsed: Variant = _load_json(relative_path, null)
+	var parsed: Variant = _load_main_json()
 	if typeof(parsed) == TYPE_DICTIONARY:
 		_populate_object(loaded_object, parsed)
 
@@ -118,7 +120,7 @@ func _clone_object(object):
 	if cloned == null:
 		return null
 
-	var serialized_data = DX_JsonSerializer.serialize(object, true)
+	var serialized_data = _serialize_object(object, true)
 	if DX_JsonSerializer.has_error():
 		return null
 
@@ -127,52 +129,43 @@ func _clone_object(object):
 		return null
 	return cloned
 
-func _encode_save_value(value: Variant) -> Dictionary:
-	if _is_json_object(value):
-		var normalized_object = _clone_object(value)
-		if normalized_object == null:
-			return {"ok": false}
-		_normalize_object(normalized_object)
-		return {
-			"ok": true,
-			"value": _serialize_object(normalized_object)
-		}
-
-	if value == null or value is Dictionary or value is Array:
-		return {
-			"ok": true,
-			"value": _duplicate_value(value)
-		}
-
-	match typeof(value):
-		TYPE_BOOL, TYPE_INT, TYPE_FLOAT, TYPE_STRING:
-			return {"ok": true, "value": value}
-
-	push_error(
-		"DX_SaveManager.save only supports JSON-compatible values or DX_JsonObject instances."
-	)
-	return {"ok": false}
-
-func _is_json_object(value: Variant) -> bool:
-	return value != null and value is Object and value.has_method("_get_serialize_config")
-
-func _ensure_parent_dir(relative_path: String) -> bool:
-	var cleaned := _normalize_relative_path(relative_path)
-	var parent_dir := cleaned.get_base_dir()
-	if parent_dir == "." or parent_dir.is_empty():
-		return _ensure_dir("")
-	return _ensure_dir(parent_dir)
-
-func _normalize_relative_path(relative_path: String) -> String:
-	return relative_path.replace("\\", "/").trim_prefix("/").trim_suffix("/")
-
-func _duplicate_value(value: Variant) -> Variant:
-	if value is Array:
-		return (value as Array).duplicate(true)
-	if value is Dictionary:
-		return (value as Dictionary).duplicate(true)
-	return value
-
 func _normalize_object(object: Variant) -> void:
 	if object != null and object.has_method("normalize"):
 		object.call("normalize")
+
+func _mark_dirty() -> void:
+	var now_msec := Time.get_ticks_msec()
+	if not _is_dirty:
+		_is_dirty = true
+		_next_save_at_msec = now_msec + AUTO_SAVE_INTERVAL_MSEC
+		return
+	_next_save_at_msec = maxi(_next_save_at_msec, now_msec) + AUTO_SAVE_DELAY_EXTENSION_MSEC
+
+func _flush_pending_save(force: bool = false) -> bool:
+	var ok := true
+
+	if force or _is_dirty:
+		ok = _save_main_json(_encode_data_for_save()) and ok
+
+	if ok:
+		_reset_pending_state()
+	else:
+		_is_dirty = true
+	return ok
+
+func _encode_data_for_save() -> Variant:
+	var normalized_data = _clone_object(data)
+	if normalized_data == null:
+		push_error("DX_SaveManager failed to clone main save data.")
+		return {}
+	_normalize_object(normalized_data)
+
+	var encoded = _serialize_object(normalized_data)
+	if DX_JsonSerializer.has_error():
+		push_error("DX_SaveManager failed to serialize main save data.")
+		return {}
+	return encoded
+
+func _reset_pending_state() -> void:
+	_is_dirty = false
+	_next_save_at_msec = -1

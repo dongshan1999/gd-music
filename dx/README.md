@@ -393,17 +393,17 @@ DX.logger.error("Popup", "popup host missing")
 常用方式：
 
 ```gdscript
-var save_data := DX.save.load_data()
-DX.save.save_data()
-var ok := DX.save.save("app/test.json", {"ok": true})
+var save_data := DX.save.load()
+var ok := DX.save.save()
+var pending := DX.save.has_pending_save()
 ```
 
 常用方法：
 
-- `save(relative_path, value)`
-- `load(relative_path, default_value := null)`
-- `load_data(relative_path := DEFAULT_DATA_PATH)`
-- `save_data(relative_path := "")`
+- `save(force := true)`
+- `load()`
+- `has_pending_save()`
+- `get_next_save_at_msec()`
 
 ### DX_JsonObject
 

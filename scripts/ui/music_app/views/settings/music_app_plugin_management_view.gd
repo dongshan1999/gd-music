@@ -71,7 +71,7 @@ func _reload_plugins_deferred() -> void:
 	status_label.text = tr("music_app.plugin_management.status.checking_host")
 	refresh()
 
-	var ensure_result: Dictionary = await _plugin_management_controller.ensure_plugin_host()
+	var ensure_result: Dictionary = await _plugin_management_controller.ensure_plugins_ready()
 	if not bool(ensure_result.get("ok", false)):
 		_plugins.clear()
 		_is_loading = false

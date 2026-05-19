@@ -33,12 +33,6 @@ func is_tag_enabled(tag: StringName) -> bool:
 		return bool(_tag_states[string_tag])
 	return true
 
-func load_settings() -> void:
-	pass
-
-func save_settings() -> void:
-	pass
-
 func log(tag_or_message: Variant, message: Variant = null) -> void:
 	if message == null:
 		_log_internal(&"", tag_or_message, "info")

@@ -124,12 +124,6 @@ func get_liked_tracks() -> Dictionary:
 func set_liked_tracks(value: Dictionary) -> void:
 	get_app_state().liked_tracks = value
 
-## 触发 showcase 持久化当前音乐应用状态。
-func save_app_state() -> void:
-	var save_manager := get_save_manager()
-	if save_manager != null:
-		save_manager.save_data()
-
 ## 请求 showcase 同步底层音频播放器状态。
 func request_audio_sync() -> void:
 	var playback_state_controller = get_playback_state_controller()

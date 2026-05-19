@@ -1,16 +1,11 @@
 class_name MusicAppPluginManagementController
 extends "res://scripts/ui/music_app/controllers/music_app_controller_base.gd"
 
-func ensure_plugin_host() -> Dictionary:
+func ensure_plugins_ready() -> Dictionary:
 	var plugin_controller = get_plugin_controller()
 	if plugin_controller == null:
 		return {"ok": false, "error": "Music plugin controller is not available."}
-
-	var health_result: Dictionary = await plugin_controller.ping()
-	if bool(health_result.get("ok", false)):
-		return health_result
-
-	return await plugin_controller.start_local_host()
+	return await plugin_controller.refresh_plugins()
 
 func list_plugins() -> Dictionary:
 	var plugin_controller = get_plugin_controller()

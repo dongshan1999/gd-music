@@ -34,13 +34,9 @@ func set_playback_mode(value: int, persist_state: bool = true) -> void:
 		MusicAppStateDataType.PlaybackMode.SHUFFLE
 	)
 	if get_playback_mode() == clamped_mode:
-		if persist_state:
-			save_app_state()
 		return
 
 	super.set_playback_mode(clamped_mode)
-	if persist_state:
-		save_app_state()
 
 ## 循环切换播放模式，并返回切换后的值。
 func cycle_playback_mode() -> int:
@@ -76,7 +72,6 @@ func clear_playback_queue() -> void:
 	set_playback_queue_index(0)
 	set_is_playing(false)
 	request_audio_sync()
-	save_app_state()
 
 ## 基于单首曲目构建播放列表。
 func set_single_track_queue(track_index: int) -> bool:
@@ -144,7 +139,6 @@ func play_queue_index(queue_index: int, autoplay: bool = true) -> bool:
 	set_elapsed_seconds(get_current_duration_preview_start())
 	set_is_playing(autoplay)
 	request_audio_sync()
-	save_app_state()
 	return true
 
 ## 从播放队列中移除指定槽位的曲目。
@@ -178,7 +172,6 @@ func remove_track_from_queue(queue_index: int) -> bool:
 	if is_removing_current:
 		set_elapsed_seconds(_get_preview_start_for_track_index(next_queue[next_queue_index]))
 	request_audio_sync()
-	save_app_state()
 	return true
 
 ## 根据曲目索引获取默认起播进度。
@@ -203,7 +196,6 @@ func append_tracks_to_queue(track_indices: Array[int]) -> int:
 
 	if appended_count > 0:
 		set_playback_track_indices(next_queue)
-		save_app_state()
 	return appended_count
 
 ## 返回播放模式对应的文案 key。
