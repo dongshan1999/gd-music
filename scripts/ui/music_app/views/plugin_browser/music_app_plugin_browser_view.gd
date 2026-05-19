@@ -448,10 +448,13 @@ func _on_start_host_pressed() -> void:
 	if not _ensure_controller():
 		return
 	_set_status("Refreshing plugins...")
-	var result: Dictionary = await _plugin_controller.refresh_music_plugins()
-	if not bool(result.get("ok", false)):
-		_set_status("Plugin refresh failed: %s" % str(result.get("error", "Unknown error.")))
-		_show_error(str(result.get("error", "Failed to refresh plugins.")))
+	var ok := await _plugin_controller.refresh_music_plugins()
+	if not ok:
+		var error_text := _plugin_controller.last_error
+		if error_text.is_empty():
+			error_text = "Failed to refresh plugins."
+		_set_status("Plugin refresh failed: %s" % error_text)
+		_show_error(error_text)
 		return
 	_set_status("Plugins refreshed.")
 	_toast("Plugins refreshed.")
@@ -469,9 +472,10 @@ func _on_install_file_pressed() -> void:
 	if plugin_path.is_empty():
 		_show_error("Please enter a plugin file path.")
 		return
-	var result: Dictionary = await _get_plugin_controller().install_plugin_from_file(plugin_path)
-	if not bool(result.get("ok", false)):
-		_show_error(str(result.get("error", "Install failed.")))
+	var plugin_controller = _get_plugin_controller()
+	var result: Dictionary = await plugin_controller.install_plugin_from_file(plugin_path)
+	if result.is_empty():
+		_show_error(plugin_controller.last_error if not plugin_controller.last_error.is_empty() else "Install failed.")
 		return
 	_toast("Plugin installed from file.")
 	await _reload_plugins(false)
@@ -483,9 +487,10 @@ func _on_install_url_pressed() -> void:
 	if plugin_url.is_empty():
 		_show_error("Please enter a plugin URL.")
 		return
-	var result: Dictionary = await _get_plugin_controller().install_plugin_from_url(plugin_url)
-	if not bool(result.get("ok", false)):
-		_show_error(str(result.get("error", "Install failed.")))
+	var plugin_controller = _get_plugin_controller()
+	var ok := await plugin_controller.install_plugin_from_url(plugin_url)
+	if not ok:
+		_show_error(plugin_controller.last_error if not plugin_controller.last_error.is_empty() else "Install failed.")
 		return
 	_toast("Plugin installed from URL.")
 	await _reload_plugins(false)
@@ -499,14 +504,10 @@ func _on_load_vars_pressed() -> void:
 	if plugin_controller == null:
 		_show_error("Plugin controller is not available.")
 		return
-	var result: Dictionary = await plugin_controller.get_plugin_user_variables(plugin_id)
-	if not bool(result.get("ok", false)):
-		_show_error(str(result.get("error", "Failed to load plugin vars.")))
+	var values: Dictionary = await plugin_controller.get_plugin_user_variables(plugin_id)
+	if values.is_empty() and not plugin_controller.last_error.is_empty():
+		_show_error(plugin_controller.last_error)
 		return
-	var payload = result.get("data", {})
-	var values: Dictionary = {}
-	if payload is Dictionary:
-		values = payload.get("values", {})
 	vars_editor.text = JSON.stringify(values, "\t")
 
 func _on_save_vars_pressed() -> void:
@@ -525,9 +526,9 @@ func _on_save_vars_pressed() -> void:
 		_show_error("Plugin controller is not available.")
 		return
 
-	var result: Dictionary = await plugin_controller.set_plugin_user_variables(plugin_id, json.data)
-	if not bool(result.get("ok", false)):
-		_show_error(str(result.get("error", "Failed to save plugin vars.")))
+	var ok := await plugin_controller.set_plugin_user_variables(plugin_id, json.data)
+	if not ok:
+		_show_error(plugin_controller.last_error if not plugin_controller.last_error.is_empty() else "Failed to save plugin vars.")
 		return
 	_toast("Plugin vars saved.")
 
@@ -560,28 +561,28 @@ func _search_page(page: int) -> void:
 	_sync_query_state()
 	_set_searching(true)
 
-	var result: Dictionary = await _get_plugin_controller().search(
+	var plugin_controller = _get_plugin_controller()
+	var result: Dictionary = await plugin_controller.search(
 		plugin_id,
 		query,
 		_current_page,
 		_get_selected_search_type()
 	)
 	_set_searching(false)
-	if not bool(result.get("ok", false)):
+	if result.is_empty():
 		_search_results = []
 		_last_is_end = true
 		_render_results()
-		_show_error(str(result.get("error", "Search failed.")))
+		_show_error(plugin_controller.last_error if not plugin_controller.last_error.is_empty() else "Search failed.")
 		return
 
 	_plugin_controller.push_plugin_search_history(query)
 	_search_history = _copy_string_array(_plugin_controller.get_plugin_search_history())
 	_render_history()
 
-	var payload = result.get("data", {})
-	if payload is Dictionary:
-		_search_results = _normalize_dictionary_array(payload.get("data", []))
-		_last_is_end = bool(payload.get("isEnd", true))
+	if result is Dictionary:
+		_search_results = _normalize_dictionary_array(result.get("data", []))
+		_last_is_end = bool(result.get("isEnd", true))
 	else:
 		_search_results = []
 		_last_is_end = true
@@ -595,37 +596,28 @@ func _reload_plugins(auto_start: bool) -> void:
 		_set_status("Plugin controller unavailable.")
 		return
 
-	_set_status("Checking plugins at %s..." % plugin_controller.get_plugin_root_path())
-	var health_result: Dictionary = await plugin_controller.get_plugin_runtime_status()
-	if not bool(health_result.get("ok", false)) and auto_start:
-		_set_status("Refreshing plugins...")
-		health_result = await _plugin_controller.refresh_music_plugins()
-
-	if not bool(health_result.get("ok", false)):
+	_set_status("Refreshing plugins...")
+	var refresh_ok := await plugin_controller.refresh_plugins()
+	if not refresh_ok:
 		_plugins = []
 		_selected_plugin_id = ""
 		_search_results = []
 		_last_is_end = true
 		_render_tabs()
 		_render_results()
-		_set_status("Plugins unavailable: %s" % str(health_result.get("error", "Unknown error.")))
+		_set_status("Plugins unavailable: %s" % plugin_controller.last_error)
 		return
 
-	_set_status("Plugins ready at %s" % plugin_controller.get_plugin_root_path())
-	var list_result: Dictionary = await plugin_controller.list_plugins()
-	if not bool(list_result.get("ok", false)):
+	_set_status("Plugins ready.")
+	var plugins := plugin_controller.list_plugins()
+	if plugins.is_empty() and not plugin_controller.last_error.is_empty():
 		_plugins = []
 		_selected_plugin_id = ""
 		_render_tabs()
 		_render_results()
-		_set_status("Plugins ready, but listing failed: %s" % str(list_result.get("error", "")))
+		_set_status("Plugins ready, but listing failed: %s" % plugin_controller.last_error)
 		return
-
-	var payload = list_result.get("data", {})
-	if payload is Dictionary and payload.get("plugins", null) is Array:
-		_plugins = _normalize_dictionary_array(payload.get("plugins", []))
-	else:
-		_plugins = []
+	_plugins = plugins
 
 	if _plugins.is_empty():
 		_selected_plugin_id = ""
