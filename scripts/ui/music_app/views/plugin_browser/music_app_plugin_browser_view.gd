@@ -51,9 +51,6 @@ var _selected_search_type := DEFAULT_SEARCH_TYPE
 @onready var install_url_input: LineEdit = %InstallUrlInput
 @onready var install_url_button: Button = %InstallUrlButton
 @onready var plugin_info_label: Label = %PluginInfoLabel
-@onready var load_vars_button: Button = %LoadVarsButton
-@onready var save_vars_button: Button = %SaveVarsButton
-@onready var vars_editor: TextEdit = %VarsEditor
 
 var _history_tag_nodes: Array = []
 var _search_type_tab_nodes: Array = []
@@ -85,8 +82,6 @@ func bind() -> void:
 	refresh_plugins_button.pressed.connect(_on_refresh_plugins_pressed)
 	install_file_button.pressed.connect(_on_install_file_pressed)
 	install_url_button.pressed.connect(_on_install_url_pressed)
-	load_vars_button.pressed.connect(_on_load_vars_pressed)
-	save_vars_button.pressed.connect(_on_save_vars_pressed)
 
 ## 弹窗显示时刷新界面并重新请求插件状态。
 func on_popup_shown() -> void:
@@ -342,8 +337,6 @@ func _sync_action_state() -> void:
 	submit_search_button.disabled = not has_plugin or not has_query or _is_searching
 	start_host_button.disabled = _is_searching
 	refresh_plugins_button.disabled = _is_searching
-	load_vars_button.disabled = not has_plugin or _is_searching
-	save_vars_button.disabled = not has_plugin or _is_searching
 	clear_history_button.disabled = _search_history.is_empty() or _is_searching
 	manage_toggle_button.text = "Hide" if management_panel.visible else "Manage"
 
@@ -363,7 +356,7 @@ func _normalize_dictionary_array(value: Variant) -> Array[Dictionary]:
 			result.append(item)
 	return result
 
-func _get_plugin_controller():
+func _get_plugin_controller() -> MusicAppPluginController:
 	if _plugin_controller == null:
 		return null
 	return _plugin_controller.get_plugin_controller()
@@ -448,7 +441,7 @@ func _on_start_host_pressed() -> void:
 	if not _ensure_controller():
 		return
 	_set_status("Refreshing plugins...")
-	var ok := await _plugin_controller.refresh_music_plugins()
+	var ok: bool = await _plugin_controller.refresh_music_plugins()
 	if not ok:
 		var error_text := _plugin_controller.last_error
 		if error_text.is_empty():
@@ -487,50 +480,13 @@ func _on_install_url_pressed() -> void:
 	if plugin_url.is_empty():
 		_show_error("Please enter a plugin URL.")
 		return
-	var plugin_controller = _get_plugin_controller()
-	var ok := await plugin_controller.install_plugin_from_url(plugin_url)
+	var plugin_controller: MusicAppPluginController = _get_plugin_controller()
+	var ok: bool = await plugin_controller.install_plugin_from_url(plugin_url)
 	if not ok:
 		_show_error(plugin_controller.last_error if not plugin_controller.last_error.is_empty() else "Install failed.")
 		return
 	_toast("Plugin installed from URL.")
 	await _reload_plugins(false)
-
-func _on_load_vars_pressed() -> void:
-	var plugin_id := _get_selected_plugin_id()
-	if plugin_id.is_empty():
-		_show_error("Please select a plugin first.")
-		return
-	var plugin_controller = _get_plugin_controller()
-	if plugin_controller == null:
-		_show_error("Plugin controller is not available.")
-		return
-	var values: Dictionary = await plugin_controller.get_plugin_user_variables(plugin_id)
-	if values.is_empty() and not plugin_controller.last_error.is_empty():
-		_show_error(plugin_controller.last_error)
-		return
-	vars_editor.text = JSON.stringify(values, "\t")
-
-func _on_save_vars_pressed() -> void:
-	var plugin_id := _get_selected_plugin_id()
-	if plugin_id.is_empty():
-		_show_error("Please select a plugin first.")
-		return
-
-	var json := JSON.new()
-	if json.parse(vars_editor.text) != OK or not (json.data is Dictionary):
-		_show_error("Plugin vars must be a JSON object.")
-		return
-
-	var plugin_controller = _get_plugin_controller()
-	if plugin_controller == null:
-		_show_error("Plugin controller is not available.")
-		return
-
-	var ok := await plugin_controller.set_plugin_user_variables(plugin_id, json.data)
-	if not ok:
-		_show_error(plugin_controller.last_error if not plugin_controller.last_error.is_empty() else "Failed to save plugin vars.")
-		return
-	_toast("Plugin vars saved.")
 
 func _on_query_submitted(_text: String) -> void:
 	await _search_page(1)
@@ -561,7 +517,7 @@ func _search_page(page: int) -> void:
 	_sync_query_state()
 	_set_searching(true)
 
-	var plugin_controller = _get_plugin_controller()
+	var plugin_controller: MusicAppPluginController = _get_plugin_controller()
 	var result: Dictionary = await plugin_controller.search(
 		plugin_id,
 		query,
@@ -591,13 +547,13 @@ func _search_page(page: int) -> void:
 
 ## 刷新插件状态并重新加载插件列表。
 func _reload_plugins(auto_start: bool) -> void:
-	var plugin_controller = _get_plugin_controller()
+	var plugin_controller: MusicAppPluginController = _get_plugin_controller()
 	if plugin_controller == null:
 		_set_status("Plugin controller unavailable.")
 		return
 
 	_set_status("Refreshing plugins...")
-	var refresh_ok := await plugin_controller.refresh_plugins()
+	var refresh_ok: bool = await plugin_controller.refresh_plugins()
 	if not refresh_ok:
 		_plugins = []
 		_selected_plugin_id = ""
@@ -609,7 +565,7 @@ func _reload_plugins(auto_start: bool) -> void:
 		return
 
 	_set_status("Plugins ready.")
-	var plugins := plugin_controller.list_plugins()
+	var plugins: Array[Dictionary] = plugin_controller.list_plugins()
 	if plugins.is_empty() and not plugin_controller.last_error.is_empty():
 		_plugins = []
 		_selected_plugin_id = ""
