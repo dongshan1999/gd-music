@@ -225,10 +225,10 @@ func _resolve_stream_for_track(track: TrackData, sync_request_id: int) -> AudioS
 		var resolve_result = await plugin_controller.resolve_track_plugin_source(get_selected_track_index())
 		if sync_request_id != _audio_sync_request_id:
 			return null
-		if not bool(resolve_result.get("ok", false)):
+		if resolve_result.is_empty():
 			push_warning("Failed to resolve plugin stream for track \"%s\": %s" % [
 				track.title,
-				str(resolve_result.get("error", "Unknown error."))
+				plugin_controller.last_error if not plugin_controller.last_error.is_empty() else "Unknown error."
 			])
 			return null
 

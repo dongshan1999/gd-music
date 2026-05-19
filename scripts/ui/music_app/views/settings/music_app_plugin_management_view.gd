@@ -71,32 +71,25 @@ func _reload_plugins_deferred() -> void:
 	status_label.text = tr("music_app.plugin_management.status.checking_host")
 	refresh()
 
-	var ensure_result: Dictionary = await _plugin_management_controller.ensure_plugins_ready()
-	if not bool(ensure_result.get("ok", false)):
+	var ensure_ok := await _plugin_management_controller.ensure_plugins_ready()
+	if not ensure_ok:
 		_plugins.clear()
 		_is_loading = false
-		status_label.text = str(
-			ensure_result.get("error", tr("music_app.plugin_management.status.host_unavailable"))
-		)
+		var ensure_error = _plugin_management_controller.last_error
+		status_label.text = ensure_error if not ensure_error.is_empty() else tr("music_app.plugin_management.status.host_unavailable")
 		refresh()
 		return
 
 	status_label.text = tr("music_app.plugin_management.status.loading_plugins")
-	var list_result: Dictionary = await _plugin_management_controller.list_plugins()
+	var list_result := _plugin_management_controller.list_plugins()
 	_is_loading = false
-	if not bool(list_result.get("ok", false)):
+	if list_result.is_empty() and not _plugin_management_controller.last_error.is_empty():
 		_plugins.clear()
-		status_label.text = str(
-			list_result.get("error", tr("music_app.plugin_management.status.load_failed"))
-		)
+		status_label.text = _plugin_management_controller.last_error
 		refresh()
 		return
 
-	var payload = list_result.get("data", {})
-	if payload is Dictionary and payload.get("plugins", null) is Array:
-		_plugins = _normalize_dictionary_array(payload.get("plugins", []))
-	else:
-		_plugins = []
+	_plugins = list_result
 
 	status_label.text = tr("music_app.plugin_management.status.loaded_count").format(
 		{"count": _plugins.size()}
@@ -149,14 +142,12 @@ func _install_plugin_from_path(plugin_path: String) -> void:
 		return
 
 	var result: Dictionary = await _plugin_management_controller.install_plugin_from_file(normalized_plugin_path)
-	if not bool(result.get("ok", false)):
+	if result.is_empty():
 		_plugin_management_controller.show_common_alert(
 			tr("music_app.plugin_management.install.title"),
 			tr("music_app.plugin_management.install.local_failed").format(
 				{
-					"error": str(
-						result.get("error", tr("music_app.plugin_management.common.unknown_error"))
-					)
+					"error": _plugin_management_controller.last_error if not _plugin_management_controller.last_error.is_empty() else tr("music_app.plugin_management.common.unknown_error")
 				}
 			)
 		)
@@ -196,11 +187,11 @@ func _on_plugin_share_requested(_plugin_id: String) -> void:
 	_plugin_management_controller.show_share_placeholder()
 
 func _on_plugin_uninstall_requested(plugin_id: String) -> void:
-	var result: Dictionary = await _plugin_management_controller.uninstall_plugin(plugin_id)
-	if not bool(result.get("ok", false)):
+	var ok := await _plugin_management_controller.uninstall_plugin(plugin_id)
+	if not ok:
 		_plugin_management_controller.show_common_alert(
 			tr("music_app.plugin_management.uninstall.title"),
-			str(result.get("error", tr("music_app.plugin_management.uninstall.failed")))
+			_plugin_management_controller.last_error if not _plugin_management_controller.last_error.is_empty() else tr("music_app.plugin_management.uninstall.failed")
 		)
 		return
 	_plugin_management_controller.show_toast(tr("music_app.plugin_management.uninstall.success"))

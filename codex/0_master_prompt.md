@@ -1,10 +1,26 @@
 # 主提示
-1. UI铺设需要落实到预制体中
-2. 弹窗需要保持预制体名称，view脚本，controller脚本名称前缀相同，然后预制体名称 + _page，view脚本 + _view，controller脚本 + _controller，弹窗必须要有view和controller，并且controller只能在view中new
-3. 当前开发阶段，存档无须容错处理
-4. 文本显示内容都要使用多语言translations/music_app.csv，脚本上直接使用tr或者DX.localization.bind_text，预制体上组件还是使用内容，如果是硬编码不是代码控制使用localize_comp.gd填充key
+
+1. **UI 预制体**  
+   所有 UI 必须落实到预制体（场景文件）中。
+
+2. **弹窗命名与结构规范**
+   - 命名必须统一：
+     - 预制体：`{前缀}_page`
+     - View 脚本：`{前缀}_view`
+     - Controller 脚本：`{前缀}_controller`
+   - 每个弹窗 **必须** 包含 View 与 Controller。
+   - Controller 只能在 View 脚本内部实例化。
+
+3. **存档容错**  
+   当前阶段无需对存档功能做任何容错处理。
+
+4. **多语言文本**
+   - 所有显示文本统一使用 `translations/music_app.csv`。
+   - **脚本中**：使用 `tr()` 或 `DX.localization.bind_text`。
+   - **预制体静态文本**：不要硬编码文本，使用 `localize_comp.gd` 填充对应的 key。
+5. **代码规范**
+   - 新增功能必须遵循 **最小开放接口** 原则，禁止出现无实际逻辑的两层空转发。
+   - 所有数值、字符串硬编码必须提取为常量。
+
 # 开发需求
-1. ![1](12545f6411ae900ac14170881406ae7c.jpg)
-2. ![2](c60eac100aec20cf59d9d3528ff4f2ad.jpg)
-3. 需要在scripts\ui\music_app\views\settings中新增铺设插件管理界面如图1其内容需要是动态生成预制体，然后图片中卸载插件是放在底部的，我希望和切换按钮放一起，图片使用X表示卸载，还有界面右下方有一个+图片是打开图二，
-4. 图二希望铺设在插件管理界面里，然后帮我汇总一下插件对应方法在哪里告诉我
+

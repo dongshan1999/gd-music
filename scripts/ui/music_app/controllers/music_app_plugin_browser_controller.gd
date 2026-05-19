@@ -2,6 +2,7 @@ class_name MusicAppPluginBrowserController
 extends "res://scripts/ui/music_app/controllers/music_app_controller_base.gd"
 
 const MAX_SEARCH_HISTORY := 10
+var last_error := ""
 
 ## 返回插件搜索历史。
 func get_plugin_search_history() -> Array[String]:
@@ -39,11 +40,14 @@ func clear_plugin_search_history() -> void:
 	get_app_state().plugin_search_history = []
 
 ## 刷新外部 GDScript 插件目录并重新加载插件列表。
-func refresh_music_plugins() -> Dictionary:
+func refresh_music_plugins() -> bool:
 	var plugin_controller = get_plugin_controller()
 	if plugin_controller == null:
-		return build_plugin_error("Music plugin controller is not available.")
-	return await plugin_controller.refresh_plugins()
+		last_error = "Music plugin controller is not available."
+		return false
+	var ok := await plugin_controller.refresh_plugins()
+	last_error = plugin_controller.last_error
+	return ok
 
 ## 控制器进入后预热外部插件目录。
 func auto_refresh_music_plugins() -> void:
@@ -56,41 +60,42 @@ func auto_refresh_music_plugins() -> void:
 func resolve_track_plugin_source(track_index: int, quality: String = "standard") -> Dictionary:
 	var track := _get_track(track_index)
 	if track == null:
-		return build_plugin_error("Track index is out of range.")
+		last_error = "Track index is out of range."
+		return {}
 	if track == null or not track.is_plugin_track():
-		return build_plugin_error("Selected track is not a plugin track.")
+		last_error = "Selected track is not a plugin track."
+		return {}
 
 	var plugin_controller = get_plugin_controller()
 	if plugin_controller == null:
-		return build_plugin_error("Music plugin controller is not available.")
+		last_error = "Music plugin controller is not available."
+		return {}
 
 	var result: Dictionary = await plugin_controller.get_media_source(track, quality)
-	if bool(result.get("ok", false)) and result.get("data", null) is Dictionary:
-		track.apply_plugin_source(result.data)
+	last_error = plugin_controller.last_error
+	if not result.is_empty():
+		track.apply_plugin_source(result)
 	return result
 
 ## 解析指定插件曲目的歌词数据。
 func resolve_track_plugin_lyric(track_index: int) -> Dictionary:
 	var track := _get_track(track_index)
 	if track == null:
-		return build_plugin_error("Track index is out of range.")
+		last_error = "Track index is out of range."
+		return {}
 	if track == null or not track.is_plugin_track():
-		return build_plugin_error("Selected track is not a plugin track.")
+		last_error = "Selected track is not a plugin track."
+		return {}
 
 	var plugin_controller = get_plugin_controller()
 	if plugin_controller == null:
-		return build_plugin_error("Music plugin controller is not available.")
+		last_error = "Music plugin controller is not available."
+		return {}
 
 	var result: Dictionary = await plugin_controller.get_lyric(track)
-	if bool(result.get("ok", false)) and result.get("data", null) is Dictionary:
-		track.apply_plugin_lyric(result.data)
-	return result
-
-## 构造统一格式的插件错误返回。
-func build_plugin_error(message: String, extra: Dictionary = {}) -> Dictionary:
-	var result := {"ok": false, "error": message}
-	for key in extra.keys():
-		result[key] = extra[key]
+	last_error = plugin_controller.last_error
+	if not result.is_empty():
+		track.apply_plugin_lyric(result)
 	return result
 
 ## 根据全量曲目索引返回曲目对象。
