@@ -71,7 +71,7 @@ func _reload_plugins_deferred() -> void:
 	status_label.text = tr("music_app.plugin_management.status.checking_host")
 	refresh()
 
-	var ensure_ok := await _plugin_management_controller.ensure_plugins_ready()
+	var ensure_ok: bool = await _plugin_management_controller.ensure_plugins_ready()
 	if not ensure_ok:
 		_plugins.clear()
 		_is_loading = false
@@ -81,7 +81,7 @@ func _reload_plugins_deferred() -> void:
 		return
 
 	status_label.text = tr("music_app.plugin_management.status.loading_plugins")
-	var list_result := _plugin_management_controller.list_plugins()
+	var list_result: Array[Dictionary] = _plugin_management_controller.list_plugins()
 	_is_loading = false
 	if list_result.is_empty() and not _plugin_management_controller.last_error.is_empty():
 		_plugins.clear()
@@ -187,7 +187,7 @@ func _on_plugin_share_requested(_plugin_id: String) -> void:
 	_plugin_management_controller.show_share_placeholder()
 
 func _on_plugin_uninstall_requested(plugin_id: String) -> void:
-	var ok := await _plugin_management_controller.uninstall_plugin(plugin_id)
+	var ok: bool = await _plugin_management_controller.uninstall_plugin(plugin_id)
 	if not ok:
 		_plugin_management_controller.show_common_alert(
 			tr("music_app.plugin_management.uninstall.title"),

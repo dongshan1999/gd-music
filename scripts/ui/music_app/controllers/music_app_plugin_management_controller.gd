@@ -4,16 +4,16 @@ extends "res://scripts/ui/music_app/controllers/music_app_controller_base.gd"
 var last_error := ""
 
 func ensure_plugins_ready() -> bool:
-	var plugin_controller = get_plugin_controller()
+	var plugin_controller: MusicAppPluginController = get_plugin_controller()
 	if plugin_controller == null:
 		last_error = "Music plugin controller is not available."
 		return false
-	var ok := await plugin_controller.refresh_plugins()
+	var ok: bool = await plugin_controller.refresh_plugins()
 	last_error = plugin_controller.last_error
 	return ok
 
 func list_plugins() -> Array[Dictionary]:
-	var plugin_controller = get_plugin_controller()
+	var plugin_controller: MusicAppPluginController = get_plugin_controller()
 	if plugin_controller == null:
 		last_error = "Music plugin controller is not available."
 		return []
@@ -21,40 +21,40 @@ func list_plugins() -> Array[Dictionary]:
 	return plugin_controller.list_plugins()
 
 func install_plugin_from_file(plugin_path: String) -> Dictionary:
-	var plugin_controller = get_plugin_controller()
+	var plugin_controller: MusicAppPluginController = get_plugin_controller()
 	if plugin_controller == null:
 		last_error = "Music plugin controller is not available."
 		return {}
-	var result := await plugin_controller.install_plugin_from_file(plugin_path)
+	var result: Dictionary = await plugin_controller.install_plugin_from_file(plugin_path)
 	last_error = plugin_controller.last_error
 	return result
 
 func install_plugin_from_url(plugin_url: String) -> bool:
-	var plugin_controller = get_plugin_controller()
+	var plugin_controller: MusicAppPluginController = get_plugin_controller()
 	if plugin_controller == null:
 		last_error = "Music plugin controller is not available."
 		return false
-	var ok := await plugin_controller.install_plugin_from_url(plugin_url)
+	var ok: bool = await plugin_controller.install_plugin_from_url(plugin_url)
 	last_error = plugin_controller.last_error
 	return ok
 
 func uninstall_plugin(plugin_id: String) -> bool:
-	var plugin_controller = get_plugin_controller()
+	var plugin_controller: MusicAppPluginController = get_plugin_controller()
 	if plugin_controller == null:
 		last_error = "Music plugin controller is not available."
 		return false
-	var ok := await plugin_controller.uninstall_plugin(plugin_id)
+	var ok: bool = await plugin_controller.uninstall_plugin(plugin_id)
 	last_error = plugin_controller.last_error
 	return ok
 
 func is_plugin_enabled(plugin_id: String) -> bool:
-	var plugin_controller = get_plugin_controller()
+	var plugin_controller: MusicAppPluginController = get_plugin_controller()
 	if plugin_controller == null:
 		return false
 	return plugin_controller.is_plugin_enabled(plugin_id)
 
 func set_plugin_enabled(plugin_id: String, enabled: bool) -> void:
-	var plugin_controller = get_plugin_controller()
+	var plugin_controller: MusicAppPluginController = get_plugin_controller()
 	if plugin_controller == null:
 		return
 	plugin_controller.set_plugin_enabled(plugin_id, enabled)

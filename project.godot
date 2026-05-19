@@ -39,7 +39,7 @@ version_control/autoload_on_startup=true
 
 [editor_plugins]
 
-enabled=PackedStringArray("res://addons/AnchorsOnlyPreset/plugin.cfg")
+enabled=PackedStringArray("res://addons/AnchorsOnlyPreset/plugin.cfg", "res://addons/dx_build_number/plugin.cfg")
 
 [internationalization]
 

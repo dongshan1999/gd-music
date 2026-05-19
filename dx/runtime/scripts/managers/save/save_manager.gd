@@ -13,7 +13,7 @@ var _next_save_at_msec: int = -1
 
 func in_ready() -> void:
 	_ensure_save_dir()
-	load()
+	self.load()
 
 func in_process(_delta: float) -> void:
 	if not _is_dirty or _next_save_at_msec < 0:

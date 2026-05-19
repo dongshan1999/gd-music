@@ -41,17 +41,17 @@ func clear_plugin_search_history() -> void:
 
 ## 刷新外部 GDScript 插件目录并重新加载插件列表。
 func refresh_music_plugins() -> bool:
-	var plugin_controller = get_plugin_controller()
+	var plugin_controller: MusicAppPluginController = get_plugin_controller()
 	if plugin_controller == null:
 		last_error = "Music plugin controller is not available."
 		return false
-	var ok := await plugin_controller.refresh_plugins()
+	var ok: bool = await plugin_controller.refresh_plugins()
 	last_error = plugin_controller.last_error
 	return ok
 
 ## 控制器进入后预热外部插件目录。
 func auto_refresh_music_plugins() -> void:
-	var plugin_controller = get_plugin_controller()
+	var plugin_controller: MusicAppPluginController = get_plugin_controller()
 	if plugin_controller == null:
 		return
 	await plugin_controller.refresh_plugins()
@@ -66,7 +66,7 @@ func resolve_track_plugin_source(track_index: int, quality: String = "standard")
 		last_error = "Selected track is not a plugin track."
 		return {}
 
-	var plugin_controller = get_plugin_controller()
+	var plugin_controller: MusicAppPluginController = get_plugin_controller()
 	if plugin_controller == null:
 		last_error = "Music plugin controller is not available."
 		return {}
@@ -87,7 +87,7 @@ func resolve_track_plugin_lyric(track_index: int) -> Dictionary:
 		last_error = "Selected track is not a plugin track."
 		return {}
 
-	var plugin_controller = get_plugin_controller()
+	var plugin_controller: MusicAppPluginController = get_plugin_controller()
 	if plugin_controller == null:
 		last_error = "Music plugin controller is not available."
 		return {}
