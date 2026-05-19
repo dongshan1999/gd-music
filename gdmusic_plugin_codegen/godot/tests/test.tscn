@@ -1,0 +1,6 @@
+[gd_scene format=3 uid="uid://b10hml2344f65"]
+
+[ext_resource type="Script" uid="uid://6awp71mthb14" path="res://gdmusic_plugin_codegen/godot/tests/test_bilibili_plugin.gd" id="1_0qvyw"]
+
+[node name="Test" type="Node" unique_id=365513183]
+script = ExtResource("1_0qvyw")

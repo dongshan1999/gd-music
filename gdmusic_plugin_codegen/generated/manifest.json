@@ -1,0 +1,483 @@
+{
+  "plugins": [
+    {
+      "folderName": "airsonic",
+      "platform": "Airsonic Advanced",
+      "outputPath": "E:\\project\\godot\\test\\gdmusic_plugin_codegen\\generated\\airsonic_plugin.gd",
+      "author": "JumuFeng",
+      "description": "支持 Airsonic Advanced 服务器，自动检测服务器版本和兼容性",
+      "userVariables": [
+        {
+          "key": "url",
+          "name": "服务器地址",
+          "type": ""
+        },
+        {
+          "key": "username",
+          "name": "用户名",
+          "type": ""
+        },
+        {
+          "key": "password",
+          "name": "密码",
+          "type": ""
+        }
+      ],
+      "supportedMethods": [
+        "search",
+        "getMediaSource",
+        "getLyric",
+        "getAlbumInfo",
+        "getArtistWorks",
+        "getTopLists",
+        "getTopListDetail"
+      ],
+      "supportedSearchTypes": [
+        "music",
+        "album",
+        "artist"
+      ],
+      "dependencies": [
+        "axios",
+        "crypto-js"
+      ],
+      "capabilities": [
+        "http",
+        "crypto",
+        "user_variables",
+        "state_cache",
+        "pagination"
+      ],
+      "migrationDifficulty": "high",
+      "migrationNotes": [
+        "replace axios calls with Godot HTTPRequest or HTTPClient helper",
+        "replace crypto-js hashing/signature logic with Godot HashingContext or native bridge",
+        "map env.getUserVariables() to a Godot-side plugin config storage",
+        "convert JS module-level cache into plugin instance state"
+      ]
+    },
+    {
+      "folderName": "audiomack",
+      "platform": "Audiomack",
+      "outputPath": "E:\\project\\godot\\test\\gdmusic_plugin_codegen\\generated\\audiomack_plugin.gd",
+      "author": "猫头猫",
+      "description": "",
+      "userVariables": [],
+      "supportedMethods": [
+        "search",
+        "getMediaSource",
+        "getAlbumInfo",
+        "getArtistWorks",
+        "getTopLists",
+        "getTopListDetail"
+      ],
+      "supportedSearchTypes": [
+        "music",
+        "album",
+        "sheet",
+        "artist"
+      ],
+      "dependencies": [
+        "axios",
+        "cheerio",
+        "crypto-js",
+        "dayjs"
+      ],
+      "capabilities": [
+        "http",
+        "html_parse",
+        "crypto",
+        "state_cache",
+        "pagination"
+      ],
+      "migrationDifficulty": "high",
+      "migrationNotes": [
+        "replace axios calls with Godot HTTPRequest or HTTPClient helper",
+        "replace cheerio HTML parsing with XMLParser, RegEx, or a custom HTML adapter",
+        "replace crypto-js hashing/signature logic with Godot HashingContext or native bridge",
+        "convert JS module-level cache into plugin instance state"
+      ]
+    },
+    {
+      "folderName": "bilibili",
+      "platform": "bilibili",
+      "outputPath": "E:\\project\\godot\\test\\gdmusic_plugin_codegen\\generated\\bilibili_plugin.gd",
+      "author": "猫头猫",
+      "description": "",
+      "userVariables": [],
+      "supportedMethods": [
+        "search",
+        "getMediaSource",
+        "getAlbumInfo",
+        "getArtistWorks",
+        "importMusicSheet",
+        "getTopLists",
+        "getTopListDetail"
+      ],
+      "supportedSearchTypes": [
+        "music",
+        "album",
+        "artist"
+      ],
+      "dependencies": [
+        "axios",
+        "cheerio",
+        "crypto-js",
+        "dayjs",
+        "he"
+      ],
+      "capabilities": [
+        "http",
+        "html_parse",
+        "crypto",
+        "state_cache",
+        "pagination"
+      ],
+      "migrationDifficulty": "high",
+      "migrationNotes": [
+        "replace axios calls with Godot HTTPRequest or HTTPClient helper",
+        "replace cheerio HTML parsing with XMLParser, RegEx, or a custom HTML adapter",
+        "replace crypto-js hashing/signature logic with Godot HashingContext or native bridge",
+        "convert JS module-level cache into plugin instance state"
+      ]
+    },
+    {
+      "folderName": "geciqianxun",
+      "platform": "歌词千寻",
+      "outputPath": "E:\\project\\godot\\test\\gdmusic_plugin_codegen\\generated\\geciqianxun_plugin.gd",
+      "author": "",
+      "description": "",
+      "userVariables": [],
+      "supportedMethods": [
+        "search",
+        "getLyric"
+      ],
+      "supportedSearchTypes": [
+        "lyric"
+      ],
+      "dependencies": [
+        "axios",
+        "cheerio"
+      ],
+      "capabilities": [
+        "http",
+        "html_parse",
+        "state_cache",
+        "pagination"
+      ],
+      "migrationDifficulty": "medium",
+      "migrationNotes": [
+        "replace axios calls with Godot HTTPRequest or HTTPClient helper",
+        "replace cheerio HTML parsing with XMLParser, RegEx, or a custom HTML adapter",
+        "convert JS module-level cache into plugin instance state"
+      ]
+    },
+    {
+      "folderName": "geciwang",
+      "platform": "歌词网",
+      "outputPath": "E:\\project\\godot\\test\\gdmusic_plugin_codegen\\generated\\geciwang_plugin.gd",
+      "author": "",
+      "description": "",
+      "userVariables": [],
+      "supportedMethods": [
+        "search",
+        "getLyric"
+      ],
+      "supportedSearchTypes": [
+        "lyric"
+      ],
+      "dependencies": [
+        "axios",
+        "cheerio"
+      ],
+      "capabilities": [
+        "http",
+        "html_parse",
+        "state_cache",
+        "pagination"
+      ],
+      "migrationDifficulty": "medium",
+      "migrationNotes": [
+        "replace axios calls with Godot HTTPRequest or HTTPClient helper",
+        "replace cheerio HTML parsing with XMLParser, RegEx, or a custom HTML adapter",
+        "convert JS module-level cache into plugin instance state"
+      ]
+    },
+    {
+      "folderName": "kuaishou",
+      "platform": "快手",
+      "outputPath": "E:\\project\\godot\\test\\gdmusic_plugin_codegen\\generated\\kuaishou_plugin.gd",
+      "author": "猫头猫",
+      "description": "",
+      "userVariables": [],
+      "supportedMethods": [
+        "search",
+        "getMediaSource"
+      ],
+      "supportedSearchTypes": [
+        "music"
+      ],
+      "dependencies": [
+        "axios"
+      ],
+      "capabilities": [
+        "http",
+        "state_cache",
+        "pagination"
+      ],
+      "migrationDifficulty": "low",
+      "migrationNotes": [
+        "replace axios calls with Godot HTTPRequest or HTTPClient helper",
+        "convert JS module-level cache into plugin instance state"
+      ]
+    },
+    {
+      "folderName": "maoerfm",
+      "platform": "猫耳FM",
+      "outputPath": "E:\\project\\godot\\test\\gdmusic_plugin_codegen\\generated\\maoerfm_plugin.gd",
+      "author": "猫头猫",
+      "description": "",
+      "userVariables": [],
+      "supportedMethods": [
+        "search",
+        "getMediaSource",
+        "getAlbumInfo"
+      ],
+      "supportedSearchTypes": [
+        "music",
+        "album"
+      ],
+      "dependencies": [
+        "axios",
+        "he"
+      ],
+      "capabilities": [
+        "http",
+        "state_cache",
+        "pagination"
+      ],
+      "migrationDifficulty": "medium",
+      "migrationNotes": [
+        "replace axios calls with Godot HTTPRequest or HTTPClient helper",
+        "convert JS module-level cache into plugin instance state"
+      ]
+    },
+    {
+      "folderName": "navidrome",
+      "platform": "Navidrome",
+      "outputPath": "E:\\project\\godot\\test\\gdmusic_plugin_codegen\\generated\\navidrome_plugin.gd",
+      "author": "猫头猫",
+      "description": "",
+      "userVariables": [
+        {
+          "key": "url",
+          "name": "服务器地址",
+          "type": ""
+        },
+        {
+          "key": "username",
+          "name": "用户名",
+          "type": ""
+        },
+        {
+          "key": "password",
+          "name": "密码",
+          "type": ""
+        }
+      ],
+      "supportedMethods": [
+        "search",
+        "getMediaSource"
+      ],
+      "supportedSearchTypes": [
+        "music",
+        "album"
+      ],
+      "dependencies": [
+        "axios",
+        "crypto-js"
+      ],
+      "capabilities": [
+        "http",
+        "crypto",
+        "user_variables",
+        "state_cache",
+        "pagination"
+      ],
+      "migrationDifficulty": "medium",
+      "migrationNotes": [
+        "replace axios calls with Godot HTTPRequest or HTTPClient helper",
+        "replace crypto-js hashing/signature logic with Godot HashingContext or native bridge",
+        "map env.getUserVariables() to a Godot-side plugin config storage",
+        "convert JS module-level cache into plugin instance state"
+      ]
+    },
+    {
+      "folderName": "suno",
+      "platform": "suno",
+      "outputPath": "E:\\project\\godot\\test\\gdmusic_plugin_codegen\\generated\\suno_plugin.gd",
+      "author": "",
+      "description": "",
+      "userVariables": [],
+      "supportedMethods": [
+        "getLyric",
+        "getTopLists",
+        "getTopListDetail"
+      ],
+      "supportedSearchTypes": [],
+      "dependencies": [
+        "axios"
+      ],
+      "capabilities": [
+        "http",
+        "state_cache",
+        "pagination"
+      ],
+      "migrationDifficulty": "low",
+      "migrationNotes": [
+        "replace axios calls with Godot HTTPRequest or HTTPClient helper",
+        "convert JS module-level cache into plugin instance state"
+      ]
+    },
+    {
+      "folderName": "udio",
+      "platform": "udio",
+      "outputPath": "E:\\project\\godot\\test\\gdmusic_plugin_codegen\\generated\\udio_plugin.gd",
+      "author": "猫头猫",
+      "description": "",
+      "userVariables": [],
+      "supportedMethods": [
+        "search",
+        "getMediaSource",
+        "getLyric",
+        "getTopLists",
+        "getTopListDetail"
+      ],
+      "supportedSearchTypes": [
+        "music"
+      ],
+      "dependencies": [
+        "axios"
+      ],
+      "capabilities": [
+        "http",
+        "state_cache",
+        "pagination"
+      ],
+      "migrationDifficulty": "medium",
+      "migrationNotes": [
+        "replace axios calls with Godot HTTPRequest or HTTPClient helper",
+        "convert JS module-level cache into plugin instance state"
+      ]
+    },
+    {
+      "folderName": "webdav",
+      "platform": "WebDAV",
+      "outputPath": "E:\\project\\godot\\test\\gdmusic_plugin_codegen\\generated\\webdav_plugin.gd",
+      "author": "猫头猫",
+      "description": "使用此插件前先配置用户变量",
+      "userVariables": [
+        {
+          "key": "url",
+          "name": "WebDAV地址",
+          "type": ""
+        },
+        {
+          "key": "username",
+          "name": "用户名",
+          "type": ""
+        },
+        {
+          "key": "password",
+          "name": "密码",
+          "type": "password"
+        },
+        {
+          "key": "searchPath",
+          "name": "存放歌曲的路径",
+          "type": ""
+        }
+      ],
+      "supportedMethods": [
+        "search",
+        "getMediaSource",
+        "getTopLists",
+        "getTopListDetail"
+      ],
+      "supportedSearchTypes": [
+        "music"
+      ],
+      "dependencies": [
+        "webdav"
+      ],
+      "capabilities": [
+        "webdav_protocol",
+        "user_variables",
+        "state_cache",
+        "pagination"
+      ],
+      "migrationDifficulty": "medium",
+      "migrationNotes": [
+        "replace webdav client calls with direct WebDAV HTTP methods or a Godot-side adapter",
+        "map env.getUserVariables() to a Godot-side plugin config storage",
+        "convert JS module-level cache into plugin instance state"
+      ]
+    },
+    {
+      "folderName": "yinyuetai",
+      "platform": "音悦台",
+      "outputPath": "E:\\project\\godot\\test\\gdmusic_plugin_codegen\\generated\\yinyuetai_plugin.gd",
+      "author": "猫头猫",
+      "description": "",
+      "userVariables": [],
+      "supportedMethods": [
+        "search",
+        "getMediaSource"
+      ],
+      "supportedSearchTypes": [
+        "music"
+      ],
+      "dependencies": [
+        "axios"
+      ],
+      "capabilities": [
+        "http",
+        "state_cache",
+        "pagination"
+      ],
+      "migrationDifficulty": "low",
+      "migrationNotes": [
+        "replace axios calls with Godot HTTPRequest or HTTPClient helper",
+        "convert JS module-level cache into plugin instance state"
+      ]
+    },
+    {
+      "folderName": "youtube",
+      "platform": "Youtube",
+      "outputPath": "E:\\project\\godot\\test\\gdmusic_plugin_codegen\\generated\\youtube_plugin.gd",
+      "author": "猫头猫",
+      "description": "",
+      "userVariables": [],
+      "supportedMethods": [
+        "search",
+        "getMediaSource"
+      ],
+      "supportedSearchTypes": [
+        "music"
+      ],
+      "dependencies": [
+        "axios"
+      ],
+      "capabilities": [
+        "http",
+        "state_cache",
+        "pagination"
+      ],
+      "migrationDifficulty": "low",
+      "migrationNotes": [
+        "replace axios calls with Godot HTTPRequest or HTTPClient helper",
+        "convert JS module-level cache into plugin instance state"
+      ]
+    }
+  ]
+}

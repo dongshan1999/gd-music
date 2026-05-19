@@ -43,9 +43,6 @@ func is_playing() -> bool:
 func set_is_playing(value: bool) -> void:
 	_get_base_controller().set_is_playing(value)
 
-func save_app_state() -> void:
-	_get_base_controller().save_app_state()
-
 func get_popup_router_controller():
 	return _get_base_controller().get_popup_router_controller()
 
@@ -77,7 +74,6 @@ func toggle_playback() -> void:
 	set_is_playing(not is_playing())
 	request_audio_sync()
 	_emit_playback_progress_changed()
-	save_app_state()
 
 ## 将底层播放器与全局状态同步到指定秒数。
 func seek_to_elapsed_seconds(value: int, persist_state: bool = true) -> void:
@@ -90,8 +86,6 @@ func seek_to_elapsed_seconds(value: int, persist_state: bool = true) -> void:
 
 	var target_seconds := clampi(value, 0, get_current_duration())
 	if target_seconds == get_elapsed_seconds():
-		if persist_state:
-			save_app_state()
 		return
 
 	set_elapsed_seconds(target_seconds)
@@ -104,8 +98,6 @@ func seek_to_elapsed_seconds(value: int, persist_state: bool = true) -> void:
 		request_audio_sync()
 
 	_emit_playback_progress_changed(track)
-	if persist_state:
-		save_app_state()
 
 ## 发起一次异步音频状态同步请求。
 func request_audio_sync() -> void:
@@ -171,7 +163,6 @@ func _sync_audio_state(sync_request_id: int) -> void:
 		stop_audio_playback(true)
 		if is_playing():
 			set_is_playing(false)
-			save_app_state()
 		return
 
 	var track := get_current_track()
@@ -180,7 +171,6 @@ func _sync_audio_state(sync_request_id: int) -> void:
 		stop_audio_playback(true)
 		if is_playing():
 			set_is_playing(false)
-			save_app_state()
 		return
 
 	var desired_track_key := _get_track_playback_key(track)
@@ -392,7 +382,6 @@ func _sync_track_duration_from_stream(track: TrackData, stream: AudioStream) -> 
 	track.normalize()
 	set_elapsed_seconds(clampi(get_elapsed_seconds(), 0, track.duration))
 	_emit_playback_progress_changed(track)
-	save_app_state()
 
 ## 在当前曲目无法播放时停止音频并回退到可恢复状态。
 func _mark_playback_unavailable(track: TrackData) -> void:
@@ -402,7 +391,6 @@ func _mark_playback_unavailable(track: TrackData) -> void:
 		return
 	set_is_playing(false)
 	set_elapsed_seconds(track.preview_start)
-	save_app_state()
 
 ## 返回 showcase 上实际承载播放的 AudioStreamPlayer。
 func _get_audio_player() -> AudioStreamPlayer:

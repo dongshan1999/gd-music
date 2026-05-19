@@ -447,14 +447,14 @@ func _on_manage_toggle_pressed() -> void:
 func _on_start_host_pressed() -> void:
 	if not _ensure_controller():
 		return
-	_set_status("Starting plugin host...")
-	var result: Dictionary = await _plugin_controller.start_music_plugin_host()
+	_set_status("Refreshing plugins...")
+	var result: Dictionary = await _plugin_controller.refresh_music_plugins()
 	if not bool(result.get("ok", false)):
-		_set_status("Host start failed: %s" % str(result.get("error", "Unknown error.")))
-		_show_error(str(result.get("error", "Failed to start host.")))
+		_set_status("Plugin refresh failed: %s" % str(result.get("error", "Unknown error.")))
+		_show_error(str(result.get("error", "Failed to refresh plugins.")))
 		return
-	_set_status("Host ready.")
-	_toast("Plugin host is running.")
+	_set_status("Plugins refreshed.")
+	_toast("Plugins refreshed.")
 	await _reload_plugins(false)
 
 func _on_refresh_plugins_pressed() -> void:
@@ -469,7 +469,7 @@ func _on_install_file_pressed() -> void:
 	if plugin_path.is_empty():
 		_show_error("Please enter a plugin file path.")
 		return
-	var result: Dictionary = await _plugin_controller.install_music_plugin_from_file(plugin_path)
+	var result: Dictionary = await _get_plugin_controller().install_plugin_from_file(plugin_path)
 	if not bool(result.get("ok", false)):
 		_show_error(str(result.get("error", "Install failed.")))
 		return
@@ -483,7 +483,7 @@ func _on_install_url_pressed() -> void:
 	if plugin_url.is_empty():
 		_show_error("Please enter a plugin URL.")
 		return
-	var result: Dictionary = await _plugin_controller.install_music_plugin_from_url(plugin_url)
+	var result: Dictionary = await _get_plugin_controller().install_plugin_from_url(plugin_url)
 	if not bool(result.get("ok", false)):
 		_show_error(str(result.get("error", "Install failed.")))
 		return
@@ -560,7 +560,7 @@ func _search_page(page: int) -> void:
 	_sync_query_state()
 	_set_searching(true)
 
-	var result: Dictionary = await _plugin_controller.search_music_plugin(
+	var result: Dictionary = await _get_plugin_controller().search(
 		plugin_id,
 		query,
 		_current_page,
@@ -588,18 +588,18 @@ func _search_page(page: int) -> void:
 	_render_results()
 	_sync_action_state()
 
-## 检测插件宿主状态，必要时自动启动，并重新加载插件列表。
+## 刷新插件状态并重新加载插件列表。
 func _reload_plugins(auto_start: bool) -> void:
 	var plugin_controller = _get_plugin_controller()
 	if plugin_controller == null:
 		_set_status("Plugin controller unavailable.")
 		return
 
-	_set_status("Checking plugin host at %s..." % plugin_controller.get_base_url())
-	var health_result: Dictionary = await plugin_controller.ping()
+	_set_status("Checking plugins at %s..." % plugin_controller.get_plugin_root_path())
+	var health_result: Dictionary = await plugin_controller.get_plugin_runtime_status()
 	if not bool(health_result.get("ok", false)) and auto_start:
-		_set_status("Starting plugin host...")
-		health_result = await _plugin_controller.start_music_plugin_host()
+		_set_status("Refreshing plugins...")
+		health_result = await _plugin_controller.refresh_music_plugins()
 
 	if not bool(health_result.get("ok", false)):
 		_plugins = []
@@ -608,17 +608,17 @@ func _reload_plugins(auto_start: bool) -> void:
 		_last_is_end = true
 		_render_tabs()
 		_render_results()
-		_set_status("Host unavailable: %s" % str(health_result.get("error", "Unknown error.")))
+		_set_status("Plugins unavailable: %s" % str(health_result.get("error", "Unknown error.")))
 		return
 
-	_set_status("Host ready at %s" % plugin_controller.get_base_url())
+	_set_status("Plugins ready at %s" % plugin_controller.get_plugin_root_path())
 	var list_result: Dictionary = await plugin_controller.list_plugins()
 	if not bool(list_result.get("ok", false)):
 		_plugins = []
 		_selected_plugin_id = ""
 		_render_tabs()
 		_render_results()
-		_set_status("Host ready, but plugins could not be listed: %s" % str(list_result.get("error", "")))
+		_set_status("Plugins ready, but listing failed: %s" % str(list_result.get("error", "")))
 		return
 
 	var payload = list_result.get("data", {})
@@ -645,6 +645,6 @@ func _reload_plugins(auto_start: bool) -> void:
 	_render_results()
 	_sync_action_state()
 	if _plugins.is_empty():
-		_set_status("Host ready. No plugins installed yet.")
+		_set_status("Plugins ready. No plugins installed yet.")
 	else:
-		_set_status("Host ready. %d plugin(s) loaded." % _plugins.size())
+		_set_status("Plugins ready. %d plugin(s) loaded." % _plugins.size())

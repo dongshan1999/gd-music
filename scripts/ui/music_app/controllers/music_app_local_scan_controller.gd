@@ -111,9 +111,6 @@ func scan_local_music_directories(paths: Array[String]) -> int:
 	for track in imported_tracks:
 		tracks.append(track)
 
-	if not imported_tracks.is_empty():
-		save_app_state()
-
 	return imported_tracks.size()
 
 ## 递归收集目录下符合条件的音频文件并转成曲目数据。
