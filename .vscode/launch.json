@@ -8,7 +8,7 @@
       "project": "${workspaceFolder}",
       "scene": "res://scenes/music_app_showcase_scene.tscn",
       "address": "127.0.0.1",
-      "port": 6007,
+      "port": 6008,
       "editor_path": "E:/Tool/Godot_v4.6.2-stable_win64/Godot_v4.6.2-stable_win64.exe",
       "debug_collisions": false,
       "debug_paths": false,
@@ -24,7 +24,7 @@
       "project": "${workspaceFolder}",
       "scene": "res://scenes/start_scene.tscn",
       "address": "127.0.0.1",
-      "port": 6007,
+      "port": 6008,
       "editor_path": "E:/Tool/Godot_v4.6.2-stable_win64/Godot_v4.6.2-stable_win64.exe",
       "debug_collisions": false,
       "debug_paths": false,
@@ -38,7 +38,7 @@
       "type": "godot",
       "request": "attach",
       "address": "127.0.0.1",
-      "port": 6007
+      "port": 6008
     }
   ]
 }
