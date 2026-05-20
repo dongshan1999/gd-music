@@ -13,6 +13,7 @@
 [ext_resource type="Texture2D" uid="uid://c60151fbm5sw8" path="res://textures/information-circle.svg" id="11_about"]
 [ext_resource type="Texture2D" uid="uid://siiria6wmspr" path="res://textures/home-outline.svg" id="12_home"]
 [ext_resource type="Texture2D" uid="uid://b0ppjf42h1sgv" path="res://textures/power-outline.svg" id="13_power"]
+[ext_resource type="Script" uid="uid://dyd6xpjhv4j0k" path="res://dx/runtime/scripts/component/scroll/scroll_interaction_comp.gd" id="14_scroll_interaction"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_row"]
 content_margin_left = 14.0
@@ -58,11 +59,13 @@ grow_horizontal = 2
 grow_vertical = 2
 theme_override_constants/margin_left = 14
 theme_override_constants/margin_top = 14
-theme_override_constants/margin_right = 200
-theme_override_constants/margin_bottom = 14
+theme_override_constants/margin_right = 14
+theme_override_constants/margin_bottom = 100
 
 [node name="RootVBox" type="VBoxContainer" parent="Margin" unique_id=1894789774]
 layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
 theme_override_constants/separation = 14
 
 [node name="TopRow" type="HBoxContainer" parent="Margin/RootVBox" unique_id=355697734]
@@ -85,6 +88,10 @@ vertical_alignment = 1
 [node name="TopSpacer" type="Control" parent="Margin/RootVBox/TopRow" unique_id=1630345644]
 layout_mode = 2
 size_flags_horizontal = 3
+
+[node name="ScrollInteractionComp" type="Node" parent="Margin/RootVBox" unique_id=649216301]
+script = ExtResource("14_scroll_interaction")
+scroll_container_path = NodePath("../Scroll")
 
 [node name="Scroll" type="ScrollContainer" parent="Margin/RootVBox" unique_id=1356404825]
 layout_mode = 2
@@ -240,12 +247,12 @@ text = "关于 MusicFree"
 icon = ExtResource("11_about")
 alignment = 0
 
-[node name="FooterPanel" type="Panel" parent="Margin/RootVBox/Scroll/ContentVBox" unique_id=1316545903]
+[node name="FooterPanel" type="PanelContainer" parent="Margin/RootVBox/Scroll/ContentVBox" unique_id=1316545903]
 layout_mode = 2
 theme_override_styles/panel = SubResource("StyleBoxFlat_footer")
 
 [node name="FooterMargin" type="MarginContainer" parent="Margin/RootVBox/Scroll/ContentVBox/FooterPanel" unique_id=1136825583]
-layout_mode = 0
+layout_mode = 2
 theme_override_constants/margin_left = 14
 theme_override_constants/margin_top = 14
 theme_override_constants/margin_right = 14
@@ -254,6 +261,14 @@ theme_override_constants/margin_bottom = 14
 [node name="FooterVBox" type="VBoxContainer" parent="Margin/RootVBox/Scroll/ContentVBox/FooterPanel/FooterMargin" unique_id=748007396]
 layout_mode = 2
 theme_override_constants/separation = 10
+
+[node name="VersionLabel" type="Label" parent="Margin/RootVBox/Scroll/ContentVBox/FooterPanel/FooterMargin/FooterVBox" unique_id=1683305012]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_colors/font_color = Color(0.713726, 0.717647, 0.741176, 1)
+theme_override_font_sizes/font_size = 14
+text = "0.0.1.0"
+horizontal_alignment = 1
 
 [node name="BackHomeButton" type="Button" parent="Margin/RootVBox/Scroll/ContentVBox/FooterPanel/FooterMargin/FooterVBox" unique_id=1852115913]
 unique_name_in_owner = true
