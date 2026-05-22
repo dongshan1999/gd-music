@@ -20,6 +20,7 @@ const MUSIC_APP_PLAYLIST_CONTROLLER := "res://scripts/ui/music_app/controllers/m
 const MUSIC_APP_PLUGIN_BROWSER_CONTROLLER := "res://scripts/ui/music_app/controllers/music_app_plugin_browser_controller.gd"
 const MUSIC_APP_SETTINGS_CONTROLLER := "res://scripts/ui/music_app/controllers/music_app_settings_controller.gd"
 const MUSIC_APP_PLUGIN_MANAGEMENT_CONTROLLER := "res://scripts/ui/music_app/controllers/music_app_plugin_management_controller.gd"
+const MUSIC_APP_PLUGIN_FILE_PICKER_CONTROLLER := "res://scripts/ui/music_app/controllers/music_app_plugin_file_picker_controller.gd"
 
 const MUSIC_APP_PLAYBACK_STARTED_EVENT := "res://scripts/ui/music_app/events/music_app_playback_started_event.gd"
 const MUSIC_APP_PLAYBACK_FINISHED_EVENT := "res://scripts/ui/music_app/events/music_app_playback_finished_event.gd"
@@ -33,6 +34,8 @@ const MUSIC_APP_PLUGIN_BROWSER_HISTORY_TAG_VIEW := "res://scripts/ui/music_app/v
 const MUSIC_APP_PLUGIN_BROWSER_SEARCH_TAB_VIEW := "res://scripts/ui/music_app/views/plugin_browser/music_app_plugin_search_tab.gd"
 const MUSIC_APP_PLUGIN_BROWSER_RESULT_ROW_VIEW := "res://scripts/ui/music_app/views/plugin_browser/music_app_plugin_result_row.gd"
 const MUSIC_APP_PLUGIN_MANAGEMENT_ITEM_VIEW := "res://scripts/ui/music_app/views/settings/music_app_plugin_management_item.gd"
+const MUSIC_APP_PLUGIN_FILE_PICKER_ROW_VIEW := "res://scripts/ui/music_app/views/settings/music_app_plugin_file_picker_row.gd"
+const MUSIC_APP_PLUGIN_FILE_PICKER_VIEW := "res://scripts/ui/music_app/views/settings/music_app_plugin_file_picker_view.gd"
 const MUSIC_APP_PLAYBACK_QUEUE_ROW_VIEW := "res://scripts/ui/music_app/views/playback_queue/music_app_playback_queue_row.gd"
 const MUSIC_APP_PLAYLIST_SONG_ROW_VIEW := "res://scripts/ui/music_app/views/playlist/music_app_playlist_song_row.gd"
 
@@ -52,5 +55,7 @@ const PLUGIN_BROWSER_HISTORY_TAG := "res://scenes/ui/music_app/plugin_browser/pl
 const PLUGIN_BROWSER_SEARCH_TAB := "res://scenes/ui/music_app/plugin_browser/plugin_search_tab.tscn"
 const PLUGIN_BROWSER_RESULT_ROW := "res://scenes/ui/music_app/plugin_browser/plugin_result_row.tscn"
 const PLUGIN_MANAGEMENT_ITEM := "res://scenes/ui/music_app/settings/music_app_plugin_management_item.tscn"
+const PLUGIN_FILE_PICKER_ROW := "res://scenes/ui/music_app/settings/music_app_plugin_file_picker_row.tscn"
+const PLUGIN_FILE_PICKER_PAGE := "res://scenes/ui/music_app/settings/music_app_plugin_file_picker_page.tscn"
 const PLAYBACK_QUEUE_ROW := "res://scenes/ui/music_app/playback_queue/playback_queue_row.tscn"
 const PLAYLIST_SONG_ROW := "res://scenes/ui/music_app/playlist/playlist_song_row.tscn"

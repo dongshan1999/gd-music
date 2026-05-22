@@ -3,6 +3,8 @@ extends "res://scripts/ui/music_app/controllers/music_app_controller_base.gd"
 
 const PLUGIN_ROOT_DIR := "user://gdmusic_plugins"
 const PLUGIN_ENTRY_FILE := "plugin.gd"
+const PLUGIN_IMPORT_TEMP_DIR := "user://temp/gdmusic_plugin_import"
+const DXAndroidSafTreeScript := preload("res://dx/runtime/scripts/platform/android/dx_android_saf_tree.gd")
 
 var _plugins: Dictionary = {}
 var last_error := ""
@@ -10,7 +12,7 @@ var last_error := ""
 ## 控制器进入运行期时预热插件设置对象并刷新本地插件列表。
 func in_ready() -> void:
 	get_settings()
-	await refresh_plugins()
+	refresh_plugins()
 
 func in_quit() -> void:
 	pass
@@ -30,36 +32,38 @@ func refresh_plugins() -> bool:
 
 	var root_absolute = ProjectSettings.globalize_path(PLUGIN_ROOT_DIR)
 	var root_dir = DirAccess.open(root_absolute)
-	if root_dir == null:
-		return _fail("Failed to open plugin root directory.")
+	if root_dir != null:
+		root_dir.list_dir_begin()
+		while true:
+			var entry_name = root_dir.get_next()
+			if entry_name.is_empty():
+				break
+			if entry_name == "." or entry_name == "..":
+				continue
+			if not root_dir.current_is_dir():
+				continue
 
-	root_dir.list_dir_begin()
-	while true:
-		var entry_name = root_dir.get_next()
-		if entry_name.is_empty():
-			break
-		if entry_name == "." or entry_name == "..":
-			continue
-		if not root_dir.current_is_dir():
-			continue
+			var plugin_dir = root_absolute.path_join(entry_name)
+			var load_result = _load_plugin_from_script(plugin_dir.path_join(PLUGIN_ENTRY_FILE))
+			if load_result.is_empty():
+				push_warning("Failed to load plugin from %s: %s" % [plugin_dir, last_error])
+				continue
 
-		var plugin_dir = root_absolute.path_join(entry_name)
-		var load_result = _load_plugin_from_script(plugin_dir.path_join(PLUGIN_ENTRY_FILE))
-		if load_result.is_empty():
-			push_warning("Failed to load plugin from %s: %s" % [plugin_dir, last_error])
-			continue
+			var plugin_payload: Dictionary = load_result.get("plugin_data", {})
+			var plugin_id = str(plugin_payload.get("id", "")).strip_edges()
+			if plugin_id.is_empty():
+				continue
 
-		var plugin_payload: Dictionary = load_result.get("plugin_data", {})
-		var plugin_id = str(plugin_payload.get("id", "")).strip_edges()
-		if plugin_id.is_empty():
-			continue
+			_plugins[plugin_id] = {
+				"plugin": load_result.get("plugin"),
+				"dir": plugin_dir,
+				"script_path": load_result.get("script_path", ""),
+				"plugin_data": plugin_payload,
+				"install_mode": "local_file"
+			}
+		root_dir.list_dir_end()
 
-		_plugins[plugin_id] = {
-			"plugin": load_result.get("plugin"),
-			"dir": plugin_dir,
-			"script_path": load_result.get("script_path", ""),
-			"plugin_data": plugin_payload
-		}
+	_load_android_tree_plugins()
 
 	last_error = ""
 	return true
@@ -76,10 +80,25 @@ func uninstall_plugin(plugin_id: String) -> bool:
 	if normalized_plugin_id.is_empty():
 		return _fail("Plugin id is required.")
 
-	await refresh_plugins()
+	refresh_plugins()
 	var plugin_entry = _get_plugin_entry(normalized_plugin_id)
 	if plugin_entry.is_empty():
 		return _fail("Plugin not found: %s" % normalized_plugin_id)
+
+	if str(plugin_entry.get("install_mode", "")) == "android_tree":
+		var settings := get_settings()
+		for index in range(settings.android_tree_plugins.size() - 1, -1, -1):
+			var item = settings.android_tree_plugins[index]
+			if not (item is Dictionary):
+				continue
+			if str(item.get("plugin_id", "")).strip_edges() != normalized_plugin_id:
+				continue
+			settings.android_tree_plugins.remove_at(index)
+		settings.normalize()
+		_plugins.erase(normalized_plugin_id)
+		get_settings().disabled_plugin_ids.erase(normalized_plugin_id)
+		last_error = ""
+		return true
 
 	var plugin_dir = str(plugin_entry.get("dir", ""))
 	var remove_error = _remove_directory_recursive_absolute(plugin_dir)
@@ -109,19 +128,37 @@ func install_plugin_from_file(plugin_path: String) -> Dictionary:
 	var resolved_path = _resolve_command_path(normalized_plugin_path)
 	var source_script_paths = _collect_plugin_script_paths(resolved_path)
 	if source_script_paths.is_empty():
-		_fail("Selected path does not contain a valid plugin script.")
+		_fail(
+			"Selected path does not contain a valid music plugin script.",
+			{
+				"path": resolved_path,
+				"expected": "A .gd plugin that defines get_platform() and get_supported_search_types(), or extends a supported GDMusic plugin base script."
+			}
+		)
 		return {}
 
 	var installed_plugin_ids := PackedStringArray()
+	var install_failures: PackedStringArray = []
 	for source_script_path in source_script_paths:
-		var load_result = _load_plugin_from_script(source_script_path)
+		var staged_script_path := _stage_plugin_script_for_validation(source_script_path)
+		if staged_script_path.is_empty():
+			install_failures.append(
+				"%s -> %s" % [source_script_path, last_error if not last_error.is_empty() else "Failed to stage plugin script."]
+			)
+			continue
+
+		var load_result = _load_plugin_from_script(staged_script_path)
 		if load_result.is_empty():
+			install_failures.append(
+				"%s -> %s" % [source_script_path, last_error if not last_error.is_empty() else "Unknown load error."]
+			)
 			continue
 
 		var plugin_payload: Dictionary = load_result.get("plugin_data", {})
 		var plugin_id = str(plugin_payload.get("id", "")).strip_edges()
 		if plugin_id.is_empty():
 			push_warning("Skipped plugin script with empty plugin id: %s" % source_script_path)
+			install_failures.append("%s -> Plugin id resolved from get_platform() is empty." % source_script_path)
 			continue
 
 		var target_dir = ProjectSettings.globalize_path(PLUGIN_ROOT_DIR.path_join(plugin_id))
@@ -131,6 +168,10 @@ func install_plugin_from_file(plugin_path: String) -> Dictionary:
 				"Failed to overwrite existing plugin directory. %s" %
 				str({"plugin_id": plugin_id, "code": remove_error})
 			)
+			install_failures.append(
+				"%s -> Failed to overwrite existing plugin directory for plugin_id=%s, code=%s."
+				% [source_script_path, plugin_id, str(remove_error)]
+			)
 			continue
 
 		var copy_error = _copy_plugin_script_absolute(source_script_path, target_dir)
@@ -139,27 +180,111 @@ func install_plugin_from_file(plugin_path: String) -> Dictionary:
 				"Failed to copy plugin script. %s" %
 				str({"plugin_id": plugin_id, "code": copy_error, "path": source_script_path})
 			)
+			install_failures.append(
+				"%s -> Failed to copy plugin script for plugin_id=%s, code=%s."
+				% [source_script_path, plugin_id, str(copy_error)]
+			)
 			continue
 
 		if not installed_plugin_ids.has(plugin_id):
 			installed_plugin_ids.append(plugin_id)
 
 	if installed_plugin_ids.is_empty():
-		_fail("Selected path does not contain a valid plugin script.")
+		return _finalize_installed_plugins(
+			installed_plugin_ids,
+			"Failed to install plugin from selected path.",
+			{
+				"path": resolved_path,
+				"details": _summarize_install_failures(install_failures)
+			}
+		)
+
+	return _finalize_installed_plugins(installed_plugin_ids)
+
+func install_plugin_from_android_tree(tree_uri: String) -> Dictionary:
+	var normalized_tree_uri := tree_uri.strip_edges()
+	if normalized_tree_uri.is_empty():
+		_fail("Android tree URI is required.")
+		return {}
+	if not DXAndroidSafTreeScript.is_supported():
+		_fail("Android SAF import is only available on Android runtime.")
 		return {}
 
-	if not await refresh_plugins():
+	DXAndroidSafTreeScript.persist_uri_permission(normalized_tree_uri, true)
+	var source_entries: Array[Dictionary] = DXAndroidSafTreeScript.collect_gd_files_from_tree(normalized_tree_uri)
+	if source_entries.is_empty():
+		_fail(
+			"Selected Android directory does not contain a valid music plugin script.",
+			{
+				"path": normalized_tree_uri,
+				"expected": "A .gd plugin inside the selected SAF directory tree that defines get_platform() and get_supported_search_types()."
+			}
+		)
 		return {}
 
-	var installed_plugins: Array[Dictionary] = []
-	for plugin_id in installed_plugin_ids:
-		var plugin_entry = _get_plugin_entry(plugin_id)
-		if not plugin_entry.is_empty():
-			installed_plugins.append(_serialize_plugin(plugin_entry))
+	var settings := get_settings()
+	var installed_plugin_ids := PackedStringArray()
+	var install_failures: PackedStringArray = []
+	for source_entry in source_entries:
+		var tree_path := str(source_entry.get("tree_path", "")).strip_edges()
+		var relative_path := str(source_entry.get("relative_path", "")).strip_edges()
+		if tree_path.is_empty() or relative_path.is_empty():
+			continue
 
-	if installed_plugins.size() == 1:
-		return installed_plugins[0]
-	return {"plugins": installed_plugins}
+		var source_text := _read_text_file(tree_path)
+		if source_text.is_empty():
+			install_failures.append("%s -> Failed to read plugin source from SAF tree." % tree_path)
+			continue
+		if not _looks_like_plugin_source(source_text):
+			continue
+
+		var load_result = _load_plugin_from_source(
+			source_text,
+			tree_path,
+			_tree_base_dir(normalized_tree_uri, relative_path)
+		)
+		if load_result.is_empty():
+			install_failures.append(
+				"%s -> %s" % [tree_path, last_error if not last_error.is_empty() else "Unknown load error."]
+			)
+			continue
+
+		var plugin_payload: Dictionary = load_result.get("plugin_data", {})
+		var plugin_id = str(plugin_payload.get("id", "")).strip_edges()
+		if plugin_id.is_empty():
+			install_failures.append("%s -> Plugin id resolved from get_platform() is empty." % tree_path)
+			continue
+
+		_upsert_android_tree_plugin_setting(settings, plugin_id, normalized_tree_uri, relative_path)
+		if not installed_plugin_ids.has(plugin_id):
+			installed_plugin_ids.append(plugin_id)
+
+	if installed_plugin_ids.is_empty():
+		return _finalize_installed_plugins(
+			installed_plugin_ids,
+			"Failed to install plugin from selected Android directory.",
+			{
+				"path": normalized_tree_uri,
+				"details": _summarize_install_failures(install_failures)
+			}
+		)
+
+	settings.normalize()
+	return _finalize_installed_plugins(installed_plugin_ids)
+
+func _summarize_install_failures(failures: PackedStringArray) -> String:
+	if failures.is_empty():
+		return "No plugin could be installed, but no detailed failure reason was recorded."
+
+	var visible_failures: Array[String] = []
+	var max_visible := mini(failures.size(), 3)
+	for index in max_visible:
+		visible_failures.append(failures[index])
+
+	var summary := " | ".join(visible_failures)
+	if failures.size() > max_visible:
+		summary += " | ...and %d more." % (failures.size() - max_visible)
+	return summary
 
 func is_plugin_enabled(plugin_id: String) -> bool:
 	var normalized_plugin_id := plugin_id.strip_edges()
@@ -185,7 +310,7 @@ func search(plugin_id: String, query: String, page: int = 1, media_type: String 
 			"media_type": media_type
 		}
 	)
-	var plugin_result = await _require_plugin_entry(plugin_id)
+	var plugin_result = _require_plugin_entry(plugin_id)
 	if plugin_result.is_empty():
 		print("[MusicPluginController] search aborted: plugin entry missing, last_error=", last_error)
 		return {}
@@ -213,7 +338,7 @@ func get_media_source(track, quality: String = "standard") -> Dictionary:
 		_fail("Track does not provide plugin media payload.")
 		return {}
 
-	var plugin_result = await _require_plugin_entry(str(track.platform))
+	var plugin_result = _require_plugin_entry(str(track.platform))
 	if plugin_result.is_empty():
 		return {}
 
@@ -231,7 +356,7 @@ func get_lyric(track) -> Dictionary:
 		_fail("Track does not provide plugin media payload.")
 		return {}
 
-	var plugin_result = await _require_plugin_entry(str(track.platform))
+	var plugin_result = _require_plugin_entry(str(track.platform))
 	if plugin_result.is_empty():
 		return {}
 
@@ -245,7 +370,7 @@ func get_lyric(track) -> Dictionary:
 	return result if result is Dictionary else {}
 
 func get_toplists(plugin_id: String) -> Array:
-	var plugin_result = await _require_plugin_entry(plugin_id)
+	var plugin_result = _require_plugin_entry(plugin_id)
 	if plugin_result.is_empty():
 		return []
 
@@ -274,13 +399,33 @@ func _load_plugin_from_script(entry_script_path: String) -> Dictionary:
 	if not (script_resource is GDScript):
 		_fail("Plugin entry is not a GDScript resource.", {"path": entry_script_path})
 		return {}
+	return _build_loaded_plugin_result(script_resource as GDScript, entry_script_path, entry_script_path.get_base_dir())
 
-	var plugin_instance = (script_resource as GDScript).new()
-	if plugin_instance == null:
-		_fail("Failed to instantiate plugin script.", {"path": entry_script_path})
+func _load_plugin_from_source(source_code: String, source_label: String, plugin_dir: String) -> Dictionary:
+	var normalized_source_label := source_label.strip_edges()
+	if source_code.is_empty():
+		_fail("Plugin source text is empty.", {"path": normalized_source_label})
 		return {}
 
-	var plugin_dir = entry_script_path.get_base_dir()
+	var script_resource := GDScript.new()
+	script_resource.take_over_path(normalized_source_label)
+	script_resource.source_code = source_code
+	var reload_error := script_resource.reload()
+	if reload_error != OK:
+		_fail("Failed to compile plugin script source.", {"path": normalized_source_label, "code": reload_error})
+		return {}
+	return _build_loaded_plugin_result(script_resource, normalized_source_label, plugin_dir)
+
+func _build_loaded_plugin_result(script_resource: GDScript, script_path: String, plugin_dir: String) -> Dictionary:
+	if script_resource == null:
+		_fail("Plugin script resource is null.", {"path": script_path})
+		return {}
+
+	var plugin_instance = script_resource.new()
+	if plugin_instance == null:
+		_fail("Failed to instantiate plugin script.", {"path": script_path})
+		return {}
+
 	var validate_result = _validate_plugin_instance(plugin_instance, plugin_dir)
 	if not validate_result:
 		return {}
@@ -288,8 +433,8 @@ func _load_plugin_from_script(entry_script_path: String) -> Dictionary:
 	last_error = ""
 	return {
 		"plugin": plugin_instance,
-		"plugin_data": _build_plugin_payload(plugin_instance, plugin_dir, entry_script_path),
-		"script_path": entry_script_path
+		"plugin_data": _build_plugin_payload(plugin_instance, plugin_dir, script_path),
+		"script_path": script_path
 	}
 
 func _validate_plugin_instance(plugin_instance, plugin_dir: String) -> bool:
@@ -354,7 +499,6 @@ func _get_plugin_entry(plugin_id: String) -> Dictionary:
 	return {}
 
 func _require_plugin_entry(plugin_id: String) -> Dictionary:
-	await refresh_plugins()
 	var plugin_entry = _get_plugin_entry(plugin_id)
 	if plugin_entry.is_empty():
 		_fail("Plugin not found: %s" % plugin_id)
@@ -362,6 +506,29 @@ func _require_plugin_entry(plugin_id: String) -> Dictionary:
 
 	last_error = ""
 	return plugin_entry
+
+func _finalize_installed_plugins(installed_plugin_ids: PackedStringArray, fail_message: String = "", fail_extra: Dictionary = {}) -> Dictionary:
+	if installed_plugin_ids.is_empty():
+		if not fail_message.is_empty():
+			_fail(fail_message, fail_extra)
+		return {}
+
+	if not refresh_plugins():
+		return {}
+
+	var installed_plugins: Array[Dictionary] = []
+	for plugin_id in installed_plugin_ids:
+		var plugin_entry = _get_plugin_entry(plugin_id)
+		if not plugin_entry.is_empty():
+			installed_plugins.append(_serialize_plugin(plugin_entry))
+
+	if installed_plugins.is_empty():
+		if not fail_message.is_empty():
+			_fail(fail_message, fail_extra)
+		return {}
+	if installed_plugins.size() == 1:
+		return installed_plugins[0]
+	return {"plugins": installed_plugins}
 
 func _call_plugin_string(plugin_instance, method_name: String, default_value: String = "") -> String:
 	if plugin_instance == null or not plugin_instance.has_method(method_name):
@@ -408,11 +575,12 @@ func _looks_like_plugin_script(script_path: String) -> bool:
 	if script_path.get_extension().to_lower() != "gd":
 		return false
 
-	var file = FileAccess.open(script_path, FileAccess.READ)
-	if file == null:
+	var source_text := _read_text_file(script_path)
+	if source_text.is_empty():
 		return false
+	return _looks_like_plugin_source(source_text)
 
-	var source_text = file.get_as_text()
+func _looks_like_plugin_source(source_text: String) -> bool:
 	if source_text.contains("func get_platform") and source_text.contains("func get_supported_search_types"):
 		return true
 	if source_text.contains("extends GDMusicPluginBase") or source_text.contains("extends GDMusicPluginMethods"):
@@ -420,6 +588,88 @@ func _looks_like_plugin_script(script_path: String) -> bool:
 	if source_text.contains('extends "res://gdmusic_plugin_codegen/godot/base/gdmusic_plugin_methods.gd"'):
 		return true
 	return false
+
+func _read_text_file(path: String) -> String:
+	var file = FileAccess.open(path, FileAccess.READ)
+	if file == null:
+		return ""
+	return file.get_as_text()
+
+func _load_android_tree_plugins() -> void:
+	var settings := get_settings()
+	for item in settings.android_tree_plugins:
+		if not (item is Dictionary):
+			continue
+		var plugin_id := str(item.get("plugin_id", "")).strip_edges()
+		var tree_uri := str(item.get("tree_uri", "")).strip_edges()
+		var relative_path := str(item.get("relative_path", "")).strip_edges()
+		if plugin_id.is_empty() or tree_uri.is_empty() or relative_path.is_empty():
+			continue
+
+		var tree_path := "%s#%s" % [tree_uri, relative_path.trim_prefix("/")]
+		var source_text := _read_text_file(tree_path)
+		if source_text.is_empty():
+			push_warning("Failed to read Android tree plugin source: %s" % tree_path)
+			continue
+
+		var load_result := _load_plugin_from_source(source_text, tree_path, _tree_base_dir(tree_uri, relative_path))
+		if load_result.is_empty():
+			push_warning("Failed to load Android tree plugin from %s: %s" % [tree_path, last_error])
+			continue
+
+		var plugin_payload: Dictionary = load_result.get("plugin_data", {})
+		plugin_payload["path"] = tree_path
+		plugin_payload["dir"] = _tree_base_dir(tree_uri, relative_path)
+		var loaded_plugin_id := str(plugin_payload.get("id", "")).strip_edges()
+		if loaded_plugin_id.is_empty():
+			continue
+
+		_plugins[loaded_plugin_id] = {
+			"plugin": load_result.get("plugin"),
+			"dir": _tree_base_dir(tree_uri, relative_path),
+			"script_path": tree_path,
+			"plugin_data": plugin_payload,
+			"install_mode": "android_tree",
+			"tree_uri": tree_uri,
+			"relative_path": relative_path
+		}
+
+func _upsert_android_tree_plugin_setting(settings: MusicPluginSettingsData, plugin_id: String, tree_uri: String, relative_path: String) -> void:
+	var normalized_plugin_id := plugin_id.strip_edges()
+	var normalized_tree_uri := tree_uri.strip_edges()
+	var normalized_relative_path := relative_path.strip_edges().trim_prefix("/")
+	if normalized_plugin_id.is_empty() or normalized_tree_uri.is_empty() or normalized_relative_path.is_empty():
+		return
+
+	for index in settings.android_tree_plugins.size():
+		var item = settings.android_tree_plugins[index]
+		if not (item is Dictionary):
+			continue
+		if str(item.get("plugin_id", "")).strip_edges() != normalized_plugin_id:
+			continue
+		settings.android_tree_plugins[index] = {
+			"plugin_id": normalized_plugin_id,
+			"tree_uri": normalized_tree_uri,
+			"relative_path": normalized_relative_path
+		}
+		return
+
+	settings.android_tree_plugins.append(
+		{
+			"plugin_id": normalized_plugin_id,
+			"tree_uri": normalized_tree_uri,
+			"relative_path": normalized_relative_path
+		}
+	)
+
+func _tree_base_dir(tree_uri: String, relative_path: String) -> String:
+	var normalized_tree_uri := tree_uri.strip_edges()
+	var base_relative_path := relative_path.get_base_dir().trim_prefix("/")
+	if normalized_tree_uri.is_empty():
+		return ""
+	if base_relative_path.is_empty():
+		return normalized_tree_uri
+	return "%s#%s" % [normalized_tree_uri, base_relative_path]
 
 func _supports_plugin_method(plugin_instance, supported_methods: PackedStringArray, gd_method_name: String, method_flag_name: String) -> bool:
 	if plugin_instance == null or not plugin_instance.has_method(gd_method_name):
@@ -433,44 +683,32 @@ func _sort_plugin_payloads(left: Variant, right: Variant) -> bool:
 	var right_dict: Dictionary = right if right is Dictionary else {}
 	return str(left_dict.get("name", "")).naturalnocasecmp_to(str(right_dict.get("name", ""))) < 0
 
-func _copy_directory_recursive_absolute(source_dir: String, target_dir: String) -> int:
-	var make_dir_error = DirAccess.make_dir_recursive_absolute(target_dir)
-	if make_dir_error != OK:
-		return make_dir_error
-
-	var dir = DirAccess.open(source_dir)
-	if dir == null:
-		return ERR_CANT_OPEN
-
-	dir.list_dir_begin()
-	while true:
-		var entry_name = dir.get_next()
-		if entry_name.is_empty():
-			break
-		if entry_name == "." or entry_name == "..":
-			continue
-
-		var source_path = source_dir.path_join(entry_name)
-		var target_path = target_dir.path_join(entry_name)
-		if dir.current_is_dir():
-			var nested_error = _copy_directory_recursive_absolute(source_path, target_path)
-			if nested_error != OK:
-				dir.list_dir_end()
-				return nested_error
-		else:
-			var copy_error = DirAccess.copy_absolute(source_path, target_path)
-			if copy_error != OK:
-				dir.list_dir_end()
-				return copy_error
-
-	dir.list_dir_end()
-	return OK
-
 func _copy_plugin_script_absolute(source_script_path: String, target_dir: String) -> int:
 	var make_dir_error = DirAccess.make_dir_recursive_absolute(target_dir)
 	if make_dir_error != OK:
 		return make_dir_error
 	return DirAccess.copy_absolute(source_script_path, target_dir.path_join(PLUGIN_ENTRY_FILE))
+
+func _stage_plugin_script_for_validation(source_script_path: String) -> String:
+	var temp_root := ProjectSettings.globalize_path(PLUGIN_IMPORT_TEMP_DIR)
+	var clear_error := _remove_directory_recursive_absolute(temp_root)
+	if clear_error != OK and DirAccess.dir_exists_absolute(temp_root):
+		_fail(
+			"Failed to clear temporary plugin import directory.",
+			{"path": temp_root, "code": clear_error}
+		)
+		return ""
+
+	var stage_dir := temp_root.path_join("staged_plugin")
+	var copy_error := _copy_plugin_script_absolute(source_script_path, stage_dir)
+	if copy_error != OK:
+		_fail(
+			"Failed to stage plugin script for validation.",
+			{"path": source_script_path, "code": copy_error}
+		)
+		return ""
+
+	return stage_dir.path_join(PLUGIN_ENTRY_FILE)
 
 func _remove_directory_recursive_absolute(target_dir: String) -> int:
 	if not DirAccess.dir_exists_absolute(target_dir):

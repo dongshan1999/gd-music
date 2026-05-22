@@ -7,6 +7,7 @@ extends Node
 @export var enable_mouse_wheel := true
 @export var enable_pan_gesture := true
 @export var enable_drag_scroll := true
+@export var enable_touch_drag_scroll := true
 @export var force_pass_scroll_events := true
 
 var _scroll: ScrollContainer
@@ -14,6 +15,10 @@ var _drag_scroll_active := false
 var _drag_scroll_started := false
 var _drag_scroll_last_position := Vector2.ZERO
 var _drag_scroll_press_position := Vector2.ZERO
+var _touch_drag_active := false
+var _touch_drag_started := false
+var _touch_drag_last_position := Vector2.ZERO
+var _touch_drag_press_position := Vector2.ZERO
 
 func _ready() -> void:
 	_scroll = _resolve_scroll_container()
@@ -61,6 +66,10 @@ func _input(event: InputEvent) -> void:
 			_handle_drag_scroll_button(mouse_button)
 	elif enable_drag_scroll and event is InputEventMouseMotion:
 		_handle_drag_scroll_motion(event as InputEventMouseMotion)
+	elif enable_touch_drag_scroll and event is InputEventScreenTouch:
+		_handle_touch_drag_touch(event as InputEventScreenTouch)
+	elif enable_touch_drag_scroll and event is InputEventScreenDrag:
+		_handle_touch_drag_motion(event as InputEventScreenDrag)
 	elif enable_pan_gesture and event is InputEventPanGesture:
 		_handle_pan_gesture(event as InputEventPanGesture)
 
@@ -123,6 +132,33 @@ func _handle_drag_scroll_motion(event: InputEventMouseMotion) -> void:
 	var delta_y := event.position.y - _drag_scroll_last_position.y
 	_drag_scroll_last_position = event.position
 	_set_scroll_vertical(_scroll.scroll_vertical - delta_y)
+	get_viewport().set_input_as_handled()
+
+func _handle_touch_drag_touch(event: InputEventScreenTouch) -> void:
+	if event.pressed:
+		if not _is_pointer_inside_scroll(event.position):
+			return
+		_touch_drag_active = true
+		_touch_drag_started = false
+		_touch_drag_press_position = event.position
+		_touch_drag_last_position = event.position
+		return
+
+	_touch_drag_active = false
+	_touch_drag_started = false
+
+func _handle_touch_drag_motion(event: InputEventScreenDrag) -> void:
+	if not _touch_drag_active:
+		return
+
+	var drag_offset := event.position - _touch_drag_press_position
+	if not _touch_drag_started:
+		if absf(drag_offset.y) < drag_scroll_threshold:
+			return
+		_touch_drag_started = true
+
+	_touch_drag_last_position = event.position
+	_set_scroll_vertical(_scroll.scroll_vertical - event.relative.y)
 	get_viewport().set_input_as_handled()
 
 func _is_pointer_inside_scroll(position: Vector2) -> bool:

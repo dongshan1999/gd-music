@@ -11,6 +11,7 @@ const CountdownManagerScript := preload(DX_ScriptPathsType.COUNTDOWN)
 const PoolManagerScript := preload(DX_ScriptPathsType.POOL)
 const SaveManagerScript := preload(DX_ScriptPathsType.SAVE)
 const LocalizationManagerScript := preload(DX_ScriptPathsType.LOCALIZATION)
+const DebugManagerScript := preload(DX_ScriptPathsType.DEBUG)
 
 const MANAGER_READY_METHOD := &"in_ready"
 const MANAGER_PROCESS_METHOD := &"in_process"
@@ -30,6 +31,7 @@ const MANAGER_COUNTDOWN := &"countdown"
 const MANAGER_POOL := &"pool"
 const MANAGER_SAVE := &"save"
 const MANAGER_LOCALIZATION := &"localization"
+const MANAGER_DEBUG := &"debug"
 
 const POPUP_NODE_PATH := ^"Popup"
 
@@ -72,6 +74,10 @@ var save:
 var localization:
 	get:
 		return get_manager(MANAGER_LOCALIZATION)
+
+var debug:
+	get:
+		return get_manager(MANAGER_DEBUG)
 
 var _manager_map: Dictionary = {}
 var _manager_order: Array = []
@@ -142,6 +148,7 @@ func _bootstrap() -> void:
 	register_manager(MANAGER_POOL, PoolManagerScript.new())
 	register_manager(MANAGER_SAVE, SaveManagerScript.new())
 	register_manager(MANAGER_LOCALIZATION, LocalizationManagerScript.new())
+	register_manager(MANAGER_DEBUG, DebugManagerScript.new())
 func _register_popup_manager() -> void:
 	if has_manager(MANAGER_POPUP):
 		return
