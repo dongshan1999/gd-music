@@ -10,6 +10,7 @@ const COUNTDOWN := "res://dx/runtime/scripts/managers/countdown_manager.gd"
 const POOL := "res://dx/runtime/scripts/managers/pool_manager.gd"
 const SAVE := "res://dx/runtime/scripts/managers/save/save_manager.gd"
 const LOCALIZATION := "res://dx/runtime/scripts/managers/localization/localization_manager.gd"
+const DEBUG := "res://dx/runtime/scripts/managers/debug/debug_manager.gd"
 
 const APP_PAUSE_EVENT := "res://dx/runtime/scripts/managers/signals/events/dx_app_pause_event.gd"
 const APP_FOCUS_EVENT := "res://dx/runtime/scripts/managers/signals/events/dx_app_focus_event.gd"

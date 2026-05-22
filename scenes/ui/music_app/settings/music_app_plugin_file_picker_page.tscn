@@ -1,0 +1,75 @@
+[gd_scene load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://scripts/ui/music_app/views/settings/music_app_plugin_file_picker_view.gd" id="1_script"]
+[ext_resource type="Texture2D" path="res://textures/arrow-left.svg" id="2_back"]
+
+[node name="MusicAppPluginFilePickerPage" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_script")
+
+[node name="Background" type="ColorRect" parent="."]
+layout_mode = 0
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+color = Color(0.0862745, 0.0901961, 0.101961, 1)
+
+[node name="Margin" type="MarginContainer" parent="."]
+layout_mode = 0
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/margin_left = 14
+theme_override_constants/margin_top = 14
+theme_override_constants/margin_right = 14
+theme_override_constants/margin_bottom = 14
+
+[node name="PickerVBox" type="VBoxContainer" parent="Margin"]
+layout_mode = 2
+theme_override_constants/separation = 12
+
+[node name="PickerTopRow" type="HBoxContainer" parent="Margin/PickerVBox"]
+layout_mode = 2
+theme_override_constants/separation = 10
+
+[node name="PluginPickerBackButton" type="Button" parent="Margin/PickerVBox/PickerTopRow"]
+unique_name_in_owner = true
+layout_mode = 2
+icon = ExtResource("2_back")
+
+[node name="PluginPickerPathLabel" type="Label" parent="Margin/PickerVBox/PickerTopRow"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+text = "/storage/emulated/0"
+vertical_alignment = 1
+clip_text = true
+
+[node name="PickerScroll" type="ScrollContainer" parent="Margin/PickerVBox"]
+layout_mode = 2
+size_flags_vertical = 3
+horizontal_scroll_mode = 0
+
+[node name="PluginPickerEntryList" type="VBoxContainer" parent="Margin/PickerVBox/PickerScroll"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 8
+
+[node name="PluginPickerHintLabel" type="Label" parent="Margin/PickerVBox/PickerScroll/PluginPickerEntryList"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "当前目录没有可用的 .gd 插件文件"
+horizontal_alignment = 1
+
+[node name="PluginPickerBottomSpace" type="Control" parent="Margin/PickerVBox/PickerScroll/PluginPickerEntryList"]
+unique_name_in_owner = true
+layout_mode = 2

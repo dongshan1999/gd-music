@@ -45,7 +45,7 @@ func refresh_music_plugins() -> bool:
 	if plugin_controller == null:
 		last_error = "Music plugin controller is not available."
 		return false
-	var ok: bool = await plugin_controller.refresh_plugins()
+	var ok: bool = plugin_controller.refresh_plugins()
 	last_error = plugin_controller.last_error
 	return ok
 
@@ -54,7 +54,7 @@ func auto_refresh_music_plugins() -> void:
 	var plugin_controller: MusicAppPluginController = get_plugin_controller()
 	if plugin_controller == null:
 		return
-	await plugin_controller.refresh_plugins()
+	plugin_controller.refresh_plugins()
 
 ## 解析指定插件曲目的可播放音频源。
 func resolve_track_plugin_source(track_index: int, quality: String = "standard") -> Dictionary:

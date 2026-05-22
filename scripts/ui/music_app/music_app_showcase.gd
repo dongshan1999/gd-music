@@ -22,12 +22,28 @@ var _playlist_state_controller = PlaylistStateControllerScript.new(self)
 var _popup_router_controller = PopupRouterControllerScript.new(self)
 var _plugin_controller = PluginControllerScript.new(self)
 
+# @dx_debug_action(name="Toggle Playback", group="Playback")
+func debug_toggle_playback() -> void:
+	toggle_playback()
+
+# @dx_debug_action(name="Refresh Plugins", group="Plugin")
+func debug_refresh_plugins() -> void:
+	_plugin_controller.refresh_plugins()
+
+# @dx_debug_number(name="Engine Time Scale", group="Runtime")
+var debug_engine_time_scale := 1.0
+
+# @dx_debug_string(name="Debug Note", group="Runtime")
+var debug_note := ""
+
 ## 初始化音乐应用展示层，挂接弹窗宿主、播放器与定时同步逻辑。
 func _ready() -> void:
 	instance = self
 
 	_popup_router_controller.attach_popup_hosts(normal_popup_host, fullscreen_popup_host)
 	_plugin_controller.in_ready()
+	if DX != null and DX.debug != null:
+		DX.debug.register_target("MusicAppShowcase", self)
 
 	mini_player.setup(self)
 	_playlist_state_controller.sync_favorite_playlist_from_likes()
@@ -49,6 +65,8 @@ func _exit_tree() -> void:
 	_playback_state_controller.stop_audio_playback(true)
 	_plugin_controller.in_quit()
 	_popup_router_controller.detach_popup_hosts(normal_popup_host, fullscreen_popup_host)
+	if DX != null and DX.debug != null:
+		DX.debug.unregister_target("MusicAppShowcase")
 	if instance == self:
 		instance = null
 
@@ -62,6 +80,7 @@ func _auto_refresh_plugins() -> void:
 
 ## 每秒同步一次播放进度，并在状态变化时刷新界面。
 func _on_tick() -> void:
+	Engine.time_scale = debug_engine_time_scale
 	_playback_state_controller.tick_playback_progress()
 
 func toggle_playback() -> void:

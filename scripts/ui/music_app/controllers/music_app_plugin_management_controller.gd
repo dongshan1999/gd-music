@@ -8,7 +8,7 @@ func ensure_plugins_ready() -> bool:
 	if plugin_controller == null:
 		last_error = "Music plugin controller is not available."
 		return false
-	var ok: bool = await plugin_controller.refresh_plugins()
+	var ok: bool = plugin_controller.refresh_plugins()
 	last_error = plugin_controller.last_error
 	return ok
 
@@ -25,7 +25,16 @@ func install_plugin_from_file(plugin_path: String) -> Dictionary:
 	if plugin_controller == null:
 		last_error = "Music plugin controller is not available."
 		return {}
-	var result: Dictionary = await plugin_controller.install_plugin_from_file(plugin_path)
+	var result: Dictionary = plugin_controller.install_plugin_from_file(plugin_path)
+	last_error = plugin_controller.last_error
+	return result
+
+func install_plugin_from_android_tree(tree_uri: String) -> Dictionary:
+	var plugin_controller: MusicAppPluginController = get_plugin_controller()
+	if plugin_controller == null:
+		last_error = "Music plugin controller is not available."
+		return {}
+	var result: Dictionary = plugin_controller.install_plugin_from_android_tree(tree_uri)
 	last_error = plugin_controller.last_error
 	return result
 
@@ -34,7 +43,7 @@ func install_plugin_from_url(plugin_url: String) -> bool:
 	if plugin_controller == null:
 		last_error = "Music plugin controller is not available."
 		return false
-	var ok: bool = await plugin_controller.install_plugin_from_url(plugin_url)
+	var ok: bool = plugin_controller.install_plugin_from_url(plugin_url)
 	last_error = plugin_controller.last_error
 	return ok
 
@@ -43,7 +52,7 @@ func uninstall_plugin(plugin_id: String) -> bool:
 	if plugin_controller == null:
 		last_error = "Music plugin controller is not available."
 		return false
-	var ok: bool = await plugin_controller.uninstall_plugin(plugin_id)
+	var ok: bool = plugin_controller.uninstall_plugin(plugin_id)
 	last_error = plugin_controller.last_error
 	return ok
 

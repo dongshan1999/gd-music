@@ -13,6 +13,8 @@ enum PopupId {
 	MUSIC_APP_PLUGIN_BROWSER,
 	MUSIC_APP_SETTINGS,
 	MUSIC_APP_PLUGIN_MANAGEMENT,
+	MUSIC_APP_PLUGIN_FILE_PICKER,
+	DX_DEBUG,
 }
 
 const POPUP_SCENES := {
@@ -27,6 +29,8 @@ const POPUP_SCENES := {
 	PopupId.MUSIC_APP_PLUGIN_BROWSER: preload("res://scenes/ui/music_app/plugin_browser/music_app_plugin_browser_page.tscn"),
 	PopupId.MUSIC_APP_SETTINGS: preload("res://scenes/ui/music_app/settings/music_app_settings_page.tscn"),
 	PopupId.MUSIC_APP_PLUGIN_MANAGEMENT: preload("res://scenes/ui/music_app/settings/music_app_plugin_management_page.tscn"),
+	PopupId.MUSIC_APP_PLUGIN_FILE_PICKER: preload("res://scenes/ui/music_app/settings/music_app_plugin_file_picker_page.tscn"),
+	PopupId.DX_DEBUG: preload("res://dx/runtime/scenes/debug/dx_debug_popup.tscn"),
 }
 
 static func has_popup(popup_id: int) -> bool:

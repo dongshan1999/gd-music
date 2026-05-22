@@ -13,6 +13,7 @@ var _is_bound := false
 var _is_loading := false
 var _plugin_items: Array = []
 var _plugins: Array[Dictionary] = []
+var _plugin_picker_popup
 
 @onready var back_button: Button = %PluginManagementBackButton
 @onready var more_button: Button = %PluginManagementMoreButton
@@ -25,7 +26,6 @@ var _plugins: Array[Dictionary] = []
 @onready var update_subscriptions_button: Button = %UpdateSubscriptionsButton
 @onready var floating_add_button: Button = %FloatingAddButton
 @onready var status_label: Label = %PluginManagementStatusLabel
-@onready var plugin_directory_dialog: FileDialog = %PluginDirectoryDialog
 
 func setup(controller: MusicAppShowcaseController) -> void:
 	_controller = controller
@@ -46,11 +46,6 @@ func bind() -> void:
 	install_from_url_button.pressed.connect(_on_install_from_url_pressed)
 	update_all_button.pressed.connect(_on_update_all_pressed)
 	update_subscriptions_button.pressed.connect(_on_update_subscriptions_pressed)
-	plugin_directory_dialog.dir_selected.connect(_on_plugin_dir_selected)
-
-	plugin_directory_dialog.access = FileDialog.ACCESS_FILESYSTEM
-	plugin_directory_dialog.file_mode = FileDialog.FILE_MODE_OPEN_DIR
-	plugin_directory_dialog.set_use_native_dialog(true)
 
 func on_popup_shown() -> void:
 	refresh()
@@ -134,7 +129,63 @@ func _toggle_install_panel() -> void:
 
 func _on_install_from_file_pressed() -> void:
 	install_panel.visible = false
-	plugin_directory_dialog.popup_file_dialog()
+	if OS.get_name() == "Android":
+		_open_android_plugin_directory_picker()
+		return
+	var popup_router = _plugin_management_controller.get_popup_router_controller()
+	if popup_router == null:
+		return
+	_plugin_picker_popup = popup_router.show_popup(DX_PopupRegistry.PopupId.MUSIC_APP_PLUGIN_FILE_PICKER)
+	if _plugin_picker_popup != null and _plugin_picker_popup.has_signal("plugin_selected"):
+		if not _plugin_picker_popup.plugin_selected.is_connected(_on_plugin_file_picked):
+			_plugin_picker_popup.plugin_selected.connect(_on_plugin_file_picked)
+
+func _open_android_plugin_directory_picker() -> void:
+	if not DisplayServer.has_feature(DisplayServer.FEATURE_NATIVE_DIALOG_FILE):
+		_plugin_management_controller.show_common_alert(
+			tr("music_app.plugin_management.install.title"),
+			"Current Android runtime does not support native SAF directory picker."
+		)
+		return
+	DisplayServer.file_dialog_show(
+		"",
+		"",
+		"",
+		false,
+		DisplayServer.FILE_DIALOG_MODE_OPEN_DIR,
+		PackedStringArray(),
+		Callable(self, "_on_android_plugin_directory_picked")
+	)
+
+func _on_android_plugin_directory_picked(status: bool, selected_paths: PackedStringArray, _selected_filter_index: int) -> void:
+	if not status or selected_paths.is_empty():
+		return
+	call_deferred("_install_plugin_from_android_tree_uri", selected_paths[0])
+
+func _install_plugin_from_android_tree_uri(tree_uri: String) -> void:
+	var normalized_tree_uri := tree_uri.strip_edges()
+	if normalized_tree_uri.is_empty():
+		return
+	_install_plugin_from_android_tree_async(normalized_tree_uri)
+
+func _install_plugin_from_android_tree_async(tree_uri: String) -> void:
+	await _install_plugin_from_android_tree(tree_uri)
+
+func _install_plugin_from_android_tree(tree_uri: String) -> Dictionary:
+	var result: Dictionary = await _plugin_management_controller.install_plugin_from_android_tree(tree_uri)
+	if result.is_empty():
+		_plugin_management_controller.show_common_alert(
+			tr("music_app.plugin_management.install.title"),
+			tr("music_app.plugin_management.install.local_failed").format(
+				{
+					"error": _plugin_management_controller.last_error if not _plugin_management_controller.last_error.is_empty() else tr("music_app.plugin_management.common.unknown_error")
+				}
+			)
+		)
+		return {}
+	_plugin_management_controller.show_toast(tr("music_app.plugin_management.install.success"))
+	_request_reload()
+	return result
 
 func _install_plugin_from_path(plugin_path: String) -> void:
 	var normalized_plugin_path := plugin_path.strip_edges()
@@ -203,5 +254,5 @@ func _on_plugin_source_redirect_requested(_plugin_id: String) -> void:
 func _on_plugin_import_playlist_requested(_plugin_id: String) -> void:
 	_plugin_management_controller.show_import_playlist_placeholder()
 
-func _on_plugin_dir_selected(dir: String) -> void:
-	_install_plugin_from_path(dir)
+func _on_plugin_file_picked(path: String) -> void:
+	_install_plugin_from_path(path)
