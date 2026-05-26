@@ -198,6 +198,22 @@ func append_tracks_to_queue(track_indices: Array[int]) -> int:
 		set_playback_track_indices(next_queue)
 	return appended_count
 
+## 将单曲放到播放队列顶部并立即切到该曲目。
+func play_track_at_queue_top(track_index: int, autoplay: bool = true) -> bool:
+	var sanitized := _sanitize_track_indices([track_index])
+	if sanitized.is_empty():
+		return false
+
+	var resolved_track_index := sanitized[0]
+	var next_queue := get_playback_track_indices()
+	for index in range(next_queue.size() - 1, -1, -1):
+		if next_queue[index] == resolved_track_index:
+			next_queue.remove_at(index)
+
+	next_queue.push_front(resolved_track_index)
+	set_playback_track_indices(next_queue)
+	return play_queue_index(0, autoplay)
+
 ## 返回播放模式对应的文案 key。
 func get_playback_mode_label_key() -> String:
 	match get_playback_mode():

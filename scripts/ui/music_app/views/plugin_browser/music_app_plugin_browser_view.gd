@@ -431,7 +431,13 @@ func _on_plugin_tab_selected(plugin_id: String) -> void:
 func _on_result_row_pressed(index: int) -> void:
 	if index < 0 or index >= _search_results.size():
 		return
-	_toast("当前搜索结果仅展示，不执行导入或播放。")
+	if _get_selected_search_type() != DEFAULT_SEARCH_TYPE:
+		_toast("当前只支持播放单曲搜索结果。")
+		return
+	if _plugin_controller == null:
+		return
+	if not _plugin_controller.play_search_result(_search_results, index, _get_selected_plugin_id()):
+		_show_error("播放失败")
 
 func _on_manage_toggle_pressed() -> void:
 	management_panel.visible = not management_panel.visible
@@ -443,9 +449,7 @@ func _on_start_host_pressed() -> void:
 	_set_status("Refreshing plugins...")
 	var ok: bool = await _plugin_controller.refresh_music_plugins()
 	if not ok:
-		var error_text := _plugin_controller.last_error
-		if error_text.is_empty():
-			error_text = "Failed to refresh plugins."
+		var error_text := "Failed to refresh plugins. Check console output."
 		_set_status("Plugin refresh failed: %s" % error_text)
 		_show_error(error_text)
 		return

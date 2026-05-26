@@ -183,10 +183,7 @@ func _make_track(
 	duration: int,
 	preview_start: int,
 	mark: String,
-	source: String,
-	accent: Color,
-	secondary: Color,
-	tertiary: Color
+	source: String
 ) -> TrackData:
 	var track := TrackData.new()
 	track.title = title
@@ -196,9 +193,6 @@ func _make_track(
 	track.preview_start = preview_start
 	track.mark = mark
 	track.source = source
-	track.accent = accent
-	track.secondary = secondary
-	track.tertiary = tertiary
 	track.normalize()
 	return track
 
