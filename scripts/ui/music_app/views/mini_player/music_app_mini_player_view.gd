@@ -143,7 +143,7 @@ func _reset_cover_state() -> void:
 func _apply_cover_placeholder(track: TrackData) -> void:
 	mini_cover_mark_label.visible = true
 	mini_cover_mark_label.text = track.mark if not track.mark.is_empty() else track.title.left(1)
-	_apply_cover_colors(track.tertiary, track.secondary)
+	_apply_cover_colors(DEFAULT_COVER_BG, DEFAULT_COVER_FG)
 
 ## 更新封面背景色和占位文字色。
 func _apply_cover_colors(background_color: Color, foreground_color: Color) -> void:

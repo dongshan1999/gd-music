@@ -1,12 +1,10 @@
 @tool
 extends EditorPlugin
 
-const BuildNumberStoreScript := preload("res://addons/dx_build_number/dx_build_number_store.gd")
+const BUILD_INFO_PATH := "res://build_info.cfg"
 
 class DXBuildNumberExportHook:
 	extends EditorExportPlugin
-
-	var _store := BuildNumberStoreScript.new()
 
 	func _get_name() -> String:
 		return "DXBuildNumberExport"
@@ -19,7 +17,7 @@ class DXBuildNumberExportHook:
 		if platform_key.is_empty():
 			return {}
 
-		var next_build_number := _store.get_next_build_number(platform_key)
+		var next_build_number := _read_project_build_number() + 1
 		return {
 			"build_number": next_build_number,
 		}
@@ -29,13 +27,43 @@ class DXBuildNumberExportHook:
 		if platform_key.is_empty():
 			return
 
-		var build_number := _store.increment_build_number(platform_key)
+		var build_number := _read_project_build_number() + 1
+		var build_info := _make_build_info(platform_key, build_number, _is_debug)
+		_write_project_build_info(build_info)
+		add_file("res://build_info.cfg", build_info.to_utf8_buffer(), false)
 		print("[DXBuildNumberExport] %s build_number -> %d" % [platform_key, build_number])
 
 	func _get_platform_key(platform: EditorExportPlatform) -> String:
 		if platform == null:
 			return ""
-		return BuildNumberStoreScript.normalize_platform_name(platform.get_os_name())
+		var normalized_name := platform.get_os_name().strip_edges().to_lower()
+		if normalized_name.contains("windows"):
+			return "windows"
+		if normalized_name.contains("android"):
+			return "android"
+		return ""
+
+	func _make_build_info(platform_key: String, build_number: int, is_debug: bool) -> String:
+		var config := ConfigFile.new()
+		config.set_value("app", "version", str(ProjectSettings.get_setting("application/config/version", "0.0.0")))
+		config.set_value("build", "platform", platform_key)
+		config.set_value("build", "number", maxi(0, build_number))
+		config.set_value("build", "debug", is_debug)
+		config.set_value("build", "unix_time", int(Time.get_unix_time_from_system()))
+		return config.encode_to_text()
+
+	func _read_project_build_number() -> int:
+		var config := ConfigFile.new()
+		if config.load(BUILD_INFO_PATH) != OK:
+			return 0
+		return maxi(0, int(config.get_value("build", "number", 0)))
+
+	func _write_project_build_info(build_info: String) -> void:
+		var file := FileAccess.open(BUILD_INFO_PATH, FileAccess.WRITE)
+		if file == null:
+			push_warning("Failed to write build info: %s" % BUILD_INFO_PATH)
+			return
+		file.store_string(build_info)
 
 var _export_plugin: EditorExportPlugin
 

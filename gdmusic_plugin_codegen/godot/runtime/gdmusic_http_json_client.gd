@@ -32,6 +32,9 @@ func request_json(
 func build_url(base_url: String, query: Dictionary = {}) -> String:
 	return _build_url(base_url, query)
 
+func build_form_body(query: Dictionary = {}) -> String:
+	return _build_query_string(query)
+
 func get_text(
 	url: String,
 	query: Dictionary = {},
@@ -123,15 +126,8 @@ func _build_url(base_url: String, query: Dictionary) -> String:
 	if query.is_empty():
 		return base_url
 
-	var parts: Array[String] = []
-	for key in query.keys():
-		parts.append("%s=%s" % [
-			str(key).uri_encode(),
-			_format_query_value(query[key]).uri_encode(),
-		])
-
 	var separator = "&" if base_url.contains("?") else "?"
-	return "%s%s%s" % [base_url, separator, "&".join(parts)]
+	return "%s%s%s" % [base_url, separator, _build_query_string(query)]
 
 func _build_header_array(headers: Dictionary) -> PackedStringArray:
 	var result = PackedStringArray()
@@ -143,3 +139,12 @@ func _format_query_value(value: Variant) -> String:
 	if value is bool:
 		return "true" if value else "false"
 	return str(value)
+
+func _build_query_string(query: Dictionary) -> String:
+	var parts: Array[String] = []
+	for key in query.keys():
+		parts.append("%s=%s" % [
+			str(key).uri_encode(),
+			_format_query_value(query[key]).uri_encode(),
+		])
+	return "&".join(parts)

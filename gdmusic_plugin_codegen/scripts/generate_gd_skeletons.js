@@ -3,67 +3,118 @@ const path = require("path");
 
 const PROJECT_ROOT = path.resolve(__dirname, "..");
 const DEFAULT_SOURCE_ROOT = path.resolve(PROJECT_ROOT, "source_plugins");
-const DEFAULT_OUTPUT_ROOT = path.resolve(__dirname, "..", "generated");
+const DEFAULT_OUTPUT_ROOT = path.resolve(PROJECT_ROOT, ".generated");
+const DEFAULT_HANDWRITTEN_PLUGIN_ROOT = DEFAULT_OUTPUT_ROOT;
+
+function parseCliArgs(argv) {
+  const options = {
+    sourceRoot: DEFAULT_SOURCE_ROOT,
+    outputRoot: DEFAULT_OUTPUT_ROOT,
+    pluginNames: [],
+  };
+
+  const positional = [];
+  for (let index = 0; index < argv.length; index += 1) {
+    const arg = argv[index];
+    if (arg.startsWith("--plugins=")) {
+      options.pluginNames = arg
+        .slice("--plugins=".length)
+        .split(",")
+        .map((item) => item.trim().toLowerCase())
+        .filter(Boolean);
+      continue;
+    }
+    if (arg === "--plugins") {
+      const value = argv[index + 1] ?? "";
+      options.pluginNames = value
+        .split(",")
+        .map((item) => item.trim().toLowerCase())
+        .filter(Boolean);
+      index += 1;
+      continue;
+    }
+    positional.push(arg);
+  }
+
+  if (positional[0]) {
+    options.sourceRoot = path.resolve(positional[0]);
+  }
+  if (positional[1]) {
+    options.outputRoot = path.resolve(positional[1]);
+  }
+
+  return options;
+}
 
 const METHOD_SPECS = [
   {
     tsName: "search",
     gdName: "search",
     args: "query: String, page: int, media_type: String",
+    returnType: "Dictionary",
     returnStub: 'return {"isEnd": true, "data": []}',
   },
   {
     tsName: "getMediaSource",
     gdName: "get_media_source",
     args: "music_item: Dictionary, quality: String",
+    returnType: "Dictionary",
     returnStub: "return {}",
   },
   {
     tsName: "getMusicInfo",
     gdName: "get_music_info",
     args: "media_base: Dictionary",
+    returnType: "Dictionary",
     returnStub: "return {}",
   },
   {
     tsName: "getLyric",
     gdName: "get_lyric",
     args: "music_item: Dictionary",
+    returnType: "Dictionary",
     returnStub: "return {}",
   },
   {
     tsName: "getAlbumInfo",
     gdName: "get_album_info",
     args: "album_item: Dictionary, page: int",
+    returnType: "Dictionary",
     returnStub: "return {}",
   },
   {
     tsName: "getArtistWorks",
     gdName: "get_artist_works",
     args: "artist_item: Dictionary, page: int, media_type: String",
+    returnType: "Dictionary",
     returnStub: 'return {"isEnd": true, "data": []}',
   },
   {
     tsName: "importMusicSheet",
     gdName: "import_music_sheet",
     args: "url_like: String",
+    returnType: "Array",
     returnStub: "return []",
   },
   {
     tsName: "importMusicItem",
     gdName: "import_music_item",
     args: "url_like: String",
+    returnType: "Dictionary",
     returnStub: "return {}",
   },
   {
     tsName: "getTopLists",
     gdName: "get_toplists",
     args: "",
+    returnType: "Array",
     returnStub: "return []",
   },
   {
     tsName: "getTopListDetail",
     gdName: "get_toplist_detail",
     args: "toplist_item: Dictionary",
+    returnType: "Dictionary",
     returnStub: "return {}",
   },
 ];
@@ -552,6 +603,70 @@ function toSnakeCase(value) {
     .toLowerCase();
 }
 
+function toHandwrittenPluginFilename(folderName) {
+  return `gdmusic_${toSnakeCase(folderName)}_plugin.gd`;
+}
+
+function getDifficultyRank(difficulty) {
+  if (difficulty === "low") {
+    return 1;
+  }
+  if (difficulty === "medium") {
+    return 2;
+  }
+  return 3;
+}
+
+function computeRecommendedPriority(meta) {
+  let score = getDifficultyRank(meta.migrationDifficulty);
+  if (meta.dependencies.includes("axios")) {
+    score -= 0.25;
+  }
+  if (meta.dependencies.includes("cheerio")) {
+    score += 0.75;
+  }
+  if (meta.dependencies.includes("crypto-js")) {
+    score += 0.75;
+  }
+  if (meta.dependencies.includes("webdav")) {
+    score += 1.0;
+  }
+  if (meta.supportedMethods.includes("importMusicSheet")) {
+    score += 0.5;
+  }
+  if (meta.supportedMethods.length <= 2) {
+    score -= 0.25;
+  }
+
+  if (score <= 1.5) {
+    return 1;
+  }
+  if (score <= 2.5) {
+    return 2;
+  }
+  return 3;
+}
+
+async function detectHandwrittenPluginInfo(folderName) {
+  const filename = toHandwrittenPluginFilename(folderName);
+  const absolutePath = path.join(DEFAULT_HANDWRITTEN_PLUGIN_ROOT, filename);
+
+  try {
+    await fs.stat(absolutePath);
+    return {
+      status: "handwritten",
+      handwrittenPluginAbsolutePath: absolutePath,
+      handwrittenPluginRelativePath: path.relative(PROJECT_ROOT, absolutePath).replace(/\\/g, "/"),
+    };
+  } catch {
+    return {
+      status: "skeleton",
+      handwrittenPluginAbsolutePath: "",
+      handwrittenPluginRelativePath: "",
+    };
+  }
+}
+
 function collectMethodNames(propertyKeys) {
   const propertyKeySet = new Set(propertyKeys);
   return METHOD_SPECS.filter((spec) => propertyKeySet.has(spec.tsName)).map((spec) => spec.tsName);
@@ -560,7 +675,7 @@ function collectMethodNames(propertyKeys) {
 function buildMethodBlock(spec, pluginName, originalSourcePath) {
   const args = spec.args ? `(${spec.args})` : "()";
   return [
-    `func ${spec.gdName}${args} -> Variant:`,
+    `func ${spec.gdName}${args} -> ${spec.returnType}:`,
     `\t## TODO: migrate ${pluginName}.${spec.tsName} from MusicFree TypeScript plugin.`,
     `\t## Source: ${escapeGDScriptString(originalSourcePath)}`,
     `\tpush_warning("${escapeGDScriptString(pluginName)}.${spec.gdName}() is not implemented.")`,
@@ -570,7 +685,6 @@ function buildMethodBlock(spec, pluginName, originalSourcePath) {
 }
 
 function buildPluginScript(meta) {
-  const className = `${toPascalCase(meta.folderName)}Plugin`;
   const supportedTypes = meta.supportedSearchTypes
     .map((item) => `"${escapeGDScriptString(item)}"`)
     .join(", ");
@@ -596,7 +710,7 @@ function buildPluginScript(meta) {
     "## Auto-generated by gdmusic_plugin_codegen/scripts/generate_gd_skeletons.js",
     `## Source plugin entry: ${escapeGDScriptString(meta.sourcePath)}`,
     `## Migration difficulty: ${escapeGDScriptString(meta.migrationDifficulty)}`,
-    `class_name ${className}`,
+    "## class_name intentionally omitted to avoid global script class conflicts in Godot.",
     'extends "res://gdmusic_plugin_codegen/godot/base/gdmusic_plugin_methods.gd"',
     "",
     `const PLATFORM := "${escapeGDScriptString(meta.platform)}"`,
@@ -712,18 +826,63 @@ function buildMigrationReport(manifest) {
     return left.folderName.localeCompare(right.folderName, "en");
   });
 
+  const handwrittenPlugins = sorted.filter((item) => item.status === "handwritten");
+  const skeletonPlugins = sorted.filter((item) => item.status === "skeleton");
+  const recommendedCandidates = skeletonPlugins
+    .filter((item) => item.recommendedPriority <= 2)
+    .slice(0, 6);
+
+  const difficultyCounts = {
+    low: sorted.filter((item) => item.migrationDifficulty === "low").length,
+    medium: sorted.filter((item) => item.migrationDifficulty === "medium").length,
+    high: sorted.filter((item) => item.migrationDifficulty === "high").length,
+  };
+
   const lines = [
     "# MusicFree Plugin Migration Report",
     "",
     `Generated plugins: ${sorted.length}`,
+    `Handwritten runnable plugins: ${handwrittenPlugins.length}`,
+    `Skeleton-only plugins: ${skeletonPlugins.length}`,
     "",
-    "| Plugin | Platform | Difficulty | Methods | Dependencies |",
-    "| --- | --- | --- | --- | --- |",
+    `Difficulty summary: low=${difficultyCounts.low}, medium=${difficultyCounts.medium}, high=${difficultyCounts.high}`,
+    "",
+    "## Current status",
+    "",
   ];
+
+  if (handwrittenPlugins.length > 0) {
+    for (const item of handwrittenPlugins) {
+      lines.push(`- [done] ${item.folderName} -> ${item.handwrittenPluginRelativePath}`);
+    }
+  } else {
+    lines.push("- No handwritten runnable plugins detected.");
+  }
+
+  lines.push("");
+  lines.push("## Recommended next candidates");
+  lines.push("");
+
+  if (recommendedCandidates.length > 0) {
+    for (const item of recommendedCandidates) {
+      const note = item.migrationNotes[0] || "inspect source manually";
+      lines.push(
+        `- [p${item.recommendedPriority}] ${item.folderName} (${item.migrationDifficulty}) - methods: ${item.supportedMethods.join(", ") || "-"} - ${note}`
+      );
+    }
+  } else {
+    lines.push("- No recommended candidates available.");
+  }
+
+  lines.push("");
+  lines.push("## Full table");
+  lines.push("");
+  lines.push("| Plugin | Status | Priority | Platform | Difficulty | Methods | Dependencies |");
+  lines.push("| --- | --- | --- | --- | --- | --- | --- |");
 
   for (const item of sorted) {
     lines.push(
-      `| ${item.folderName} | ${item.platform || ""} | ${item.migrationDifficulty} | ${item.supportedMethods.join(", ") || "-"} | ${item.dependencies.join(", ") || "-"} |`
+      `| ${item.folderName} | ${item.status} | p${item.recommendedPriority} | ${item.platform || ""} | ${item.migrationDifficulty} | ${item.supportedMethods.join(", ") || "-"} | ${item.dependencies.join(", ") || "-"} |`
     );
   }
 
@@ -740,14 +899,20 @@ function buildMigrationReport(manifest) {
   return lines.join("\n");
 }
 
-async function generate(sourceRoot, outputRoot) {
+async function generate(sourceRoot, outputRoot, options = {}) {
   const entries = await fs.readdir(sourceRoot, { withFileTypes: true });
   await fs.mkdir(outputRoot, { recursive: true });
+  const selectedPluginNames = new Set(
+    (options.pluginNames ?? []).map((item) => String(item).trim().toLowerCase()).filter(Boolean)
+  );
 
   const manifest = [];
 
   for (const entry of entries) {
     if (!entry.isDirectory()) {
+      continue;
+    }
+    if (selectedPluginNames.size > 0 && !selectedPluginNames.has(entry.name.toLowerCase())) {
       continue;
     }
 
@@ -764,11 +929,13 @@ async function generate(sourceRoot, outputRoot) {
     const gdSource = buildPluginScript(meta);
     const outputPath = path.join(outputRoot, `${toSnakeCase(entry.name)}_plugin.gd`);
     await fs.writeFile(outputPath, gdSource, "utf8");
+    const handwrittenPluginInfo = await detectHandwrittenPluginInfo(meta.folderName);
 
     manifest.push({
       folderName: meta.folderName,
       platform: meta.platform,
       outputPath,
+      outputPathRelative: path.relative(PROJECT_ROOT, outputPath).replace(/\\/g, "/"),
       author: meta.author,
       description: meta.description,
       userVariables: meta.userVariables,
@@ -778,11 +945,40 @@ async function generate(sourceRoot, outputRoot) {
       capabilities: meta.capabilities,
       migrationDifficulty: meta.migrationDifficulty,
       migrationNotes: meta.migrationNotes,
+      recommendedPriority: computeRecommendedPriority(meta),
+      status: handwrittenPluginInfo.status,
+      handwrittenPluginAbsolutePath: handwrittenPluginInfo.handwrittenPluginAbsolutePath,
+      handwrittenPluginRelativePath: handwrittenPluginInfo.handwrittenPluginRelativePath,
     });
   }
 
+  const summary = {
+    totalPlugins: manifest.length,
+    handwrittenPlugins: manifest.filter((item) => item.status === "handwritten").length,
+    skeletonPlugins: manifest.filter((item) => item.status === "skeleton").length,
+    byDifficulty: {
+      low: manifest.filter((item) => item.migrationDifficulty === "low").length,
+      medium: manifest.filter((item) => item.migrationDifficulty === "medium").length,
+      high: manifest.filter((item) => item.migrationDifficulty === "high").length,
+    },
+  };
+
   const manifestPath = path.join(outputRoot, "manifest.json");
-  await fs.writeFile(manifestPath, JSON.stringify({ plugins: manifest }, null, 2), "utf8");
+  await fs.writeFile(
+    manifestPath,
+    JSON.stringify(
+      {
+        generatedAt: new Date().toISOString(),
+        sourceRoot,
+        outputRoot,
+        summary,
+        plugins: manifest,
+      },
+      null,
+      2
+    ),
+    "utf8"
+  );
   const reportPath = path.join(outputRoot, "migration_report.md");
   await fs.writeFile(reportPath, buildMigrationReport(manifest), "utf8");
 
@@ -792,10 +988,16 @@ async function generate(sourceRoot, outputRoot) {
 }
 
 async function main() {
-  const sourceRoot = process.argv[2] ? path.resolve(process.argv[2]) : DEFAULT_SOURCE_ROOT;
-  const outputRoot = process.argv[3] ? path.resolve(process.argv[3]) : DEFAULT_OUTPUT_ROOT;
+  const options = parseCliArgs(process.argv.slice(2));
+  const sourceRoot = options.sourceRoot;
+  const outputRoot = options.outputRoot;
 
-  await generate(sourceRoot, outputRoot);
+  console.log(`Source root: ${sourceRoot}`);
+  console.log(`Output root: ${outputRoot}`);
+  if (options.pluginNames.length > 0) {
+    console.log(`Selected plugins: ${options.pluginNames.join(", ")}`);
+  }
+  await generate(sourceRoot, outputRoot, options);
 }
 
 main().catch((error) => {

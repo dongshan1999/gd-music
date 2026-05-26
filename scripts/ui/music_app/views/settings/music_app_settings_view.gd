@@ -3,13 +3,12 @@ extends "res://dx/runtime/scripts/managers/popup/popup_view.gd"
 
 const MusicAppScriptPathsType := preload("res://scripts/constants/music_app_script_paths.gd")
 const SettingsControllerScript := preload(MusicAppScriptPathsType.MUSIC_APP_SETTINGS_CONTROLLER)
-const BuildNumberStoreScript := preload("res://addons/dx_build_number/dx_build_number_store.gd")
-const APP_VERSION := "0.0.1"
+const BUILD_INFO_PATH := "res://build_info.cfg"
+const DEFAULT_APP_VERSION := "0.0.0"
 
 var _controller: MusicAppShowcaseController
 var _settings_controller
 var _is_bound := false
-var _build_number_store := BuildNumberStoreScript.new()
 
 @onready var back_button: Button = %SettingsBackButton
 @onready var basic_settings_button: Button = %BasicSettingsButton
@@ -61,8 +60,15 @@ func _refresh_version_label() -> void:
 	if version_label == null:
 		return
 
-	var build_number := _build_number_store.read_build_number(OS.get_name())
-	version_label.text = "%s.%d" % [APP_VERSION, build_number]
+	var version := str(ProjectSettings.get_setting("application/config/version", DEFAULT_APP_VERSION))
+	var build_number := _read_exported_build_number()
+	version_label.text = "%s.%d" % [version, build_number]
+
+func _read_exported_build_number() -> int:
+	var config := ConfigFile.new()
+	if config.load(BUILD_INFO_PATH) == OK:
+		return maxi(0, int(config.get_value("build", "number", 0)))
+	return 0
 
 func _on_basic_settings_pressed() -> void:
 	_settings_controller.show_basic_settings_placeholder()
