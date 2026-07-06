@@ -42,6 +42,10 @@ version_control/autoload_on_startup=true
 
 enabled=PackedStringArray("res://addons/AnchorsOnlyPreset/plugin.cfg", "res://addons/dx_build_number/plugin.cfg")
 
+[gui]
+
+theme/custom="res://themes/gd_music_theme.tres"
+
 [internationalization]
 
 locale/translations=PackedStringArray("res://translations/music_app.en.translation", "res://translations/music_app.zh.translation", "res://translations/music_app.zh_CN.translation")
