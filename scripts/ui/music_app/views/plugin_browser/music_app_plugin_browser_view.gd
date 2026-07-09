@@ -372,7 +372,7 @@ func _reload_plugins_deferred() -> void:
 	_reload_requested = false
 	if not _ensure_controller():
 		return
-	await _reload_plugins(true)
+	_reload_plugins(true)
 
 func _on_query_text_changed(_text: String) -> void:
 	_sync_query_state()
@@ -447,7 +447,7 @@ func _on_start_host_pressed() -> void:
 	if not _ensure_controller():
 		return
 	_set_status("Refreshing plugins...")
-	var ok: bool = await _plugin_controller.refresh_music_plugins()
+	var ok: bool = _plugin_controller.refresh_music_plugins()
 	if not ok:
 		var error_text := "Failed to refresh plugins. Check console output."
 		_set_status("Plugin refresh failed: %s" % error_text)
@@ -455,12 +455,12 @@ func _on_start_host_pressed() -> void:
 		return
 	_set_status("Plugins refreshed.")
 	_toast("Plugins refreshed.")
-	await _reload_plugins(false)
+	_reload_plugins(false)
 
 func _on_refresh_plugins_pressed() -> void:
 	if not _ensure_controller():
 		return
-	await _reload_plugins(true)
+	_reload_plugins(true)
 
 func _on_install_file_pressed() -> void:
 	if not _ensure_controller():
@@ -470,12 +470,12 @@ func _on_install_file_pressed() -> void:
 		_show_error("Please enter a plugin file path.")
 		return
 	var plugin_controller = _get_plugin_controller()
-	var result: Dictionary = await plugin_controller.install_plugin_from_file(plugin_path)
+	var result: Dictionary = plugin_controller.install_plugin_from_file(plugin_path)
 	if result.is_empty():
 		_show_error(plugin_controller.last_error if not plugin_controller.last_error.is_empty() else "Install failed.")
 		return
 	_toast("Plugin installed from file.")
-	await _reload_plugins(false)
+	_reload_plugins(false)
 
 func _on_install_url_pressed() -> void:
 	if not _ensure_controller():
@@ -485,12 +485,12 @@ func _on_install_url_pressed() -> void:
 		_show_error("Please enter a plugin URL.")
 		return
 	var plugin_controller: MusicAppPluginController = _get_plugin_controller()
-	var ok: bool = await plugin_controller.install_plugin_from_url(plugin_url)
+	var ok: bool = plugin_controller.install_plugin_from_url(plugin_url)
 	if not ok:
 		_show_error(plugin_controller.last_error if not plugin_controller.last_error.is_empty() else "Install failed.")
 		return
 	_toast("Plugin installed from URL.")
-	await _reload_plugins(false)
+	_reload_plugins(false)
 
 func _on_query_submitted(_text: String) -> void:
 	await _search_page(1)
@@ -550,14 +550,14 @@ func _search_page(page: int) -> void:
 	_sync_action_state()
 
 ## 刷新插件状态并重新加载插件列表。
-func _reload_plugins(auto_start: bool) -> void:
+func _reload_plugins(_auto_start: bool) -> void:
 	var plugin_controller: MusicAppPluginController = _get_plugin_controller()
 	if plugin_controller == null:
 		_set_status("Plugin controller unavailable.")
 		return
 
 	_set_status("Refreshing plugins...")
-	var refresh_ok: bool = await plugin_controller.refresh_plugins()
+	var refresh_ok: bool = plugin_controller.refresh_plugins()
 	if not refresh_ok:
 		_plugins = []
 		_selected_plugin_id = ""

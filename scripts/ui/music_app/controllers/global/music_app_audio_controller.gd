@@ -76,7 +76,7 @@ func toggle_playback() -> void:
 	_emit_playback_progress_changed()
 
 ## 将底层播放器与全局状态同步到指定秒数。
-func seek_to_elapsed_seconds(value: int, persist_state: bool = true) -> void:
+func seek_to_elapsed_seconds(value: int, _persist_state: bool = true) -> void:
 	if not has_tracks():
 		return
 
