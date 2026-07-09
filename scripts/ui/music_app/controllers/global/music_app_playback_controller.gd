@@ -27,7 +27,7 @@ func get_playback_mode() -> int:
 	return super.get_playback_mode()
 
 ## 设置当前全局播放模式。
-func set_playback_mode(value: int, persist_state: bool = true) -> void:
+func set_playback_mode(value: int, _persist_state: bool = true) -> void:
 	var clamped_mode := clampi(
 		value,
 		MusicAppStateDataType.PlaybackMode.LOOP_ALL,

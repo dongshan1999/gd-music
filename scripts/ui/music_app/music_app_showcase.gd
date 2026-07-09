@@ -71,12 +71,12 @@ func _exit_tree() -> void:
 		instance = null
 
 ## 处理翻译切换和窗口关闭时的状态刷新与保存。
-func _notification(what: int) -> void:
+func _notification(_what: int) -> void:
 	pass
 
 ## 延迟刷新外部插件目录。
 func _auto_refresh_plugins() -> void:
-	await _plugin_controller.refresh_plugins()
+	_plugin_controller.refresh_plugins()
 
 ## 每秒同步一次播放进度，并在状态变化时刷新界面。
 func _on_tick() -> void:
