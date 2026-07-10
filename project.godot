@@ -14,7 +14,7 @@ compatibility/default_parent_skeleton_in_mesh_instance_3d=true
 
 [application]
 
-config/name="test"
+config/name="gd-music"
 config/version="1.0.0"
 run/main_scene="res://scenes/music_app_showcase_scene.tscn"
 config/features=PackedStringArray("4.7", "Forward Plus")
