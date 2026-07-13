@@ -1,9 +1,8 @@
 class_name DX_DateTime
 extends RefCounted
 
-const SELF_SCRIPT := preload("res://dx/runtime/scripts/managers/time/datetime.gd")
 const DX_TimeUtilityClass := preload("res://dx/runtime/scripts/utility/time_utility.gd")
-const DEFAULT_FORMAT := DX_TimeUtilityClass.DEFAULT_FORMAT
+const DEFAULT_FORMAT := "yyyy-MM-dd HH:mm:ss"
 
 var _unix_timestamp: int = 0
 var _year: int = 0
@@ -65,7 +64,7 @@ var day_of_year: int:
 
 var date:
 	get:
-		return SELF_SCRIPT.new(DX_TimeUtilityClass.start_of_day_unix(_unix_timestamp))
+		return DX_DateTime.new(DX_TimeUtilityClass.start_of_day_unix(_unix_timestamp))
 
 var unix_timestamp: int:
 	get:
@@ -103,7 +102,7 @@ static func today():
 	return now().date
 
 static func from_unix_timestamp(timestamp: int):
-	return SELF_SCRIPT.new(timestamp)
+	return DX_DateTime.new(timestamp)
 
 static func from_dictionary(value: Dictionary):
 	var year_value := int(value.get("year", 1))
@@ -113,8 +112,8 @@ static func from_dictionary(value: Dictionary):
 	var minute_value := int(value.get("minute", 0))
 	var second_value := int(value.get("second", 0))
 	var weekday_value := int(value.get("weekday", -1))
-	var unix_timestamp_value := DX_TimeUtilityClass.unix_from_dictionary(value)
-	return SELF_SCRIPT.new(
+	var unix_timestamp_value: int = DX_TimeUtilityClass.unix_from_dictionary(value)
+	return DX_DateTime.new(
 		unix_timestamp_value,
 		year_value,
 		month_value,
@@ -131,7 +130,7 @@ static func parse(value: String):
 
 func clone():
 	_ensure_expanded()
-	return SELF_SCRIPT.new(
+	return DX_DateTime.new(
 		_unix_timestamp,
 		_year,
 		_month,
@@ -184,7 +183,7 @@ func _assign_expanded(
 func _ensure_expanded() -> void:
 	if _is_expanded:
 		return
-	var value := DX_TimeUtilityClass.datetime_dict_from_unix(_unix_timestamp)
+	var value: Dictionary = DX_TimeUtilityClass.datetime_dict_from_unix(_unix_timestamp)
 	_assign_expanded(
 		int(value.get("year", 1)),
 		int(value.get("month", 1)),
@@ -213,12 +212,11 @@ static func _read_manager_unix_now() -> int:
 	var tree := Engine.get_main_loop() as SceneTree
 	if tree == null:
 		return DX_TimeUtilityClass.now_unix()
-	var dx_root := tree.root.get_node_or_null(^"DX")
-	if dx_root == null:
+	if DX == null:
 		return DX_TimeUtilityClass.now_unix()
-	if not dx_root.has_method("get_manager"):
+	if not DX.has_method("get_manager"):
 		return DX_TimeUtilityClass.now_unix()
-	var time_manager = dx_root.call("get_manager", &"time")
+	var time_manager = DX.call("get_manager", &"time")
 	if time_manager == null or not time_manager.has_method("now_unix"):
 		return DX_TimeUtilityClass.now_unix()
 	return int(time_manager.call("now_unix"))

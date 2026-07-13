@@ -1,0 +1,8 @@
+[gd_resource type="Resource" script_class="DX_ResourceLibrary" format=3 uid="uid://ba56j0v3q5pcq"]
+
+[ext_resource type="Script" uid="uid://c8f7waryqmat2" path="res://dx/runtime/scripts/managers/res/resource_entry.gd" id="1_0rg21"]
+[ext_resource type="Script" uid="uid://dbk2xodmnyq61" path="res://dx/runtime/scripts/managers/res/resource_library.gd" id="1_resource_library"]
+
+[resource]
+script = ExtResource("1_resource_library")
+library_id = &"scene"

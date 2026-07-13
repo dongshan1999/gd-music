@@ -8,9 +8,7 @@ static var _property_types_cache = {}
 static var _property_types_cache_signatures = {}
 static var _global_class_path_cache = {}
 static var _script_type_cache = {}
-static var _last_error_message: String = ""
 static var _has_error: bool = false
-static var _error_messages: Array[String] = []
 
 static func serialize(obj, include_ignored: bool = false, max_depth: int = DEFAULT_MAX_DEPTH) -> Dictionary:
 	_reset_error_state()
@@ -19,23 +17,29 @@ static func serialize(obj, include_ignored: bool = false, max_depth: int = DEFAU
 	return _serialize_object(obj, include_ignored, 0, safe_max_depth)
 
 static func deserialize(
-	data: Dictionary,
+	data: Variant,
 	target,
 	include_ignored: bool = false,
 	max_depth: int = DEFAULT_MAX_DEPTH
 ) -> void:
 	_reset_error_state()
+	var source_data := _normalize_deserialize_data(data, "deserialize")
+	if _has_error:
+		return
 	var safe_max_depth := _sanitize_max_depth(max_depth)
 	_warn_if_zero_max_depth(safe_max_depth, "deserialize")
-	_deserialize_object(data, target, include_ignored, 0, safe_max_depth)
+	_deserialize_object(source_data, target, include_ignored, 0, safe_max_depth)
 
 static func create_from_dict(
 	script_path: String,
-	data: Dictionary,
+	data: Variant,
 	include_ignored: bool = false,
 	max_depth: int = DEFAULT_MAX_DEPTH
 ):
 	_reset_error_state()
+	var source_data := _normalize_deserialize_data(data, "create_from_dict")
+	if _has_error:
+		return null
 	var script = load(script_path)
 	if script == null:
 		_report_error("JsonSerializer.create_from_dict failed to load script '%s'." % script_path)
@@ -51,8 +55,8 @@ static func create_from_dict(
 
 	var safe_max_depth := _sanitize_max_depth(max_depth)
 	_warn_if_zero_max_depth(safe_max_depth, "create_from_dict")
-	_deserialize_object(data, instance, include_ignored, 0, safe_max_depth)
-	if has_error():
+	_deserialize_object(source_data, instance, include_ignored, 0, safe_max_depth)
+	if _has_error:
 		return null
 	return instance
 
@@ -68,18 +72,6 @@ static func refresh_cache_for(object: Object) -> void:
 	_property_types_cache_signatures.erase(script_path)
 	_ensure_property_types_cached(object)
 
-static func clear_last_error() -> void:
-	_reset_error_state()
-
-static func has_error() -> bool:
-	return _has_error
-
-static func get_last_error() -> String:
-	return _last_error_message
-
-static func get_error_messages() -> Array[String]:
-	return _error_messages.duplicate()
-
 static func _serialize_object(obj, include_ignored: bool, depth: int, max_depth: int) -> Dictionary:
 	if _is_depth_exceeded(depth, max_depth, "serialize"):
 		return {}
@@ -93,7 +85,7 @@ static func _serialize_object(obj, include_ignored: bool, depth: int, max_depth:
 
 		var json_key: String = prop_config.get("json_name", prop_name)
 		data[json_key] = _serialize_value(obj.get(prop_name), include_ignored, depth + 1, max_depth)
-		if has_error():
+		if _has_error:
 			return {}
 	return data
 
@@ -125,10 +117,10 @@ static func _serialize_value(
 			return {"x": value.x, "y": value.y, "z": value.z, "w": value.w}
 		TYPE_RECT2:
 			var rect2_pos = _serialize_value(value.position, include_ignored, depth + 1, max_depth)
-			if has_error():
+			if _has_error:
 				return null
 			var rect2_size = _serialize_value(value.size, include_ignored, depth + 1, max_depth)
-			if has_error():
+			if _has_error:
 				return null
 			return {
 				"pos": rect2_pos,
@@ -136,10 +128,10 @@ static func _serialize_value(
 			}
 		TYPE_RECT2I:
 			var rect2i_pos = _serialize_value(value.position, include_ignored, depth + 1, max_depth)
-			if has_error():
+			if _has_error:
 				return null
 			var rect2i_size = _serialize_value(value.size, include_ignored, depth + 1, max_depth)
-			if has_error():
+			if _has_error:
 				return null
 			return {
 				"pos": rect2i_pos,
@@ -155,7 +147,7 @@ static func _serialize_value(
 			var dict = {}
 			for key in value:
 				dict[key] = _serialize_value(value[key], include_ignored, depth + 1, max_depth)
-				if has_error():
+				if _has_error:
 					return null
 			return dict
 		TYPE_ARRAY, TYPE_PACKED_BYTE_ARRAY, TYPE_PACKED_INT32_ARRAY, \
@@ -167,7 +159,7 @@ static func _serialize_value(
 			var array_data = []
 			for item in value:
 				array_data.append(_serialize_value(item, include_ignored, depth + 1, max_depth))
-				if has_error():
+				if _has_error:
 					return null
 			return array_data
 
@@ -191,7 +183,7 @@ static func _deserialize_object(
 
 	var config = target._get_serialize_config()
 	for prop_name in _get_script_property_names(target):
-		if has_error():
+		if _has_error:
 			return
 
 		var prop_config: Dictionary = config.get(prop_name, {})
@@ -215,7 +207,7 @@ static func _deserialize_object(
 				max_depth
 			)
 		)
-		if has_error():
+		if _has_error:
 			return
 
 static func _deserialize_value(
@@ -354,12 +346,12 @@ static func _deserialize_untyped_array(
 	max_depth: int = DEFAULT_MAX_DEPTH
 ) -> Array:
 	var result = _make_array_result(current)
-	if has_error():
+	if _has_error:
 		return current
 	for i in raw.size():
 		var elem_current = current[i] if i < current.size() else null
 		result.append(_deserialize_value(raw[i], elem_current, {}, include_ignored, depth + 1, max_depth))
-		if has_error():
+		if _has_error:
 			return current
 	return result
 
@@ -373,7 +365,7 @@ static func _deserialize_dictionary(
 ) -> Dictionary:
 	var result = _make_dictionary_result(current)
 	var value_type_info = _get_dictionary_value_type_info(expected_type_info, current)
-	if has_error():
+	if _has_error:
 		return current if current is Dictionary else result
 	for key in raw:
 		var old_value = current.get(key) if current is Dictionary else null
@@ -385,7 +377,7 @@ static func _deserialize_dictionary(
 			depth + 1,
 			max_depth
 		)
-		if has_error():
+		if _has_error:
 			return current if current is Dictionary else result
 	return result
 
@@ -400,7 +392,7 @@ static func _deserialize_array_like(
 	var expected_type: int = int(expected_type_info.get("type", TYPE_NIL))
 	if expected_type == TYPE_ARRAY:
 		var result = _make_array_result(current, expected_type_info)
-		if has_error():
+		if _has_error:
 			return current if current is Array else result
 		var elem_type_info = _get_array_element_type_info(expected_type_info)
 		for i in raw.size():
@@ -417,7 +409,7 @@ static func _deserialize_array_like(
 					max_depth
 				)
 			)
-			if has_error():
+			if _has_error:
 				return current if current is Array else result
 		return result
 
@@ -456,28 +448,28 @@ static func _deserialize_array_like(
 			var vector2_array = PackedVector2Array()
 			for item in raw:
 				vector2_array.append(_deserialize_value(item, null, {"type": TYPE_VECTOR2}, false, depth + 1, max_depth))
-				if has_error():
+				if _has_error:
 					return current if typeof(current) == TYPE_PACKED_VECTOR2_ARRAY else vector2_array
 			return vector2_array
 		TYPE_PACKED_VECTOR3_ARRAY:
 			var vector3_array = PackedVector3Array()
 			for item in raw:
 				vector3_array.append(_deserialize_value(item, null, {"type": TYPE_VECTOR3}, false, depth + 1, max_depth))
-				if has_error():
+				if _has_error:
 					return current if typeof(current) == TYPE_PACKED_VECTOR3_ARRAY else vector3_array
 			return vector3_array
 		TYPE_PACKED_VECTOR4_ARRAY:
 			var vector4_array = PackedVector4Array()
 			for item in raw:
 				vector4_array.append(_deserialize_value(item, null, {"type": TYPE_VECTOR4}, false, depth + 1, max_depth))
-				if has_error():
+				if _has_error:
 					return current if typeof(current) == TYPE_PACKED_VECTOR4_ARRAY else vector4_array
 			return vector4_array
 		TYPE_PACKED_COLOR_ARRAY:
 			var color_array = PackedColorArray()
 			for item in raw:
 				color_array.append(_deserialize_value(item, null, {"type": TYPE_COLOR}, false, depth + 1, max_depth))
-				if has_error():
+				if _has_error:
 					return current if typeof(current) == TYPE_PACKED_COLOR_ARRAY else color_array
 			return color_array
 
@@ -969,17 +961,33 @@ static func _warn_if_zero_max_depth(max_depth: int, operation: String) -> void:
 		% operation
 	)
 
+static func _normalize_deserialize_data(data: Variant, operation: String) -> Dictionary:
+	if typeof(data) == TYPE_STRING:
+		var json := JSON.new()
+		var error := json.parse(data)
+		if error != OK:
+			_report_error(
+				"JsonSerializer.%s failed to parse JSON: %s at line %d."
+				% [operation, json.get_error_message(), json.get_error_line()]
+			)
+			return {}
+		data = json.data
+
+	if typeof(data) != TYPE_DICTIONARY:
+		_report_error(
+			"JsonSerializer.%s expected Dictionary or JSON object string, got %s."
+			% [operation, type_string(typeof(data))]
+		)
+		return {}
+
+	return data
+
 static func _reset_error_state() -> void:
-	_last_error_message = ""
 	_has_error = false
-	_error_messages.clear()
 
 static func _report_error(message: String) -> void:
-	_last_error_message = message
 	_has_error = true
-	if _error_messages.is_empty() or _error_messages[-1] != message:
-		_error_messages.append(message)
-		push_error(message)
+	push_error(message)
 
 static func _is_valid_script_resource(script) -> bool:
 	if script == null:

@@ -1,7 +1,6 @@
-[gd_scene load_steps=3 format=3 uid="uid://dqb3yk0oe8330"]
+[gd_scene format=3 uid="uid://dqb3yk0oe8330"]
 
 [ext_resource type="Script" uid="uid://crnuaxlx02ks7" path="res://scripts/ui/music_app/music_app_showcase.gd" id="1_script"]
-[ext_resource type="PackedScene" path="res://dx/runtime/scenes/debug/dx_debug_trigger.tscn" id="2_debug_trigger"]
 [ext_resource type="PackedScene" uid="uid://cgs5gwcepfoow" path="res://scenes/ui/music_app/mini_player/music_app_mini_player.tscn" id="5_mini_player"]
 
 [node name="MusicAppShowcase" type="Control" unique_id=1976821598]
@@ -69,6 +68,3 @@ mouse_filter = 2
 
 [node name="AudioPlayer" type="AudioStreamPlayer" parent="." unique_id=2045941312]
 unique_name_in_owner = true
-
-[node name="DebugTrigger" parent="." instance=ExtResource("2_debug_trigger")]
-layout_mode = 1

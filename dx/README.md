@@ -1,5 +1,7 @@
 # DX README
 
+更新时间：2026-06-23 17:54
+
 ## 概览
 
 `dx/` 是项目内的运行时基础框架，提供这些基础能力：
@@ -9,9 +11,10 @@
 - 全局事件总线
 - 弹窗管理
 - 保存与序列化
+- 跨平台虚拟文件路径
 - 本地化
 - 简单对象池
-- 通用数据存取
+- JSON 配置管理
 - 日志
 
 当前自动加载入口：
@@ -23,13 +26,17 @@
 - `DX.time`
 - `DX.logger`
 - `DX.signals`
-- `DX.data`
+- `DX.config`
 - `DX.background_state`
 - `DX.countdown`
 - `DX.pool`
 - `DX.save`
+- `DX.files`
 - `DX.localization`
 - `DX.popup`
+- `DX.debug`
+- `DX.effect`
+- `DX.res`
 
 ---
 
@@ -49,6 +56,7 @@
 DX.logger.log("Boot", "ready")
 var now_unix := DX.time.now_unix()
 var dx_root := DX as DX_Root
+var texture := DX.res.get_texture(&"example_icon")
 ```
 
 常用方法：
@@ -57,24 +65,6 @@ var dx_root := DX as DX_Root
 - `get_manager(manager_name)`
 - `has_manager(manager_name)`
 - `get_manager_names()`
-
----
-
-## 常量与路径
-
-### DX_ScriptPaths
-
-作用：
-
-- 集中保存 DX 内脚本路径字符串
-- 用法与 `scripts/constants/music_app_script_paths.gd` 一致
-
-常用方式：
-
-```gdscript
-const DX_ScriptPathsType := preload("res://dx/runtime/scripts/constants/dx_script_paths.gd")
-const AppBackgroundEventScript := preload(DX_ScriptPathsType.APP_BACKGROUND_EVENT)
-```
 
 ---
 
@@ -294,23 +284,101 @@ DX.countdown.subscribe_completed(&"demo", _on_countdown_completed)
 
 ---
 
-## 数据与对象池
+## 配置与对象池
 
-### DX_DataManager
+### DX_ConfigData
 
 作用：
 
-- 简单运行时键值存储
-- 按 bucket 分组
+- 配置根数据对象
+- 继承 `DX_JsonObject`
+- 挂载业务配置根对象，例如 `data.app`
+- `normalize()` 负责补齐缺失的业务配置对象
+
+根配置伪代码：
+
+```gdscript
+class_name DX_ConfigData
+extends DX_JsonObject
+
+const AppConfigScript := preload("res://path/to/app_config.gd")
+
+var app: AppConfigScript = AppConfigScript.new()
+
+func normalize() -> void:
+	if app == null:
+		app = AppConfigScript.new()
+	app.normalize()
+```
+
+业务配置伪代码：
+
+```gdscript
+class_name AppConfig
+extends DX_JsonObject
+
+const ItemConfigScript := preload("res://path/to/item_config.gd")
+const RuleConfigScript := preload("res://path/to/rule_config.gd")
+
+var items: Array[ItemConfigScript] = []
+var rule: RuleConfigScript = RuleConfigScript.new()
+
+func normalize() -> void:
+	if items == null:
+		items = []
+	if rule == null:
+		rule = RuleConfigScript.new()
+
+	for item_config in items:
+		if item_config != null:
+			item_config.normalize()
+	rule.normalize()
+
+func get_item_config(item_id: StringName):
+	for item_config in items:
+		if item_config != null and item_config.item_id == item_id:
+			return item_config
+	return null
+```
+
+配置 JSON 形状：
+
+```json
+{
+	"app": {
+		"items": [
+			{"item_id": "example_item", "display_name": "Example Item"}
+		],
+		"rule": {
+			"some_value": 10
+		}
+	}
+}
+```
+
+### DX_ConfigManager
+
+作用：
+
+- JSON 配置读取
+- 当前配置对象挂在 `DX.config.data`
+- 进入运行时后自动从默认配置路径加载一次
+- 手动调用 `load(path)` 会替换 `DX.config.data`
+
+常用方式：
+
+```gdscript
+var config_data := DX.config.data
+var app_config = config_data.app
+var item_config = app_config.get_item_config(&"example_item")
+var value = app_config.rule.some_value
+
+var reloaded_config_data := DX.config.load("res://path/to/config.json")
+```
 
 常用方法：
 
-- `set_value(bucket, key, value)`
-- `get_value(bucket, key, default_value := null)`
-- `has_value(bucket, key)`
-- `get_bucket(bucket)`
-- `clear_bucket(bucket)`
-- `clear()`
+- `load(config_path := "res://dx/data/config.json")`
 
 ### DX_PoolManager
 
@@ -319,6 +387,7 @@ DX.countdown.subscribe_completed(&"demo", _on_countdown_completed)
 - 简单节点对象池
 - 适合可复用节点模板
 - 支持节点通过鸭子方法响应出池/回池生命周期
+- 缓冲池只负责基础显隐；碰撞、相机、处理启停由对象在生命周期钩子里自行处理
 
 常用方法：
 
@@ -369,18 +438,212 @@ DX.logger.error("Popup", "popup host missing")
 
 ---
 
+## 调试
+
+### DX_DebugManager
+
+作用：
+
+- 管理运行时 Debug 面板数据
+- 提供 Options 风格的调试入口
+- 显示日志、系统信息、Profiler 信息
+- 只在 debug build 中生效
+
+常用入口：
+
+- `DX.debug`
+- Debug 触发器：`dx/runtime/scenes/debug/dx_debug_trigger.tscn`
+- Debug 弹窗：`dx/runtime/scenes/debug/dx_debug_popup.tscn`
+
+### Debug Options 约定
+
+业务调试项统一写在 `asset/scripts/debug/options/` 下，继承：
+
+```gdscript
+extends "res://dx/runtime/scripts/debug/debug_options_base.gd"
+```
+
+Options 只有两类订阅方式：
+
+1. `register_options()`：注册不依赖运行对象的集中式按钮。
+2. `get_targets() + bind(target)`：Options 自己明确找到目标对象，再注册字段和方法。
+
+底层 `dx/runtime/scripts/debug` 不做项目级全局搜索，不写死业务 Autoload 名，也不读取 `component_list/components` 这类业务字段。目标怎么找由项目自己的 Options 决定。
+
+集中式按钮示例：
+
+```gdscript
+class_name ExampleDebugOptions
+extends "res://dx/runtime/scripts/debug/debug_options_base.gd"
+
+const CHEAT_GROUP := "Cheat"
+
+func register_options() -> void:
+	group_display(CHEAT_GROUP, GroupDisplayMode.INLINE, DEFAULT_OPTIONS_TARGET_ID)
+	action(CHEAT_GROUP, "执行测试操作", Callable(self, "run_test_action"))
+
+func run_test_action() -> void:
+	var target := get_bound_target("ExampleTarget")
+	if target != null and target.has_method("debug_run_test_action"):
+		target.call("debug_run_test_action")
+```
+
+绑定运行对象示例：
+
+```gdscript
+class_name ExampleTargetDebugOptions
+extends "res://dx/runtime/scripts/debug/debug_options_base.gd"
+
+const TARGET_ID := "ExampleTarget"
+const GROUP := "Example"
+const TARGET_SCRIPT_PATH := "res://path/to/example_target.gd"
+
+func get_target_id() -> String:
+	return TARGET_ID
+
+func get_targets() -> Array:
+	var target := find_in_current_scene_by_script(TARGET_SCRIPT_PATH)
+	return [target] if target != null else []
+
+func bind(target: Object) -> void:
+	register_target(target)
+	group_display(GROUP, GroupDisplayMode.INLINE)
+	string(GROUP, target, "debug_name", "名称")
+	number(GROUP, target, "debug_value", "数值", {"min": 0, "max": 100, "step": 1})
+	boolean(GROUP, target, "debug_enabled", "启用")
+	action(GROUP, target, "debug_run_test_action", "执行")
+```
+
+目标查找辅助方法：
+
+- `get_root_node(path)`：从 SceneTree root 下取节点，适合 Autoload。
+- `get_current_scene()`：取当前场景根节点。
+- `find_in_current_scene_by_script(script_path)`：只在当前场景节点树中按脚本路径找节点。
+
+字段注册 API：
+
+- `number(group, target, member_name, name, range := {}, target_id := "")`
+- `string(group, target, member_name, name, target_id := "")`
+- `boolean(group, target, member_name, name, target_id := "")`
+- `select(group, target, member_name, name, options, target_id := "")`
+- `readonly(group, getter, name, target_id := "")`
+- `action(group, target, method_name, name, target_id := "")`
+- `action(group, name, callback, member_name := "", target_id := "")`
+- `group_display(group, mode, target_id := "")`
+- `get_bound_target(target_id := "")`
+
+`number` 传入范围时会显示为滑条：
+
+```gdscript
+number("Example", target, "debug_value", "数值", {
+	"min": 0,
+	"max": 100,
+	"step": 1,
+})
+```
+
+`select` 支持数组或 GDScript enum 字典：
+
+```gdscript
+enum DebugMode { NORMAL, GOD }
+
+select("Example", target, "debug_mode", "模式", DebugMode)
+select("Example", target, "debug_item_id", "选项", [
+	{"label": "选项 A", "value": &"option_a"},
+	{"label": "选项 B", "value": &"option_b"},
+])
+```
+
+Group 显示模式：
+
+- `GroupDisplayMode.INLINE`：字段直接显示。
+- `GroupDisplayMode.COLLAPSE`：字段折叠在分组里。
+- `GroupDisplayMode.PAGE`：分组作为分页入口，点击进入后显示字段。
+
+新增 Options 后，需要在 `dx/dx.gd` 的 `DebugOptionsScripts` 中登记：
+
+```gdscript
+const DebugOptionsScripts: Array[Script] = [
+	preload("res://path/to/example_target_debug_options.gd"),
+]
+```
+
+约束：
+
+- 不再使用 `@dx_debug_*` 注释扫描。
+- 不使用 `bool()` 或 `enum()` 作为注册 API 名称，使用 `boolean()` 和 `select()`。
+- 不在 DX 底层写项目业务名，项目目标查找写在项目 Options 里。
+- 不在目标脚本里手动订阅/退订 Debug，避免业务逻辑被调试系统污染。
+
+---
+
 ## 保存与序列化
 
 ### DX_SaveData
 
 作用：
 
-- 默认存档数据对象
-- 当前内置承载音乐应用存档
+- 存档根数据对象
+- 继承 `DX_JsonObject`
+- 挂载业务存档根对象，例如 `data.app`
+- `normalize()` 负责补齐缺失的业务存档对象
 
-常用方法：
+根存档伪代码：
 
-- `normalize()`
+```gdscript
+class_name DX_SaveData
+extends DX_JsonObject
+
+const AppSaveDataScript := preload("res://path/to/app_save_data.gd")
+
+var app: AppSaveDataScript = AppSaveDataScript.new()
+
+func normalize() -> void:
+	if app == null:
+		app = AppSaveDataScript.new()
+	app.normalize()
+```
+
+业务存档伪代码：
+
+```gdscript
+class_name AppSaveData
+extends DX_JsonObject
+
+const ProfileSaveDataScript := preload("res://path/to/profile_save_data.gd")
+const RuntimeSaveDataScript := preload("res://path/to/runtime_save_data.gd")
+
+var profile: ProfileSaveDataScript = ProfileSaveDataScript.new()
+var runtime: RuntimeSaveDataScript = RuntimeSaveDataScript.new()
+
+func normalize() -> void:
+	if profile == null:
+		profile = ProfileSaveDataScript.new()
+	profile.normalize()
+
+	if runtime == null:
+		runtime = RuntimeSaveDataScript.new()
+	runtime.normalize()
+
+func clear() -> void:
+	profile.clear()
+	runtime.clear()
+```
+
+存档 JSON 形状：
+
+```json
+{
+	"app": {
+		"profile": {
+			"selected_id": "example"
+		},
+		"runtime": {
+			"status": "running"
+		}
+	}
+}
+```
 
 ### DX_SaveManager
 
@@ -389,21 +652,28 @@ DX.logger.error("Popup", "popup host missing")
 - JSON 保存/读取
 - 对象与字典相互转换
 - 当前全局数据对象挂在 `DX.save.data`
+- 进入运行时后自动读取默认存档路径
+- `save(false)` 只标记脏数据，稍后自动保存
+- `save(true)` 立即写盘
+- 应用退出、暂停或失焦时会强制落盘
 
 常用方式：
 
 ```gdscript
-var save_data := DX.save.load()
-var ok := DX.save.save()
-var pending := DX.save.has_pending_save()
+var save_data := DX.save.data
+save_data.app.profile.selected_id = &"example"
+save_data.app.runtime.status = &"running"
+
+DX.save.save(false)
+
+var loaded_save_data := DX.save.load()
+var ok := DX.save.save(true)
 ```
 
 常用方法：
 
 - `save(force := true)`
 - `load()`
-- `has_pending_save()`
-- `get_next_save_at_msec()`
 
 ### DX_JsonObject
 
@@ -422,14 +692,83 @@ var pending := DX.save.has_pending_save()
 常用方法：
 
 - `serialize(obj, include_ignored := false, max_depth := DEFAULT_MAX_DEPTH)`
-- `deserialize(data, target, max_depth := DEFAULT_MAX_DEPTH)`
-- `create_from_dict(data, default_object, max_depth := DEFAULT_MAX_DEPTH)`
+- `deserialize(data_or_json, target, max_depth := DEFAULT_MAX_DEPTH)`
+- `create_from_dict(script_path, data, include_ignored := false, max_depth := DEFAULT_MAX_DEPTH)`
 - `clear_cache()`
 - `refresh_cache_for(object)`
-- `clear_last_error()`
-- `has_error()`
-- `get_last_error()`
-- `get_error_messages()`
+
+---
+
+## 文件
+
+### DX_FileManager
+
+作用：
+
+- 提供跨平台文件读写入口
+- 用虚拟路径隔离 Windows 原生路径、Godot `user://` 和 Android SAF `content://`
+- 避免业务层把 Android 虚拟路径误当作真实文件路径
+
+当前虚拟路径：
+
+| 路径 | 平台 | 状态 | 说明 |
+| --- | --- | --- | --- |
+| `app://exports/demo.csv` | 全平台 | 可读写 | 映射到 `user://exports/demo.csv`，适合 App 私有导入导出缓存 |
+| `local://E:/tmp/demo.csv` | Windows/editor | 可读写 | 映射到桌面原生路径，Android 不支持 |
+| `saf-file://content://...` | Android | 可读写 | 单文件 SAF URI，适合导入或写入系统返回的单文件目标 |
+| `saf-tree://content://...#exports/demo.csv` | Android | 可读写 | 目录 SAF URI + 相对路径，适合用户选择导出文件夹后写文件 |
+
+常用方式：
+
+```gdscript
+var write_result := DX.files.write_text("app://exports/demo.csv", "时间,类型,金额\n")
+if not write_result.ok:
+	DX.logger.error("Files", write_result.error)
+
+var read_result := DX.files.read_text("app://exports/demo.csv")
+if read_result.ok:
+	print(read_result.text)
+```
+
+常用方法：
+
+- `app_path(relative_path) -> String`
+- `local_path(native_path) -> String`
+- `saf_file_path(uri) -> String`
+- `saf_tree_path(uri, relative_path := "") -> String`
+- `read_bytes(path) -> Dictionary`
+- `read_text(path) -> Dictionary`
+- `write_bytes(path, data) -> Dictionary`
+- `write_text(path, text) -> Dictionary`
+- `exists(path) -> bool`
+- `make_dir_recursive(path) -> Dictionary`
+- `globalize(path) -> String`
+- `persist_saf_uri_permission(path_or_uri, persist := true) -> bool`
+- `pick_file(title, filters, callback, current_directory := "") -> Dictionary`
+- `pick_directory(title, callback, current_directory := "") -> Dictionary`
+- `path_join(base_path, relative_path) -> String`
+
+返回值约定：
+
+```gdscript
+{
+	"ok": true,
+	"path": "user://exports/demo.csv",
+	"data": PackedByteArray(),
+	"text": "file text",
+	"bytes": 12,
+	"error": ""
+}
+```
+
+Android 规则：
+
+- 不把 `content://` 转成绝对路径。
+- 文件选择统一走 `DX.files.pick_file()` 和 `DX.files.pick_directory()`。
+- 文件选择器拿到 URI 后，DX 会转成 `saf-file://content://...` 或 `saf-tree://content://...`。
+- 向用户选择的 SAF 目录写文件时，使用 `DX.files.path_join(tree_path, file_name)` 得到 `saf-tree://...#file_name`。
+- 需要长期访问时调用 `DX.files.persist_saf_uri_permission(uri)`。
+- SAF 读写通过 Godot `FileAccess` 处理 `content://` 或 `content://...#relative/path`，不要自己拼真实路径。
 
 ---
 
@@ -445,8 +784,8 @@ var pending := DX.save.has_pending_save()
 常用方式：
 
 ```gdscript
-var text := DX.localization.text("music_app.home.title")
-DX.localization.bind_text(label, "music_app.home.title")
+var text := DX.localization.text("example.title")
+DX.localization.bind_text(label, "example.title")
 DX.localization.set_locale(DX_LocalizationManager.Locale.ZH_CN)
 ```
 
@@ -487,15 +826,10 @@ DX.localization.set_locale(DX_LocalizationManager.Locale.ZH_CN)
 
 枚举：
 
-- `PopupId.COMMON_DIALOG`
-- `PopupId.COMMON_TOAST`
-- `PopupId.MUSIC_APP_HOME`
-- `PopupId.MUSIC_APP_PLAYLIST`
-- `PopupId.MUSIC_APP_PLAYER`
-- `PopupId.MUSIC_APP_PLAYBACK_QUEUE`
-- `PopupId.MUSIC_APP_LOCAL_MUSIC`
-- `PopupId.MUSIC_APP_LOCAL_SCAN`
-- `PopupId.MUSIC_APP_PLUGIN_BROWSER`
+- `PopupId.EXAMPLE_POPUP`
+- `PopupId.EXAMPLE_FULLSCREEN_POPUP`
+
+实际枚举以 `dx/runtime/scripts/managers/popup/popup_registry.gd` 中的 `PopupId` 为准。
 
 ### DX_PopupView
 
@@ -529,7 +863,7 @@ DX.localization.set_locale(DX_LocalizationManager.Locale.ZH_CN)
 常用方式：
 
 ```gdscript
-DX.popup.show(DX_PopupRegistry.PopupId.MUSIC_APP_HOME)
+DX.popup.show(DX_PopupRegistry.PopupId.EXAMPLE_POPUP)
 DX.popup.hide()
 ```
 
@@ -546,6 +880,20 @@ DX.popup.hide()
 - `clear_normal_host(host := null)`
 - `clear_fullscreen_host(host := null)`
 
+### 弹窗 CV 约定
+
+业务弹窗采用 CV 结构：
+
+- Controller：纯 GDScript 类，继承 `RefCounted`，不作为场景节点存在。负责弹窗数据、状态、按钮行为和关闭回调等控制逻辑。
+- View：继承 `DX_PopupView`，挂在弹窗预制体根节点。只负责 UI 节点引用、显示刷新和把按钮事件转发给 Controller。
+- 弹窗预制体只落 View 和 UI 节点，不添加 Controller 节点。
+- 每个弹窗独立目录存放，场景名、view 脚本名、controller 脚本名使用同一弹窗前缀，例如：
+  - `asset/scenes/ui/popups/example_popup/example_popup.tscn`
+  - `asset/scripts/ui/popups/example_popup/example_popup_view.gd`
+  - `asset/scripts/ui/popups/example_popup/example_popup_controller.gd`
+- 弹窗必须在 `DX_PopupRegistry.PopupId` 和 `POPUP_SCENES` 中注册，再通过 `DX.popup.show(popup_id)` 打开。
+- 业务入口只负责传入数据或回调，不直接操作弹窗内部 UI 节点。
+
 ---
 
 ## 当前建议
@@ -553,5 +901,5 @@ DX.popup.hide()
 1. DX 内模块优先通过 `DX` 根访问 manager，不要在业务里重复 new manager。
 2. 高频时间判断优先用 `DX.time.now_unix()`，需要展示时再转 `DX_DateTime`。
 3. 跨模块广播优先用 `DX.signals`，局部节点通信优先用 Godot 原生 `signal`。
-4. `dx_script_paths.gd` 只放路径字符串，不直接存 `preload()` 结果。
-5. 弹窗根节点统一继承 `DX_PopupView`，并通过 `DX.popup` 管理。
+4. 弹窗根节点统一继承 `DX_PopupView`，并通过 `DX.popup` 管理。
+5. 业务导入导出优先走 `DX.files`，不要在 Android 上把 `content://` 当作原生路径处理。

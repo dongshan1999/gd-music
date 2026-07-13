@@ -1,9 +1,8 @@
 class_name DX_CountdownManager
 extends RefCounted
 
-const DX_CountdownInfoScript = preload("res://dx/runtime/scripts/managers/countdown_info.gd")
-const DX_ScriptPathsType := preload("res://dx/runtime/scripts/constants/dx_script_paths.gd")
-const AppBackgroundEventScript := preload(DX_ScriptPathsType.APP_BACKGROUND_EVENT)
+const DX_CountdownInfoScript := preload("res://dx/runtime/scripts/managers/countdown/countdown_info.gd")
+const AppBackgroundEventScript := preload("res://dx/runtime/scripts/managers/signals/events/dx_app_background_event.gd")
 
 var dx: Node
 var _active: Dictionary = {}
