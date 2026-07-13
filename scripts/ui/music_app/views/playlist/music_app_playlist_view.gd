@@ -13,6 +13,7 @@ var _is_bound := false
 @onready var playlist_back_button: Button = %PlaylistBackButton
 @onready var playlist_search_button: Button = %PlaylistSearchButton
 @onready var playlist_more_button: Button = %PlaylistMoreButton
+@onready var playlist_shelf_3d: Control = %PlaylistShelf3D
 @onready var playlist_hero_panel: Panel = %PlaylistHeroPanel
 @onready var playlist_hero_cover: Panel = %PlaylistHeroCover
 @onready var playlist_hero_mark_label: Label = %PlaylistHeroMarkLabel
@@ -39,9 +40,23 @@ func bind() -> void:
 
 	playlist_back_button.pressed.connect(close_page)
 	play_all_button.pressed.connect(_play_playlist_from_start)
+	playlist_shelf_3d.previous_requested.connect(_select_previous_playlist)
+	playlist_shelf_3d.next_requested.connect(_select_next_playlist)
+	playlist_shelf_3d.play_requested.connect(_play_playlist_from_start)
+	playlist_shelf_3d.playlist_selected.connect(_select_playlist)
+
 func refresh() -> void:
 	if _controller == null:
 		return
+
+	playlist_shelf_3d.configure(
+		_playlist_controller.get_playlists(),
+		_playlist_controller.get_selected_playlist_index(),
+		_playlist_controller,
+		_playlist_controller.get_playing_playlist_index()
+	)
+	if playlist_shelf_3d.has_method("apply_visualizer_settings"):
+		playlist_shelf_3d.apply_visualizer_settings(_playlist_controller.get_app_state().visualizer_settings)
 
 	if _playlist_controller.get_playlists().is_empty():
 		playlist_hero_mark_label.text = tr("music_app.playlist.favorites_mark")
@@ -71,6 +86,18 @@ func _play_playlist_from_start() -> void:
 
 func _select_song_from_playlist(slot_index: int) -> void:
 	_playlist_controller.play_selected_playlist_track(slot_index)
+
+func _select_playlist(playlist_index: int) -> void:
+	if _playlist_controller.select_playlist(playlist_index):
+		refresh()
+
+func _select_previous_playlist() -> void:
+	if _playlist_controller.select_playlist(_playlist_controller.get_selected_playlist_index() - 1):
+		refresh()
+
+func _select_next_playlist() -> void:
+	if _playlist_controller.select_playlist(_playlist_controller.get_selected_playlist_index() + 1):
+		refresh()
 
 func _sync_song_rows(target_size: int) -> void:
 	while song_rows.size() < target_size:

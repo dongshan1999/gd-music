@@ -13,6 +13,25 @@ func get_selected_playlist():
 		return null
 	return playlists[playlist_index]
 
+func select_playlist(index: int) -> bool:
+	var playlists: Array[PlaylistData] = get_playlists_ref()
+	if index < 0 or index >= playlists.size():
+		return false
+	set_selected_playlist_index(index)
+	return true
+
+func get_playing_playlist_index() -> int:
+	var playback_controller = get_playback_controller()
+	if playback_controller == null or not playback_controller.has_playback_queue():
+		return -1
+
+	var playback_track_indices: Array[int] = playback_controller.get_playback_track_indices()
+	var playlists: Array[PlaylistData] = get_playlists_ref()
+	for index in playlists.size():
+		if _playlist_matches_track_indices(playlists[index], playback_track_indices):
+			return index
+	return -1
+
 ## 返回当前选中歌单内的曲目索引列表。
 func get_selected_playlist_track_indices() -> Array[int]:
 	return _get_playlist_track_indices(get_selected_playlist_index())
@@ -69,6 +88,16 @@ func _get_playlist_track_indices(index: int) -> Array[int]:
 	for track_index in playlists[index].tracks:
 		result.append(track_index)
 	return result
+
+func _playlist_matches_track_indices(playlist: PlaylistData, track_indices: Array[int]) -> bool:
+	if playlist == null:
+		return false
+	if playlist.tracks.size() != track_indices.size():
+		return false
+	for index in playlist.tracks.size():
+		if playlist.tracks[index] != track_indices[index]:
+			return false
+	return not track_indices.is_empty()
 
 ## 按给定顺序构建播放队列并跳到目标槽位。
 func _play_track_list(track_indices: Array[int], start_slot_index: int, autoplay: bool = true) -> bool:

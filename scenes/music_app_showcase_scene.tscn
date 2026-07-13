@@ -1,8 +1,9 @@
-[gd_scene load_steps=3 format=3 uid="uid://dqb3yk0oe8330"]
+[gd_scene load_steps=4 format=3 uid="uid://dqb3yk0oe8330"]
 
 [ext_resource type="Script" uid="uid://crnuaxlx02ks7" path="res://scripts/ui/music_app/music_app_showcase.gd" id="1_script"]
 [ext_resource type="PackedScene" path="res://dx/runtime/scenes/debug/dx_debug_trigger.tscn" id="2_debug_trigger"]
 [ext_resource type="PackedScene" uid="uid://cgs5gwcepfoow" path="res://scenes/ui/music_app/mini_player/music_app_mini_player.tscn" id="5_mini_player"]
+[ext_resource type="PackedScene" path="res://scenes/ui/music_app/visualizer/music_app_visualizer.tscn" id="6_visualizer"]
 
 [node name="MusicAppShowcase" type="Control" unique_id=1976821598]
 layout_mode = 3
@@ -39,6 +40,16 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
+
+[node name="MusicAppVisualizer" parent="PreviewRoot/PhoneShell" unique_id=1723592710 instance=ExtResource("6_visualizer")]
+unique_name_in_owner = true
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
 
 [node name="NormalPopupHost" type="Control" parent="PreviewRoot/PhoneShell" unique_id=1330102395]
 unique_name_in_owner = true

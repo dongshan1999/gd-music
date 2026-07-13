@@ -14,20 +14,187 @@
 [ext_resource type="Texture2D" path="res://textures/play.svg" id="15_play"]
 [ext_resource type="Script" uid="uid://bym33i5tdjhtg" path="res://dx/runtime/scripts/managers/localization/localize_comp.gd" id="999_localize_comp"]
 
+[sub_resource type="Shader" id="Shader_player_atmosphere_overlay"]
+code = "shader_type canvas_item;
+
+float hash(vec2 p) {
+	return fract(sin(dot(p, vec2(127.1, 311.7))) * 43758.5453123);
+}
+
+void fragment() {
+	vec2 uv = UV;
+	vec2 center = uv - vec2(0.5, 0.46);
+	float vignette = smoothstep(0.88, 0.28, length(center));
+	float top_glow = smoothstep(0.72, 0.05, length((uv - vec2(0.28, 0.12)) * vec2(1.0, 1.9)));
+	float gold_glow = smoothstep(0.62, 0.06, length((uv - vec2(0.82, 0.72)) * vec2(1.4, 1.0)));
+	float flow = smoothstep(0.025, 0.0, abs(fract((uv.x + uv.y * 0.78) * 6.0 - TIME * 0.12) - 0.5));
+	float scan = sin((uv.y + TIME * 0.015) * 980.0) * 0.5 + 0.5;
+	float grain = hash(floor((uv + TIME * 0.004) * vec2(280.0, 520.0)));
+	vec3 color = vec3(0.002, 0.005, 0.010);
+	color += vec3(0.03, 0.82, 1.0) * top_glow * 0.16;
+	color += vec3(1.0, 0.58, 0.16) * gold_glow * 0.13;
+	color += vec3(0.08, 0.75, 0.95) * flow * 0.035;
+	color += vec3(scan * 0.012 + grain * 0.014);
+	COLOR = vec4(color, 0.72 - vignette * 0.18);
+}
+"
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_player_atmosphere_overlay"]
+shader = SubResource("Shader_player_atmosphere_overlay")
+
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_player_cover_panel"]
-bg_color = Color(0.176471, 0.192157, 0.223529, 1)
+bg_color = Color(0.012, 0.015, 0.022, 0.74)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0.51, 0.86, 1, 0.24)
 corner_radius_top_left = 8
 corner_radius_top_right = 8
 corner_radius_bottom_right = 8
 corner_radius_bottom_left = 8
+shadow_color = Color(0, 0.78, 1, 0.13)
+shadow_size = 22
+shadow_offset = Vector2(0, 10)
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_player_cover_circle"]
-bg_color = Color(0, 0, 0, 0)
+bg_color = Color(0, 0, 0, 0.14)
 border_width_left = 2
 border_width_top = 2
 border_width_right = 2
 border_width_bottom = 2
-border_color = Color(1, 1, 1, 0.24)
+border_color = Color(1, 0.73, 0.31, 0.72)
+corner_radius_top_left = 999
+corner_radius_top_right = 999
+corner_radius_bottom_right = 999
+corner_radius_bottom_left = 999
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_player_glass_panel"]
+bg_color = Color(0.006, 0.008, 0.013, 0.54)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0.5, 0.86, 1, 0.16)
+corner_radius_top_left = 8
+corner_radius_top_right = 8
+corner_radius_bottom_right = 8
+corner_radius_bottom_left = 8
+shadow_color = Color(0, 0, 0, 0.34)
+shadow_size = 18
+shadow_offset = Vector2(0, 8)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_player_chip"]
+bg_color = Color(0.04, 0.06, 0.08, 0.66)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(1, 0.72, 0.28, 0.36)
+corner_radius_top_left = 999
+corner_radius_top_right = 999
+corner_radius_bottom_right = 999
+corner_radius_bottom_left = 999
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_player_icon_button"]
+bg_color = Color(0.03, 0.045, 0.062, 0.48)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0.54, 0.9, 1, 0.18)
+corner_radius_top_left = 999
+corner_radius_top_right = 999
+corner_radius_bottom_right = 999
+corner_radius_bottom_left = 999
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_player_icon_button_hover"]
+bg_color = Color(0.06, 0.1, 0.12, 0.76)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0.62, 0.92, 1, 0.46)
+corner_radius_top_left = 999
+corner_radius_top_right = 999
+corner_radius_bottom_right = 999
+corner_radius_bottom_left = 999
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_player_icon_button_pressed"]
+bg_color = Color(0.92, 0.64, 0.22, 0.22)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(1, 0.72, 0.28, 0.58)
+corner_radius_top_left = 999
+corner_radius_top_right = 999
+corner_radius_bottom_right = 999
+corner_radius_bottom_left = 999
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_player_primary_button"]
+bg_color = Color(1, 0.69, 0.26, 0.94)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(1, 0.92, 0.58, 0.82)
+corner_radius_top_left = 999
+corner_radius_top_right = 999
+corner_radius_bottom_right = 999
+corner_radius_bottom_left = 999
+shadow_color = Color(1, 0.64, 0.18, 0.34)
+shadow_size = 20
+shadow_offset = Vector2(0, 0)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_player_primary_button_hover"]
+bg_color = Color(1, 0.76, 0.36, 1)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(1, 0.96, 0.7, 0.92)
+corner_radius_top_left = 999
+corner_radius_top_right = 999
+corner_radius_bottom_right = 999
+corner_radius_bottom_left = 999
+shadow_color = Color(1, 0.7, 0.2, 0.48)
+shadow_size = 24
+shadow_offset = Vector2(0, 0)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_player_progress_bg"]
+bg_color = Color(0.9, 0.96, 1, 0.13)
+corner_radius_top_left = 999
+corner_radius_top_right = 999
+corner_radius_bottom_right = 999
+corner_radius_bottom_left = 999
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_player_progress_fill"]
+bg_color = Color(0.95, 0.72, 0.35, 0.96)
+corner_radius_top_left = 999
+corner_radius_top_right = 999
+corner_radius_bottom_right = 999
+corner_radius_bottom_left = 999
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_player_cover_outer_ring"]
+bg_color = Color(0, 0, 0, 0)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0.48, 0.86, 1, 0.2)
+corner_radius_top_left = 999
+corner_radius_top_right = 999
+corner_radius_bottom_right = 999
+corner_radius_bottom_left = 999
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_player_cover_core"]
+bg_color = Color(0.008, 0.012, 0.018, 0.9)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(1, 0.75, 0.33, 0.46)
 corner_radius_top_left = 999
 corner_radius_top_right = 999
 corner_radius_bottom_right = 999
@@ -50,7 +217,40 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-color = Color(0.109804, 0.113725, 0.129412, 1)
+mouse_filter = 2
+color = Color(0.002, 0.004, 0.008, 0.58)
+
+[node name="PlayerAtmosphereOverlay" type="ColorRect" parent="." unique_id=2078164138]
+layout_mode = 0
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+material = SubResource("ShaderMaterial_player_atmosphere_overlay")
+color = Color(1, 1, 1, 1)
+
+[node name="PlayerTopGlassPanel" type="Panel" parent="." unique_id=2115665088]
+layout_mode = 0
+anchor_left = 0.035
+anchor_top = 0.018
+anchor_right = 0.965
+anchor_bottom = 0.118
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_player_glass_panel")
+
+[node name="PlayerControlGlassPanel" type="Panel" parent="." unique_id=1929575868]
+layout_mode = 0
+anchor_left = 0.035
+anchor_top = 0.68
+anchor_right = 0.965
+anchor_bottom = 0.975
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_player_glass_panel")
 
 [node name="PlayerMargin" type="MarginContainer" parent="." unique_id=909338491]
 layout_mode = 0
@@ -76,6 +276,12 @@ theme_override_constants/separation = 8
 unique_name_in_owner = true
 custom_minimum_size = Vector2(44, 44)
 layout_mode = 2
+theme_override_colors/icon_normal_color = Color(0.88, 0.95, 1, 0.9)
+theme_override_colors/icon_hover_color = Color(1, 0.74, 0.34, 1)
+theme_override_styles/normal = SubResource("StyleBoxFlat_player_icon_button")
+theme_override_styles/pressed = SubResource("StyleBoxFlat_player_icon_button_pressed")
+theme_override_styles/hover = SubResource("StyleBoxFlat_player_icon_button_hover")
+theme_override_styles/focus = SubResource("StyleBoxFlat_player_icon_button_hover")
 icon = ExtResource("5_arrow_left")
 expand_icon = true
 icon_alignment = 1
@@ -89,6 +295,12 @@ size_flags_horizontal = 3
 unique_name_in_owner = true
 custom_minimum_size = Vector2(44, 44)
 layout_mode = 2
+theme_override_colors/icon_normal_color = Color(0.88, 0.95, 1, 0.9)
+theme_override_colors/icon_hover_color = Color(1, 0.74, 0.34, 1)
+theme_override_styles/normal = SubResource("StyleBoxFlat_player_icon_button")
+theme_override_styles/pressed = SubResource("StyleBoxFlat_player_icon_button_pressed")
+theme_override_styles/hover = SubResource("StyleBoxFlat_player_icon_button_hover")
+theme_override_styles/focus = SubResource("StyleBoxFlat_player_icon_button_hover")
 icon = ExtResource("6_share")
 expand_icon = true
 icon_alignment = 1
@@ -102,6 +314,8 @@ alignment = 1
 [node name="NowTitleLabel" type="Label" parent="PlayerMargin/PlayerVBox/PlayerTitleBlock" unique_id=1104681979]
 unique_name_in_owner = true
 layout_mode = 2
+theme_override_colors/font_color = Color(0.96, 0.98, 1, 0.98)
+theme_override_font_sizes/font_size = 25
 text = "虚拟"
 horizontal_alignment = 1
 
@@ -120,6 +334,8 @@ theme_override_constants/separation = 8
 [node name="NowArtistLabel" type="Label" parent="PlayerMargin/PlayerVBox/PlayerTitleBlock/ArtistCenter/ArtistRow" unique_id=364759087]
 unique_name_in_owner = true
 layout_mode = 2
+theme_override_colors/font_color = Color(0.66, 0.74, 0.8, 0.88)
+theme_override_font_sizes/font_size = 14
 text = "陈粒"
 
 [node name="LocalizeComp" type="Node" parent="PlayerMargin/PlayerVBox/PlayerTitleBlock/ArtistCenter/ArtistRow/NowArtistLabel" unique_id=943377041]
@@ -131,6 +347,7 @@ update_in_runtime = false
 unique_name_in_owner = true
 custom_minimum_size = Vector2(74, 30)
 layout_mode = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_player_chip")
 
 [node name="Margin" type="MarginContainer" parent="PlayerMargin/PlayerVBox/PlayerTitleBlock/ArtistCenter/ArtistRow/PlayerSourceChip" unique_id=1012786507]
 layout_mode = 0
@@ -146,6 +363,8 @@ theme_override_constants/margin_bottom = 6
 [node name="PlayerSourceLabel" type="Label" parent="PlayerMargin/PlayerVBox/PlayerTitleBlock/ArtistCenter/ArtistRow/PlayerSourceChip/Margin" unique_id=822233788]
 unique_name_in_owner = true
 layout_mode = 2
+theme_override_colors/font_color = Color(1, 0.77, 0.38, 0.95)
+theme_override_font_sizes/font_size = 12
 text = "元力QQ"
 horizontal_alignment = 1
 vertical_alignment = 1
@@ -168,18 +387,31 @@ theme_override_styles/panel = SubResource("StyleBoxFlat_player_cover_panel")
 [node name="CoverGlowLeft" type="ColorRect" parent="PlayerMargin/PlayerVBox/CoverStage/CoverPanel" unique_id=654731710]
 unique_name_in_owner = true
 layout_mode = 0
-offset_top = 34.0
-offset_right = 166.0
-offset_bottom = 266.0
-color = Color(0, 0, 0, 0)
+offset_left = 18.0
+offset_top = 54.0
+offset_right = 130.0
+offset_bottom = 260.0
+mouse_filter = 2
+color = Color(0.02, 0.82, 1, 0.075)
 
 [node name="CoverGlowRight" type="ColorRect" parent="PlayerMargin/PlayerVBox/CoverStage/CoverPanel" unique_id=1692710363]
 unique_name_in_owner = true
 layout_mode = 0
-offset_left = 160.0
-offset_right = 310.0
-offset_bottom = 260.0
-color = Color(0, 0, 0, 0)
+offset_left = 178.0
+offset_top = 24.0
+offset_right = 292.0
+offset_bottom = 240.0
+mouse_filter = 2
+color = Color(1, 0.55, 0.16, 0.068)
+
+[node name="CoverOuterRing" type="Panel" parent="PlayerMargin/PlayerVBox/CoverStage/CoverPanel" unique_id=1510697602]
+layout_mode = 0
+offset_left = 34.0
+offset_top = 34.0
+offset_right = 276.0
+offset_bottom = 276.0
+mouse_filter = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_player_cover_outer_ring")
 
 [node name="CoverCircle" type="Panel" parent="PlayerMargin/PlayerVBox/CoverStage/CoverPanel" unique_id=1021963745]
 unique_name_in_owner = true
@@ -188,7 +420,26 @@ offset_left = 48.0
 offset_top = 48.0
 offset_right = 248.0
 offset_bottom = 248.0
+mouse_filter = 2
 theme_override_styles/panel = SubResource("StyleBoxFlat_player_cover_circle")
+
+[node name="CoverInnerRing" type="Panel" parent="PlayerMargin/PlayerVBox/CoverStage/CoverPanel" unique_id=1746770304]
+layout_mode = 0
+offset_left = 82.0
+offset_top = 82.0
+offset_right = 214.0
+offset_bottom = 214.0
+mouse_filter = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_player_cover_outer_ring")
+
+[node name="CoverCoreDot" type="Panel" parent="PlayerMargin/PlayerVBox/CoverStage/CoverPanel" unique_id=1669730644]
+layout_mode = 0
+offset_left = 131.0
+offset_top = 131.0
+offset_right = 165.0
+offset_bottom = 165.0
+mouse_filter = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_player_cover_core")
 
 [node name="CoverMarkLabel" type="Label" parent="PlayerMargin/PlayerVBox/CoverStage/CoverPanel" unique_id=522729667]
 unique_name_in_owner = true
@@ -197,11 +448,13 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-theme_override_colors/font_color = Color(1, 1, 1, 0.88)
-theme_override_font_sizes/font_size = 28
+theme_override_colors/font_color = Color(0.96, 0.98, 1, 0.88)
+theme_override_font_sizes/font_size = 24
 text = "虚拟"
 horizontal_alignment = 1
 vertical_alignment = 1
+clip_text = true
+text_overrun_behavior = 3
 
 [node name="LocalizeComp" type="Node" parent="PlayerMargin/PlayerVBox/CoverStage/CoverPanel/CoverMarkLabel" unique_id=363683347]
 script = ExtResource("999_localize_comp")
@@ -217,6 +470,12 @@ alignment = 1
 unique_name_in_owner = true
 custom_minimum_size = Vector2(40, 40)
 layout_mode = 2
+theme_override_colors/icon_normal_color = Color(0.9, 0.96, 1, 0.82)
+theme_override_colors/icon_hover_color = Color(1, 0.72, 0.34, 1)
+theme_override_styles/normal = SubResource("StyleBoxFlat_player_icon_button")
+theme_override_styles/pressed = SubResource("StyleBoxFlat_player_icon_button_pressed")
+theme_override_styles/hover = SubResource("StyleBoxFlat_player_icon_button_hover")
+theme_override_styles/focus = SubResource("StyleBoxFlat_player_icon_button_hover")
 icon = ExtResource("13_heart_outline")
 expand_icon = true
 icon_alignment = 1
@@ -225,6 +484,8 @@ vertical_icon_alignment = 1
 [node name="PlayerFxLabel" type="Label" parent="PlayerMargin/PlayerVBox/PlayerMetaRow" unique_id=1133679788]
 unique_name_in_owner = true
 layout_mode = 2
+theme_override_colors/font_color = Color(0.72, 0.82, 0.88, 0.82)
+theme_override_font_sizes/font_size = 13
 text = "音效"
 
 [node name="LocalizeComp" type="Node" parent="PlayerMargin/PlayerVBox/PlayerMetaRow/PlayerFxLabel" unique_id=708220863]
@@ -235,6 +496,12 @@ tr_key = "music_app.player.fx"
 unique_name_in_owner = true
 custom_minimum_size = Vector2(40, 40)
 layout_mode = 2
+theme_override_colors/icon_normal_color = Color(0.9, 0.96, 1, 0.82)
+theme_override_colors/icon_hover_color = Color(1, 0.72, 0.34, 1)
+theme_override_styles/normal = SubResource("StyleBoxFlat_player_icon_button")
+theme_override_styles/pressed = SubResource("StyleBoxFlat_player_icon_button_pressed")
+theme_override_styles/hover = SubResource("StyleBoxFlat_player_icon_button_hover")
+theme_override_styles/focus = SubResource("StyleBoxFlat_player_icon_button_hover")
 icon = ExtResource("7_tone")
 expand_icon = true
 icon_alignment = 1
@@ -243,12 +510,20 @@ vertical_icon_alignment = 1
 [node name="SpeedLabel" type="Label" parent="PlayerMargin/PlayerVBox/PlayerMetaRow" unique_id=1551380707]
 unique_name_in_owner = true
 layout_mode = 2
+theme_override_colors/font_color = Color(1, 0.76, 0.34, 0.9)
+theme_override_font_sizes/font_size = 13
 text = "1.0x"
 
 [node name="CommentButton" type="Button" parent="PlayerMargin/PlayerVBox/PlayerMetaRow" unique_id=278719635]
 unique_name_in_owner = true
 custom_minimum_size = Vector2(40, 40)
 layout_mode = 2
+theme_override_colors/icon_normal_color = Color(0.9, 0.96, 1, 0.82)
+theme_override_colors/icon_hover_color = Color(1, 0.72, 0.34, 1)
+theme_override_styles/normal = SubResource("StyleBoxFlat_player_icon_button")
+theme_override_styles/pressed = SubResource("StyleBoxFlat_player_icon_button_pressed")
+theme_override_styles/hover = SubResource("StyleBoxFlat_player_icon_button_hover")
+theme_override_styles/focus = SubResource("StyleBoxFlat_player_icon_button_hover")
 icon = ExtResource("8_comment")
 expand_icon = true
 icon_alignment = 1
@@ -262,6 +537,12 @@ tr_key = "music_app.player.comments_short"
 unique_name_in_owner = true
 custom_minimum_size = Vector2(40, 40)
 layout_mode = 2
+theme_override_colors/icon_normal_color = Color(0.9, 0.96, 1, 0.82)
+theme_override_colors/icon_hover_color = Color(1, 0.72, 0.34, 1)
+theme_override_styles/normal = SubResource("StyleBoxFlat_player_icon_button")
+theme_override_styles/pressed = SubResource("StyleBoxFlat_player_icon_button_pressed")
+theme_override_styles/hover = SubResource("StyleBoxFlat_player_icon_button_hover")
+theme_override_styles/focus = SubResource("StyleBoxFlat_player_icon_button_hover")
 icon = ExtResource("9_more")
 expand_icon = true
 icon_alignment = 1
@@ -277,6 +558,8 @@ layout_mode = 2
 [node name="ElapsedLabel" type="Label" parent="PlayerMargin/PlayerVBox/ProgressWrap/TimeRow" unique_id=710331033]
 unique_name_in_owner = true
 layout_mode = 2
+theme_override_colors/font_color = Color(0.72, 0.82, 0.88, 0.82)
+theme_override_font_sizes/font_size = 12
 text = "02:38"
 
 [node name="Spacer" type="Control" parent="PlayerMargin/PlayerVBox/ProgressWrap/TimeRow" unique_id=638192304]
@@ -286,6 +569,8 @@ size_flags_horizontal = 3
 [node name="RemainingLabel" type="Label" parent="PlayerMargin/PlayerVBox/ProgressWrap/TimeRow" unique_id=1414238252]
 unique_name_in_owner = true
 layout_mode = 2
+theme_override_colors/font_color = Color(0.72, 0.82, 0.88, 0.82)
+theme_override_font_sizes/font_size = 12
 text = "04:01"
 horizontal_alignment = 2
 
@@ -293,6 +578,8 @@ horizontal_alignment = 2
 unique_name_in_owner = true
 custom_minimum_size = Vector2(0, 6)
 layout_mode = 2
+theme_override_styles/background = SubResource("StyleBoxFlat_player_progress_bg")
+theme_override_styles/fill = SubResource("StyleBoxFlat_player_progress_fill")
 value = 40.0
 show_percentage = false
 
@@ -307,6 +594,12 @@ theme_override_constants/separation = 18
 unique_name_in_owner = true
 custom_minimum_size = Vector2(48, 48)
 layout_mode = 2
+theme_override_colors/icon_normal_color = Color(0.86, 0.94, 1, 0.88)
+theme_override_colors/icon_hover_color = Color(1, 0.74, 0.34, 1)
+theme_override_styles/normal = SubResource("StyleBoxFlat_player_icon_button")
+theme_override_styles/pressed = SubResource("StyleBoxFlat_player_icon_button_pressed")
+theme_override_styles/hover = SubResource("StyleBoxFlat_player_icon_button_hover")
+theme_override_styles/focus = SubResource("StyleBoxFlat_player_icon_button_hover")
 icon = ExtResource("14_loop_all")
 expand_icon = true
 icon_alignment = 1
@@ -316,6 +609,12 @@ vertical_icon_alignment = 1
 unique_name_in_owner = true
 custom_minimum_size = Vector2(56, 56)
 layout_mode = 2
+theme_override_colors/icon_normal_color = Color(0.9, 0.96, 1, 0.92)
+theme_override_colors/icon_hover_color = Color(1, 0.74, 0.34, 1)
+theme_override_styles/normal = SubResource("StyleBoxFlat_player_icon_button")
+theme_override_styles/pressed = SubResource("StyleBoxFlat_player_icon_button_pressed")
+theme_override_styles/hover = SubResource("StyleBoxFlat_player_icon_button_hover")
+theme_override_styles/focus = SubResource("StyleBoxFlat_player_icon_button_hover")
 icon = ExtResource("10_skip_left")
 expand_icon = true
 icon_alignment = 1
@@ -325,6 +624,12 @@ vertical_icon_alignment = 1
 unique_name_in_owner = true
 custom_minimum_size = Vector2(84, 84)
 layout_mode = 2
+theme_override_colors/icon_normal_color = Color(0.01, 0.015, 0.02, 1)
+theme_override_colors/icon_hover_color = Color(0.01, 0.015, 0.02, 1)
+theme_override_styles/normal = SubResource("StyleBoxFlat_player_primary_button")
+theme_override_styles/pressed = SubResource("StyleBoxFlat_player_primary_button_hover")
+theme_override_styles/hover = SubResource("StyleBoxFlat_player_primary_button_hover")
+theme_override_styles/focus = SubResource("StyleBoxFlat_player_primary_button_hover")
 icon = ExtResource("15_play")
 expand_icon = true
 icon_alignment = 1
@@ -334,6 +639,12 @@ vertical_icon_alignment = 1
 unique_name_in_owner = true
 custom_minimum_size = Vector2(56, 56)
 layout_mode = 2
+theme_override_colors/icon_normal_color = Color(0.9, 0.96, 1, 0.92)
+theme_override_colors/icon_hover_color = Color(1, 0.74, 0.34, 1)
+theme_override_styles/normal = SubResource("StyleBoxFlat_player_icon_button")
+theme_override_styles/pressed = SubResource("StyleBoxFlat_player_icon_button_pressed")
+theme_override_styles/hover = SubResource("StyleBoxFlat_player_icon_button_hover")
+theme_override_styles/focus = SubResource("StyleBoxFlat_player_icon_button_hover")
 icon = ExtResource("11_skip_right")
 expand_icon = true
 icon_alignment = 1
@@ -343,6 +654,12 @@ vertical_icon_alignment = 1
 unique_name_in_owner = true
 custom_minimum_size = Vector2(48, 48)
 layout_mode = 2
+theme_override_colors/icon_normal_color = Color(0.86, 0.94, 1, 0.88)
+theme_override_colors/icon_hover_color = Color(1, 0.74, 0.34, 1)
+theme_override_styles/normal = SubResource("StyleBoxFlat_player_icon_button")
+theme_override_styles/pressed = SubResource("StyleBoxFlat_player_icon_button_pressed")
+theme_override_styles/hover = SubResource("StyleBoxFlat_player_icon_button_hover")
+theme_override_styles/focus = SubResource("StyleBoxFlat_player_icon_button_hover")
 icon = ExtResource("12_playlist")
 expand_icon = true
 icon_alignment = 1

@@ -7,6 +7,7 @@
 [ext_resource type="Texture2D" path="res://textures/play.svg" id="7_play"]
 [ext_resource type="Texture2D" path="res://textures/plus.svg" id="8_plus"]
 [ext_resource type="Texture2D" path="res://textures/pencil-square.svg" id="9_edit"]
+[ext_resource type="PackedScene" path="res://scenes/ui/music_app/playlist/playlist_shelf_3d.tscn" id="10_shelf_3d"]
 [ext_resource type="Script" path="res://dx/runtime/scripts/managers/localization/localize_comp.gd" id="999_localize_comp"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_playlist_hero_cover"]
@@ -96,9 +97,14 @@ expand_icon = true
 icon_alignment = 1
 vertical_icon_alignment = 1
 
+[node name="PlaylistShelf3D" parent="Margin/PlaylistVBox" unique_id=659703091 instance=ExtResource("10_shelf_3d")]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 300)
+layout_mode = 2
+
 [node name="PlaylistHeroPanel" type="Panel" parent="Margin/PlaylistVBox" unique_id=1234494683]
 unique_name_in_owner = true
-custom_minimum_size = Vector2(0, 176)
+custom_minimum_size = Vector2(0, 142)
 layout_mode = 2
 
 [node name="Margin" type="MarginContainer" parent="Margin/PlaylistVBox/PlaylistHeroPanel" unique_id=1871958647]

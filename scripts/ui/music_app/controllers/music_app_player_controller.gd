@@ -1,6 +1,9 @@
 class_name MusicAppPlayerController
 extends "res://scripts/ui/music_app/controllers/music_app_controller_base.gd"
 
+const MusicAppScriptPathsType := preload("res://scripts/constants/music_app_script_paths.gd")
+const FavoriteChangedEventScript := preload(MusicAppScriptPathsType.MUSIC_APP_FAVORITE_CHANGED_EVENT)
+
 ## 判断播放器当前是否存在可播放队列。
 func has_tracks() -> bool:
 	var playback_controller = get_playback_controller()
@@ -112,6 +115,7 @@ func toggle_like_current_track() -> bool:
 		if next_state
 		else tr("music_app.toast.favorite_removed")
 	)
+	DX.signals.fire(FavoriteChangedEventScript.new(track, next_state))
 	return next_state
 
 ## 展示当前播放队列弹窗。

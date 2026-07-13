@@ -164,6 +164,177 @@ text = "语言设置"
 icon = ExtResource("6_language")
 alignment = 0
 
+[node name="VisualizerSection" type="VBoxContainer" parent="Margin/RootVBox/Scroll/ContentVBox" unique_id=1304468054]
+layout_mode = 2
+theme_override_constants/separation = 10
+
+[node name="VisualizerSectionLabel" type="Label" parent="Margin/RootVBox/Scroll/ContentVBox/VisualizerSection" unique_id=544667862]
+layout_mode = 2
+theme_override_font_sizes/font_size = 18
+text = "视觉效果"
+
+[node name="VisualizerEnabledPanel" type="PanelContainer" parent="Margin/RootVBox/Scroll/ContentVBox/VisualizerSection" unique_id=1522105284]
+custom_minimum_size = Vector2(0, 64)
+layout_mode = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_row")
+
+[node name="EnabledRow" type="HBoxContainer" parent="Margin/RootVBox/Scroll/ContentVBox/VisualizerSection/VisualizerEnabledPanel" unique_id=877864980]
+layout_mode = 2
+theme_override_constants/separation = 12
+
+[node name="VisualizerEnabledLabel" type="Label" parent="Margin/RootVBox/Scroll/ContentVBox/VisualizerSection/VisualizerEnabledPanel/EnabledRow" unique_id=641089122]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "启用沉浸式视觉"
+vertical_alignment = 1
+
+[node name="VisualizerEnabledCheckBox" type="CheckBox" parent="Margin/RootVBox/Scroll/ContentVBox/VisualizerSection/VisualizerEnabledPanel/EnabledRow" unique_id=811564037]
+unique_name_in_owner = true
+layout_mode = 2
+button_pressed = true
+
+[node name="VisualizerModePanel" type="PanelContainer" parent="Margin/RootVBox/Scroll/ContentVBox/VisualizerSection" unique_id=1157986209]
+custom_minimum_size = Vector2(0, 88)
+layout_mode = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_row")
+
+[node name="ModeVBox" type="VBoxContainer" parent="Margin/RootVBox/Scroll/ContentVBox/VisualizerSection/VisualizerModePanel" unique_id=1043184791]
+layout_mode = 2
+theme_override_constants/separation = 10
+
+[node name="VisualizerModeLabel" type="Label" parent="Margin/RootVBox/Scroll/ContentVBox/VisualizerSection/VisualizerModePanel/ModeVBox" unique_id=1551763782]
+layout_mode = 2
+text = "视觉模式"
+
+[node name="ModeButtonRow" type="HBoxContainer" parent="Margin/RootVBox/Scroll/ContentVBox/VisualizerSection/VisualizerModePanel/ModeVBox" unique_id=557198203]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="VisualizerModeMineradioButton" type="Button" parent="Margin/RootVBox/Scroll/ContentVBox/VisualizerSection/VisualizerModePanel/ModeVBox/ModeButtonRow" unique_id=1487073211]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+toggle_mode = true
+button_pressed = true
+text = "Mineradio"
+
+[node name="VisualizerModeCityButton" type="Button" parent="Margin/RootVBox/Scroll/ContentVBox/VisualizerSection/VisualizerModePanel/ModeVBox/ModeButtonRow" unique_id=367960490]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+toggle_mode = true
+text = "City"
+
+[node name="VisualizerQualityPanel" type="PanelContainer" parent="Margin/RootVBox/Scroll/ContentVBox/VisualizerSection" unique_id=1017183556]
+custom_minimum_size = Vector2(0, 96)
+layout_mode = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_row")
+
+[node name="QualityVBox" type="VBoxContainer" parent="Margin/RootVBox/Scroll/ContentVBox/VisualizerSection/VisualizerQualityPanel" unique_id=1111344530]
+layout_mode = 2
+theme_override_constants/separation = 10
+
+[node name="VisualizerQualityLabel" type="Label" parent="Margin/RootVBox/Scroll/ContentVBox/VisualizerSection/VisualizerQualityPanel/QualityVBox" unique_id=1857659437]
+layout_mode = 2
+text = "性能档位"
+
+[node name="QualityButtonRow" type="HBoxContainer" parent="Margin/RootVBox/Scroll/ContentVBox/VisualizerSection/VisualizerQualityPanel/QualityVBox" unique_id=2040548576]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="VisualizerQualityOffButton" type="Button" parent="Margin/RootVBox/Scroll/ContentVBox/VisualizerSection/VisualizerQualityPanel/QualityVBox/QualityButtonRow" unique_id=1980207058]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+toggle_mode = true
+text = "Off"
+
+[node name="VisualizerQualityLowButton" type="Button" parent="Margin/RootVBox/Scroll/ContentVBox/VisualizerSection/VisualizerQualityPanel/QualityVBox/QualityButtonRow" unique_id=1745168310]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+toggle_mode = true
+text = "Low"
+
+[node name="VisualizerQualityMediumButton" type="Button" parent="Margin/RootVBox/Scroll/ContentVBox/VisualizerSection/VisualizerQualityPanel/QualityVBox/QualityButtonRow" unique_id=1113476145]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+toggle_mode = true
+button_pressed = true
+text = "Medium"
+
+[node name="VisualizerQualityHighButton" type="Button" parent="Margin/RootVBox/Scroll/ContentVBox/VisualizerSection/VisualizerQualityPanel/QualityVBox/QualityButtonRow" unique_id=922640752]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+toggle_mode = true
+text = "High"
+
+[node name="VisualizerParticlesPanel" type="PanelContainer" parent="Margin/RootVBox/Scroll/ContentVBox/VisualizerSection" unique_id=739374069]
+custom_minimum_size = Vector2(0, 76)
+layout_mode = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_row")
+
+[node name="ParticlesRow" type="HBoxContainer" parent="Margin/RootVBox/Scroll/ContentVBox/VisualizerSection/VisualizerParticlesPanel" unique_id=1720235265]
+layout_mode = 2
+theme_override_constants/separation = 12
+
+[node name="VisualizerParticlesLabel" type="Label" parent="Margin/RootVBox/Scroll/ContentVBox/VisualizerSection/VisualizerParticlesPanel/ParticlesRow" unique_id=760612014]
+custom_minimum_size = Vector2(86, 0)
+layout_mode = 2
+text = "粒子强度"
+vertical_alignment = 1
+
+[node name="VisualizerParticlesSlider" type="HSlider" parent="Margin/RootVBox/Scroll/ContentVBox/VisualizerSection/VisualizerParticlesPanel/ParticlesRow" unique_id=1171703943]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+min_value = 0.25
+max_value = 1.5
+step = 0.05
+value = 1.0
+
+[node name="VisualizerParticlesValueLabel" type="Label" parent="Margin/RootVBox/Scroll/ContentVBox/VisualizerSection/VisualizerParticlesPanel/ParticlesRow"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(52, 0)
+layout_mode = 2
+text = "100%"
+horizontal_alignment = 2
+vertical_alignment = 1
+
+[node name="VisualizerBloomPanel" type="PanelContainer" parent="Margin/RootVBox/Scroll/ContentVBox/VisualizerSection" unique_id=824675291]
+custom_minimum_size = Vector2(0, 76)
+layout_mode = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_row")
+
+[node name="BloomRow" type="HBoxContainer" parent="Margin/RootVBox/Scroll/ContentVBox/VisualizerSection/VisualizerBloomPanel" unique_id=379157250]
+layout_mode = 2
+theme_override_constants/separation = 12
+
+[node name="VisualizerBloomLabel" type="Label" parent="Margin/RootVBox/Scroll/ContentVBox/VisualizerSection/VisualizerBloomPanel/BloomRow" unique_id=1837207595]
+custom_minimum_size = Vector2(86, 0)
+layout_mode = 2
+text = "泛光强度"
+vertical_alignment = 1
+
+[node name="VisualizerBloomSlider" type="HSlider" parent="Margin/RootVBox/Scroll/ContentVBox/VisualizerSection/VisualizerBloomPanel/BloomRow" unique_id=1487828238]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+min_value = 0.0
+max_value = 1.5
+step = 0.05
+value = 1.0
+
+[node name="VisualizerBloomValueLabel" type="Label" parent="Margin/RootVBox/Scroll/ContentVBox/VisualizerSection/VisualizerBloomPanel/BloomRow"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(52, 0)
+layout_mode = 2
+text = "100%"
+horizontal_alignment = 2
+vertical_alignment = 1
+
 [node name="OtherSection" type="VBoxContainer" parent="Margin/RootVBox/Scroll/ContentVBox" unique_id=974697217]
 layout_mode = 2
 theme_override_constants/separation = 10
