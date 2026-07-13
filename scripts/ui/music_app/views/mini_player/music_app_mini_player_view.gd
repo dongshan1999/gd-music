@@ -9,8 +9,8 @@ const PlaybackProgressChangedEventScript := preload(
 	MusicAppScriptPathsType.MUSIC_APP_PLAYBACK_PROGRESS_CHANGED_EVENT
 )
 const REMOTE_ARTWORK_TIMEOUT_SECONDS := 10.0
-const DEFAULT_COVER_BG := Color(0.203922, 0.215686, 0.247059, 1)
-const DEFAULT_COVER_FG := Color(0.968627, 0.968627, 0.972549, 1)
+const DEFAULT_COVER_BG := Color(0.018, 0.024, 0.034, 0.92)
+const DEFAULT_COVER_FG := Color(1.0, 0.76, 0.34, 0.96)
 
 var _controller: MusicAppShowcaseController
 var _mini_player_controller: MusicAppMiniPlayerController

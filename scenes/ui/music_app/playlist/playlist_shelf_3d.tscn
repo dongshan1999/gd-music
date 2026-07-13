@@ -1,0 +1,559 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://scripts/ui/music_app/views/playlist/music_app_playlist_shelf_3d.gd" id="1_lvel7"]
+[ext_resource type="Shader" path="res://shaders/ui/music_app/visualizer/mineradio_stage_frame.gdshader" id="2_stage_frame"]
+
+[sub_resource type="Environment" id="Environment_6yktk"]
+background_mode = 1
+background_color = Color(0.02, 0.024, 0.03, 0)
+ambient_light_source = 2
+ambient_light_color = Color(0.08, 0.12, 0.16, 1)
+ambient_light_energy = 0.85
+glow_enabled = true
+glow_intensity = 0.55
+glow_strength = 0.75
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_shelf_back_halo"]
+shader = ExtResource("2_stage_frame")
+shader_parameter/tint = Color(0.24, 0.92, 1, 1)
+shader_parameter/pulse = 0.0
+shader_parameter/bass = 0.0
+shader_parameter/mid = 0.0
+shader_parameter/treble = 0.0
+shader_parameter/alpha = 0.2
+shader_parameter/radius = 0.72
+shader_parameter/line_width = 0.012
+shader_parameter/glow_width = 0.24
+shader_parameter/spoke_count = 28.0
+shader_parameter/spin_speed = 0.04
+shader_parameter/glass_fill = 0.06
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_shelf_center_halo"]
+shader = ExtResource("2_stage_frame")
+shader_parameter/tint = Color(0.96, 0.74, 0.28, 1)
+shader_parameter/pulse = 0.0
+shader_parameter/bass = 0.0
+shader_parameter/mid = 0.0
+shader_parameter/treble = 0.0
+shader_parameter/alpha = 0.24
+shader_parameter/radius = 0.58
+shader_parameter/line_width = 0.018
+shader_parameter/glow_width = 0.18
+shader_parameter/spoke_count = 18.0
+shader_parameter/spin_speed = -0.075
+shader_parameter/glass_fill = 0.12
+
+[sub_resource type="QuadMesh" id="QuadMesh_shelf_halo"]
+size = Vector2(3.25, 3.25)
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_shelf_platform"]
+transparency = 1
+shading_mode = 0
+albedo_color = Color(0.015, 0.08, 0.11, 0.28)
+emission_enabled = true
+emission = Color(0.06, 0.66, 0.92, 1)
+emission_energy_multiplier = 0.28
+
+[sub_resource type="PlaneMesh" id="PlaneMesh_shelf_platform"]
+size = Vector2(7.4, 2.4)
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_shelf_rail_primary"]
+transparency = 1
+shading_mode = 0
+albedo_color = Color(0.12, 0.9, 1, 0.26)
+emission_enabled = true
+emission = Color(0.12, 0.9, 1, 1)
+emission_energy_multiplier = 0.72
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_shelf_rail_secondary"]
+transparency = 1
+shading_mode = 0
+albedo_color = Color(1, 0.72, 0.28, 0.18)
+emission_enabled = true
+emission = Color(1, 0.72, 0.28, 1)
+emission_energy_multiplier = 0.48
+
+[sub_resource type="BoxMesh" id="BoxMesh_shelf_rail"]
+size = Vector3(7.1, 0.025, 0.035)
+
+[sub_resource type="BoxMesh" id="BoxMesh_shelf_center_pedestal"]
+size = Vector3(1.55, 0.035, 0.95)
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_shelf_pedestal"]
+transparency = 1
+shading_mode = 0
+albedo_color = Color(0.12, 0.86, 1, 0.18)
+emission_enabled = true
+emission = Color(0.12, 0.86, 1, 1)
+emission_energy_multiplier = 0.58
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_card_glass"]
+transparency = 1
+albedo_color = Color(0.008, 0.014, 0.02, 0.86)
+metallic = 0.18
+roughness = 0.24
+emission_enabled = true
+emission = Color(0.10, 0.72, 0.92, 1)
+emission_energy_multiplier = 0.22
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_card_accent_rail"]
+transparency = 1
+shading_mode = 0
+albedo_color = Color(0.14, 0.9, 1, 0.42)
+emission_enabled = true
+emission = Color(0.14, 0.9, 1, 1)
+emission_energy_multiplier = 0.82
+
+[sub_resource type="BoxMesh" id="BoxMesh_card_glass"]
+size = Vector3(1.68, 0.82, 0.07)
+
+[sub_resource type="BoxMesh" id="BoxMesh_card_cover_tile"]
+size = Vector3(0.56, 0.56, 0.075)
+
+[sub_resource type="BoxMesh" id="BoxMesh_card_accent_rail"]
+size = Vector3(1.04, 0.026, 0.035)
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_04hty"]
+albedo_color = Color(0.05, 0.09, 0.13, 1)
+metallic = 0.22
+roughness = 0.34
+emission_enabled = true
+emission = Color(0.12, 0.82, 1, 1)
+emission_energy_multiplier = 0.45
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_kocg4"]
+albedo_color = Color(0.05, 0.09, 0.13, 1)
+metallic = 0.22
+roughness = 0.34
+emission_enabled = true
+emission = Color(0.12, 0.82, 1, 1)
+emission_energy_multiplier = 0.45
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_imsyw"]
+albedo_color = Color(0.08, 0.28, 0.34, 1)
+metallic = 0.22
+roughness = 0.34
+emission_enabled = true
+emission = Color(0.12, 0.82, 1, 1)
+emission_energy_multiplier = 1.7
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_sk0wk"]
+albedo_color = Color(0.05, 0.09, 0.13, 1)
+metallic = 0.22
+roughness = 0.34
+emission_enabled = true
+emission = Color(0.12, 0.82, 1, 1)
+emission_energy_multiplier = 0.45
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_mopk2"]
+albedo_color = Color(0.05, 0.09, 0.13, 1)
+metallic = 0.22
+roughness = 0.34
+emission_enabled = true
+emission = Color(0.12, 0.82, 1, 1)
+emission_energy_multiplier = 0.45
+
+[node name="PlaylistShelf3D" type="Control" unique_id=669230322]
+custom_minimum_size = Vector2(0, 300)
+layout_mode = 3
+anchors_preset = 0
+anchor_right = 1.0
+anchor_bottom = 1.0
+mouse_filter = 1
+script = ExtResource("1_lvel7")
+
+[node name="PlaylistShelfContainer" type="SubViewportContainer" parent="." unique_id=2002342724]
+layout_mode = 0
+anchor_right = 1.0
+anchor_bottom = 1.0
+mouse_filter = 2
+stretch = true
+
+[node name="PlaylistShelfViewport" type="SubViewport" parent="PlaylistShelfContainer" unique_id=778342600]
+unique_name_in_owner = true
+transparent_bg = true
+size = Vector2i(430, 300)
+render_target_update_mode = 4
+
+[node name="ShelfRoot" type="Node3D" parent="PlaylistShelfContainer/PlaylistShelfViewport" unique_id=734217897]
+
+[node name="PlaylistArtworkRequest" type="HTTPRequest" parent="PlaylistShelfContainer/PlaylistShelfViewport/ShelfRoot" unique_id=1984717368]
+unique_name_in_owner = true
+
+[node name="ShelfEnvironment" type="WorldEnvironment" parent="PlaylistShelfContainer/PlaylistShelfViewport/ShelfRoot" unique_id=626459399]
+environment = SubResource("Environment_6yktk")
+
+[node name="ShelfCamera" type="Camera3D" parent="PlaylistShelfContainer/PlaylistShelfViewport/ShelfRoot" unique_id=544619799]
+transform = Transform3D(1, 0, 0, 0, 0.9851093, 0.1719291, 0, -0.1719291, 0.9851093, 0, 1.05, 7.4)
+current = true
+fov = 52.0
+
+[node name="ShelfKeyLight" type="DirectionalLight3D" parent="PlaylistShelfContainer/PlaylistShelfViewport/ShelfRoot" unique_id=1974471976]
+transform = Transform3D(0.95105654, -0.17724487, 0.25313193, 0, 0.81915206, 0.57357645, -0.309017, -0.5455036, 0.77905995, 0, 0, 0)
+light_energy = 0.9
+
+[node name="ShelfGlowLight" type="OmniLight3D" parent="PlaylistShelfContainer/PlaylistShelfViewport/ShelfRoot" unique_id=2081468064]
+unique_name_in_owner = true
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.1, 1.6)
+light_color = Color(0.22, 0.9, 1, 1)
+light_energy = 1.2
+omni_range = 8.0
+
+[node name="ShelfStage" type="Node3D" parent="PlaylistShelfContainer/PlaylistShelfViewport/ShelfRoot"]
+unique_name_in_owner = true
+
+[node name="ShelfBackHalo" type="MeshInstance3D" parent="PlaylistShelfContainer/PlaylistShelfViewport/ShelfRoot/ShelfStage"]
+unique_name_in_owner = true
+position = Vector3(0, 0.55, -0.92)
+rotation = Vector3(0, 0, 0.12)
+scale = Vector3(1.26, 0.76, 1)
+material_override = SubResource("ShaderMaterial_shelf_back_halo")
+mesh = SubResource("QuadMesh_shelf_halo")
+
+[node name="ShelfCenterHalo" type="MeshInstance3D" parent="PlaylistShelfContainer/PlaylistShelfViewport/ShelfRoot/ShelfStage"]
+unique_name_in_owner = true
+position = Vector3(0, 0.47, -0.18)
+rotation = Vector3(0, 0, -0.08)
+scale = Vector3(0.68, 0.88, 1)
+material_override = SubResource("ShaderMaterial_shelf_center_halo")
+mesh = SubResource("QuadMesh_shelf_halo")
+
+[node name="ShelfPlatform" type="MeshInstance3D" parent="PlaylistShelfContainer/PlaylistShelfViewport/ShelfRoot/ShelfStage"]
+unique_name_in_owner = true
+position = Vector3(0, -0.48, -0.05)
+material_override = SubResource("StandardMaterial3D_shelf_platform")
+mesh = SubResource("PlaneMesh_shelf_platform")
+
+[node name="ShelfFrontRail" type="MeshInstance3D" parent="PlaylistShelfContainer/PlaylistShelfViewport/ShelfRoot/ShelfStage"]
+unique_name_in_owner = true
+position = Vector3(0, -0.39, 0.64)
+material_override = SubResource("StandardMaterial3D_shelf_rail_primary")
+mesh = SubResource("BoxMesh_shelf_rail")
+
+[node name="ShelfBackRail" type="MeshInstance3D" parent="PlaylistShelfContainer/PlaylistShelfViewport/ShelfRoot/ShelfStage"]
+unique_name_in_owner = true
+position = Vector3(0, -0.42, -0.78)
+material_override = SubResource("StandardMaterial3D_shelf_rail_secondary")
+mesh = SubResource("BoxMesh_shelf_rail")
+
+[node name="ShelfCenterPedestal" type="MeshInstance3D" parent="PlaylistShelfContainer/PlaylistShelfViewport/ShelfRoot/ShelfStage"]
+unique_name_in_owner = true
+position = Vector3(0, -0.34, 0.28)
+material_override = SubResource("StandardMaterial3D_shelf_pedestal")
+mesh = SubResource("BoxMesh_shelf_center_pedestal")
+
+[node name="CardSlots" type="Node3D" parent="PlaylistShelfContainer/PlaylistShelfViewport/ShelfRoot" unique_id=245343676]
+
+[node name="CardFarLeft" type="Node3D" parent="PlaylistShelfContainer/PlaylistShelfViewport/ShelfRoot/CardSlots" unique_id=371085149]
+transform = Transform3D(0.49, 0, 0.22, 0, 0.53, 0, -0.22, 0, 0.49, -2.62, 0.18, -0.86)
+
+[node name="CardGlass" type="MeshInstance3D" parent="PlaylistShelfContainer/PlaylistShelfViewport/ShelfRoot/CardSlots/CardFarLeft"]
+position = Vector3(0, 0, -0.025)
+material_override = SubResource("StandardMaterial3D_card_glass")
+mesh = SubResource("BoxMesh_card_glass")
+
+[node name="Cover" type="MeshInstance3D" parent="PlaylistShelfContainer/PlaylistShelfViewport/ShelfRoot/CardSlots/CardFarLeft" unique_id=1231477154]
+position = Vector3(-0.46, 0.04, 0.052)
+material_override = SubResource("StandardMaterial3D_04hty")
+mesh = SubResource("BoxMesh_card_cover_tile")
+
+[node name="CardAccentRail" type="MeshInstance3D" parent="PlaylistShelfContainer/PlaylistShelfViewport/ShelfRoot/CardSlots/CardFarLeft"]
+position = Vector3(0.18, -0.32, 0.055)
+material_override = SubResource("StandardMaterial3D_card_accent_rail")
+mesh = SubResource("BoxMesh_card_accent_rail")
+
+[node name="MarkLabel" type="Label3D" parent="PlaylistShelfContainer/PlaylistShelfViewport/ShelfRoot/CardSlots/CardFarLeft" unique_id=1056130900]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.46, 0.07, 0.1)
+modulate = Color(0.72, 0.96, 1, 1)
+outline_modulate = Color(0, 0, 0, 0.58)
+text = "歌"
+font_size = 42
+outline_size = 6
+
+[node name="TitleLabel" type="Label3D" parent="PlaylistShelfContainer/PlaylistShelfViewport/ShelfRoot/CardSlots/CardFarLeft" unique_id=1408895043]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.28, 0.13, 0.082)
+modulate = Color(0.95, 0.98, 1, 1)
+outline_modulate = Color(0, 0, 0, 0.62)
+text = "歌单"
+font_size = 20
+outline_size = 4
+width = 110.0
+
+[node name="CountLabel" type="Label3D" parent="PlaylistShelfContainer/PlaylistShelfViewport/ShelfRoot/CardSlots/CardFarLeft" unique_id=31124144]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.28, -0.12, 0.085)
+modulate = Color(0.58, 0.78, 0.86, 1)
+outline_modulate = Color(0, 0, 0, 0.58)
+text = "0 首"
+font_size = 15
+outline_size = 3
+width = 110.0
+
+[node name="CardLeft" type="Node3D" parent="PlaylistShelfContainer/PlaylistShelfViewport/ShelfRoot/CardSlots" unique_id=288936598]
+transform = Transform3D(0.73, 0, 0.17, 0, 0.72, 0, -0.17, 0, 0.73, -1.38, 0.26, -0.05)
+
+[node name="CardGlass" type="MeshInstance3D" parent="PlaylistShelfContainer/PlaylistShelfViewport/ShelfRoot/CardSlots/CardLeft"]
+position = Vector3(0, 0, -0.025)
+material_override = SubResource("StandardMaterial3D_card_glass")
+mesh = SubResource("BoxMesh_card_glass")
+
+[node name="Cover" type="MeshInstance3D" parent="PlaylistShelfContainer/PlaylistShelfViewport/ShelfRoot/CardSlots/CardLeft" unique_id=131901967]
+position = Vector3(-0.46, 0.04, 0.052)
+material_override = SubResource("StandardMaterial3D_kocg4")
+mesh = SubResource("BoxMesh_card_cover_tile")
+
+[node name="CardAccentRail" type="MeshInstance3D" parent="PlaylistShelfContainer/PlaylistShelfViewport/ShelfRoot/CardSlots/CardLeft"]
+position = Vector3(0.18, -0.32, 0.055)
+material_override = SubResource("StandardMaterial3D_card_accent_rail")
+mesh = SubResource("BoxMesh_card_accent_rail")
+
+[node name="MarkLabel" type="Label3D" parent="PlaylistShelfContainer/PlaylistShelfViewport/ShelfRoot/CardSlots/CardLeft" unique_id=1730319396]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.46, 0.07, 0.1)
+modulate = Color(0.72, 0.96, 1, 1)
+outline_modulate = Color(0, 0, 0, 0.58)
+text = "歌"
+font_size = 42
+outline_size = 6
+
+[node name="TitleLabel" type="Label3D" parent="PlaylistShelfContainer/PlaylistShelfViewport/ShelfRoot/CardSlots/CardLeft" unique_id=1210129109]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.28, 0.13, 0.082)
+modulate = Color(0.95, 0.98, 1, 1)
+outline_modulate = Color(0, 0, 0, 0.62)
+text = "歌单"
+font_size = 20
+outline_size = 4
+width = 110.0
+
+[node name="CountLabel" type="Label3D" parent="PlaylistShelfContainer/PlaylistShelfViewport/ShelfRoot/CardSlots/CardLeft" unique_id=1433861070]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.28, -0.12, 0.085)
+modulate = Color(0.58, 0.78, 0.86, 1)
+outline_modulate = Color(0, 0, 0, 0.58)
+text = "0 首"
+font_size = 15
+outline_size = 3
+width = 110.0
+
+[node name="CardCenter" type="Node3D" parent="PlaylistShelfContainer/PlaylistShelfViewport/ShelfRoot/CardSlots" unique_id=1194335898]
+transform = Transform3D(1.02, 0, 0, 0, 1.02, 0, 0, 0, 1.02, 0, 0.38, 0.38)
+
+[node name="CardGlass" type="MeshInstance3D" parent="PlaylistShelfContainer/PlaylistShelfViewport/ShelfRoot/CardSlots/CardCenter"]
+position = Vector3(0, 0, -0.025)
+material_override = SubResource("StandardMaterial3D_card_glass")
+mesh = SubResource("BoxMesh_card_glass")
+
+[node name="Cover" type="MeshInstance3D" parent="PlaylistShelfContainer/PlaylistShelfViewport/ShelfRoot/CardSlots/CardCenter" unique_id=973171683]
+position = Vector3(-0.46, 0.04, 0.052)
+material_override = SubResource("StandardMaterial3D_imsyw")
+mesh = SubResource("BoxMesh_card_cover_tile")
+
+[node name="CardAccentRail" type="MeshInstance3D" parent="PlaylistShelfContainer/PlaylistShelfViewport/ShelfRoot/CardSlots/CardCenter"]
+position = Vector3(0.18, -0.32, 0.055)
+material_override = SubResource("StandardMaterial3D_card_accent_rail")
+mesh = SubResource("BoxMesh_card_accent_rail")
+
+[node name="MarkLabel" type="Label3D" parent="PlaylistShelfContainer/PlaylistShelfViewport/ShelfRoot/CardSlots/CardCenter" unique_id=1948453363]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.46, 0.07, 0.1)
+modulate = Color(0.72, 0.96, 1, 1)
+outline_modulate = Color(0, 0, 0, 0.58)
+text = "歌"
+font_size = 42
+outline_size = 6
+
+[node name="TitleLabel" type="Label3D" parent="PlaylistShelfContainer/PlaylistShelfViewport/ShelfRoot/CardSlots/CardCenter" unique_id=165031497]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.28, 0.13, 0.082)
+modulate = Color(0.95, 0.98, 1, 1)
+outline_modulate = Color(0, 0, 0, 0.62)
+text = "歌单"
+font_size = 20
+outline_size = 4
+width = 110.0
+
+[node name="CountLabel" type="Label3D" parent="PlaylistShelfContainer/PlaylistShelfViewport/ShelfRoot/CardSlots/CardCenter" unique_id=112335505]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.28, -0.12, 0.085)
+modulate = Color(0.58, 0.78, 0.86, 1)
+outline_modulate = Color(0, 0, 0, 0.58)
+text = "0 首"
+font_size = 15
+outline_size = 3
+width = 110.0
+
+[node name="CardRight" type="Node3D" parent="PlaylistShelfContainer/PlaylistShelfViewport/ShelfRoot/CardSlots" unique_id=1910982431]
+transform = Transform3D(0.73, 0, -0.17, 0, 0.72, 0, 0.17, 0, 0.73, 1.38, 0.26, -0.05)
+
+[node name="CardGlass" type="MeshInstance3D" parent="PlaylistShelfContainer/PlaylistShelfViewport/ShelfRoot/CardSlots/CardRight"]
+position = Vector3(0, 0, -0.025)
+material_override = SubResource("StandardMaterial3D_card_glass")
+mesh = SubResource("BoxMesh_card_glass")
+
+[node name="Cover" type="MeshInstance3D" parent="PlaylistShelfContainer/PlaylistShelfViewport/ShelfRoot/CardSlots/CardRight" unique_id=579992418]
+position = Vector3(-0.46, 0.04, 0.052)
+material_override = SubResource("StandardMaterial3D_sk0wk")
+mesh = SubResource("BoxMesh_card_cover_tile")
+
+[node name="CardAccentRail" type="MeshInstance3D" parent="PlaylistShelfContainer/PlaylistShelfViewport/ShelfRoot/CardSlots/CardRight"]
+position = Vector3(0.18, -0.32, 0.055)
+material_override = SubResource("StandardMaterial3D_card_accent_rail")
+mesh = SubResource("BoxMesh_card_accent_rail")
+
+[node name="MarkLabel" type="Label3D" parent="PlaylistShelfContainer/PlaylistShelfViewport/ShelfRoot/CardSlots/CardRight" unique_id=499792008]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.46, 0.07, 0.1)
+modulate = Color(0.72, 0.96, 1, 1)
+outline_modulate = Color(0, 0, 0, 0.58)
+text = "歌"
+font_size = 42
+outline_size = 6
+
+[node name="TitleLabel" type="Label3D" parent="PlaylistShelfContainer/PlaylistShelfViewport/ShelfRoot/CardSlots/CardRight" unique_id=1491930908]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.28, 0.13, 0.082)
+modulate = Color(0.95, 0.98, 1, 1)
+outline_modulate = Color(0, 0, 0, 0.62)
+text = "歌单"
+font_size = 20
+outline_size = 4
+width = 110.0
+
+[node name="CountLabel" type="Label3D" parent="PlaylistShelfContainer/PlaylistShelfViewport/ShelfRoot/CardSlots/CardRight" unique_id=2100040794]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.28, -0.12, 0.085)
+modulate = Color(0.58, 0.78, 0.86, 1)
+outline_modulate = Color(0, 0, 0, 0.58)
+text = "0 首"
+font_size = 15
+outline_size = 3
+width = 110.0
+
+[node name="CardFarRight" type="Node3D" parent="PlaylistShelfContainer/PlaylistShelfViewport/ShelfRoot/CardSlots" unique_id=111146294]
+transform = Transform3D(0.49, 0, -0.22, 0, 0.53, 0, 0.22, 0, 0.49, 2.62, 0.18, -0.86)
+
+[node name="CardGlass" type="MeshInstance3D" parent="PlaylistShelfContainer/PlaylistShelfViewport/ShelfRoot/CardSlots/CardFarRight"]
+position = Vector3(0, 0, -0.025)
+material_override = SubResource("StandardMaterial3D_card_glass")
+mesh = SubResource("BoxMesh_card_glass")
+
+[node name="Cover" type="MeshInstance3D" parent="PlaylistShelfContainer/PlaylistShelfViewport/ShelfRoot/CardSlots/CardFarRight" unique_id=1956261125]
+position = Vector3(-0.46, 0.04, 0.052)
+material_override = SubResource("StandardMaterial3D_mopk2")
+mesh = SubResource("BoxMesh_card_cover_tile")
+
+[node name="CardAccentRail" type="MeshInstance3D" parent="PlaylistShelfContainer/PlaylistShelfViewport/ShelfRoot/CardSlots/CardFarRight"]
+position = Vector3(0.18, -0.32, 0.055)
+material_override = SubResource("StandardMaterial3D_card_accent_rail")
+mesh = SubResource("BoxMesh_card_accent_rail")
+
+[node name="MarkLabel" type="Label3D" parent="PlaylistShelfContainer/PlaylistShelfViewport/ShelfRoot/CardSlots/CardFarRight" unique_id=969850907]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.46, 0.07, 0.1)
+modulate = Color(0.72, 0.96, 1, 1)
+outline_modulate = Color(0, 0, 0, 0.58)
+text = "歌"
+font_size = 42
+outline_size = 6
+
+[node name="TitleLabel" type="Label3D" parent="PlaylistShelfContainer/PlaylistShelfViewport/ShelfRoot/CardSlots/CardFarRight" unique_id=1183191996]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.28, 0.13, 0.082)
+modulate = Color(0.95, 0.98, 1, 1)
+outline_modulate = Color(0, 0, 0, 0.62)
+text = "歌单"
+font_size = 20
+outline_size = 4
+width = 110.0
+
+[node name="CountLabel" type="Label3D" parent="PlaylistShelfContainer/PlaylistShelfViewport/ShelfRoot/CardSlots/CardFarRight" unique_id=305107074]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.28, -0.12, 0.085)
+modulate = Color(0.58, 0.78, 0.86, 1)
+outline_modulate = Color(0, 0, 0, 0.58)
+text = "0 首"
+font_size = 15
+outline_size = 3
+width = 110.0
+
+[node name="ShelfHitAreas" type="Control" parent="." unique_id=1880465960]
+layout_mode = 0
+anchor_right = 1.0
+anchor_bottom = 1.0
+mouse_filter = 1
+
+[node name="ShelfFarLeftHitButton" type="Button" parent="ShelfHitAreas" unique_id=1254511026]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(58, 150)
+layout_mode = 0
+anchor_left = 0.02
+anchor_top = 0.21
+anchor_right = 0.15
+anchor_bottom = 0.72
+grow_horizontal = 2
+grow_vertical = 2
+flat = true
+
+[node name="ShelfLeftHitButton" type="Button" parent="ShelfHitAreas" unique_id=1995673356]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(92, 170)
+layout_mode = 0
+anchor_left = 0.14
+anchor_top = 0.18
+anchor_right = 0.36
+anchor_bottom = 0.76
+grow_horizontal = 2
+grow_vertical = 2
+flat = true
+
+[node name="ShelfCenterHitButton" type="Button" parent="ShelfHitAreas" unique_id=1747268820]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(150, 190)
+layout_mode = 0
+anchor_left = 0.32
+anchor_top = 0.14
+anchor_right = 0.68
+anchor_bottom = 0.80
+grow_horizontal = 2
+grow_vertical = 2
+flat = true
+
+[node name="ShelfRightHitButton" type="Button" parent="ShelfHitAreas" unique_id=1494547667]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(92, 170)
+layout_mode = 0
+anchor_left = 0.64
+anchor_top = 0.18
+anchor_right = 0.86
+anchor_bottom = 0.76
+grow_horizontal = 2
+grow_vertical = 2
+flat = true
+
+[node name="ShelfFarRightHitButton" type="Button" parent="ShelfHitAreas" unique_id=1643582661]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(58, 150)
+layout_mode = 0
+anchor_left = 0.85
+anchor_top = 0.21
+anchor_right = 0.98
+anchor_bottom = 0.72
+grow_horizontal = 2
+grow_vertical = 2
+flat = true
+
+[node name="ShelfControls" type="HBoxContainer" parent="." unique_id=1797408623]
+visible = false
+layout_mode = 0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_top = 252.0
+offset_bottom = 300.0
+theme_override_constants/separation = 44
+alignment = 1
+
+[node name="ShelfPreviousButton" type="Button" parent="ShelfControls" unique_id=783951544]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(34, 34)
+layout_mode = 2
+text = "<"
+
+[node name="ShelfPlayButton" type="Button" parent="ShelfControls" unique_id=64461952]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(54, 34)
+layout_mode = 2
+text = "▶"
+
+[node name="ShelfNextButton" type="Button" parent="ShelfControls" unique_id=1378288803]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(34, 34)
+layout_mode = 2
+text = ">"

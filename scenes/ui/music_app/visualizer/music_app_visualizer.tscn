@@ -1,0 +1,1166 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://scripts/ui/music_app/views/visualizer/music_app_visualizer_view.gd" id="1_08ydn"]
+[ext_resource type="Script" path="res://scripts/ui/music_app/views/visualizer/music_app_voxel_city.gd" id="2_voxel_city"]
+[ext_resource type="Script" path="res://scripts/ui/music_app/views/visualizer/music_app_cover_particle_stage.gd" id="3_cover_particle"]
+[ext_resource type="Shader" path="res://shaders/ui/music_app/visualizer/cover_particle_stage.gdshader" id="4_cover_particle_shader"]
+[ext_resource type="Shader" path="res://shaders/ui/music_app/visualizer/cover_particle_bloom.gdshader" id="5_cover_bloom_shader"]
+[ext_resource type="Shader" path="res://shaders/ui/music_app/visualizer/mineradio_light_flow_overlay.gdshader" id="6_light_flow_shader"]
+[ext_resource type="Shader" path="res://shaders/ui/music_app/visualizer/mineradio_stage_frame.gdshader" id="7_stage_frame_shader"]
+
+[sub_resource type="Environment" id="Environment_kjp2h"]
+background_mode = 1
+background_color = Color(0.015, 0.018, 0.026, 1)
+ambient_light_source = 2
+ambient_light_color = Color(0.08, 0.11, 0.16, 1)
+ambient_light_energy = 0.65
+glow_enabled = true
+glow_intensity = 0.78
+glow_strength = 1.05
+
+[sub_resource type="ParticleProcessMaterial" id="ParticleProcessMaterial_2l5lt"]
+emission_shape = 1
+emission_sphere_radius = 3.5
+direction = Vector3(0, 1, 0)
+spread = 180.0
+initial_velocity_min = 0.4
+initial_velocity_max = 1.8
+gravity = Vector3(0, 0.08, 0)
+scale_min = 0.035
+scale_max = 0.08
+color = Color(0.18, 0.86, 1, 0.92)
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_riuy6"]
+transparency = 1
+shading_mode = 0
+albedo_color = Color(0.2, 0.95, 1, 0.72)
+
+[sub_resource type="QuadMesh" id="QuadMesh_7yugm"]
+material = SubResource("StandardMaterial3D_riuy6")
+size = Vector2(0.08, 0.08)
+
+[sub_resource type="ParticleProcessMaterial" id="ParticleProcessMaterial_stardust"]
+emission_shape = 3
+emission_box_extents = Vector3(9, 5, 4)
+direction = Vector3(0, 0.25, -0.1)
+spread = 180.0
+initial_velocity_min = 0.04
+initial_velocity_max = 0.32
+gravity = Vector3(0, 0.015, 0)
+scale_min = 0.012
+scale_max = 0.045
+color = Color(0.46, 0.94, 1, 0.62)
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_stardust"]
+transparency = 1
+shading_mode = 0
+albedo_color = Color(0.46, 0.94, 1, 0.58)
+emission_enabled = true
+emission = Color(0.24, 0.86, 1, 1)
+emission_energy_multiplier = 0.95
+
+[sub_resource type="QuadMesh" id="QuadMesh_stardust"]
+material = SubResource("StandardMaterial3D_stardust")
+size = Vector2(0.035, 0.035)
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_ribbon_primary"]
+transparency = 1
+shading_mode = 0
+albedo_color = Color(0.08, 0.86, 1, 0.18)
+emission_enabled = true
+emission = Color(0.05, 0.82, 1, 1)
+emission_energy_multiplier = 0.7
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_ribbon_secondary"]
+transparency = 1
+shading_mode = 0
+albedo_color = Color(0.74, 0.58, 0.22, 0.1)
+emission_enabled = true
+emission = Color(0.9, 0.66, 0.28, 1)
+emission_energy_multiplier = 0.45
+
+[sub_resource type="QuadMesh" id="QuadMesh_ribbon_wide"]
+size = Vector2(1, 1)
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_stage_outer"]
+shader = ExtResource("7_stage_frame_shader")
+shader_parameter/tint = Color(0.44, 0.92, 1, 1)
+shader_parameter/pulse = 0.0
+shader_parameter/bass = 0.0
+shader_parameter/mid = 0.0
+shader_parameter/treble = 0.0
+shader_parameter/alpha = 0.32
+shader_parameter/radius = 0.78
+shader_parameter/line_width = 0.012
+shader_parameter/glow_width = 0.22
+shader_parameter/spoke_count = 36.0
+shader_parameter/spin_speed = 0.045
+shader_parameter/glass_fill = 0.03
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_stage_mid"]
+shader = ExtResource("7_stage_frame_shader")
+shader_parameter/tint = Color(0.44, 0.92, 1, 1)
+shader_parameter/pulse = 0.0
+shader_parameter/bass = 0.0
+shader_parameter/mid = 0.0
+shader_parameter/treble = 0.0
+shader_parameter/alpha = 0.24
+shader_parameter/radius = 0.66
+shader_parameter/line_width = 0.016
+shader_parameter/glow_width = 0.18
+shader_parameter/spoke_count = 18.0
+shader_parameter/spin_speed = -0.068
+shader_parameter/glass_fill = 0.08
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_stage_inner"]
+shader = ExtResource("7_stage_frame_shader")
+shader_parameter/tint = Color(0.44, 0.92, 1, 1)
+shader_parameter/pulse = 0.0
+shader_parameter/bass = 0.0
+shader_parameter/mid = 0.0
+shader_parameter/treble = 0.0
+shader_parameter/alpha = 0.18
+shader_parameter/radius = 0.54
+shader_parameter/line_width = 0.011
+shader_parameter/glow_width = 0.14
+shader_parameter/spoke_count = 12.0
+shader_parameter/spin_speed = 0.12
+shader_parameter/glass_fill = 0.12
+
+[sub_resource type="QuadMesh" id="QuadMesh_stage_frame"]
+size = Vector2(4.6, 4.6)
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_city_ground"]
+transparency = 1
+shading_mode = 0
+albedo_color = Color(0.006, 0.012, 0.018, 0.74)
+emission_enabled = true
+emission = Color(0.02, 0.16, 0.22, 1)
+emission_energy_multiplier = 0.35
+
+[sub_resource type="PlaneMesh" id="PlaneMesh_city_ground"]
+size = Vector2(14, 14)
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_city_road_primary"]
+transparency = 1
+shading_mode = 0
+albedo_color = Color(0.04, 0.86, 1, 0.18)
+emission_enabled = true
+emission = Color(0.04, 0.86, 1, 1)
+emission_energy_multiplier = 0.9
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_city_road_secondary"]
+transparency = 1
+shading_mode = 0
+albedo_color = Color(1, 0.68, 0.24, 0.12)
+emission_enabled = true
+emission = Color(1, 0.62, 0.18, 1)
+emission_energy_multiplier = 0.55
+
+[sub_resource type="PlaneMesh" id="PlaneMesh_city_road"]
+size = Vector2(14, 0.075)
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_city_fog"]
+transparency = 1
+shading_mode = 0
+albedo_color = Color(0.08, 0.65, 0.9, 0.075)
+emission_enabled = true
+emission = Color(0.04, 0.58, 0.9, 1)
+emission_energy_multiplier = 0.28
+
+[sub_resource type="PlaneMesh" id="PlaneMesh_city_fog"]
+size = Vector2(13, 5.2)
+
+[sub_resource type="Shader" id="Shader_scanline_overlay"]
+code = "shader_type canvas_item;
+
+uniform float pulse = 0.0;
+uniform float scanline_alpha = 0.075;
+uniform float vignette_alpha = 0.42;
+uniform vec4 tint : source_color = vec4(0.08, 0.9, 1.0, 1.0);
+
+void fragment() {
+	vec2 uv = UV;
+	float line = step(0.72, fract(uv.y * 760.0 + TIME * 10.0));
+	float fine_noise = fract(sin(dot(floor(uv * vec2(280.0, 520.0)), vec2(12.9898, 78.233))) * 43758.5453);
+	float scan = line * scanline_alpha * (0.45 + fine_noise * 0.55);
+	float dist = distance(uv, vec2(0.5, 0.5));
+	float vignette = smoothstep(0.28, 0.82, dist) * vignette_alpha;
+	float center_glow = smoothstep(0.8, 0.0, dist) * pulse * 0.055;
+	vec3 color = mix(vec3(0.0), tint.rgb, scan * 0.75 + center_glow);
+	COLOR = vec4(color, max(vignette, scan + center_glow));
+}
+"
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_scanline_overlay"]
+shader = ExtResource("6_light_flow_shader")
+shader_parameter/pulse = 0.0
+shader_parameter/scanline_alpha = 0.055
+shader_parameter/vignette_alpha = 0.56
+shader_parameter/tint = Color(0.08, 0.9, 1, 1)
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_cover_particle_stage"]
+shader = ExtResource("4_cover_particle_shader")
+shader_parameter/color_mix = 1.0
+shader_parameter/has_cover = 0.0
+shader_parameter/time = 0.0
+shader_parameter/bass = 0.0
+shader_parameter/mid = 0.0
+shader_parameter/treble = 0.0
+shader_parameter/beat = 0.0
+shader_parameter/energy = 0.0
+shader_parameter/burst = 0.0
+shader_parameter/activity = 1.0
+shader_parameter/alpha = 0.94
+shader_parameter/point_scale = 1.0
+shader_parameter/tint_color = Color(0.44, 0.92, 1, 1)
+shader_parameter/ripple0 = Vector4(0, 0, 9, 0)
+shader_parameter/ripple1 = Vector4(0, 0, 9, 0)
+shader_parameter/ripple2 = Vector4(0, 0, 9, 0)
+shader_parameter/ripple3 = Vector4(0, 0, 9, 0)
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_cover_particle_bloom"]
+shader = ExtResource("5_cover_bloom_shader")
+shader_parameter/color_mix = 1.0
+shader_parameter/has_cover = 0.0
+shader_parameter/time = 0.0
+shader_parameter/bass = 0.0
+shader_parameter/mid = 0.0
+shader_parameter/treble = 0.0
+shader_parameter/beat = 0.0
+shader_parameter/energy = 0.0
+shader_parameter/burst = 0.0
+shader_parameter/activity = 1.0
+shader_parameter/alpha = 0.22
+shader_parameter/point_scale = 1.0
+shader_parameter/bloom_strength = 0.72
+shader_parameter/tint_color = Color(0.44, 0.92, 1, 1)
+shader_parameter/ripple0 = Vector4(0, 0, 9, 0)
+shader_parameter/ripple1 = Vector4(0, 0, 9, 0)
+shader_parameter/ripple2 = Vector4(0, 0, 9, 0)
+shader_parameter/ripple3 = Vector4(0, 0, 9, 0)
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_xufr3"]
+albedo_color = Color(0.071, 0.215, 0.22, 1)
+metallic = 0.35
+roughness = 0.38
+emission_enabled = true
+emission = Color(0.05, 0.72, 0.96, 1)
+emission_energy_multiplier = 0.25
+
+[sub_resource type="BoxMesh" id="BoxMesh_m35dr"]
+size = Vector3(0.42, 1, 0.42)
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_multimesh_city"]
+vertex_color_use_as_albedo = true
+metallic = 0.28
+roughness = 0.36
+emission_enabled = true
+emission = Color(0.08, 0.72, 1, 1)
+emission_energy_multiplier = 0.08
+
+[sub_resource type="BoxMesh" id="BoxMesh_multimesh_city"]
+material = SubResource("StandardMaterial3D_multimesh_city")
+size = Vector3(0.24, 1, 0.24)
+
+[sub_resource type="MultiMesh" id="MultiMesh_city"]
+transform_format = 1
+use_colors = true
+mesh = SubResource("BoxMesh_multimesh_city")
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_imcs0"]
+albedo_color = Color(0.071, 0.2, 0.22, 1)
+metallic = 0.35
+roughness = 0.38
+emission_enabled = true
+emission = Color(0.05, 0.72, 0.96, 1)
+emission_energy_multiplier = 0.25
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_7eqv2"]
+albedo_color = Color(0.071, 0.185, 0.22, 1)
+metallic = 0.35
+roughness = 0.38
+emission_enabled = true
+emission = Color(0.05, 0.72, 0.96, 1)
+emission_energy_multiplier = 0.25
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_7x1c0"]
+albedo_color = Color(0.071, 0.17, 0.22, 1)
+metallic = 0.35
+roughness = 0.38
+emission_enabled = true
+emission = Color(0.05, 0.72, 0.96, 1)
+emission_energy_multiplier = 0.25
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_caccc"]
+albedo_color = Color(0.071, 0.185, 0.22, 1)
+metallic = 0.35
+roughness = 0.38
+emission_enabled = true
+emission = Color(0.05, 0.72, 0.96, 1)
+emission_energy_multiplier = 0.25
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_ae33c"]
+albedo_color = Color(0.071, 0.2, 0.22, 1)
+metallic = 0.35
+roughness = 0.38
+emission_enabled = true
+emission = Color(0.05, 0.72, 0.96, 1)
+emission_energy_multiplier = 0.25
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_av56k"]
+albedo_color = Color(0.071, 0.215, 0.22, 1)
+metallic = 0.35
+roughness = 0.38
+emission_enabled = true
+emission = Color(0.05, 0.72, 0.96, 1)
+emission_energy_multiplier = 0.25
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_dq8qi"]
+albedo_color = Color(0.059, 0.215, 0.22, 1)
+metallic = 0.35
+roughness = 0.38
+emission_enabled = true
+emission = Color(0.05, 0.72, 0.96, 1)
+emission_energy_multiplier = 0.25
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_ixhvy"]
+albedo_color = Color(0.059, 0.2, 0.22, 1)
+metallic = 0.35
+roughness = 0.38
+emission_enabled = true
+emission = Color(0.05, 0.72, 0.96, 1)
+emission_energy_multiplier = 0.25
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_34rbd"]
+albedo_color = Color(0.059, 0.185, 0.22, 1)
+metallic = 0.35
+roughness = 0.38
+emission_enabled = true
+emission = Color(0.05, 0.72, 0.96, 1)
+emission_energy_multiplier = 0.25
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_chy0r"]
+albedo_color = Color(0.059, 0.17, 0.22, 1)
+metallic = 0.35
+roughness = 0.38
+emission_enabled = true
+emission = Color(0.05, 0.72, 0.96, 1)
+emission_energy_multiplier = 0.25
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_e24im"]
+albedo_color = Color(0.059, 0.185, 0.22, 1)
+metallic = 0.35
+roughness = 0.38
+emission_enabled = true
+emission = Color(0.05, 0.72, 0.96, 1)
+emission_energy_multiplier = 0.25
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_gq3ws"]
+albedo_color = Color(0.059, 0.2, 0.22, 1)
+metallic = 0.35
+roughness = 0.38
+emission_enabled = true
+emission = Color(0.05, 0.72, 0.96, 1)
+emission_energy_multiplier = 0.25
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_wnj3y"]
+albedo_color = Color(0.059, 0.215, 0.22, 1)
+metallic = 0.35
+roughness = 0.38
+emission_enabled = true
+emission = Color(0.05, 0.72, 0.96, 1)
+emission_energy_multiplier = 0.25
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_8f3qu"]
+albedo_color = Color(0.047, 0.215, 0.22, 1)
+metallic = 0.35
+roughness = 0.38
+emission_enabled = true
+emission = Color(0.05, 0.72, 0.96, 1)
+emission_energy_multiplier = 0.25
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_xf7ex"]
+albedo_color = Color(0.047, 0.2, 0.22, 1)
+metallic = 0.35
+roughness = 0.38
+emission_enabled = true
+emission = Color(0.05, 0.72, 0.96, 1)
+emission_energy_multiplier = 0.25
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_klxmh"]
+albedo_color = Color(0.047, 0.185, 0.22, 1)
+metallic = 0.35
+roughness = 0.38
+emission_enabled = true
+emission = Color(0.05, 0.72, 0.96, 1)
+emission_energy_multiplier = 0.25
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_c6paf"]
+albedo_color = Color(0.047, 0.17, 0.22, 1)
+metallic = 0.35
+roughness = 0.38
+emission_enabled = true
+emission = Color(0.05, 0.72, 0.96, 1)
+emission_energy_multiplier = 0.25
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_0i2u3"]
+albedo_color = Color(0.047, 0.185, 0.22, 1)
+metallic = 0.35
+roughness = 0.38
+emission_enabled = true
+emission = Color(0.05, 0.72, 0.96, 1)
+emission_energy_multiplier = 0.25
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_wvxwo"]
+albedo_color = Color(0.047, 0.2, 0.22, 1)
+metallic = 0.35
+roughness = 0.38
+emission_enabled = true
+emission = Color(0.05, 0.72, 0.96, 1)
+emission_energy_multiplier = 0.25
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_ruudd"]
+albedo_color = Color(0.047, 0.215, 0.22, 1)
+metallic = 0.35
+roughness = 0.38
+emission_enabled = true
+emission = Color(0.05, 0.72, 0.96, 1)
+emission_energy_multiplier = 0.25
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_fds1g"]
+albedo_color = Color(0.035, 0.215, 0.22, 1)
+metallic = 0.35
+roughness = 0.38
+emission_enabled = true
+emission = Color(0.05, 0.72, 0.96, 1)
+emission_energy_multiplier = 0.25
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_u0kjr"]
+albedo_color = Color(0.035, 0.2, 0.22, 1)
+metallic = 0.35
+roughness = 0.38
+emission_enabled = true
+emission = Color(0.05, 0.72, 0.96, 1)
+emission_energy_multiplier = 0.25
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_kixyf"]
+albedo_color = Color(0.035, 0.185, 0.22, 1)
+metallic = 0.35
+roughness = 0.38
+emission_enabled = true
+emission = Color(0.05, 0.72, 0.96, 1)
+emission_energy_multiplier = 0.25
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_gsdx7"]
+albedo_color = Color(0.035, 0.17, 0.22, 1)
+metallic = 0.35
+roughness = 0.38
+emission_enabled = true
+emission = Color(0.05, 0.72, 0.96, 1)
+emission_energy_multiplier = 0.25
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_xlih4"]
+albedo_color = Color(0.035, 0.185, 0.22, 1)
+metallic = 0.35
+roughness = 0.38
+emission_enabled = true
+emission = Color(0.05, 0.72, 0.96, 1)
+emission_energy_multiplier = 0.25
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_j2g8m"]
+albedo_color = Color(0.035, 0.2, 0.22, 1)
+metallic = 0.35
+roughness = 0.38
+emission_enabled = true
+emission = Color(0.05, 0.72, 0.96, 1)
+emission_energy_multiplier = 0.25
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_yffp5"]
+albedo_color = Color(0.035, 0.215, 0.22, 1)
+metallic = 0.35
+roughness = 0.38
+emission_enabled = true
+emission = Color(0.05, 0.72, 0.96, 1)
+emission_energy_multiplier = 0.25
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_s2isy"]
+albedo_color = Color(0.047, 0.215, 0.22, 1)
+metallic = 0.35
+roughness = 0.38
+emission_enabled = true
+emission = Color(0.05, 0.72, 0.96, 1)
+emission_energy_multiplier = 0.25
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_padtm"]
+albedo_color = Color(0.047, 0.2, 0.22, 1)
+metallic = 0.35
+roughness = 0.38
+emission_enabled = true
+emission = Color(0.05, 0.72, 0.96, 1)
+emission_energy_multiplier = 0.25
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_2y3ix"]
+albedo_color = Color(0.047, 0.185, 0.22, 1)
+metallic = 0.35
+roughness = 0.38
+emission_enabled = true
+emission = Color(0.05, 0.72, 0.96, 1)
+emission_energy_multiplier = 0.25
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_lqpp2"]
+albedo_color = Color(0.047, 0.17, 0.22, 1)
+metallic = 0.35
+roughness = 0.38
+emission_enabled = true
+emission = Color(0.05, 0.72, 0.96, 1)
+emission_energy_multiplier = 0.25
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_0ejne"]
+albedo_color = Color(0.047, 0.185, 0.22, 1)
+metallic = 0.35
+roughness = 0.38
+emission_enabled = true
+emission = Color(0.05, 0.72, 0.96, 1)
+emission_energy_multiplier = 0.25
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_33xlo"]
+albedo_color = Color(0.047, 0.2, 0.22, 1)
+metallic = 0.35
+roughness = 0.38
+emission_enabled = true
+emission = Color(0.05, 0.72, 0.96, 1)
+emission_energy_multiplier = 0.25
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_gq0vm"]
+albedo_color = Color(0.047, 0.215, 0.22, 1)
+metallic = 0.35
+roughness = 0.38
+emission_enabled = true
+emission = Color(0.05, 0.72, 0.96, 1)
+emission_energy_multiplier = 0.25
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_0c7xi"]
+albedo_color = Color(0.059, 0.215, 0.22, 1)
+metallic = 0.35
+roughness = 0.38
+emission_enabled = true
+emission = Color(0.05, 0.72, 0.96, 1)
+emission_energy_multiplier = 0.25
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_jy73r"]
+albedo_color = Color(0.059, 0.2, 0.22, 1)
+metallic = 0.35
+roughness = 0.38
+emission_enabled = true
+emission = Color(0.05, 0.72, 0.96, 1)
+emission_energy_multiplier = 0.25
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_qtbb1"]
+albedo_color = Color(0.059, 0.185, 0.22, 1)
+metallic = 0.35
+roughness = 0.38
+emission_enabled = true
+emission = Color(0.05, 0.72, 0.96, 1)
+emission_energy_multiplier = 0.25
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_0fpa3"]
+albedo_color = Color(0.059, 0.17, 0.22, 1)
+metallic = 0.35
+roughness = 0.38
+emission_enabled = true
+emission = Color(0.05, 0.72, 0.96, 1)
+emission_energy_multiplier = 0.25
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_77smp"]
+albedo_color = Color(0.059, 0.185, 0.22, 1)
+metallic = 0.35
+roughness = 0.38
+emission_enabled = true
+emission = Color(0.05, 0.72, 0.96, 1)
+emission_energy_multiplier = 0.25
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_f8buc"]
+albedo_color = Color(0.059, 0.2, 0.22, 1)
+metallic = 0.35
+roughness = 0.38
+emission_enabled = true
+emission = Color(0.05, 0.72, 0.96, 1)
+emission_energy_multiplier = 0.25
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_uaoq2"]
+albedo_color = Color(0.059, 0.215, 0.22, 1)
+metallic = 0.35
+roughness = 0.38
+emission_enabled = true
+emission = Color(0.05, 0.72, 0.96, 1)
+emission_energy_multiplier = 0.25
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_p781q"]
+albedo_color = Color(0.071, 0.215, 0.22, 1)
+metallic = 0.35
+roughness = 0.38
+emission_enabled = true
+emission = Color(0.05, 0.72, 0.96, 1)
+emission_energy_multiplier = 0.25
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_7jx8h"]
+albedo_color = Color(0.071, 0.2, 0.22, 1)
+metallic = 0.35
+roughness = 0.38
+emission_enabled = true
+emission = Color(0.05, 0.72, 0.96, 1)
+emission_energy_multiplier = 0.25
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_onnai"]
+albedo_color = Color(0.071, 0.185, 0.22, 1)
+metallic = 0.35
+roughness = 0.38
+emission_enabled = true
+emission = Color(0.05, 0.72, 0.96, 1)
+emission_energy_multiplier = 0.25
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_sjg4u"]
+albedo_color = Color(0.071, 0.17, 0.22, 1)
+metallic = 0.35
+roughness = 0.38
+emission_enabled = true
+emission = Color(0.05, 0.72, 0.96, 1)
+emission_energy_multiplier = 0.25
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_bvhsx"]
+albedo_color = Color(0.071, 0.185, 0.22, 1)
+metallic = 0.35
+roughness = 0.38
+emission_enabled = true
+emission = Color(0.05, 0.72, 0.96, 1)
+emission_energy_multiplier = 0.25
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_7f4ar"]
+albedo_color = Color(0.071, 0.2, 0.22, 1)
+metallic = 0.35
+roughness = 0.38
+emission_enabled = true
+emission = Color(0.05, 0.72, 0.96, 1)
+emission_energy_multiplier = 0.25
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_vidja"]
+albedo_color = Color(0.071, 0.215, 0.22, 1)
+metallic = 0.35
+roughness = 0.38
+emission_enabled = true
+emission = Color(0.05, 0.72, 0.96, 1)
+emission_energy_multiplier = 0.25
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_fk6my"]
+transparency = 1
+shading_mode = 0
+albedo_color = Color(0.25, 0.92, 1, 0)
+
+[sub_resource type="TorusMesh" id="TorusMesh_qp1mk"]
+inner_radius = 0.035
+outer_radius = 0.42
+ring_segments = 96
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_ptdlt"]
+transparency = 1
+shading_mode = 0
+albedo_color = Color(0.25, 0.92, 1, 0)
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_ai5c7"]
+transparency = 1
+shading_mode = 0
+albedo_color = Color(0.25, 0.92, 1, 0)
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_2tcs0"]
+transparency = 1
+shading_mode = 0
+albedo_color = Color(0.25, 0.92, 1, 0)
+
+[node name="MusicAppVisualizer" type="Control" unique_id=1575718016]
+layout_mode = 3
+anchors_preset = 0
+anchor_right = 1.0
+anchor_bottom = 1.0
+mouse_filter = 2
+script = ExtResource("1_08ydn")
+
+[node name="VisualizerContainer" type="SubViewportContainer" parent="." unique_id=1172414927]
+layout_mode = 0
+anchor_right = 1.0
+anchor_bottom = 1.0
+mouse_filter = 2
+stretch = true
+
+[node name="VisualizerViewport" type="SubViewport" parent="VisualizerContainer" unique_id=234719091]
+unique_name_in_owner = true
+transparent_bg = true
+size = Vector2i(430, 932)
+render_target_update_mode = 4
+
+[node name="WorldRoot" type="Node3D" parent="VisualizerContainer/VisualizerViewport" unique_id=1210457913]
+
+[node name="VisualizerEnvironment" type="WorldEnvironment" parent="VisualizerContainer/VisualizerViewport/WorldRoot" unique_id=1450781566]
+unique_name_in_owner = true
+environment = SubResource("Environment_kjp2h")
+
+[node name="VisualizerCamera" type="Camera3D" parent="VisualizerContainer/VisualizerViewport/WorldRoot" unique_id=408688615]
+unique_name_in_owner = true
+transform = Transform3D(1, 0, 0, 0, 0.91323125, 0.40744162, 0, -0.40744162, 0.91323125, 0, 7.2, 13)
+current = true
+fov = 54.0
+
+[node name="KeyLight" type="DirectionalLight3D" parent="VisualizerContainer/VisualizerViewport/WorldRoot" unique_id=2139871973]
+transform = Transform3D(0.88294756, -0.31413782, 0.34888536, 0, 0.7431448, 0.6691306, -0.46947157, -0.59080726, 0.6561579, 0, 0, 0)
+light_energy = 0.85
+
+[node name="BeatLight" type="OmniLight3D" parent="VisualizerContainer/VisualizerViewport/WorldRoot" unique_id=323478965]
+unique_name_in_owner = true
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.2, 0)
+light_color = Color(0.25, 0.95, 1, 1)
+light_energy = 0.45
+omni_range = 12.0
+
+[node name="MineradioBackdrop" type="Node3D" parent="VisualizerContainer/VisualizerViewport/WorldRoot" unique_id=1492194102]
+unique_name_in_owner = true
+
+[node name="StarDustParticles" type="GPUParticles3D" parent="VisualizerContainer/VisualizerViewport/WorldRoot/MineradioBackdrop" unique_id=1528160830]
+unique_name_in_owner = true
+transform = Transform3D(1, 0, 0, 0, 0.9781476, -0.20791169, 0, 0.20791169, 0.9781476, 0, 3.7, -1.2)
+amount = 420
+lifetime = 7.5
+preprocess = 7.5
+randomness = 0.92
+visibility_aabb = AABB(-12, -4, -8, 24, 14, 16)
+process_material = SubResource("ParticleProcessMaterial_stardust")
+draw_pass_1 = SubResource("QuadMesh_stardust")
+
+[node name="LightRibbons" type="Node3D" parent="VisualizerContainer/VisualizerViewport/WorldRoot/MineradioBackdrop" unique_id=1907612805]
+unique_name_in_owner = true
+
+[node name="LightRibbon1" type="MeshInstance3D" parent="VisualizerContainer/VisualizerViewport/WorldRoot/MineradioBackdrop/LightRibbons" unique_id=1466905427]
+unique_name_in_owner = true
+position = Vector3(-2.7, 4.2, 1.8)
+rotation = Vector3(0, 0, -0.55)
+scale = Vector3(11, 0.34, 1)
+material_override = SubResource("StandardMaterial3D_ribbon_primary")
+mesh = SubResource("QuadMesh_ribbon_wide")
+
+[node name="LightRibbon2" type="MeshInstance3D" parent="VisualizerContainer/VisualizerViewport/WorldRoot/MineradioBackdrop/LightRibbons" unique_id=1081429429]
+unique_name_in_owner = true
+position = Vector3(3.4, 2.7, 2.2)
+rotation = Vector3(0, 0, -0.55)
+scale = Vector3(9.5, 0.22, 1)
+material_override = SubResource("StandardMaterial3D_ribbon_primary")
+mesh = SubResource("QuadMesh_ribbon_wide")
+
+[node name="LightRibbon3" type="MeshInstance3D" parent="VisualizerContainer/VisualizerViewport/WorldRoot/MineradioBackdrop/LightRibbons" unique_id=2130127913]
+unique_name_in_owner = true
+position = Vector3(-3.2, 1.25, 2.4)
+rotation = Vector3(0, 0, 0.48)
+scale = Vector3(8, 0.18, 1)
+material_override = SubResource("StandardMaterial3D_ribbon_secondary")
+mesh = SubResource("QuadMesh_ribbon_wide")
+
+[node name="LightRibbon4" type="MeshInstance3D" parent="VisualizerContainer/VisualizerViewport/WorldRoot/MineradioBackdrop/LightRibbons" unique_id=1786951473]
+unique_name_in_owner = true
+position = Vector3(0.4, 5.4, 2.6)
+rotation = Vector3(0, 0, 0.48)
+scale = Vector3(12, 0.14, 1)
+material_override = SubResource("StandardMaterial3D_ribbon_secondary")
+mesh = SubResource("QuadMesh_ribbon_wide")
+
+[node name="CoverParticleStage3D" type="Node3D" parent="VisualizerContainer/VisualizerViewport/WorldRoot" unique_id=1386804930]
+unique_name_in_owner = true
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.1, 0.35)
+script = ExtResource("3_cover_particle")
+
+[node name="CoverArtworkRequest" type="HTTPRequest" parent="VisualizerContainer/VisualizerViewport/WorldRoot/CoverParticleStage3D" unique_id=1006810862]
+unique_name_in_owner = true
+
+[node name="MineradioStageFrame" type="Node3D" parent="VisualizerContainer/VisualizerViewport/WorldRoot/CoverParticleStage3D"]
+unique_name_in_owner = true
+position = Vector3(0, 0, -0.18)
+
+[node name="StageOuterOrbit" type="MeshInstance3D" parent="VisualizerContainer/VisualizerViewport/WorldRoot/CoverParticleStage3D/MineradioStageFrame"]
+unique_name_in_owner = true
+position = Vector3(0, 0, -0.08)
+rotation = Vector3(0, 0, 0.08)
+scale = Vector3(1.12, 1.12, 1)
+material_override = SubResource("ShaderMaterial_stage_outer")
+mesh = SubResource("QuadMesh_stage_frame")
+
+[node name="StageMidOrbit" type="MeshInstance3D" parent="VisualizerContainer/VisualizerViewport/WorldRoot/CoverParticleStage3D/MineradioStageFrame"]
+unique_name_in_owner = true
+position = Vector3(0, 0, -0.04)
+rotation = Vector3(0, 0, -0.14)
+scale = Vector3(0.96, 0.96, 1)
+material_override = SubResource("ShaderMaterial_stage_mid")
+mesh = SubResource("QuadMesh_stage_frame")
+
+[node name="StageInnerGlass" type="MeshInstance3D" parent="VisualizerContainer/VisualizerViewport/WorldRoot/CoverParticleStage3D/MineradioStageFrame"]
+unique_name_in_owner = true
+position = Vector3(0, 0, -0.015)
+rotation = Vector3(0, 0, 0.03)
+scale = Vector3(0.78, 0.78, 1)
+material_override = SubResource("ShaderMaterial_stage_inner")
+mesh = SubResource("QuadMesh_stage_frame")
+
+[node name="CoverBloomMesh" type="MeshInstance3D" parent="VisualizerContainer/VisualizerViewport/WorldRoot/CoverParticleStage3D" unique_id=1939541023]
+unique_name_in_owner = true
+material_override = SubResource("ShaderMaterial_cover_particle_bloom")
+visibility_range_begin = 0.0
+
+[node name="CoverParticleMesh" type="MeshInstance3D" parent="VisualizerContainer/VisualizerViewport/WorldRoot/CoverParticleStage3D" unique_id=1497445066]
+unique_name_in_owner = true
+material_override = SubResource("ShaderMaterial_cover_particle_stage")
+visibility_range_begin = 0.0
+
+[node name="RhythmParticles" type="GPUParticles3D" parent="VisualizerContainer/VisualizerViewport/WorldRoot" unique_id=1844736490]
+unique_name_in_owner = true
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.4, 0)
+amount = 180
+lifetime = 2.4
+preprocess = 0.8
+randomness = 0.72
+visibility_aabb = AABB(-10, -2, -10, 20, 12, 20)
+process_material = SubResource("ParticleProcessMaterial_2l5lt")
+draw_pass_1 = SubResource("QuadMesh_7yugm")
+
+[node name="VoxelCity" type="Node3D" parent="VisualizerContainer/VisualizerViewport/WorldRoot" unique_id=1895326103]
+visible = false
+transform = Transform3D(0.52, 0, 0, 0, 0.52, 0, 0, 0, 0.52, 0, -0.82, -2.7)
+
+[node name="CitySceneLayers" type="Node3D" parent="VisualizerContainer/VisualizerViewport/WorldRoot/VoxelCity" unique_id=114079509]
+unique_name_in_owner = true
+
+[node name="CityGround" type="MeshInstance3D" parent="VisualizerContainer/VisualizerViewport/WorldRoot/VoxelCity/CitySceneLayers" unique_id=1829477439]
+unique_name_in_owner = true
+transform = Transform3D(1, 0, 0, 0, -4.371139e-08, -1, 0, 1, -4.371139e-08, 0, -0.012, 0)
+material_override = SubResource("StandardMaterial3D_city_ground")
+mesh = SubResource("PlaneMesh_city_ground")
+
+[node name="CityRoadNorthSouth" type="MeshInstance3D" parent="VisualizerContainer/VisualizerViewport/WorldRoot/VoxelCity/CitySceneLayers" unique_id=212772634]
+unique_name_in_owner = true
+transform = Transform3D(-4.371139e-08, 0, 1, 0, -4.371139e-08, -1, 1, 0, 4.371139e-08, 0, 0.008, 0)
+material_override = SubResource("StandardMaterial3D_city_road_primary")
+mesh = SubResource("PlaneMesh_city_road")
+
+[node name="CityRoadEastWest" type="MeshInstance3D" parent="VisualizerContainer/VisualizerViewport/WorldRoot/VoxelCity/CitySceneLayers" unique_id=149565392]
+unique_name_in_owner = true
+transform = Transform3D(1, 0, 0, 0, -4.371139e-08, -1, 0, 1, -4.371139e-08, 0, 0.01, 0)
+material_override = SubResource("StandardMaterial3D_city_road_primary")
+mesh = SubResource("PlaneMesh_city_road")
+
+[node name="CityRoadDiagonalA" type="MeshInstance3D" parent="VisualizerContainer/VisualizerViewport/WorldRoot/VoxelCity/CitySceneLayers" unique_id=2115072601]
+unique_name_in_owner = true
+transform = Transform3D(0.70710677, 0, 0.70710677, 0.70710677, -3.090862e-08, -0.70710677, 3.090862e-08, 1, -3.090862e-08, 0, 0.014, 0)
+material_override = SubResource("StandardMaterial3D_city_road_secondary")
+mesh = SubResource("PlaneMesh_city_road")
+
+[node name="CityRoadDiagonalB" type="MeshInstance3D" parent="VisualizerContainer/VisualizerViewport/WorldRoot/VoxelCity/CitySceneLayers" unique_id=1398244272]
+unique_name_in_owner = true
+transform = Transform3D(0.70710677, 0, -0.70710677, -0.70710677, -3.090862e-08, -0.70710677, -3.090862e-08, 1, 3.090862e-08, 0, 0.016, 0)
+material_override = SubResource("StandardMaterial3D_city_road_secondary")
+mesh = SubResource("PlaneMesh_city_road")
+
+[node name="CityFogLow" type="MeshInstance3D" parent="VisualizerContainer/VisualizerViewport/WorldRoot/VoxelCity/CitySceneLayers" unique_id=1040725724]
+unique_name_in_owner = true
+transform = Transform3D(1, 0, 0, 0, 0.54463905, -0.83867055, 0, 0.83867055, 0.54463905, 0, 0.85, 1.18)
+material_override = SubResource("StandardMaterial3D_city_fog")
+mesh = SubResource("PlaneMesh_city_fog")
+
+[node name="CityFogBack" type="MeshInstance3D" parent="VisualizerContainer/VisualizerViewport/WorldRoot/VoxelCity/CitySceneLayers" unique_id=198540032]
+unique_name_in_owner = true
+transform = Transform3D(1, 0, 0, 0, 0.42261824, -0.9063078, 0, 0.9063078, 0.42261824, 0, 1.8, -2.85)
+material_override = SubResource("StandardMaterial3D_city_fog")
+mesh = SubResource("PlaneMesh_city_fog")
+
+[node name="MultiMeshCity" type="MultiMeshInstance3D" parent="VisualizerContainer/VisualizerViewport/WorldRoot/VoxelCity" unique_id=1620539145]
+unique_name_in_owner = true
+multimesh = SubResource("MultiMesh_city")
+script = ExtResource("2_voxel_city")
+
+[node name="Pillars" type="Node3D" parent="VisualizerContainer/VisualizerViewport/WorldRoot/VoxelCity" unique_id=1099014449]
+unique_name_in_owner = true
+
+[node name="Pillar_-3_-3" type="MeshInstance3D" parent="VisualizerContainer/VisualizerViewport/WorldRoot/VoxelCity/Pillars" unique_id=736924585]
+transform = Transform3D(1, 0, 0, 0, 0.16, 0, 0, 0, 1, -2.34, 0.08, -2.34)
+material_override = SubResource("StandardMaterial3D_xufr3")
+mesh = SubResource("BoxMesh_m35dr")
+
+[node name="Pillar_-3_-2" type="MeshInstance3D" parent="VisualizerContainer/VisualizerViewport/WorldRoot/VoxelCity/Pillars" unique_id=1647911755]
+transform = Transform3D(1, 0, 0, 0, 0.16, 0, 0, 0, 1, -2.34, 0.08, -1.56)
+material_override = SubResource("StandardMaterial3D_imcs0")
+mesh = SubResource("BoxMesh_m35dr")
+
+[node name="Pillar_-3_-1" type="MeshInstance3D" parent="VisualizerContainer/VisualizerViewport/WorldRoot/VoxelCity/Pillars" unique_id=1476292555]
+transform = Transform3D(1, 0, 0, 0, 0.16, 0, 0, 0, 1, -2.34, 0.08, -0.78)
+material_override = SubResource("StandardMaterial3D_7eqv2")
+mesh = SubResource("BoxMesh_m35dr")
+
+[node name="Pillar_-3_+0" type="MeshInstance3D" parent="VisualizerContainer/VisualizerViewport/WorldRoot/VoxelCity/Pillars" unique_id=1567525223]
+transform = Transform3D(1, 0, 0, 0, 0.16, 0, 0, 0, 1, -2.34, 0.08, 0)
+material_override = SubResource("StandardMaterial3D_7x1c0")
+mesh = SubResource("BoxMesh_m35dr")
+
+[node name="Pillar_-3_+1" type="MeshInstance3D" parent="VisualizerContainer/VisualizerViewport/WorldRoot/VoxelCity/Pillars" unique_id=2012300563]
+transform = Transform3D(1, 0, 0, 0, 0.16, 0, 0, 0, 1, -2.34, 0.08, 0.78)
+material_override = SubResource("StandardMaterial3D_caccc")
+mesh = SubResource("BoxMesh_m35dr")
+
+[node name="Pillar_-3_+2" type="MeshInstance3D" parent="VisualizerContainer/VisualizerViewport/WorldRoot/VoxelCity/Pillars" unique_id=308470374]
+transform = Transform3D(1, 0, 0, 0, 0.16, 0, 0, 0, 1, -2.34, 0.08, 1.56)
+material_override = SubResource("StandardMaterial3D_ae33c")
+mesh = SubResource("BoxMesh_m35dr")
+
+[node name="Pillar_-3_+3" type="MeshInstance3D" parent="VisualizerContainer/VisualizerViewport/WorldRoot/VoxelCity/Pillars" unique_id=2032531848]
+transform = Transform3D(1, 0, 0, 0, 0.16, 0, 0, 0, 1, -2.34, 0.08, 2.34)
+material_override = SubResource("StandardMaterial3D_av56k")
+mesh = SubResource("BoxMesh_m35dr")
+
+[node name="Pillar_-2_-3" type="MeshInstance3D" parent="VisualizerContainer/VisualizerViewport/WorldRoot/VoxelCity/Pillars" unique_id=903611164]
+transform = Transform3D(1, 0, 0, 0, 0.16, 0, 0, 0, 1, -1.56, 0.08, -2.34)
+material_override = SubResource("StandardMaterial3D_dq8qi")
+mesh = SubResource("BoxMesh_m35dr")
+
+[node name="Pillar_-2_-2" type="MeshInstance3D" parent="VisualizerContainer/VisualizerViewport/WorldRoot/VoxelCity/Pillars" unique_id=1453633347]
+transform = Transform3D(1, 0, 0, 0, 0.16, 0, 0, 0, 1, -1.56, 0.08, -1.56)
+material_override = SubResource("StandardMaterial3D_ixhvy")
+mesh = SubResource("BoxMesh_m35dr")
+
+[node name="Pillar_-2_-1" type="MeshInstance3D" parent="VisualizerContainer/VisualizerViewport/WorldRoot/VoxelCity/Pillars" unique_id=273110371]
+transform = Transform3D(1, 0, 0, 0, 0.16, 0, 0, 0, 1, -1.56, 0.08, -0.78)
+material_override = SubResource("StandardMaterial3D_34rbd")
+mesh = SubResource("BoxMesh_m35dr")
+
+[node name="Pillar_-2_+0" type="MeshInstance3D" parent="VisualizerContainer/VisualizerViewport/WorldRoot/VoxelCity/Pillars" unique_id=1001353388]
+transform = Transform3D(1, 0, 0, 0, 0.16, 0, 0, 0, 1, -1.56, 0.08, 0)
+material_override = SubResource("StandardMaterial3D_chy0r")
+mesh = SubResource("BoxMesh_m35dr")
+
+[node name="Pillar_-2_+1" type="MeshInstance3D" parent="VisualizerContainer/VisualizerViewport/WorldRoot/VoxelCity/Pillars" unique_id=603090470]
+transform = Transform3D(1, 0, 0, 0, 0.16, 0, 0, 0, 1, -1.56, 0.08, 0.78)
+material_override = SubResource("StandardMaterial3D_e24im")
+mesh = SubResource("BoxMesh_m35dr")
+
+[node name="Pillar_-2_+2" type="MeshInstance3D" parent="VisualizerContainer/VisualizerViewport/WorldRoot/VoxelCity/Pillars" unique_id=650492114]
+transform = Transform3D(1, 0, 0, 0, 0.16, 0, 0, 0, 1, -1.56, 0.08, 1.56)
+material_override = SubResource("StandardMaterial3D_gq3ws")
+mesh = SubResource("BoxMesh_m35dr")
+
+[node name="Pillar_-2_+3" type="MeshInstance3D" parent="VisualizerContainer/VisualizerViewport/WorldRoot/VoxelCity/Pillars" unique_id=659379741]
+transform = Transform3D(1, 0, 0, 0, 0.16, 0, 0, 0, 1, -1.56, 0.08, 2.34)
+material_override = SubResource("StandardMaterial3D_wnj3y")
+mesh = SubResource("BoxMesh_m35dr")
+
+[node name="Pillar_-1_-3" type="MeshInstance3D" parent="VisualizerContainer/VisualizerViewport/WorldRoot/VoxelCity/Pillars" unique_id=1432817150]
+transform = Transform3D(1, 0, 0, 0, 0.16, 0, 0, 0, 1, -0.78, 0.08, -2.34)
+material_override = SubResource("StandardMaterial3D_8f3qu")
+mesh = SubResource("BoxMesh_m35dr")
+
+[node name="Pillar_-1_-2" type="MeshInstance3D" parent="VisualizerContainer/VisualizerViewport/WorldRoot/VoxelCity/Pillars" unique_id=1103052966]
+transform = Transform3D(1, 0, 0, 0, 0.16, 0, 0, 0, 1, -0.78, 0.08, -1.56)
+material_override = SubResource("StandardMaterial3D_xf7ex")
+mesh = SubResource("BoxMesh_m35dr")
+
+[node name="Pillar_-1_-1" type="MeshInstance3D" parent="VisualizerContainer/VisualizerViewport/WorldRoot/VoxelCity/Pillars" unique_id=2138395931]
+transform = Transform3D(1, 0, 0, 0, 0.16, 0, 0, 0, 1, -0.78, 0.08, -0.78)
+material_override = SubResource("StandardMaterial3D_klxmh")
+mesh = SubResource("BoxMesh_m35dr")
+
+[node name="Pillar_-1_+0" type="MeshInstance3D" parent="VisualizerContainer/VisualizerViewport/WorldRoot/VoxelCity/Pillars" unique_id=350423683]
+transform = Transform3D(1, 0, 0, 0, 0.16, 0, 0, 0, 1, -0.78, 0.08, 0)
+material_override = SubResource("StandardMaterial3D_c6paf")
+mesh = SubResource("BoxMesh_m35dr")
+
+[node name="Pillar_-1_+1" type="MeshInstance3D" parent="VisualizerContainer/VisualizerViewport/WorldRoot/VoxelCity/Pillars" unique_id=1012642928]
+transform = Transform3D(1, 0, 0, 0, 0.16, 0, 0, 0, 1, -0.78, 0.08, 0.78)
+material_override = SubResource("StandardMaterial3D_0i2u3")
+mesh = SubResource("BoxMesh_m35dr")
+
+[node name="Pillar_-1_+2" type="MeshInstance3D" parent="VisualizerContainer/VisualizerViewport/WorldRoot/VoxelCity/Pillars" unique_id=255652131]
+transform = Transform3D(1, 0, 0, 0, 0.16, 0, 0, 0, 1, -0.78, 0.08, 1.56)
+material_override = SubResource("StandardMaterial3D_wvxwo")
+mesh = SubResource("BoxMesh_m35dr")
+
+[node name="Pillar_-1_+3" type="MeshInstance3D" parent="VisualizerContainer/VisualizerViewport/WorldRoot/VoxelCity/Pillars" unique_id=255365270]
+transform = Transform3D(1, 0, 0, 0, 0.16, 0, 0, 0, 1, -0.78, 0.08, 2.34)
+material_override = SubResource("StandardMaterial3D_ruudd")
+mesh = SubResource("BoxMesh_m35dr")
+
+[node name="Pillar_+0_-3" type="MeshInstance3D" parent="VisualizerContainer/VisualizerViewport/WorldRoot/VoxelCity/Pillars" unique_id=980829646]
+transform = Transform3D(1, 0, 0, 0, 0.16, 0, 0, 0, 1, 0, 0.08, -2.34)
+material_override = SubResource("StandardMaterial3D_fds1g")
+mesh = SubResource("BoxMesh_m35dr")
+
+[node name="Pillar_+0_-2" type="MeshInstance3D" parent="VisualizerContainer/VisualizerViewport/WorldRoot/VoxelCity/Pillars" unique_id=97894146]
+transform = Transform3D(1, 0, 0, 0, 0.16, 0, 0, 0, 1, 0, 0.08, -1.56)
+material_override = SubResource("StandardMaterial3D_u0kjr")
+mesh = SubResource("BoxMesh_m35dr")
+
+[node name="Pillar_+0_-1" type="MeshInstance3D" parent="VisualizerContainer/VisualizerViewport/WorldRoot/VoxelCity/Pillars" unique_id=1765414093]
+transform = Transform3D(1, 0, 0, 0, 0.16, 0, 0, 0, 1, 0, 0.08, -0.78)
+material_override = SubResource("StandardMaterial3D_kixyf")
+mesh = SubResource("BoxMesh_m35dr")
+
+[node name="Pillar_+0_+0" type="MeshInstance3D" parent="VisualizerContainer/VisualizerViewport/WorldRoot/VoxelCity/Pillars" unique_id=2057896963]
+transform = Transform3D(1, 0, 0, 0, 0.16, 0, 0, 0, 1, 0, 0.08, 0)
+material_override = SubResource("StandardMaterial3D_gsdx7")
+mesh = SubResource("BoxMesh_m35dr")
+
+[node name="Pillar_+0_+1" type="MeshInstance3D" parent="VisualizerContainer/VisualizerViewport/WorldRoot/VoxelCity/Pillars" unique_id=1509424531]
+transform = Transform3D(1, 0, 0, 0, 0.16, 0, 0, 0, 1, 0, 0.08, 0.78)
+material_override = SubResource("StandardMaterial3D_xlih4")
+mesh = SubResource("BoxMesh_m35dr")
+
+[node name="Pillar_+0_+2" type="MeshInstance3D" parent="VisualizerContainer/VisualizerViewport/WorldRoot/VoxelCity/Pillars" unique_id=409996465]
+transform = Transform3D(1, 0, 0, 0, 0.16, 0, 0, 0, 1, 0, 0.08, 1.56)
+material_override = SubResource("StandardMaterial3D_j2g8m")
+mesh = SubResource("BoxMesh_m35dr")
+
+[node name="Pillar_+0_+3" type="MeshInstance3D" parent="VisualizerContainer/VisualizerViewport/WorldRoot/VoxelCity/Pillars" unique_id=934153518]
+transform = Transform3D(1, 0, 0, 0, 0.16, 0, 0, 0, 1, 0, 0.08, 2.34)
+material_override = SubResource("StandardMaterial3D_yffp5")
+mesh = SubResource("BoxMesh_m35dr")
+
+[node name="Pillar_+1_-3" type="MeshInstance3D" parent="VisualizerContainer/VisualizerViewport/WorldRoot/VoxelCity/Pillars" unique_id=881725177]
+transform = Transform3D(1, 0, 0, 0, 0.16, 0, 0, 0, 1, 0.78, 0.08, -2.34)
+material_override = SubResource("StandardMaterial3D_s2isy")
+mesh = SubResource("BoxMesh_m35dr")
+
+[node name="Pillar_+1_-2" type="MeshInstance3D" parent="VisualizerContainer/VisualizerViewport/WorldRoot/VoxelCity/Pillars" unique_id=469301107]
+transform = Transform3D(1, 0, 0, 0, 0.16, 0, 0, 0, 1, 0.78, 0.08, -1.56)
+material_override = SubResource("StandardMaterial3D_padtm")
+mesh = SubResource("BoxMesh_m35dr")
+
+[node name="Pillar_+1_-1" type="MeshInstance3D" parent="VisualizerContainer/VisualizerViewport/WorldRoot/VoxelCity/Pillars" unique_id=263310992]
+transform = Transform3D(1, 0, 0, 0, 0.16, 0, 0, 0, 1, 0.78, 0.08, -0.78)
+material_override = SubResource("StandardMaterial3D_2y3ix")
+mesh = SubResource("BoxMesh_m35dr")
+
+[node name="Pillar_+1_+0" type="MeshInstance3D" parent="VisualizerContainer/VisualizerViewport/WorldRoot/VoxelCity/Pillars" unique_id=2054111079]
+transform = Transform3D(1, 0, 0, 0, 0.16, 0, 0, 0, 1, 0.78, 0.08, 0)
+material_override = SubResource("StandardMaterial3D_lqpp2")
+mesh = SubResource("BoxMesh_m35dr")
+
+[node name="Pillar_+1_+1" type="MeshInstance3D" parent="VisualizerContainer/VisualizerViewport/WorldRoot/VoxelCity/Pillars" unique_id=1122382974]
+transform = Transform3D(1, 0, 0, 0, 0.16, 0, 0, 0, 1, 0.78, 0.08, 0.78)
+material_override = SubResource("StandardMaterial3D_0ejne")
+mesh = SubResource("BoxMesh_m35dr")
+
+[node name="Pillar_+1_+2" type="MeshInstance3D" parent="VisualizerContainer/VisualizerViewport/WorldRoot/VoxelCity/Pillars" unique_id=1518490058]
+transform = Transform3D(1, 0, 0, 0, 0.16, 0, 0, 0, 1, 0.78, 0.08, 1.56)
+material_override = SubResource("StandardMaterial3D_33xlo")
+mesh = SubResource("BoxMesh_m35dr")
+
+[node name="Pillar_+1_+3" type="MeshInstance3D" parent="VisualizerContainer/VisualizerViewport/WorldRoot/VoxelCity/Pillars" unique_id=1458792449]
+transform = Transform3D(1, 0, 0, 0, 0.16, 0, 0, 0, 1, 0.78, 0.08, 2.34)
+material_override = SubResource("StandardMaterial3D_gq0vm")
+mesh = SubResource("BoxMesh_m35dr")
+
+[node name="Pillar_+2_-3" type="MeshInstance3D" parent="VisualizerContainer/VisualizerViewport/WorldRoot/VoxelCity/Pillars" unique_id=890799866]
+transform = Transform3D(1, 0, 0, 0, 0.16, 0, 0, 0, 1, 1.56, 0.08, -2.34)
+material_override = SubResource("StandardMaterial3D_0c7xi")
+mesh = SubResource("BoxMesh_m35dr")
+
+[node name="Pillar_+2_-2" type="MeshInstance3D" parent="VisualizerContainer/VisualizerViewport/WorldRoot/VoxelCity/Pillars" unique_id=1215920583]
+transform = Transform3D(1, 0, 0, 0, 0.16, 0, 0, 0, 1, 1.56, 0.08, -1.56)
+material_override = SubResource("StandardMaterial3D_jy73r")
+mesh = SubResource("BoxMesh_m35dr")
+
+[node name="Pillar_+2_-1" type="MeshInstance3D" parent="VisualizerContainer/VisualizerViewport/WorldRoot/VoxelCity/Pillars" unique_id=1985313406]
+transform = Transform3D(1, 0, 0, 0, 0.16, 0, 0, 0, 1, 1.56, 0.08, -0.78)
+material_override = SubResource("StandardMaterial3D_qtbb1")
+mesh = SubResource("BoxMesh_m35dr")
+
+[node name="Pillar_+2_+0" type="MeshInstance3D" parent="VisualizerContainer/VisualizerViewport/WorldRoot/VoxelCity/Pillars" unique_id=242998394]
+transform = Transform3D(1, 0, 0, 0, 0.16, 0, 0, 0, 1, 1.56, 0.08, 0)
+material_override = SubResource("StandardMaterial3D_0fpa3")
+mesh = SubResource("BoxMesh_m35dr")
+
+[node name="Pillar_+2_+1" type="MeshInstance3D" parent="VisualizerContainer/VisualizerViewport/WorldRoot/VoxelCity/Pillars" unique_id=21804980]
+transform = Transform3D(1, 0, 0, 0, 0.16, 0, 0, 0, 1, 1.56, 0.08, 0.78)
+material_override = SubResource("StandardMaterial3D_77smp")
+mesh = SubResource("BoxMesh_m35dr")
+
+[node name="Pillar_+2_+2" type="MeshInstance3D" parent="VisualizerContainer/VisualizerViewport/WorldRoot/VoxelCity/Pillars" unique_id=209658583]
+transform = Transform3D(1, 0, 0, 0, 0.16, 0, 0, 0, 1, 1.56, 0.08, 1.56)
+material_override = SubResource("StandardMaterial3D_f8buc")
+mesh = SubResource("BoxMesh_m35dr")
+
+[node name="Pillar_+2_+3" type="MeshInstance3D" parent="VisualizerContainer/VisualizerViewport/WorldRoot/VoxelCity/Pillars" unique_id=1021430645]
+transform = Transform3D(1, 0, 0, 0, 0.16, 0, 0, 0, 1, 1.56, 0.08, 2.34)
+material_override = SubResource("StandardMaterial3D_uaoq2")
+mesh = SubResource("BoxMesh_m35dr")
+
+[node name="Pillar_+3_-3" type="MeshInstance3D" parent="VisualizerContainer/VisualizerViewport/WorldRoot/VoxelCity/Pillars" unique_id=2096709202]
+transform = Transform3D(1, 0, 0, 0, 0.16, 0, 0, 0, 1, 2.34, 0.08, -2.34)
+material_override = SubResource("StandardMaterial3D_p781q")
+mesh = SubResource("BoxMesh_m35dr")
+
+[node name="Pillar_+3_-2" type="MeshInstance3D" parent="VisualizerContainer/VisualizerViewport/WorldRoot/VoxelCity/Pillars" unique_id=1922214880]
+transform = Transform3D(1, 0, 0, 0, 0.16, 0, 0, 0, 1, 2.34, 0.08, -1.56)
+material_override = SubResource("StandardMaterial3D_7jx8h")
+mesh = SubResource("BoxMesh_m35dr")
+
+[node name="Pillar_+3_-1" type="MeshInstance3D" parent="VisualizerContainer/VisualizerViewport/WorldRoot/VoxelCity/Pillars" unique_id=1325909141]
+transform = Transform3D(1, 0, 0, 0, 0.16, 0, 0, 0, 1, 2.34, 0.08, -0.78)
+material_override = SubResource("StandardMaterial3D_onnai")
+mesh = SubResource("BoxMesh_m35dr")
+
+[node name="Pillar_+3_+0" type="MeshInstance3D" parent="VisualizerContainer/VisualizerViewport/WorldRoot/VoxelCity/Pillars" unique_id=1300350993]
+transform = Transform3D(1, 0, 0, 0, 0.16, 0, 0, 0, 1, 2.34, 0.08, 0)
+material_override = SubResource("StandardMaterial3D_sjg4u")
+mesh = SubResource("BoxMesh_m35dr")
+
+[node name="Pillar_+3_+1" type="MeshInstance3D" parent="VisualizerContainer/VisualizerViewport/WorldRoot/VoxelCity/Pillars" unique_id=1439082330]
+transform = Transform3D(1, 0, 0, 0, 0.16, 0, 0, 0, 1, 2.34, 0.08, 0.78)
+material_override = SubResource("StandardMaterial3D_bvhsx")
+mesh = SubResource("BoxMesh_m35dr")
+
+[node name="Pillar_+3_+2" type="MeshInstance3D" parent="VisualizerContainer/VisualizerViewport/WorldRoot/VoxelCity/Pillars" unique_id=1565138965]
+transform = Transform3D(1, 0, 0, 0, 0.16, 0, 0, 0, 1, 2.34, 0.08, 1.56)
+material_override = SubResource("StandardMaterial3D_7f4ar")
+mesh = SubResource("BoxMesh_m35dr")
+
+[node name="Pillar_+3_+3" type="MeshInstance3D" parent="VisualizerContainer/VisualizerViewport/WorldRoot/VoxelCity/Pillars" unique_id=813033827]
+transform = Transform3D(1, 0, 0, 0, 0.16, 0, 0, 0, 1, 2.34, 0.08, 2.34)
+material_override = SubResource("StandardMaterial3D_vidja")
+mesh = SubResource("BoxMesh_m35dr")
+
+[node name="ShockwaveRings" type="Node3D" parent="VisualizerContainer/VisualizerViewport/WorldRoot" unique_id=1165524914]
+unique_name_in_owner = true
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.08, 0)
+
+[node name="ShockwaveRing1" type="MeshInstance3D" parent="VisualizerContainer/VisualizerViewport/WorldRoot/ShockwaveRings" unique_id=1924889717]
+visible = false
+material_override = SubResource("StandardMaterial3D_fk6my")
+mesh = SubResource("TorusMesh_qp1mk")
+
+[node name="ShockwaveRing2" type="MeshInstance3D" parent="VisualizerContainer/VisualizerViewport/WorldRoot/ShockwaveRings" unique_id=1964314288]
+visible = false
+material_override = SubResource("StandardMaterial3D_ptdlt")
+mesh = SubResource("TorusMesh_qp1mk")
+
+[node name="ShockwaveRing3" type="MeshInstance3D" parent="VisualizerContainer/VisualizerViewport/WorldRoot/ShockwaveRings" unique_id=977876310]
+visible = false
+material_override = SubResource("StandardMaterial3D_ai5c7")
+mesh = SubResource("TorusMesh_qp1mk")
+
+[node name="ShockwaveRing4" type="MeshInstance3D" parent="VisualizerContainer/VisualizerViewport/WorldRoot/ShockwaveRings" unique_id=506004139]
+visible = false
+material_override = SubResource("StandardMaterial3D_2tcs0")
+mesh = SubResource("TorusMesh_qp1mk")
+
+[node name="VisualizerScanlineOverlay" type="ColorRect" parent="." unique_id=451184672]
+unique_name_in_owner = true
+material = SubResource("ShaderMaterial_scanline_overlay")
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+color = Color(1, 1, 1, 1)

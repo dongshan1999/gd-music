@@ -10,6 +10,19 @@ const DEFAULT_ELAPSED_SECONDS := 0
 const DEFAULT_IS_PLAYING := false
 const DEFAULT_LIKED_TRACKS := {}
 const SYSTEM_FAVORITE_PLAYLIST_ID := "__music_app.favorite_playlist__"
+const DEFAULT_VISUALIZER_SETTINGS := {
+	"enabled": true,
+	"mode": "mineradio",
+	"quality": "medium",
+	"particles": 1.0,
+	"bloom": 1.0
+}
+const VISUALIZER_MODE_MINERADIO := "mineradio"
+const VISUALIZER_MODE_CITY := "city"
+const VISUALIZER_QUALITY_OFF := "off"
+const VISUALIZER_QUALITY_LOW := "low"
+const VISUALIZER_QUALITY_MEDIUM := "medium"
+const VISUALIZER_QUALITY_HIGH := "high"
 
 enum PlaybackMode {
 	LOOP_ALL,
@@ -29,6 +42,7 @@ var elapsed_seconds: int = DEFAULT_ELAPSED_SECONDS
 var is_playing: bool = DEFAULT_IS_PLAYING
 var liked_tracks: Dictionary = {}
 var plugin_search_history: Array[String] = []
+var visualizer_settings: Dictionary = {}
 
 static func is_system_favorite_playlist(playlist) -> bool:
 	if playlist == null:
@@ -68,6 +82,7 @@ func _init() -> void:
 	is_playing = DEFAULT_IS_PLAYING
 	liked_tracks = DEFAULT_LIKED_TRACKS.duplicate(true)
 	plugin_search_history = []
+	visualizer_settings = _build_default_visualizer_settings()
 	normalize()
 
 func normalize() -> void:
@@ -82,6 +97,7 @@ func normalize() -> void:
 	elapsed_seconds = maxi(0, elapsed_seconds)
 	liked_tracks = _normalize_liked_tracks(liked_tracks)
 	plugin_search_history = _normalize_string_array(plugin_search_history, 10)
+	visualizer_settings = _normalize_visualizer_settings(visualizer_settings)
 
 	if tracks.is_empty():
 		elapsed_seconds = 0
@@ -138,6 +154,40 @@ func _normalize_string_array(source: Array, max_count: int = -1) -> Array[String
 		result.append(text)
 		if max_count > 0 and result.size() >= max_count:
 			break
+	return result
+
+func _normalize_visualizer_settings(source: Dictionary) -> Dictionary:
+	var result := _build_default_visualizer_settings()
+	for key in source:
+		result[str(key)] = source[key]
+
+	result["enabled"] = bool(result.get("enabled", DEFAULT_VISUALIZER_SETTINGS["enabled"]))
+	var mode := str(result.get("mode", DEFAULT_VISUALIZER_SETTINGS["mode"])).strip_edges().to_lower()
+	if not [
+		VISUALIZER_MODE_MINERADIO,
+		VISUALIZER_MODE_CITY
+	].has(mode):
+		mode = DEFAULT_VISUALIZER_SETTINGS["mode"]
+	result["mode"] = mode
+	var quality := str(result.get("quality", DEFAULT_VISUALIZER_SETTINGS["quality"])).strip_edges().to_lower()
+	if not [
+		VISUALIZER_QUALITY_OFF,
+		VISUALIZER_QUALITY_LOW,
+		VISUALIZER_QUALITY_MEDIUM,
+		VISUALIZER_QUALITY_HIGH
+	].has(quality):
+		quality = DEFAULT_VISUALIZER_SETTINGS["quality"]
+	result["quality"] = quality
+	result["particles"] = clampf(float(result.get("particles", DEFAULT_VISUALIZER_SETTINGS["particles"])), 0.25, 1.5)
+	result["bloom"] = clampf(float(result.get("bloom", DEFAULT_VISUALIZER_SETTINGS["bloom"])), 0.0, 1.5)
+	return result
+
+func _build_default_visualizer_settings() -> Dictionary:
+	var result := DEFAULT_VISUALIZER_SETTINGS.duplicate(true)
+	if OS.get_name() in ["Android", "iOS", "Web"]:
+		result["quality"] = VISUALIZER_QUALITY_LOW
+		result["particles"] = 0.65
+		result["bloom"] = 0.75
 	return result
 
 func _normalize_playback_track_indices(source_track_indices: Array) -> Array[int]:
