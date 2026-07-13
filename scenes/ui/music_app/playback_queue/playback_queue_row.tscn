@@ -4,19 +4,14 @@
 [ext_resource type="Texture2D" uid="uid://dbe0ctn8q7vry" path="res://textures/musical-note.svg" id="2_dted5"]
 [ext_resource type="Texture2D" uid="uid://cubqft3yh86od" path="res://textures/x-mark.svg" id="3_1s7ss"]
 
-[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_source_chip"]
-bg_color = Color(0.231373, 0.231373, 0.25098, 1)
-corner_radius_top_left = 999
-corner_radius_top_right = 999
-corner_radius_bottom_right = 999
-corner_radius_bottom_left = 999
-
 [sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_open_button"]
 
 [node name="PlaybackQueueRow" type="Control" unique_id=785226465]
-custom_minimum_size = Vector2(0, 60)
+custom_minimum_size = Vector2(0, 64)
 layout_mode = 3
 anchors_preset = 0
+offset_right = 428.0
+offset_bottom = 64.0
 size_flags_horizontal = 3
 script = ExtResource("1_script")
 
@@ -26,19 +21,19 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-theme_override_constants/margin_left = 8
+theme_override_constants/margin_left = 4
 theme_override_constants/margin_top = 8
-theme_override_constants/margin_right = 8
+theme_override_constants/margin_right = 0
 theme_override_constants/margin_bottom = 8
 
 [node name="Row" type="HBoxContainer" parent="Margin" unique_id=33645740]
 layout_mode = 2
-theme_override_constants/separation = 10
+theme_override_constants/separation = 8
 alignment = 1
 
 [node name="CurrentIconRect" type="TextureRect" parent="Margin/Row" unique_id=173140901]
 unique_name_in_owner = true
-custom_minimum_size = Vector2(18, 18)
+custom_minimum_size = Vector2(20, 20)
 layout_mode = 2
 texture = ExtResource("2_dted5")
 stretch_mode = 5
@@ -54,39 +49,20 @@ unique_name_in_owner = true
 layout_mode = 2
 size_flags_horizontal = 3
 theme_override_colors/font_color = Color(0.968627, 0.968627, 0.972549, 1)
-theme_override_font_sizes/font_size = 18
-text = "Track Title"
+theme_override_font_sizes/font_size = 15
+text = "歌曲标题"
 vertical_alignment = 1
+text_overrun_behavior = 3
 
 [node name="SubtitleLabel" type="Label" parent="Margin/Row/Info" unique_id=1914447432]
 unique_name_in_owner = true
 layout_mode = 2
 size_flags_horizontal = 3
 theme_override_colors/font_color = Color(0.643137, 0.65098, 0.690196, 1)
-theme_override_font_sizes/font_size = 14
-text = "Artist - Album"
+theme_override_font_sizes/font_size = 12
+text = "歌手 - 来源"
 vertical_alignment = 1
-
-[node name="SourceChip" type="PanelContainer" parent="Margin/Row" unique_id=653180886]
-custom_minimum_size = Vector2(66, 30)
-layout_mode = 2
-theme_override_styles/panel = SubResource("StyleBoxFlat_source_chip")
-
-[node name="Margin" type="MarginContainer" parent="Margin/Row/SourceChip" unique_id=1135580180]
-layout_mode = 2
-theme_override_constants/margin_left = 12
-theme_override_constants/margin_top = 6
-theme_override_constants/margin_right = 12
-theme_override_constants/margin_bottom = 6
-
-[node name="SourceLabel" type="Label" parent="Margin/Row/SourceChip/Margin" unique_id=1252814513]
-unique_name_in_owner = true
-layout_mode = 2
-theme_override_colors/font_color = Color(0.878431, 0.882353, 0.901961, 1)
-theme_override_font_sizes/font_size = 13
-text = "SOURCE"
-horizontal_alignment = 1
-vertical_alignment = 1
+text_overrun_behavior = 3
 
 [node name="RemoveButton" type="Button" parent="Margin/Row" unique_id=1825104450]
 unique_name_in_owner = true
@@ -94,6 +70,8 @@ custom_minimum_size = Vector2(34, 34)
 layout_mode = 2
 icon = ExtResource("3_1s7ss")
 flat = true
+icon_alignment = 1
+expand_icon = true
 
 [node name="OpenButton" type="Button" parent="." unique_id=1119164959]
 unique_name_in_owner = true

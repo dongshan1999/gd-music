@@ -57,7 +57,7 @@ func refresh() -> void:
 		_reset_cover_state()
 		mini_track_label.text = tr("music_app.mini_player.empty")
 		mini_play_ring.progress = 0.0
-		MusicAppIconsType.apply_icon_button(mini_play_button, MusicAppIconsType.PLAY)
+		MusicAppIconsType.apply_icon_button(mini_play_button, MusicAppIconsType.PLAY, false, false)
 		return
 
 	var track: TrackData = _mini_player_controller.get_current_track()
@@ -68,7 +68,9 @@ func refresh() -> void:
 		mini_play_button,
 		MusicAppIconsType.PAUSE
 		if _mini_player_controller.is_playing()
-		else MusicAppIconsType.PLAY
+		else MusicAppIconsType.PLAY,
+		false,
+		false
 	)
 
 func _toggle_playback() -> void:

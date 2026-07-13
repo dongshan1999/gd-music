@@ -1,75 +1,113 @@
-[gd_scene load_steps=3 format=3]
+[gd_scene format=3 uid="uid://bqgo33qd13w43"]
 
-[ext_resource type="Script" path="res://scripts/ui/music_app/views/playlist/music_app_playlist_song_row.gd" id="1_script"]
+[ext_resource type="Script" uid="uid://5m0j2vlf2cuf" path="res://scripts/ui/music_app/views/playlist/music_app_playlist_song_row.gd" id="1_script"]
+[ext_resource type="Texture2D" uid="uid://crjc6fo4cjnm8" path="res://textures/bars-3.svg" id="3_drag"]
+[ext_resource type="Texture2D" uid="uid://ykxiwku5xok7" path="res://textures/check-circle-outline.svg" id="4_select"]
+[ext_resource type="Texture2D" uid="uid://dlo5u6r1lns7f" path="res://textures/trash-outline.svg" id="5_trash"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_playlist_song_row_panel"]
-bg_color = Color(0.160784, 0.160784, 0.168627, 1)
+bg_color = Color(0, 0, 0, 0)
 corner_radius_top_left = 16
 corner_radius_top_right = 16
 corner_radius_bottom_right = 16
 corner_radius_bottom_left = 16
 
-[node name="PlaylistSongRow" type="Panel"]
-custom_minimum_size = Vector2(0, 86)
-layout_mode = 2
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_song_button"]
+
+[node name="PlaylistSongRow" type="Panel" unique_id=7246353]
+custom_minimum_size = Vector2(0, 66)
+offset_right = 430.0
+offset_bottom = 66.0
 theme_override_styles/panel = SubResource("StyleBoxFlat_playlist_song_row_panel")
 script = ExtResource("1_script")
 
-[node name="Margin" type="MarginContainer" parent="."]
+[node name="SongButton" type="Button" parent="." unique_id=1900545055]
 layout_mode = 0
 anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-theme_override_constants/margin_left = 4
-theme_override_constants/margin_top = 10
-theme_override_constants/margin_right = 4
-theme_override_constants/margin_bottom = 10
+focus_mode = 0
+theme_override_styles/normal = SubResource("StyleBoxEmpty_song_button")
+theme_override_styles/pressed = SubResource("StyleBoxEmpty_song_button")
+theme_override_styles/hover = SubResource("StyleBoxEmpty_song_button")
+theme_override_styles/disabled = SubResource("StyleBoxEmpty_song_button")
+theme_override_styles/focus = SubResource("StyleBoxEmpty_song_button")
+flat = true
 
-[node name="Row" type="HBoxContainer" parent="Margin"]
+[node name="Margin" type="MarginContainer" parent="." unique_id=711090947]
+layout_mode = 0
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/margin_left = 2
+theme_override_constants/margin_top = 8
+theme_override_constants/margin_right = 0
+theme_override_constants/margin_bottom = 8
+
+[node name="Row" type="HBoxContainer" parent="Margin" unique_id=1927211102]
 layout_mode = 2
-theme_override_constants/separation = 12
+theme_override_constants/separation = 10
+alignment = 1
 
-[node name="SongIndexLabel" type="Label" parent="Margin/Row"]
+[node name="SongSelectButton" type="Button" parent="Margin/Row" unique_id=1303658344]
+visible = false
+custom_minimum_size = Vector2(32, 36)
+layout_mode = 2
+icon = ExtResource("4_select")
+flat = true
+icon_alignment = 1
+
+[node name="SongIndexLabel" type="Label" parent="Margin/Row" unique_id=1528215325]
 custom_minimum_size = Vector2(28, 0)
 layout_mode = 2
-theme_override_colors/font_color = Color(0.968627, 0.968627, 0.972549, 1)
-theme_override_font_sizes/font_size = 18
+theme_override_colors/font_color = Color(0.643137, 0.65098, 0.690196, 1)
+theme_override_font_sizes/font_size = 14
 text = "1"
 horizontal_alignment = 1
+vertical_alignment = 1
 
-[node name="SongInfo" type="VBoxContainer" parent="Margin/Row"]
+[node name="SongInfo" type="VBoxContainer" parent="Margin/Row" unique_id=1187513079]
 layout_mode = 2
 size_flags_horizontal = 3
 theme_override_constants/separation = 4
 alignment = 1
 
-[node name="SongTitleLabel" type="Label" parent="Margin/Row/SongInfo"]
+[node name="SongTitleLabel" type="Label" parent="Margin/Row/SongInfo" unique_id=1837534805]
 layout_mode = 2
+size_flags_horizontal = 3
 theme_override_colors/font_color = Color(0.968627, 0.968627, 0.972549, 1)
-theme_override_font_sizes/font_size = 18
-text = "Track Title"
+theme_override_font_sizes/font_size = 15
+text = "歌曲标题"
+text_overrun_behavior = 3
 
-[node name="SongSubtitleLabel" type="Label" parent="Margin/Row/SongInfo"]
+[node name="SongSubtitleLabel" type="Label" parent="Margin/Row/SongInfo" unique_id=322176812]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_colors/font_color = Color(0.643137, 0.65098, 0.690196, 1)
+theme_override_font_sizes/font_size = 12
+text = "歌手 - 来源"
+text_overrun_behavior = 3
+
+[node name="SongVipLabel" type="Label" parent="Margin/Row" unique_id=1740295896]
+visible = false
 layout_mode = 2
 theme_override_colors/font_color = Color(0.643137, 0.65098, 0.690196, 1)
-theme_override_font_sizes/font_size = 14
-text = "Artist - Album"
+theme_override_font_sizes/font_size = 12
 
-[node name="SongVipLabel" type="Label" parent="Margin/Row"]
+[node name="SongDeleteButton" type="Button" parent="Margin/Row" unique_id=1068662187]
+visible = false
+custom_minimum_size = Vector2(36, 36)
 layout_mode = 2
-theme_override_colors/font_color = Color(0.643137, 0.65098, 0.690196, 1)
-theme_override_font_sizes/font_size = 14
-text = "[SOURCE]"
+icon = ExtResource("5_trash")
+flat = true
+icon_alignment = 1
 
-[node name="SongMoreButton" type="Button" parent="Margin/Row"]
-custom_minimum_size = Vector2(34, 34)
+[node name="SongDragHandleButton" type="Button" parent="Margin/Row" unique_id=750733926]
+visible = false
+custom_minimum_size = Vector2(36, 36)
 layout_mode = 2
-text = "..."
-
-[node name="SongButton" type="Button" parent="."]
-layout_mode = 0
-anchor_right = 1.0
-anchor_bottom = 1.0
-grow_horizontal = 2
-grow_vertical = 2
+icon = ExtResource("3_drag")
+flat = true
+icon_alignment = 1

@@ -29,13 +29,13 @@ Music App Showcase
 │     └─ 统一提供：`show_popup()` / `show_common_alert()` / `show_toast()`
 └─ 弹窗注册表
    └─ `dx/runtime/scripts/managers/popup/popup_registry.gd`
-      ├─ `MUSIC_APP_HOME`
-      ├─ `MUSIC_APP_PLAYLIST`
-      ├─ `MUSIC_APP_PLAYER`
-      ├─ `MUSIC_APP_PLAYBACK_QUEUE`
-      ├─ `MUSIC_APP_LOCAL_MUSIC`
-      ├─ `MUSIC_APP_LOCAL_SCAN`
-      └─ `MUSIC_APP_PLUGIN_BROWSER`
+	  ├─ `MUSIC_APP_HOME`
+	  ├─ `MUSIC_APP_PLAYLIST`
+	  ├─ `MUSIC_APP_PLAYER`
+	  ├─ `MUSIC_APP_PLAYBACK_QUEUE`
+	  ├─ `MUSIC_APP_LOCAL_MUSIC`
+	  ├─ `MUSIC_APP_LOCAL_SCAN`
+	  └─ `MUSIC_APP_PLUGIN_BROWSER`
 
 ## 2. 全局功能域
 
@@ -61,11 +61,11 @@ Global Controllers
 │     └─ 维护 liked track key
 └─ `MusicAppPopupRouterController`
    └─ `scripts/ui/music_app/controllers/global/music_app_popup_router_controller.gd`
-      ├─ 绑定/解绑 normal/fullscreen popup host
-      ├─ `show_popup()` 后自动调用 popup `setup(showcase)`
-      ├─ 打开首页：`show_home_popup()`
-      ├─ 通用弹窗：`show_common_alert()` / `show_toast()`
-      └─ 返回键关闭当前非首页弹窗
+	  ├─ 绑定/解绑 normal/fullscreen popup host
+	  ├─ `show_popup()` 后自动调用 popup `setup(showcase)`
+	  ├─ 打开首页：`show_home_popup()`
+	  ├─ 通用弹窗：`show_common_alert()` / `show_toast()`
+	  └─ 返回键关闭当前非首页弹窗
 
 ## 3. 界面树
 
@@ -93,12 +93,12 @@ Home Popup
 │     └─ 信号：`delete_requested(index)`
 └─ Controller
    └─ `scripts/ui/music_app/controllers/music_app_home_controller.gd`
-      ├─ 获取歌单列表 / 收藏歌单索引
-      ├─ 新建当前歌单
-      ├─ 删除歌单
-      ├─ 打开歌单页
-      ├─ 打开本地音乐页
-      └─ 打开插件浏览器
+	  ├─ 获取歌单列表 / 收藏歌单索引
+	  ├─ 新建当前歌单
+	  ├─ 删除歌单
+	  ├─ 打开歌单页
+	  ├─ 打开本地音乐页
+	  └─ 打开插件浏览器
 
 ### 3.2 歌单页 Playlist
 
@@ -121,11 +121,11 @@ Playlist Popup
 │     └─ 信号：`more_requested(index)`
 └─ Controller
    └─ `scripts/ui/music_app/controllers/music_app_playlist_controller.gd`
-      ├─ 获取当前选中歌单
-      ├─ 获取歌单曲目索引
-      ├─ 根据 slot 播放
-      ├─ 歌单标题/mark/总数展示
-      └─ 从当前播放创建新歌单
+	  ├─ 获取当前选中歌单
+	  ├─ 获取歌单曲目索引
+	  ├─ 根据 slot 播放
+	  ├─ 歌单标题/mark/总数展示
+	  └─ 从当前播放创建新歌单
 
 ### 3.3 本地音乐页 Local Music
 
@@ -148,11 +148,11 @@ Local Music Popup
 │     └─ 信号：`more_requested(index)`
 └─ Controller
    └─ `scripts/ui/music_app/controllers/music_app_local_music_controller.gd`
-      ├─ 过滤本地曲目索引
-      ├─ 播放本地曲目列表
-      ├─ 打开扫描页
-      ├─ 打开插件浏览器
-      └─ 编辑/下载占位提示
+	  ├─ 过滤本地曲目索引
+	  ├─ 播放本地曲目列表
+	  ├─ 打开扫描页
+	  ├─ 打开插件浏览器
+	  └─ 编辑/下载占位提示
 
 ### 3.4 本地扫描页 Local Scan
 
@@ -172,11 +172,11 @@ Local Scan Popup
 │     └─ 信号：`selection_toggled(path, selected)`
 └─ Controller
    └─ `scripts/ui/music_app/controllers/music_app_local_scan_controller.gd`
-      ├─ 扫描根路径解析
-      ├─ 列出目录 / Windows 盘符
-      ├─ 递归收集音频文件
-      ├─ 生成 `TrackData`
-      └─ 导入到全局 tracks
+	  ├─ 扫描根路径解析
+	  ├─ 列出目录 / Windows 盘符
+	  ├─ 递归收集音频文件
+	  ├─ 生成 `TrackData`
+	  └─ 导入到全局 tracks
 
 ### 3.5 迷你播放器 Mini Player
 
@@ -199,10 +199,10 @@ Mini Player
 │     └─ 负责绘制圆环进度
 └─ Controller
    └─ `scripts/ui/music_app/controllers/music_app_mini_player_controller.gd`
-      ├─ 当前曲目 / 时长 / 已播秒数 / 进度比例
-      ├─ 播放/暂停
-      ├─ 打开播放器页
-      └─ 打开播放队列
+	  ├─ 当前曲目 / 时长 / 已播秒数 / 进度比例
+	  ├─ 播放/暂停
+	  ├─ 打开播放器页
+	  └─ 打开播放队列
 
 ### 3.6 全屏播放器 Player
 
@@ -222,12 +222,12 @@ Player Popup
 │        └─ 打开播放队列
 └─ Controller
    └─ `scripts/ui/music_app/controllers/music_app_player_controller.gd`
-      ├─ 当前曲目 / 时长 / elapsed
-      ├─ seek 到秒 / seek 到比例
-      ├─ 喜欢状态切换
-      ├─ 上一首 / 下一首 / 播放暂停
-      ├─ 播放模式切换
-      └─ 打开播放队列
+	  ├─ 当前曲目 / 时长 / elapsed
+	  ├─ seek 到秒 / seek 到比例
+	  ├─ 喜欢状态切换
+	  ├─ 上一首 / 下一首 / 播放暂停
+	  ├─ 播放模式切换
+	  └─ 打开播放队列
 
 ### 3.7 播放队列 Popup
 
@@ -251,11 +251,11 @@ Playback Queue Popup
 │     └─ 信号：`remove_requested(queue_index)`
 └─ Controller
    └─ `scripts/ui/music_app/controllers/music_app_playback_queue_controller.gd`
-      ├─ 读取队列展示 rows
-      ├─ 当前队列索引
-      ├─ 队列删除 / 清空
-      ├─ 播放模式 label/icon
-      └─ 播放指定队列项
+	  ├─ 读取队列展示 rows
+	  ├─ 当前队列索引
+	  ├─ 队列删除 / 清空
+	  ├─ 播放模式 label/icon
+	  └─ 播放指定队列项
 
 ### 3.8 插件浏览器 Plugin Browser
 
@@ -293,13 +293,13 @@ Plugin Browser Popup
 │     └─ 信号：`play_requested(index)`
 └─ Controller
    └─ `scripts/ui/music_app/controllers/music_app_plugin_browser_controller.gd`
-      ├─ 插件搜索历史增删改查
-      ├─ 启动/自动启动 plugin host
-      ├─ 从 URL / 本地文件安装插件
-      ├─ 调用插件搜索
-      ├─ 将搜索结果导入歌单和 tracks
-      ├─ 解析插件曲目播放地址
-      └─ 解析插件曲目歌词
+	  ├─ 插件搜索历史增删改查
+	  ├─ 启动/自动启动 plugin host
+	  ├─ 从 URL / 本地文件安装插件
+	  ├─ 调用插件搜索
+	  ├─ 将搜索结果导入歌单和 tracks
+	  ├─ 解析插件曲目播放地址
+	  └─ 解析插件曲目歌词
 
 ## 4. 插件链路
 
@@ -319,14 +319,14 @@ Plugin Search Runtime
 │     └─ 取歌词：`get_lyric()`
 └─ Node 宿主
    └─ `plugin_host/src/server.js`
-      ├─ `/health`
-      ├─ `/plugins`
-      ├─ `/install`
-      ├─ `/plugin_vars`
-      ├─ `/search`
-      ├─ `/source`
-      ├─ `/lyric`
-      └─ `/toplists`
+	  ├─ `/health`
+	  ├─ `/plugins`
+	  ├─ `/install`
+	  ├─ `/plugin_vars`
+	  ├─ `/search`
+	  ├─ `/source`
+	  ├─ `/lyric`
+	  └─ `/toplists`
 
 ## 5. 依赖规律总结
 
