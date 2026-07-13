@@ -72,7 +72,7 @@ func refresh() -> void:
 		player_source_label.text = ""
 		cover_mark_label.text = ""
 		MusicAppIconsType.apply_icon_button(like_button, MusicAppIconsType.HEART_OUTLINE)
-		MusicAppIconsType.apply_icon_button(player_play_button, MusicAppIconsType.PLAY)
+		MusicAppIconsType.apply_icon_button(player_play_button, MusicAppIconsType.PLAY, false, false)
 		MusicAppIconsType.apply_icon_button(
 			shuffle_button,
 			_player_controller.get_playback_mode_icon()
@@ -106,7 +106,9 @@ func refresh() -> void:
 		player_play_button,
 		MusicAppIconsType.PAUSE
 		if _player_controller.is_playing()
-		else MusicAppIconsType.PLAY
+		else MusicAppIconsType.PLAY,
+		false,
+		false
 	)
 	player_progress_bar.value = progress * 100.0
 	elapsed_label.text = _format_seconds(_player_controller.get_current_elapsed_seconds())

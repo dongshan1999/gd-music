@@ -61,7 +61,8 @@ func refresh() -> void:
 	MusicAppIconsType.apply_icon_button(
 		playback_mode_button,
 		_queue_controller.get_playback_mode_icon(),
-		true
+		true,
+		false
 	)
 	playback_mode_button.text = tr(_queue_controller.get_playback_mode_label_key())
 	playback_mode_button.disabled = not has_tracks

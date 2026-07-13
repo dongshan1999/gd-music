@@ -16,7 +16,6 @@ var _queue_index := -1
 @onready var current_icon_rect: TextureRect = %CurrentIconRect
 @onready var title_label: Label = %TitleLabel
 @onready var subtitle_label: Label = %SubtitleLabel
-@onready var source_label: Label = %SourceLabel
 @onready var remove_button: Button = %RemoveButton
 @onready var open_button: Button = %OpenButton
 
@@ -40,8 +39,7 @@ func configure(
 	_queue_index = queue_index
 	current_icon_rect.visible = is_current
 	title_label.text = title
-	subtitle_label.text = subtitle
-	source_label.text = source
+	subtitle_label.text = _format_subtitle(subtitle, source)
 	title_label.add_theme_color_override(
 		"font_color",
 		ACTIVE_TEXT if is_current else PRIMARY_TEXT
@@ -57,3 +55,12 @@ func _on_remove_pressed() -> void:
 	if _queue_index < 0:
 		return
 	remove_requested.emit(_queue_index)
+
+func _format_subtitle(subtitle: String, source: String) -> String:
+	var normalized_subtitle := subtitle.strip_edges()
+	var normalized_source := source.strip_edges()
+	if normalized_source.is_empty() or normalized_source == normalized_subtitle:
+		return normalized_subtitle
+	if normalized_subtitle.is_empty():
+		return normalized_source
+	return "%s · %s" % [normalized_subtitle, normalized_source]

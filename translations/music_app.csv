@@ -13,7 +13,7 @@ music_app.playlist.favorites_title,Liked,我喜欢,我喜欢
 music_app.playlist.favorites_mark,L,我,我
 music_app.playlist.total_tracks,Total {count} tracks,共 {count} 首,共 {count} 首
 music_app.playlist.total_tracks_zero,Total 0 tracks,共 0 首,共 0 首
-music_app.playlist.play_all,▶ Play All,▶ 播放全部,▶ 播放全部
+music_app.playlist.play_all,Play All,播放全部,播放全部
 music_app.playlist.new_playlist,New Playlist,新建歌单,新建歌单
 music_app.playlist.placeholder_title,Playlist Name,歌单名称,歌单名称
 music_app.common.song_count,{count} tracks,{count} 首歌曲,{count} 首歌曲

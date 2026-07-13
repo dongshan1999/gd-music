@@ -5,16 +5,51 @@
 [ext_resource type="Texture2D" path="res://textures/magnifying-glass.svg" id="5_search"]
 [ext_resource type="Texture2D" path="res://textures/ellipsis-vertical.svg" id="6_more"]
 [ext_resource type="Texture2D" path="res://textures/play.svg" id="7_play"]
-[ext_resource type="Texture2D" path="res://textures/plus.svg" id="8_plus"]
-[ext_resource type="Texture2D" path="res://textures/pencil-square.svg" id="9_edit"]
 [ext_resource type="Script" path="res://dx/runtime/scripts/managers/localization/localize_comp.gd" id="999_localize_comp"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_playlist_hero_cover"]
 bg_color = Color(0.231373, 0.231373, 0.239216, 1)
-corner_radius_top_left = 22
-corner_radius_top_right = 22
-corner_radius_bottom_right = 22
-corner_radius_bottom_left = 22
+corner_radius_top_left = 14
+corner_radius_top_right = 14
+corner_radius_bottom_right = 14
+corner_radius_bottom_left = 14
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_playlist_hero_panel"]
+bg_color = Color(0.121569, 0.12549, 0.141176, 1)
+corner_radius_top_left = 12
+corner_radius_top_right = 12
+corner_radius_bottom_right = 12
+corner_radius_bottom_left = 12
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_playlist_primary_action"]
+bg_color = Color(0.92, 0.93, 0.96, 0.14)
+corner_radius_top_left = 8
+corner_radius_top_right = 8
+corner_radius_bottom_right = 8
+corner_radius_bottom_left = 8
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_playlist_delete_action"]
+bg_color = Color(0.92, 0.18, 0.18, 0.24)
+corner_radius_top_left = 8
+corner_radius_top_right = 8
+corner_radius_bottom_right = 8
+corner_radius_bottom_left = 8
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_playlist_menu_scrim"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_playlist_menu_panel"]
+bg_color = Color(0.164706, 0.168627, 0.188235, 1)
+corner_radius_top_left = 8
+corner_radius_top_right = 8
+corner_radius_bottom_right = 8
+corner_radius_bottom_left = 8
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_playlist_menu_button"]
+bg_color = Color(1, 1, 1, 0)
+corner_radius_top_left = 6
+corner_radius_top_right = 6
+corner_radius_bottom_right = 6
+corner_radius_bottom_left = 6
 
 [node name="PlaylistPage" type="Control" unique_id=741966306]
 unique_name_in_owner = true
@@ -49,7 +84,7 @@ theme_override_constants/margin_bottom = 100
 
 [node name="PlaylistVBox" type="VBoxContainer" parent="Margin" unique_id=1797493169]
 layout_mode = 2
-theme_override_constants/separation = 16
+theme_override_constants/separation = 12
 
 [node name="PlaylistTopRow" type="HBoxContainer" parent="Margin/PlaylistVBox" unique_id=1014400035]
 custom_minimum_size = Vector2(0, 48)
@@ -61,14 +96,18 @@ unique_name_in_owner = true
 custom_minimum_size = Vector2(44, 44)
 layout_mode = 2
 icon = ExtResource("4_arrow_left")
-expand_icon = true
+expand_icon = false
 icon_alignment = 1
 vertical_icon_alignment = 1
+flat = true
 
 [node name="PlaylistTopTitle" type="Label" parent="Margin/PlaylistVBox/PlaylistTopRow" unique_id=1119246384]
 unique_name_in_owner = true
 layout_mode = 2
+theme_override_colors/font_color = Color(0.968627, 0.968627, 0.972549, 1)
+theme_override_font_sizes/font_size = 18
 text = "歌单"
+vertical_alignment = 1
 
 [node name="LocalizeComp" type="Node" parent="Margin/PlaylistVBox/PlaylistTopRow/PlaylistTopTitle" unique_id=1955727055]
 script = ExtResource("999_localize_comp")
@@ -80,26 +119,29 @@ size_flags_horizontal = 3
 
 [node name="PlaylistSearchButton" type="Button" parent="Margin/PlaylistVBox/PlaylistTopRow" unique_id=995483356]
 unique_name_in_owner = true
-custom_minimum_size = Vector2(44, 44)
+custom_minimum_size = Vector2(40, 40)
 layout_mode = 2
 icon = ExtResource("5_search")
-expand_icon = true
+expand_icon = false
 icon_alignment = 1
 vertical_icon_alignment = 1
+flat = true
 
 [node name="PlaylistMoreButton" type="Button" parent="Margin/PlaylistVBox/PlaylistTopRow" unique_id=706924577]
 unique_name_in_owner = true
-custom_minimum_size = Vector2(44, 44)
+custom_minimum_size = Vector2(40, 40)
 layout_mode = 2
 icon = ExtResource("6_more")
-expand_icon = true
+expand_icon = false
 icon_alignment = 1
 vertical_icon_alignment = 1
+flat = true
 
 [node name="PlaylistHeroPanel" type="Panel" parent="Margin/PlaylistVBox" unique_id=1234494683]
 unique_name_in_owner = true
-custom_minimum_size = Vector2(0, 176)
+custom_minimum_size = Vector2(0, 128)
 layout_mode = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_playlist_hero_panel")
 
 [node name="Margin" type="MarginContainer" parent="Margin/PlaylistVBox/PlaylistHeroPanel" unique_id=1871958647]
 layout_mode = 0
@@ -107,19 +149,21 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-theme_override_constants/margin_left = 14
-theme_override_constants/margin_top = 18
-theme_override_constants/margin_right = 14
-theme_override_constants/margin_bottom = 18
+theme_override_constants/margin_left = 12
+theme_override_constants/margin_top = 12
+theme_override_constants/margin_right = 12
+theme_override_constants/margin_bottom = 12
 
 [node name="HeroRow" type="HBoxContainer" parent="Margin/PlaylistVBox/PlaylistHeroPanel/Margin" unique_id=2096062181]
 layout_mode = 2
-theme_override_constants/separation = 18
+theme_override_constants/separation = 12
 
 [node name="PlaylistHeroCover" type="Panel" parent="Margin/PlaylistVBox/PlaylistHeroPanel/Margin/HeroRow" unique_id=944066011]
 unique_name_in_owner = true
-custom_minimum_size = Vector2(118, 118)
+custom_minimum_size = Vector2(88, 88)
 layout_mode = 2
+size_flags_horizontal = 0
+size_flags_vertical = 4
 theme_override_styles/panel = SubResource("StyleBoxFlat_playlist_hero_cover")
 
 [node name="PlaylistHeroMarkLabel" type="Label" parent="Margin/PlaylistVBox/PlaylistHeroPanel/Margin/HeroRow/PlaylistHeroCover" unique_id=1600885860]
@@ -129,6 +173,8 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
+theme_override_colors/font_color = Color(0.968627, 0.968627, 0.972549, 1)
+theme_override_font_sizes/font_size = 24
 text = "我"
 horizontal_alignment = 1
 vertical_alignment = 1
@@ -140,13 +186,19 @@ update_in_runtime = false
 
 [node name="Info" type="VBoxContainer" parent="Margin/PlaylistVBox/PlaylistHeroPanel/Margin/HeroRow" unique_id=453774606]
 layout_mode = 2
+size_flags_horizontal = 3
 theme_override_constants/separation = 8
 alignment = 1
 
 [node name="PlaylistHeroTitleLabel" type="Label" parent="Margin/PlaylistVBox/PlaylistHeroPanel/Margin/HeroRow/Info" unique_id=1583898995]
 unique_name_in_owner = true
+custom_minimum_size = Vector2(88, 0)
 layout_mode = 2
+size_flags_horizontal = 3
+theme_override_colors/font_color = Color(0.968627, 0.968627, 0.972549, 1)
+theme_override_font_sizes/font_size = 18
 text = "我喜欢"
+text_overrun_behavior = 3
 
 [node name="LocalizeComp" type="Node" parent="Margin/PlaylistVBox/PlaylistHeroPanel/Margin/HeroRow/Info/PlaylistHeroTitleLabel" unique_id=202041321]
 script = ExtResource("999_localize_comp")
@@ -156,6 +208,9 @@ update_in_runtime = false
 [node name="PlaylistHeroCountLabel" type="Label" parent="Margin/PlaylistVBox/PlaylistHeroPanel/Margin/HeroRow/Info" unique_id=2046281453]
 unique_name_in_owner = true
 layout_mode = 2
+size_flags_horizontal = 3
+theme_override_colors/font_color = Color(0.643137, 0.65098, 0.690196, 1)
+theme_override_font_sizes/font_size = 13
 text = "共 0 首"
 
 [node name="LocalizeComp" type="Node" parent="Margin/PlaylistVBox/PlaylistHeroPanel/Margin/HeroRow/Info/PlaylistHeroCountLabel" unique_id=409719352]
@@ -164,41 +219,77 @@ tr_key = "music_app.playlist.total_tracks_zero"
 update_in_runtime = false
 
 [node name="PlaylistActionsRow" type="HBoxContainer" parent="Margin/PlaylistVBox" unique_id=1332593054]
-custom_minimum_size = Vector2(0, 52)
+custom_minimum_size = Vector2(0, 44)
 layout_mode = 2
-theme_override_constants/separation = 14
+theme_override_constants/separation = 8
 
 [node name="PlayAllButton" type="Button" parent="Margin/PlaylistVBox/PlaylistActionsRow" unique_id=1453129486]
 unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 44)
 layout_mode = 2
 size_flags_horizontal = 3
-icon = ExtResource("7_play")
-expand_icon = false
-text = "▶ 播放全部"
+theme_override_colors/font_color = Color(0.968627, 0.968627, 0.972549, 1)
+theme_override_font_sizes/font_size = 14
+theme_override_styles/normal = SubResource("StyleBoxFlat_playlist_primary_action")
+theme_override_styles/pressed = SubResource("StyleBoxFlat_playlist_primary_action")
+theme_override_styles/hover = SubResource("StyleBoxFlat_playlist_primary_action")
+theme_override_styles/disabled = SubResource("StyleBoxFlat_playlist_primary_action")
+theme_override_styles/focus = SubResource("StyleBoxFlat_playlist_primary_action")
+text = ""
 
-[node name="LocalizeComp" type="Node" parent="Margin/PlaylistVBox/PlaylistActionsRow/PlayAllButton" unique_id=247668619]
+[node name="PlayAllContent" type="CenterContainer" parent="Margin/PlaylistVBox/PlaylistActionsRow/PlayAllButton" unique_id=2114263564]
+layout_mode = 0
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+
+[node name="Row" type="HBoxContainer" parent="Margin/PlaylistVBox/PlaylistActionsRow/PlayAllButton/PlayAllContent" unique_id=958497903]
+layout_mode = 2
+mouse_filter = 2
+theme_override_constants/separation = 6
+alignment = 1
+
+[node name="PlayAllIconRect" type="TextureRect" parent="Margin/PlaylistVBox/PlaylistActionsRow/PlayAllButton/PlayAllContent/Row" unique_id=1460288142]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(16, 16)
+layout_mode = 2
+mouse_filter = 2
+texture = ExtResource("7_play")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="PlayAllLabel" type="Label" parent="Margin/PlaylistVBox/PlaylistActionsRow/PlayAllButton/PlayAllContent/Row" unique_id=518318308]
+unique_name_in_owner = true
+layout_mode = 2
+mouse_filter = 2
+theme_override_colors/font_color = Color(0.968627, 0.968627, 0.972549, 1)
+theme_override_font_sizes/font_size = 14
+text = "播放全部"
+vertical_alignment = 1
+
+[node name="LocalizeComp" type="Node" parent="Margin/PlaylistVBox/PlaylistActionsRow/PlayAllButton/PlayAllContent/Row/PlayAllLabel" unique_id=247668619]
 script = ExtResource("999_localize_comp")
 tr_key = "music_app.playlist.play_all"
 
-[node name="PlaylistAddButton" type="Button" parent="Margin/PlaylistVBox/PlaylistActionsRow" unique_id=50040948]
+[node name="DeleteSelectedButton" type="Button" parent="Margin/PlaylistVBox/PlaylistActionsRow" unique_id=1052491857]
 unique_name_in_owner = true
-custom_minimum_size = Vector2(52, 52)
+visible = false
+custom_minimum_size = Vector2(0, 44)
 layout_mode = 2
-icon = ExtResource("8_plus")
-expand_icon = true
-icon_alignment = 1
-vertical_icon_alignment = 1
-
-[node name="PlaylistEditButton" type="Button" parent="Margin/PlaylistVBox/PlaylistActionsRow" unique_id=1508249865]
-unique_name_in_owner = true
-custom_minimum_size = Vector2(52, 52)
-layout_mode = 2
-icon = ExtResource("9_edit")
-expand_icon = true
-icon_alignment = 1
-vertical_icon_alignment = 1
+size_flags_horizontal = 3
+theme_override_colors/font_color = Color(1, 0.858824, 0.858824, 1)
+theme_override_font_sizes/font_size = 14
+theme_override_styles/normal = SubResource("StyleBoxFlat_playlist_delete_action")
+theme_override_styles/pressed = SubResource("StyleBoxFlat_playlist_delete_action")
+theme_override_styles/hover = SubResource("StyleBoxFlat_playlist_delete_action")
+theme_override_styles/disabled = SubResource("StyleBoxFlat_playlist_delete_action")
+theme_override_styles/focus = SubResource("StyleBoxFlat_playlist_delete_action")
+text = "删除选择"
 
 [node name="PlaylistScroll" type="ScrollContainer" parent="Margin/PlaylistVBox" unique_id=859457217]
+unique_name_in_owner = true
 layout_mode = 2
 size_flags_vertical = 3
 horizontal_scroll_mode = 0
@@ -211,3 +302,87 @@ theme_override_constants/separation = 6
 [node name="SongBottomSpace" type="Control" parent="Margin/PlaylistVBox/PlaylistScroll/SongList" unique_id=890655664]
 custom_minimum_size = Vector2(0, 24)
 layout_mode = 2
+
+[node name="PlaylistEmptyLabel" type="Label" parent="Margin/PlaylistVBox" unique_id=1505749660]
+unique_name_in_owner = true
+visible = false
+custom_minimum_size = Vector2(0, 120)
+layout_mode = 2
+theme_override_colors/font_color = Color(0.643137, 0.65098, 0.690196, 1)
+theme_override_font_sizes/font_size = 14
+text = "这个歌单里还没有歌曲"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="PlaylistMoreMenuScrim" type="Button" parent="." unique_id=944818915]
+unique_name_in_owner = true
+visible = false
+z_index = 20
+layout_mode = 0
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_styles/normal = SubResource("StyleBoxEmpty_playlist_menu_scrim")
+theme_override_styles/pressed = SubResource("StyleBoxEmpty_playlist_menu_scrim")
+theme_override_styles/hover = SubResource("StyleBoxEmpty_playlist_menu_scrim")
+theme_override_styles/disabled = SubResource("StyleBoxEmpty_playlist_menu_scrim")
+theme_override_styles/focus = SubResource("StyleBoxEmpty_playlist_menu_scrim")
+flat = true
+
+[node name="PlaylistMoreMenuPanel" type="Panel" parent="." unique_id=1975387519]
+unique_name_in_owner = true
+visible = false
+z_index = 21
+layout_mode = 0
+anchor_left = 1.0
+anchor_right = 1.0
+offset_left = -126.0
+offset_top = 52.0
+offset_right = -14.0
+offset_bottom = 144.0
+grow_horizontal = 0
+theme_override_styles/panel = SubResource("StyleBoxFlat_playlist_menu_panel")
+
+[node name="Margin" type="MarginContainer" parent="PlaylistMoreMenuPanel" unique_id=879438311]
+layout_mode = 0
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/margin_left = 6
+theme_override_constants/margin_top = 6
+theme_override_constants/margin_right = 6
+theme_override_constants/margin_bottom = 6
+
+[node name="MenuVBox" type="VBoxContainer" parent="PlaylistMoreMenuPanel/Margin" unique_id=788987117]
+layout_mode = 2
+theme_override_constants/separation = 4
+
+[node name="SortModeButton" type="Button" parent="PlaylistMoreMenuPanel/Margin/MenuVBox" unique_id=436977050]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 38)
+layout_mode = 2
+theme_override_colors/font_color = Color(0.968627, 0.968627, 0.972549, 1)
+theme_override_font_sizes/font_size = 14
+theme_override_styles/normal = SubResource("StyleBoxFlat_playlist_menu_button")
+theme_override_styles/pressed = SubResource("StyleBoxFlat_playlist_menu_button")
+theme_override_styles/hover = SubResource("StyleBoxFlat_playlist_menu_button")
+theme_override_styles/disabled = SubResource("StyleBoxFlat_playlist_menu_button")
+theme_override_styles/focus = SubResource("StyleBoxFlat_playlist_menu_button")
+text = "排序"
+alignment = 0
+
+[node name="DeleteModeButton" type="Button" parent="PlaylistMoreMenuPanel/Margin/MenuVBox" unique_id=1126982939]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 38)
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 0.858824, 0.858824, 1)
+theme_override_font_sizes/font_size = 14
+theme_override_styles/normal = SubResource("StyleBoxFlat_playlist_menu_button")
+theme_override_styles/pressed = SubResource("StyleBoxFlat_playlist_menu_button")
+theme_override_styles/hover = SubResource("StyleBoxFlat_playlist_menu_button")
+theme_override_styles/disabled = SubResource("StyleBoxFlat_playlist_menu_button")
+theme_override_styles/focus = SubResource("StyleBoxFlat_playlist_menu_button")
+text = "删除"
+alignment = 0
