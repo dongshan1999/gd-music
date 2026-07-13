@@ -145,7 +145,7 @@ theme_override_constants/separation = 10
 [node name="ScanMusicButton" type="Button" parent="LocalMusicMenuPanel/Margin/MenuVBox" unique_id=990709116]
 unique_name_in_owner = true
 layout_mode = 2
-text = "扫描本地音乐"
+text = "导入本地音乐"
 icon = ExtResource("3_fq6oh")
 flat = true
 alignment = 0

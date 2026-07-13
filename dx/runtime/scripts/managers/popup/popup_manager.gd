@@ -219,8 +219,8 @@ func _prune_invalid_popup_entries() -> void:
 	for popup_layer in _popup_stacks.keys():
 		var layer_stack: Array = _popup_stacks.get(popup_layer, [])
 		for index in range(layer_stack.size() - 1, -1, -1):
-			var popup: DX_PopupView = (layer_stack[index] as Dictionary).get("popup") as DX_PopupView
-			if is_instance_valid(popup):
+			var popup = (layer_stack[index] as Dictionary).get("popup")
+			if is_instance_valid(popup) and popup is DX_PopupView:
 				continue
 			layer_stack.remove_at(index)
 		_popup_stacks[popup_layer] = layer_stack

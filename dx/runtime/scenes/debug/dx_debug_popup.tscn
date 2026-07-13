@@ -1,7 +1,6 @@
-[gd_scene load_steps=6 format=3]
+[gd_scene load_steps=5 format=3]
 
 [ext_resource type="Script" path="res://dx/runtime/scripts/debug/dx_debug_popup.gd" id="1_script"]
-[ext_resource type="Texture2D" path="res://textures/arrow-left.svg" id="2_back"]
 [ext_resource type="Script" path="res://dx/runtime/scripts/component/scroll/scroll_interaction_comp.gd" id="3_scroll_interaction"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_button"]
@@ -25,7 +24,10 @@ grow_horizontal = 2
 grow_vertical = 2
 script = ExtResource("1_script")
 
-[node name="Background" type="ColorRect" parent="."]
+[node name="PopupCanvasLayer" type="CanvasLayer" parent="."]
+layer = 10001
+
+[node name="Background" type="ColorRect" parent="PopupCanvasLayer"]
 layout_mode = 0
 anchor_right = 1.0
 anchor_bottom = 1.0
@@ -34,7 +36,7 @@ grow_vertical = 2
 mouse_filter = 2
 color = Color(0.07, 0.07, 0.08, 0.92)
 
-[node name="Margin" type="MarginContainer" parent="."]
+[node name="Margin" type="MarginContainer" parent="PopupCanvasLayer"]
 layout_mode = 0
 anchor_right = 1.0
 anchor_bottom = 1.0
@@ -45,17 +47,17 @@ theme_override_constants/margin_top = 10
 theme_override_constants/margin_right = 14
 theme_override_constants/margin_bottom = 14
 
-[node name="RootVBox" type="VBoxContainer" parent="Margin"]
+[node name="RootVBox" type="VBoxContainer" parent="PopupCanvasLayer/Margin"]
 layout_mode = 2
 size_flags_vertical = 3
 theme_override_constants/separation = 12
 
-[node name="TopRow" type="HBoxContainer" parent="Margin/RootVBox"]
+[node name="TopRow" type="HBoxContainer" parent="PopupCanvasLayer/Margin/RootVBox"]
 custom_minimum_size = Vector2(0, 44)
 layout_mode = 2
 theme_override_constants/separation = 8
 
-[node name="MenuButton" type="Button" parent="Margin/RootVBox/TopRow"]
+[node name="MenuButton" type="Button" parent="PopupCanvasLayer/Margin/RootVBox/TopRow"]
 unique_name_in_owner = true
 custom_minimum_size = Vector2(72, 36)
 layout_mode = 2
@@ -64,22 +66,21 @@ theme_override_styles/hover = SubResource("StyleBoxFlat_button")
 theme_override_styles/pressed = SubResource("StyleBoxFlat_button")
 text = "目录"
 
-[node name="TopSpacer" type="Control" parent="Margin/RootVBox/TopRow"]
+[node name="TopSpacer" type="Control" parent="PopupCanvasLayer/Margin/RootVBox/TopRow"]
 layout_mode = 2
 size_flags_horizontal = 3
 
-[node name="CloseButton" type="Button" parent="Margin/RootVBox/TopRow"]
+[node name="CloseButton" type="Button" parent="PopupCanvasLayer/Margin/RootVBox/TopRow"]
 unique_name_in_owner = true
 custom_minimum_size = Vector2(40, 40)
 layout_mode = 2
-icon = ExtResource("2_back")
-text = ""
+text = "<"
 
-[node name="PageHost" type="Control" parent="Margin/RootVBox"]
+[node name="PageHost" type="Control" parent="PopupCanvasLayer/Margin/RootVBox"]
 layout_mode = 2
 size_flags_vertical = 3
 
-[node name="DataPage" type="Control" parent="Margin/RootVBox/PageHost"]
+[node name="OptionsPage" type="Control" parent="PopupCanvasLayer/Margin/RootVBox/PageHost"]
 unique_name_in_owner = true
 layout_mode = 1
 anchors_preset = 15
@@ -88,8 +89,7 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 
-[node name="Scroll" type="ScrollContainer" parent="Margin/RootVBox/PageHost/DataPage"]
-unique_name_in_owner = true
+[node name="OptionsScroll" type="ScrollContainer" parent="PopupCanvasLayer/Margin/RootVBox/PageHost/OptionsPage"]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -98,13 +98,13 @@ grow_horizontal = 2
 grow_vertical = 2
 horizontal_scroll_mode = 0
 
-[node name="ContentVBox" type="VBoxContainer" parent="Margin/RootVBox/PageHost/DataPage/Scroll"]
+[node name="OptionsContentVBox" type="VBoxContainer" parent="PopupCanvasLayer/Margin/RootVBox/PageHost/OptionsPage/OptionsScroll"]
 unique_name_in_owner = true
 layout_mode = 2
 size_flags_horizontal = 3
 theme_override_constants/separation = 12
 
-[node name="LogPage" type="Control" parent="Margin/RootVBox/PageHost"]
+[node name="SystemPage" type="Control" parent="PopupCanvasLayer/Margin/RootVBox/PageHost"]
 unique_name_in_owner = true
 visible = false
 layout_mode = 1
@@ -114,7 +114,24 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 
-[node name="LogsPanel" type="PanelContainer" parent="Margin/RootVBox/PageHost/LogPage"]
+[node name="SystemScroll" type="ScrollContainer" parent="PopupCanvasLayer/Margin/RootVBox/PageHost/SystemPage"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+horizontal_scroll_mode = 0
+
+[node name="SystemContentVBox" type="VBoxContainer" parent="PopupCanvasLayer/Margin/RootVBox/PageHost/SystemPage/SystemScroll"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 12
+
+[node name="ProfilerPage" type="Control" parent="PopupCanvasLayer/Margin/RootVBox/PageHost"]
+unique_name_in_owner = true
+visible = false
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -122,75 +139,108 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 
-[node name="LogsMargin" type="MarginContainer" parent="Margin/RootVBox/PageHost/LogPage/LogsPanel"]
+[node name="ProfilerScroll" type="ScrollContainer" parent="PopupCanvasLayer/Margin/RootVBox/PageHost/ProfilerPage"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+horizontal_scroll_mode = 0
+
+[node name="ProfilerContentVBox" type="VBoxContainer" parent="PopupCanvasLayer/Margin/RootVBox/PageHost/ProfilerPage/ProfilerScroll"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 12
+
+[node name="LogPage" type="Control" parent="PopupCanvasLayer/Margin/RootVBox/PageHost"]
+unique_name_in_owner = true
+visible = false
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="LogsPanel" type="PanelContainer" parent="PopupCanvasLayer/Margin/RootVBox/PageHost/LogPage"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="LogsMargin" type="MarginContainer" parent="PopupCanvasLayer/Margin/RootVBox/PageHost/LogPage/LogsPanel"]
 layout_mode = 2
 theme_override_constants/margin_left = 12
 theme_override_constants/margin_top = 12
 theme_override_constants/margin_right = 12
 theme_override_constants/margin_bottom = 12
 
-[node name="LogsVBox" type="VBoxContainer" parent="Margin/RootVBox/PageHost/LogPage/LogsPanel/LogsMargin"]
+[node name="LogsVBox" type="VBoxContainer" parent="PopupCanvasLayer/Margin/RootVBox/PageHost/LogPage/LogsPanel/LogsMargin"]
 layout_mode = 2
 size_flags_vertical = 3
 theme_override_constants/separation = 8
 
-[node name="LogToolbar" type="VBoxContainer" parent="Margin/RootVBox/PageHost/LogPage/LogsPanel/LogsMargin/LogsVBox"]
+[node name="LogToolbar" type="VBoxContainer" parent="PopupCanvasLayer/Margin/RootVBox/PageHost/LogPage/LogsPanel/LogsMargin/LogsVBox"]
 layout_mode = 2
 theme_override_constants/separation = 8
 
-[node name="LogSearchInput" type="LineEdit" parent="Margin/RootVBox/PageHost/LogPage/LogsPanel/LogsMargin/LogsVBox/LogToolbar"]
+[node name="LogSearchInput" type="LineEdit" parent="PopupCanvasLayer/Margin/RootVBox/PageHost/LogPage/LogsPanel/LogsMargin/LogsVBox/LogToolbar"]
 unique_name_in_owner = true
 layout_mode = 2
 placeholder_text = "搜索日志"
 
-[node name="LogFilterRow" type="HBoxContainer" parent="Margin/RootVBox/PageHost/LogPage/LogsPanel/LogsMargin/LogsVBox/LogToolbar"]
+[node name="LogFilterRow" type="HBoxContainer" parent="PopupCanvasLayer/Margin/RootVBox/PageHost/LogPage/LogsPanel/LogsMargin/LogsVBox/LogToolbar"]
 layout_mode = 2
 theme_override_constants/separation = 8
 
-[node name="InfoFilterButton" type="Button" parent="Margin/RootVBox/PageHost/LogPage/LogsPanel/LogsMargin/LogsVBox/LogToolbar/LogFilterRow"]
+[node name="InfoFilterButton" type="Button" parent="PopupCanvasLayer/Margin/RootVBox/PageHost/LogPage/LogsPanel/LogsMargin/LogsVBox/LogToolbar/LogFilterRow"]
 unique_name_in_owner = true
 custom_minimum_size = Vector2(62, 34)
 layout_mode = 2
 text = "信息"
 
-[node name="WarnFilterButton" type="Button" parent="Margin/RootVBox/PageHost/LogPage/LogsPanel/LogsMargin/LogsVBox/LogToolbar/LogFilterRow"]
+[node name="WarnFilterButton" type="Button" parent="PopupCanvasLayer/Margin/RootVBox/PageHost/LogPage/LogsPanel/LogsMargin/LogsVBox/LogToolbar/LogFilterRow"]
 unique_name_in_owner = true
 custom_minimum_size = Vector2(62, 34)
 layout_mode = 2
 text = "警告"
 
-[node name="ErrorFilterButton" type="Button" parent="Margin/RootVBox/PageHost/LogPage/LogsPanel/LogsMargin/LogsVBox/LogToolbar/LogFilterRow"]
+[node name="ErrorFilterButton" type="Button" parent="PopupCanvasLayer/Margin/RootVBox/PageHost/LogPage/LogsPanel/LogsMargin/LogsVBox/LogToolbar/LogFilterRow"]
 unique_name_in_owner = true
 custom_minimum_size = Vector2(62, 34)
 layout_mode = 2
 text = "错误"
 
-[node name="FilterSpacer" type="Control" parent="Margin/RootVBox/PageHost/LogPage/LogsPanel/LogsMargin/LogsVBox/LogToolbar/LogFilterRow"]
+[node name="FilterSpacer" type="Control" parent="PopupCanvasLayer/Margin/RootVBox/PageHost/LogPage/LogsPanel/LogsMargin/LogsVBox/LogToolbar/LogFilterRow"]
 layout_mode = 2
 size_flags_horizontal = 3
 
-[node name="ClearLogsButton" type="Button" parent="Margin/RootVBox/PageHost/LogPage/LogsPanel/LogsMargin/LogsVBox/LogToolbar/LogFilterRow"]
+[node name="ClearLogsButton" type="Button" parent="PopupCanvasLayer/Margin/RootVBox/PageHost/LogPage/LogsPanel/LogsMargin/LogsVBox/LogToolbar/LogFilterRow"]
 unique_name_in_owner = true
 layout_mode = 2
 text = "Clear"
 
-[node name="LogsScroll" type="ScrollContainer" parent="Margin/RootVBox/PageHost/LogPage/LogsPanel/LogsMargin/LogsVBox"]
+[node name="LogsScroll" type="ScrollContainer" parent="PopupCanvasLayer/Margin/RootVBox/PageHost/LogPage/LogsPanel/LogsMargin/LogsVBox"]
 unique_name_in_owner = true
 layout_mode = 2
 size_flags_vertical = 3
 horizontal_scroll_mode = 0
 
-[node name="LogsScrollInteractionComp" type="Node" parent="Margin/RootVBox/PageHost/LogPage/LogsPanel/LogsMargin/LogsVBox"]
+[node name="LogsScrollInteractionComp" type="Node" parent="PopupCanvasLayer/Margin/RootVBox/PageHost/LogPage/LogsPanel/LogsMargin/LogsVBox"]
 script = ExtResource("3_scroll_interaction")
 scroll_container_path = NodePath("../LogsScroll")
 
-[node name="LogsList" type="VBoxContainer" parent="Margin/RootVBox/PageHost/LogPage/LogsPanel/LogsMargin/LogsVBox/LogsScroll"]
+[node name="LogsList" type="VBoxContainer" parent="PopupCanvasLayer/Margin/RootVBox/PageHost/LogPage/LogsPanel/LogsMargin/LogsVBox/LogsScroll"]
 unique_name_in_owner = true
 layout_mode = 2
 size_flags_horizontal = 3
 theme_override_constants/separation = 0
 
-[node name="MenuLayer" type="Control" parent="."]
+[node name="MenuLayer" type="Control" parent="PopupCanvasLayer"]
 unique_name_in_owner = true
 visible = false
 layout_mode = 1
@@ -200,7 +250,7 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 
-[node name="MenuShade" type="ColorRect" parent="MenuLayer"]
+[node name="MenuShade" type="ColorRect" parent="PopupCanvasLayer/MenuLayer"]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -210,7 +260,7 @@ grow_vertical = 2
 mouse_filter = 2
 color = Color(0, 0, 0, 0.18)
 
-[node name="MenuPanel" type="PanelContainer" parent="MenuLayer"]
+[node name="MenuPanel" type="PanelContainer" parent="PopupCanvasLayer/MenuLayer"]
 custom_minimum_size = Vector2(156, 0)
 layout_mode = 1
 anchor_right = 0.0
@@ -219,27 +269,27 @@ offset_right = 156.0
 grow_vertical = 2
 theme_override_styles/panel = SubResource("StyleBoxFlat_menu")
 
-[node name="MenuMargin" type="MarginContainer" parent="MenuLayer/MenuPanel"]
+[node name="MenuMargin" type="MarginContainer" parent="PopupCanvasLayer/MenuLayer/MenuPanel"]
 layout_mode = 2
 theme_override_constants/margin_left = 12
 theme_override_constants/margin_top = 54
 theme_override_constants/margin_right = 12
 theme_override_constants/margin_bottom = 12
 
-[node name="MenuVBox" type="VBoxContainer" parent="MenuLayer/MenuPanel/MenuMargin"]
+[node name="MenuVBox" type="VBoxContainer" parent="PopupCanvasLayer/MenuLayer/MenuPanel/MenuMargin"]
 layout_mode = 2
 theme_override_constants/separation = 8
 
-[node name="DataMenuButton" type="Button" parent="MenuLayer/MenuPanel/MenuMargin/MenuVBox"]
+[node name="OptionsMenuButton" type="Button" parent="PopupCanvasLayer/MenuLayer/MenuPanel/MenuMargin/MenuVBox"]
 unique_name_in_owner = true
 custom_minimum_size = Vector2(0, 36)
 layout_mode = 2
 theme_override_styles/normal = SubResource("StyleBoxFlat_button")
 theme_override_styles/hover = SubResource("StyleBoxFlat_button")
 theme_override_styles/pressed = SubResource("StyleBoxFlat_button")
-text = "数据面板"
+text = "Options"
 
-[node name="LogMenuButton" type="Button" parent="MenuLayer/MenuPanel/MenuMargin/MenuVBox"]
+[node name="LogMenuButton" type="Button" parent="PopupCanvasLayer/MenuLayer/MenuPanel/MenuMargin/MenuVBox"]
 unique_name_in_owner = true
 custom_minimum_size = Vector2(0, 36)
 layout_mode = 2
@@ -247,6 +297,24 @@ theme_override_styles/normal = SubResource("StyleBoxFlat_button")
 theme_override_styles/hover = SubResource("StyleBoxFlat_button")
 theme_override_styles/pressed = SubResource("StyleBoxFlat_button")
 text = "Log 面板"
+
+[node name="SystemMenuButton" type="Button" parent="PopupCanvasLayer/MenuLayer/MenuPanel/MenuMargin/MenuVBox"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 36)
+layout_mode = 2
+theme_override_styles/normal = SubResource("StyleBoxFlat_button")
+theme_override_styles/hover = SubResource("StyleBoxFlat_button")
+theme_override_styles/pressed = SubResource("StyleBoxFlat_button")
+text = "System"
+
+[node name="ProfilerMenuButton" type="Button" parent="PopupCanvasLayer/MenuLayer/MenuPanel/MenuMargin/MenuVBox"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 36)
+layout_mode = 2
+theme_override_styles/normal = SubResource("StyleBoxFlat_button")
+theme_override_styles/hover = SubResource("StyleBoxFlat_button")
+theme_override_styles/pressed = SubResource("StyleBoxFlat_button")
+text = "Profiler"
 
 [node name="RefreshTimer" type="Timer" parent="."]
 unique_name_in_owner = true

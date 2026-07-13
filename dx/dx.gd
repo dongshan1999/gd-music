@@ -1,17 +1,20 @@
 class_name DX_Root
 extends Node
 
-const DX_ScriptPathsType := preload("res://dx/runtime/scripts/constants/dx_script_paths.gd")
-const LoggerScript := preload(DX_ScriptPathsType.LOGGER)
-const SignalManagerScript := preload(DX_ScriptPathsType.SIGNAL)
-const DataManagerScript := preload(DX_ScriptPathsType.DATA)
-const TimeManagerScript := preload(DX_ScriptPathsType.TIME)
-const BackgroundStateManagerScript := preload(DX_ScriptPathsType.BACKGROUND_STATE)
-const CountdownManagerScript := preload(DX_ScriptPathsType.COUNTDOWN)
-const PoolManagerScript := preload(DX_ScriptPathsType.POOL)
-const SaveManagerScript := preload(DX_ScriptPathsType.SAVE)
-const LocalizationManagerScript := preload(DX_ScriptPathsType.LOCALIZATION)
-const DebugManagerScript := preload(DX_ScriptPathsType.DEBUG)
+const LoggerScript := preload("res://dx/runtime/scripts/managers/logger.gd")
+const SignalManagerScript := preload("res://dx/runtime/scripts/managers/signals/signal_manager.gd")
+const ConfigManagerScript := preload("res://dx/runtime/scripts/managers/config/config_manager.gd")
+const TimeManagerScript := preload("res://dx/runtime/scripts/managers/time/time_manager.gd")
+const BackgroundStateManagerScript := preload("res://dx/runtime/scripts/managers/background_state_manager.gd")
+const CountdownManagerScript := preload("res://dx/runtime/scripts/managers/countdown/countdown_manager.gd")
+const SaveManagerScript := preload("res://dx/runtime/scripts/managers/save/save_manager.gd")
+const LocalizationManagerScript := preload("res://dx/runtime/scripts/managers/localization/localization_manager.gd")
+const DebugManagerScript := preload("res://dx/runtime/scripts/debug/debug_manager.gd")
+const JsonSerializerScript := preload("res://dx/runtime/scripts/serializer/json_serializer.gd")
+const DebugOptionsDataScript := preload("res://dx/runtime/scripts/debug/debug_options_data.gd")
+const UiFlyEffectScript := preload("res://dx/runtime/scripts/effects/dx_ui_fly_effect.gd")
+const ResManagerScript := preload("res://dx/runtime/scripts/managers/res/res_manager.gd")
+const FileManagerScript := preload("res://dx/runtime/scripts/managers/files/file_manager.gd")
 
 const MANAGER_READY_METHOD := &"in_ready"
 const MANAGER_PROCESS_METHOD := &"in_process"
@@ -25,15 +28,19 @@ const MANAGER_POPUP := &"popup"
 const MANAGER_TIME := &"time"
 const MANAGER_LOGGER := &"logger"
 const MANAGER_SIGNAL := &"signal"
-const MANAGER_DATA := &"data"
+const MANAGER_CONFIG := &"config"
 const MANAGER_BACKGROUND_STATE := &"background_state"
 const MANAGER_COUNTDOWN := &"countdown"
 const MANAGER_POOL := &"pool"
 const MANAGER_SAVE := &"save"
 const MANAGER_LOCALIZATION := &"localization"
 const MANAGER_DEBUG := &"debug"
+const MANAGER_EFFECT := &"effect"
+const MANAGER_RES := &"res"
+const MANAGER_FILES := &"files"
 
 const POPUP_NODE_PATH := ^"Popup"
+const POOL_NODE_PATH := ^"Pool"
 
 var popup:
 	get:
@@ -51,9 +58,9 @@ var signals:
 	get:
 		return get_manager(MANAGER_SIGNAL)
 
-var data:
+var config:
 	get:
-		return get_manager(MANAGER_DATA)
+		return get_manager(MANAGER_CONFIG)
 
 var background_state:
 	get:
@@ -79,6 +86,18 @@ var debug:
 	get:
 		return get_manager(MANAGER_DEBUG)
 
+var effect:
+	get:
+		return get_manager(MANAGER_EFFECT)
+
+var res:
+	get:
+		return get_manager(MANAGER_RES)
+
+var files:
+	get:
+		return get_manager(MANAGER_FILES)
+
 var _manager_map: Dictionary = {}
 var _manager_order: Array = []
 var _quit_dispatched := false
@@ -87,6 +106,7 @@ func _enter_tree() -> void:
 	_bootstrap()
 
 func _ready() -> void:
+	_register_pool_manager()
 	_register_popup_manager()
 	for manager in _manager_order:
 		_call_manager_no_args(manager, MANAGER_READY_METHOD)
@@ -142,13 +162,27 @@ func _bootstrap() -> void:
 	register_manager(MANAGER_TIME, TimeManagerScript.new())
 	register_manager(MANAGER_LOGGER, LoggerScript.new())
 	register_manager(MANAGER_SIGNAL, SignalManagerScript.new())
-	register_manager(MANAGER_DATA, DataManagerScript.new())
+	register_manager(MANAGER_CONFIG, ConfigManagerScript.new())
 	register_manager(MANAGER_BACKGROUND_STATE, BackgroundStateManagerScript.new())
 	register_manager(MANAGER_COUNTDOWN, CountdownManagerScript.new())
-	register_manager(MANAGER_POOL, PoolManagerScript.new())
 	register_manager(MANAGER_SAVE, SaveManagerScript.new())
 	register_manager(MANAGER_LOCALIZATION, LocalizationManagerScript.new())
-	register_manager(MANAGER_DEBUG, DebugManagerScript.new())
+	var debug_manager = register_manager(MANAGER_DEBUG, DebugManagerScript.new())
+	debug_manager.register_options_scripts(DebugOptionsDataScript.new().get_options_scripts())
+	register_manager(MANAGER_EFFECT, UiFlyEffectScript.new())
+	register_manager(MANAGER_RES, ResManagerScript.new())
+	register_manager(MANAGER_FILES, FileManagerScript.new())
+
+func _register_pool_manager() -> void:
+	if has_manager(MANAGER_POOL):
+		return
+
+	var pool_manager = get_node_or_null(POOL_NODE_PATH)
+	if pool_manager == null:
+		push_error("DX pool manager node is missing.")
+		return
+	register_manager(MANAGER_POOL, pool_manager)
+
 func _register_popup_manager() -> void:
 	if has_manager(MANAGER_POPUP):
 		return
@@ -177,6 +211,7 @@ func _dispatch_quit() -> void:
 	_quit_dispatched = true
 	for index in range(_manager_order.size() - 1, -1, -1):
 		_call_manager_no_args(_manager_order[index], MANAGER_QUIT_METHOD)
+	JsonSerializerScript.clear_cache()
 
 func _call_manager_no_args(manager, method_name: StringName) -> void:
 	if manager == null or not manager.has_method(method_name):

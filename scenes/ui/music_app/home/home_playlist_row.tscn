@@ -50,7 +50,7 @@ grow_horizontal = 2
 grow_vertical = 2
 theme_override_colors/font_color = Color(0.968627, 0.968627, 0.972549, 1)
 theme_override_font_sizes/font_size = 26
-text = "music_app.playlist.favorites_mark"
+text = "我"
 horizontal_alignment = 1
 vertical_alignment = 1
 
@@ -64,13 +64,13 @@ alignment = 1
 layout_mode = 2
 theme_override_colors/font_color = Color(0.968627, 0.968627, 0.972549, 1)
 theme_override_font_sizes/font_size = 20
-text = "music_app.playlist.placeholder_title"
+text = "歌单名称"
 
 [node name="CountLabel" type="Label" parent="Margin/Row/Info"]
 layout_mode = 2
 theme_override_colors/font_color = Color(0.643137, 0.65098, 0.690196, 1)
 theme_override_font_sizes/font_size = 16
-text = "music_app.common.song_count_zero"
+text = "0 首歌曲"
 
 [node name="DeleteButton" type="Button" parent="Margin/Row"]
 custom_minimum_size = Vector2(38, 38)
@@ -80,7 +80,7 @@ theme_override_colors/font_hover_color = Color(0.643137, 0.65098, 0.690196, 1)
 theme_override_colors/font_pressed_color = Color(0.643137, 0.65098, 0.690196, 1)
 theme_override_font_sizes/font_size = 14
 flat = true
-text = "music_app.action.delete_short"
+text = "删"
 
 [node name="OpenButton" type="Button" parent="."]
 layout_mode = 0

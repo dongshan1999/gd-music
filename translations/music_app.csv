@@ -25,8 +25,6 @@ music_app.player.placeholder_title,Virtual,虚拟,虚拟
 music_app.player.placeholder_mark,V,虚,虚
 music_app.player.placeholder_artist,Chen Li,陈粒,陈粒
 music_app.player.placeholder_source,Yuanli QQ,元力QQ,元力QQ
-music_app.player.fx,FX,音效,音效
-music_app.player.comments_short,Cmts,评,评
 music_app.queue.title_with_count,Playback Queue ({count}),播放列表 ({count}首),播放列表 ({count}首)
 music_app.queue.mode.loop_all,Loop All,循环播放,循环播放
 music_app.queue.mode.repeat_one,Repeat One,单曲循环,单曲循环
@@ -37,16 +35,16 @@ music_app.mini_player.empty,"No tracks, import music first","暂无歌曲，请�
 music_app.mini_player.placeholder_track,Virtual - Chen Li,虚拟 - 陈粒,虚拟 - 陈粒
 music_app.local.title,Local Music,本地音乐,本地音乐
 music_app.local.empty_line1,🎵 No local music yet,🎵 暂无本地音乐,🎵 暂无本地音乐
-music_app.local.empty_line2,Tap the ⋯ menu to scan first,点击右上角 ⋯ 先扫描,点击右上角 ⋯ 先扫描
-music_app.local.menu.scan,🔍 Scan Local Music,🔍 扫描本地音乐,🔍 扫描本地音乐
+music_app.local.empty_line2,Tap the ⋯ menu to import first,点击右上角 ⋯ 先导入,点击右上角 ⋯ 先导入
+music_app.local.menu.scan,🔍 Import Local Music,🔍 导入本地音乐,🔍 导入本地音乐
 music_app.local.menu.edit,✏️ Edit,✏️ 批量编辑,✏️ 批量编辑
 music_app.local.menu.download,⬇️ Download List,⬇️ 下载列表,⬇️ 下载列表
 music_app.local.search_title,Search,搜索,搜索
 music_app.local.search_message,Search will be added later.,搜索功能稍后补齐。,搜索功能稍后补齐。
 music_app.local.edit_title,Edit,编辑,编辑
-music_app.local.edit_message,Edit is not implemented yet. Scanning is available for now.,编辑功能暂未实现，当前先支持扫描。,编辑功能暂未实现，当前先支持扫描。
+music_app.local.edit_message,Edit is not implemented yet. Local import is available for now.,编辑功能暂未实现，当前先支持本地导入。,编辑功能暂未实现，当前先支持本地导入。
 music_app.local.download_title,Download List,下载列表,下载列表
-music_app.local.download_message,Download list is not implemented yet. Scanning is available for now.,下载列表暂未实现，当前先支持扫描。,下载列表暂未实现，当前先支持扫描。
+music_app.local.download_message,Download list is not implemented yet. Local import is available for now.,下载列表暂未实现，当前先支持本地导入。,下载列表暂未实现，当前先支持本地导入。
 music_app.scan.select_all,Select All,全选,全选
 music_app.scan.unselect_all,Clear All,取消全选,取消全选
 music_app.scan.hint,📁 Select folders to scan,📁 选择要扫描的文件夹,📁 选择要扫描的文件夹

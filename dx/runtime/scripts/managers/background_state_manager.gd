@@ -1,10 +1,9 @@
 class_name DX_BackgroundStateManager
 extends RefCounted
 
-const DX_ScriptPathsType := preload("res://dx/runtime/scripts/constants/dx_script_paths.gd")
-const AppPauseEventScript := preload(DX_ScriptPathsType.APP_PAUSE_EVENT)
-const AppFocusEventScript := preload(DX_ScriptPathsType.APP_FOCUS_EVENT)
-const AppBackgroundEventScript := preload(DX_ScriptPathsType.APP_BACKGROUND_EVENT)
+const AppPauseEventScript := preload("res://dx/runtime/scripts/managers/signals/events/dx_app_pause_event.gd")
+const AppFocusEventScript := preload("res://dx/runtime/scripts/managers/signals/events/dx_app_focus_event.gd")
+const AppBackgroundEventScript := preload("res://dx/runtime/scripts/managers/signals/events/dx_app_background_event.gd")
 
 var dx: Node
 var is_background := false

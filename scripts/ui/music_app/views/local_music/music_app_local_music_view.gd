@@ -42,7 +42,7 @@ func bind() -> void:
 	local_music_search_button.pressed.connect(_open_plugin_search)
 	local_music_more_button.pressed.connect(_toggle_menu)
 	local_music_menu_scrim.pressed.connect(_hide_menu)
-	scan_music_button.pressed.connect(_open_scan_page)
+	scan_music_button.pressed.connect(_open_native_import)
 	edit_music_button.pressed.connect(_show_stub_edit)
 	download_list_button.pressed.connect(_show_stub_download)
 
@@ -102,9 +102,12 @@ func _hide_menu() -> void:
 	local_music_menu_panel.visible = false
 	local_music_menu_scrim.visible = false
 
-func _open_scan_page() -> void:
+func _open_native_import() -> void:
 	_hide_menu()
-	_local_music_controller.open_scan_page()
+	_local_music_controller.open_native_import(Callable(self, "_on_native_import_finished"))
+
+func _on_native_import_finished() -> void:
+	refresh()
 
 func _open_plugin_search() -> void:
 	_local_music_controller.open_plugin_browser()

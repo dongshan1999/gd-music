@@ -1,6 +1,6 @@
 [gd_scene format=3 uid="uid://bibojacc6qmmp"]
 
-[ext_resource type="Script" path="res://dx/runtime/scripts/debug/dx_debug_trigger.gd" id="1_script"]
+[ext_resource type="Script" uid="uid://gj2xdrlap5rr" path="res://dx/runtime/scripts/debug/dx_debug_trigger.gd" id="1_script"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_trigger"]
 bg_color = Color(1, 1, 1, 0.08)
@@ -9,16 +9,15 @@ corner_radius_top_right = 12
 corner_radius_bottom_right = 12
 corner_radius_bottom_left = 12
 
-[node name="DXDebugTrigger" type="Control" unique_id=775884763]
+[node name="DXDebugTrigger" type="Control" unique_id=775884763 groups=["dx_debug_trigger"]]
 layout_mode = 3
-anchors_preset = 1
-anchor_left = 1.0
-anchor_right = 1.0
-offset_left = -36.0
-offset_top = 8.0
-offset_right = -8.0
-offset_bottom = 36.0
-grow_horizontal = 0
+anchors_preset = 5
+anchor_left = 0.5
+anchor_right = 0.5
+offset_left = -24.0
+offset_right = 20.0
+offset_bottom = 27.0
+grow_horizontal = 2
 script = ExtResource("1_script")
 
 [node name="TriggerButton" type="Button" parent="." unique_id=1921075862]
@@ -36,3 +35,4 @@ theme_override_styles/normal = SubResource("StyleBoxFlat_trigger")
 theme_override_styles/pressed = SubResource("StyleBoxFlat_trigger")
 theme_override_styles/hover = SubResource("StyleBoxFlat_trigger")
 theme_override_styles/focus = SubResource("StyleBoxFlat_trigger")
+metadata/_edit_use_anchors_ = true

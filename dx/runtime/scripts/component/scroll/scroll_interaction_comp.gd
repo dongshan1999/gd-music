@@ -8,6 +8,8 @@ extends Node
 @export var enable_pan_gesture := true
 @export var enable_drag_scroll := true
 @export var enable_touch_drag_scroll := true
+@export var enable_horizontal_scroll := true
+@export var enable_vertical_scroll := true
 @export var force_pass_scroll_events := true
 
 var _scroll: ScrollContainer
@@ -30,6 +32,7 @@ func _ready() -> void:
 		return
 
 	set_process_input(true)
+	_scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_AUTO
 	_scroll.vertical_scroll_mode = ScrollContainer.SCROLL_MODE_AUTO
 	if force_pass_scroll_events:
 		_apply_scroll_event_passthrough(_scroll)
@@ -94,13 +97,18 @@ func _handle_mouse_wheel(event: InputEventMouseButton) -> void:
 	else:
 		return
 
-	_set_scroll_vertical(next_value)
+	_set_scroll_axis(Vector2(_scroll.scroll_horizontal, next_value))
 	get_viewport().set_input_as_handled()
 
 func _handle_pan_gesture(event: InputEventPanGesture) -> void:
 	if not _is_pointer_inside_scroll(event.position):
 		return
-	_set_scroll_vertical(_scroll.scroll_vertical + int(event.delta.y))
+	_set_scroll_axis(
+		Vector2(
+			_scroll.scroll_horizontal + int(event.delta.x),
+			_scroll.scroll_vertical + int(event.delta.y)
+		)
+	)
 	get_viewport().set_input_as_handled()
 
 func _handle_drag_scroll_button(event: InputEventMouseButton) -> void:
@@ -125,13 +133,18 @@ func _handle_drag_scroll_motion(event: InputEventMouseMotion) -> void:
 
 	var drag_offset := event.position - _drag_scroll_press_position
 	if not _drag_scroll_started:
-		if absf(drag_offset.y) < drag_scroll_threshold:
+		if drag_offset.length() < drag_scroll_threshold:
 			return
 		_drag_scroll_started = true
 
-	var delta_y := event.position.y - _drag_scroll_last_position.y
+	var delta := event.position - _drag_scroll_last_position
 	_drag_scroll_last_position = event.position
-	_set_scroll_vertical(_scroll.scroll_vertical - delta_y)
+	_set_scroll_axis(
+		Vector2(
+			_scroll.scroll_horizontal - delta.x,
+			_scroll.scroll_vertical - delta.y
+		)
+	)
 	get_viewport().set_input_as_handled()
 
 func _handle_touch_drag_touch(event: InputEventScreenTouch) -> void:
@@ -153,18 +166,41 @@ func _handle_touch_drag_motion(event: InputEventScreenDrag) -> void:
 
 	var drag_offset := event.position - _touch_drag_press_position
 	if not _touch_drag_started:
-		if absf(drag_offset.y) < drag_scroll_threshold:
+		if drag_offset.length() < drag_scroll_threshold:
 			return
 		_touch_drag_started = true
 
 	_touch_drag_last_position = event.position
-	_set_scroll_vertical(_scroll.scroll_vertical - event.relative.y)
+	_set_scroll_axis(
+		Vector2(
+			_scroll.scroll_horizontal - event.relative.x,
+			_scroll.scroll_vertical - event.relative.y
+		)
+	)
 	get_viewport().set_input_as_handled()
 
 func _is_pointer_inside_scroll(position: Vector2) -> bool:
 	return _scroll != null and _scroll.get_global_rect().has_point(position)
 
+func _set_scroll_axis(value: Vector2) -> void:
+	_set_scroll_horizontal(value.x)
+	_set_scroll_vertical(value.y)
+
+func _set_scroll_horizontal(value: float) -> void:
+	if not enable_horizontal_scroll:
+		return
+
+	var horizontal_bar := _scroll.get_h_scroll_bar()
+	if horizontal_bar == null:
+		return
+
+	var max_scroll := maxf(0.0, horizontal_bar.max_value - horizontal_bar.page)
+	_scroll.scroll_horizontal = int(clampf(value, 0.0, max_scroll))
+
 func _set_scroll_vertical(value: float) -> void:
+	if not enable_vertical_scroll:
+		return
+
 	var vertical_bar := _scroll.get_v_scroll_bar()
 	if vertical_bar == null:
 		return

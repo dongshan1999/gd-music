@@ -16,17 +16,11 @@ var _is_progress_dragging := false
 var _active_progress_touch_index := -1
 
 @onready var close_player_button: Button = %ClosePlayerButton
-@onready var player_share_button: Button = %PlayerShareButton
 @onready var now_title_label: Label = %NowTitleLabel
 @onready var now_artist_label: Label = %NowArtistLabel
 @onready var player_source_label: Label = %PlayerSourceLabel
 @onready var cover_mark_label: Label = %CoverMarkLabel
 @onready var like_button: Button = %LikeButton
-@onready var player_fx_label: Label = %PlayerFxLabel
-@onready var tone_button: Button = %ToneButton
-@onready var speed_label: Label = %SpeedLabel
-@onready var comment_button: Button = %CommentButton
-@onready var player_queue_button: Button = %PlayerQueueButton
 @onready var elapsed_label: Label = %ElapsedLabel
 @onready var remaining_label: Label = %RemainingLabel
 @onready var player_progress_bar: ProgressBar = %PlayerProgressBar
@@ -55,7 +49,6 @@ func bind() -> void:
 	player_next_button.pressed.connect(_play_next)
 	shuffle_button.pressed.connect(_cycle_playback_mode)
 	like_button.pressed.connect(_toggle_like_current_track)
-	player_queue_button.pressed.connect(_show_playback_queue)
 	player_list_button.pressed.connect(_show_playback_queue)
 	_bind_player_progress_bar_input()
 	DX.signals.subscribe(PlaybackStartedEventScript, _on_playback_started)

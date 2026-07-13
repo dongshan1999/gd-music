@@ -129,17 +129,13 @@ func _get_format_payload():
 	return format_args.duplicate()
 
 func _get_localization_manager():
+	if Engine.is_editor_hint():
+		return null
 	if not is_inside_tree():
 		return null
-
-	var tree := get_tree()
-	if tree == null:
+	if DX == null:
 		return null
-
-	var dx = tree.root.get_node_or_null("DX") if tree.root != null else null
-	if dx == null:
-		return null
-	return dx.localization
+	return DX.localization
 
 func _get_text_target() -> Object:
 	var parent := get_parent()
