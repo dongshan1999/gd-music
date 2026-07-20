@@ -51,6 +51,8 @@ func load():
 	data = DX_SaveData.new()
 	var payload: Variant = _load_main_payload()
 	if payload is Dictionary:
+		if data.has_method("sanitize_payload"):
+			payload = data.call("sanitize_payload", payload)
 		DX_JsonSerializer.deserialize(payload, data)
 	_normalize_object(data)
 	_reset_pending_state()

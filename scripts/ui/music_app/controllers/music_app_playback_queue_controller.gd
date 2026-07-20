@@ -47,16 +47,12 @@ func get_queue_rows() -> Array[Dictionary]:
 	if playback_controller == null:
 		return []
 
-	var queue_track_indices: Array[int] = get_playback_track_indices_ref()
-	var tracks: Array[TrackData] = get_tracks_ref()
+	var queue_track_ids: Array[String] = get_playback_track_ids_ref()
 	var current_queue_index := get_playback_queue_index()
 	var rows: Array[Dictionary] = []
 
-	for queue_index in queue_track_indices.size():
-		var track_index := int(queue_track_indices[queue_index])
-		if track_index < 0 or track_index >= tracks.size():
-			continue
-		var track: TrackData = tracks[track_index]
+	for queue_index in queue_track_ids.size():
+		var track: TrackData = get_track_by_id(queue_track_ids[queue_index])
 		if track == null:
 			continue
 		rows.append({

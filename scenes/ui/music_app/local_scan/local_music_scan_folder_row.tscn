@@ -1,12 +1,20 @@
-[gd_scene load_steps=4 format=3]
+[gd_scene load_steps=5 format=3]
 
 [ext_resource type="Script" path="res://scripts/ui/music_app/views/local_scan/music_app_local_music_scan_folder_row.gd" id="1_script"]
 [ext_resource type="Texture2D" path="res://textures/folder-outline.svg" id="2_folder"]
 [ext_resource type="Texture2D" path="res://textures/check-circle-outline.svg" id="3_unchecked"]
 
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_scan_folder_row"]
+bg_color = Color(0.121569, 0.12549, 0.141176, 1)
+corner_radius_top_left = 8
+corner_radius_top_right = 8
+corner_radius_bottom_right = 8
+corner_radius_bottom_left = 8
+
 [node name="LocalMusicScanFolderRow" type="Panel"]
-custom_minimum_size = Vector2(0, 52)
+custom_minimum_size = Vector2(0, 56)
 layout_mode = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_scan_folder_row")
 script = ExtResource("1_script")
 
 [node name="Margin" type="MarginContainer" parent="."]
@@ -27,6 +35,8 @@ theme_override_constants/separation = 8
 [node name="FolderButton" type="Button" parent="Margin/Row"]
 layout_mode = 2
 size_flags_horizontal = 3
+theme_override_colors/font_color = Color(0.968627, 0.968627, 0.972549, 1)
+theme_override_font_sizes/font_size = 14
 icon = ExtResource("2_folder")
 expand_icon = false
 text = "Folder"
@@ -34,9 +44,11 @@ flat = true
 alignment = 0
 
 [node name="ToggleButton" type="Button" parent="Margin/Row"]
-custom_minimum_size = Vector2(46, 34)
+custom_minimum_size = Vector2(40, 34)
 layout_mode = 2
+theme_override_constants/icon_max_width = 18
 icon = ExtResource("3_unchecked")
-expand_icon = true
+expand_icon = false
 icon_alignment = 1
 vertical_icon_alignment = 1
+flat = true

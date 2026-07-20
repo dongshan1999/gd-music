@@ -37,12 +37,20 @@ theme_override_constants/margin_bottom = 10
 layout_mode = 2
 theme_override_constants/separation = 14
 
-[node name="CoverPanel" type="Panel" parent="Margin/Row"]
+[node name="CoverSlot" type="Control" parent="Margin/Row"]
 custom_minimum_size = Vector2(68, 68)
 layout_mode = 2
+
+[node name="CoverPanel" type="Panel" parent="Margin/Row/CoverSlot"]
+custom_minimum_size = Vector2(68, 68)
+layout_mode = 0
+offset_right = 68.0
+offset_bottom = 68.0
+grow_horizontal = 2
+grow_vertical = 2
 theme_override_styles/panel = SubResource("StyleBoxFlat_home_playlist_cover_panel")
 
-[node name="MarkLabel" type="Label" parent="Margin/Row/CoverPanel"]
+[node name="MarkLabel" type="Label" parent="Margin/Row/CoverSlot/CoverPanel"]
 layout_mode = 0
 anchor_right = 1.0
 anchor_bottom = 1.0

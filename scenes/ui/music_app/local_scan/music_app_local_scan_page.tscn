@@ -81,7 +81,9 @@ theme_override_constants/separation = 8
 [node name="ScanHintLabel" type="Label" parent="Margin/ScanVBox/ScanScroll/ScanFolderList" unique_id=1478582596]
 unique_name_in_owner = true
 layout_mode = 2
-text = "📁 选择要扫描的文件夹"
+theme_override_colors/font_color = Color(0.643137, 0.65098, 0.690196, 1)
+theme_override_font_sizes/font_size = 14
+text = "选择要扫描的文件夹"
 horizontal_alignment = 1
 
 [node name="LocalizeComp" type="Node" parent="Margin/ScanVBox/ScanScroll/ScanFolderList/ScanHintLabel" unique_id=1602412346]

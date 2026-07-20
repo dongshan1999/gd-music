@@ -4,5 +4,5 @@ extends "res://dx/runtime/scripts/serializer/json_object.gd"
 var title: String = ""
 var count: int = 0
 var mark: String = ""
-var tracks: Array[int] = []
+var tracks: Array[String] = []
 var deletable: bool = true
