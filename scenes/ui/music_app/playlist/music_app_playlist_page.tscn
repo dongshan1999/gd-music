@@ -154,16 +154,19 @@ theme_override_constants/margin_top = 12
 theme_override_constants/margin_right = 12
 theme_override_constants/margin_bottom = 12
 
-[node name="HeroRow" type="HBoxContainer" parent="Margin/PlaylistVBox/PlaylistHeroPanel/Margin" unique_id=2096062181]
+[node name="HeroRow" type="Control" parent="Margin/PlaylistVBox/PlaylistHeroPanel/Margin" unique_id=2096062181]
 layout_mode = 2
-theme_override_constants/separation = 12
 
 [node name="PlaylistHeroCover" type="Panel" parent="Margin/PlaylistVBox/PlaylistHeroPanel/Margin/HeroRow" unique_id=944066011]
 unique_name_in_owner = true
 custom_minimum_size = Vector2(88, 88)
-layout_mode = 2
-size_flags_horizontal = 0
-size_flags_vertical = 4
+layout_mode = 0
+offset_left = 0.0
+offset_top = 8.0
+offset_right = 88.0
+offset_bottom = 96.0
+grow_horizontal = 2
+grow_vertical = 2
 theme_override_styles/panel = SubResource("StyleBoxFlat_playlist_hero_cover")
 
 [node name="PlaylistHeroMarkLabel" type="Label" parent="Margin/PlaylistVBox/PlaylistHeroPanel/Margin/HeroRow/PlaylistHeroCover" unique_id=1600885860]
@@ -185,8 +188,12 @@ tr_key = "music_app.playlist.favorites_mark"
 update_in_runtime = false
 
 [node name="Info" type="VBoxContainer" parent="Margin/PlaylistVBox/PlaylistHeroPanel/Margin/HeroRow" unique_id=453774606]
-layout_mode = 2
-size_flags_horizontal = 3
+layout_mode = 0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 108.0
+grow_horizontal = 2
+grow_vertical = 2
 theme_override_constants/separation = 8
 alignment = 1
 

@@ -29,34 +29,64 @@ func get_selected_playlist_index() -> int:
 func set_selected_playlist_index(value: int) -> void:
 	_get_base_controller().set_selected_playlist_index(value)
 
-func get_liked_tracks() -> Dictionary:
-	return _get_base_controller().get_liked_tracks()
-
-## 根据收藏映射重建系统“我喜欢”歌单内容。
-func sync_favorite_playlist_from_likes() -> void:
+## 规范化系统“我喜欢”歌单，确保它始终是第一个歌单。
+func normalize_favorite_playlist() -> void:
 	var favorite_playlist := get_or_create_favorite_playlist()
-	var liked_track_indices: Array[int] = []
-	var tracks: Array[TrackData] = get_tracks_ref()
-	var liked_tracks = get_liked_tracks()
-	for index in tracks.size():
-		var track: TrackData = tracks[index]
-		if track == null:
-			continue
-		if bool(liked_tracks.get(track_key(track), false)):
-			liked_track_indices.append(index)
-
 	favorite_playlist.title = MusicAppStateData.SYSTEM_FAVORITE_PLAYLIST_ID
 	favorite_playlist.mark = ""
 	favorite_playlist.deletable = false
-	favorite_playlist.tracks = liked_track_indices
-	favorite_playlist.count = liked_track_indices.size()
+	favorite_playlist.tracks = _normalize_track_ids(favorite_playlist.tracks)
+	favorite_playlist.count = favorite_playlist.tracks.size()
+
+## 判断曲目是否存在于系统“我喜欢”歌单。
+func is_track_liked(track: TrackData) -> bool:
+	var track_id := track_key(track)
+	if track_id.is_empty():
+		return false
+	var favorite_playlist := get_or_create_favorite_playlist()
+	return favorite_playlist.tracks.has(track_id)
+
+## 设置曲目是否存在于系统“我喜欢”歌单，返回是否发生变化。
+func set_track_liked(track: TrackData, liked: bool) -> bool:
+	var track_id := track_key(track)
+	if track_id.is_empty():
+		return false
+
+	var favorite_playlist := get_or_create_favorite_playlist()
+	favorite_playlist.tracks = _normalize_track_ids(favorite_playlist.tracks)
+	var currently_liked := favorite_playlist.tracks.has(track_id)
+	if currently_liked == liked:
+		favorite_playlist.count = favorite_playlist.tracks.size()
+		return false
+
+	if liked:
+		favorite_playlist.tracks.append(track_id)
+	else:
+		favorite_playlist.tracks.erase(track_id)
+	favorite_playlist.count = favorite_playlist.tracks.size()
+	return true
+
+## 切换曲目收藏状态，返回切换后的状态。
+func toggle_track_liked(track: TrackData) -> bool:
+	var next_state := not is_track_liked(track)
+	set_track_liked(track, next_state)
+	return next_state
 
 ## 获取或创建系统“我喜欢”歌单。
 func get_or_create_favorite_playlist() -> PlaylistData:
 	var playlists: Array[PlaylistData] = get_playlists_ref()
 	var favorite_index := find_favorite_playlist_index()
 	if favorite_index >= 0:
-		return playlists[favorite_index]
+		var favorite_playlist: PlaylistData = playlists[favorite_index]
+		if favorite_index > 0:
+			playlists.remove_at(favorite_index)
+			playlists.insert(0, favorite_playlist)
+			_rebase_selected_playlist_index_after_favorite_move(favorite_index)
+		favorite_playlist.title = MusicAppStateData.SYSTEM_FAVORITE_PLAYLIST_ID
+		favorite_playlist.mark = ""
+		favorite_playlist.deletable = false
+		favorite_playlist.count = favorite_playlist.tracks.size()
+		return favorite_playlist
 
 	var favorite_playlist := PlaylistData.new()
 	favorite_playlist.title = MusicAppStateData.SYSTEM_FAVORITE_PLAYLIST_ID
@@ -81,8 +111,33 @@ func find_favorite_playlist_index() -> int:
 func track_key(track: TrackData) -> String:
 	if track == null:
 		return ""
-	if not track.file_path.is_empty():
-		return track.file_path
-	if track.is_plugin_track():
-		return "%s:%s" % [track.platform, track.remote_id]
-	return "%s - %s" % [track.title, track.artist]
+	return track.id.strip_edges()
+
+func _normalize_track_ids(source: Array) -> Array[String]:
+	var result: Array[String] = []
+	var track_ids := _build_track_id_map()
+	for item in source:
+		var track_id := str(item).strip_edges()
+		if track_id.is_empty() or not track_ids.has(track_id):
+			continue
+		if result.has(track_id):
+			continue
+		result.append(track_id)
+	return result
+
+func _build_track_id_map() -> Dictionary:
+	var result := {}
+	for track in get_tracks_ref():
+		if track == null:
+			continue
+		var track_id := track_key(track)
+		if not track_id.is_empty():
+			result[track_id] = true
+	return result
+
+func _rebase_selected_playlist_index_after_favorite_move(old_favorite_index: int) -> void:
+	var selected_index := get_selected_playlist_index()
+	if selected_index == old_favorite_index:
+		set_selected_playlist_index(0)
+	elif selected_index < old_favorite_index:
+		set_selected_playlist_index(selected_index + 1)

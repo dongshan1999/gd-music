@@ -28,9 +28,6 @@ func get_showcase():
 func _get_base_controller() -> MusicAppControllerBase:
 	return MusicAppControllerBaseScript.new(controller)
 
-func get_selected_track_index() -> int:
-	return _get_base_controller().get_selected_track_index()
-
 func get_elapsed_seconds() -> int:
 	return _get_base_controller().get_elapsed_seconds()
 
@@ -215,38 +212,31 @@ func _sync_audio_state(sync_request_id: int) -> void:
 	_emit_playback_started(track)
 	_emit_playback_progress_changed(track)
 
-## 为当前曲目解析可播放音频流，支持本地文件、远程地址和插件来源。
-func _resolve_stream_for_track(track: TrackData, sync_request_id: int) -> AudioStream:
+## 为当前曲目解析可播放音频流。
+func _resolve_stream_for_track(track: TrackData, _sync_request_id: int) -> AudioStream:
 	if not track.file_path.is_empty():
 		return _load_local_stream(track.file_path)
 
-	if track.stream_url.is_empty() and track.is_plugin_track():
-		var plugin_controller := MusicAppPluginBrowserController.new(get_showcase())
-		var resolve_result = await plugin_controller.resolve_track_plugin_source(get_selected_track_index())
-		if sync_request_id != _audio_sync_request_id:
-			return null
-		if resolve_result.is_empty():
-			push_warning("Failed to resolve plugin stream for track \"%s\". Check console output." % track.title)
-			return null
-
-	if track.stream_url.is_empty():
-		push_warning("Track \"%s\" does not have a playable audio source." % track.title)
-		return null
-
-	if _is_remote_stream_url(track.stream_url):
-		return await _load_remote_stream(track.stream_url, track.stream_headers, sync_request_id)
-
-	return _load_local_stream(track.stream_url)
+	push_warning("Track \"%s\" does not have a local audio file path." % track.title)
+	return null
 
 ## 从本地文件系统读取音频字节并解码为 AudioStream。
 func _load_local_stream(path: String) -> AudioStream:
 	if path.is_empty():
 		return null
-	if not FileAccess.file_exists(path):
-		push_warning("Audio file does not exist: %s" % path)
-		return null
 
-	var bytes := FileAccess.get_file_as_bytes(path)
+	var bytes := PackedByteArray()
+	if DX != null and DX.files != null:
+		var read_result: Dictionary = DX.files.read_bytes(path)
+		if not bool(read_result.get("ok", false)):
+			push_warning("Audio file is unreadable: %s. Error: %s" % [path, str(read_result.get("error", ""))])
+			return null
+		bytes = read_result.get("data", PackedByteArray())
+	else:
+		if not FileAccess.file_exists(path):
+			push_warning("Audio file does not exist: %s" % path)
+			return null
+		bytes = FileAccess.get_file_as_bytes(path)
 	if bytes.is_empty():
 		push_warning("Audio file is empty or unreadable: %s" % path)
 		return null
@@ -340,10 +330,6 @@ func _is_remote_stream_url(path_or_url: String) -> bool:
 func _get_track_playback_key(track: TrackData) -> String:
 	if not track.file_path.is_empty():
 		return "file:%s" % track.file_path
-	if not track.stream_url.is_empty():
-		return "url:%s" % track.stream_url
-	if track.is_plugin_track():
-		return "plugin:%s:%s" % [track.platform, track.remote_id]
 	return "title:%s:%s" % [track.title, track.artist]
 
 ## 在已存在的 AudioStreamPlayer 上应用 seek，并维持暂停/播放状态。

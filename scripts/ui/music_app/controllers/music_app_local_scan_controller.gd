@@ -1,12 +1,19 @@
 class_name MusicAppLocalScanController
 extends "res://scripts/ui/music_app/controllers/music_app_controller_base.gd"
 
+const DEBUG_TAG := "MusicLocalImport"
 const WINDOWS_SCAN_ROOT := "windows://drives"
 const AUDIO_EXTENSIONS := {
 	"mp3": true,
 	"wav": true,
 	"ogg": true
 }
+const LYRIC_EXTENSIONS := [
+	"lrc",
+	"LRC",
+	"txt",
+	"TXT"
+]
 
 ## 返回本地扫描的起始目录。
 func get_scan_root_path() -> String:
@@ -63,7 +70,7 @@ func list_scan_directories(path: String) -> Array[Dictionary]:
 	var directory_names := DirAccess.get_directories_at(normalized_path)
 	directory_names.sort()
 	for directory_name in directory_names:
-		if directory_name in [".", ".."]:
+		if _should_skip_file_system_entry(directory_name):
 			continue
 		result.append(
 			{
@@ -92,6 +99,7 @@ func list_windows_drive_entries() -> Array[Dictionary]:
 
 ## 递归扫描所选目录并导入新的本地音乐曲目。
 func scan_local_music_directories(paths: Array[String]) -> int:
+	_debug_import("scan directories requested", paths)
 	var tracks: Array[TrackData] = get_tracks_ref()
 	var existing_paths := {}
 	for track in tracks:
@@ -100,16 +108,34 @@ func scan_local_music_directories(paths: Array[String]) -> int:
 		existing_paths[normalize_path(track.file_path)] = true
 
 	var imported_tracks: Array[TrackData] = []
+	var stats := {
+		"targets": 0,
+		"invalid_targets": 0,
+		"directories": 0,
+		"files": 0,
+		"audio_files": 0,
+		"duplicates": 0,
+		"unsupported_files": 0,
+		"imported": 0
+	}
 	var unique_targets := {}
 	for raw_path in paths:
 		var target_path := normalize_path(str(raw_path))
 		if target_path.is_empty() or unique_targets.has(target_path):
+			_debug_import("skip scan target", {
+				"raw": raw_path,
+				"target": target_path,
+				"already_seen": unique_targets.has(target_path)
+			})
 			continue
 		unique_targets[target_path] = true
-		_collect_audio_tracks(target_path, existing_paths, imported_tracks)
+		stats["targets"] = int(stats["targets"]) + 1
+		_collect_audio_tracks(target_path, existing_paths, imported_tracks, stats, {})
 
 	for track in imported_tracks:
 		tracks.append(track)
+	stats["imported"] = imported_tracks.size()
+	_debug_import("scan directories completed", stats)
 
 	return imported_tracks.size()
 
@@ -117,35 +143,76 @@ func scan_local_music_directories(paths: Array[String]) -> int:
 func _collect_audio_tracks(
 	root_path: String,
 	existing_paths: Dictionary,
-	imported_tracks: Array[TrackData]
+	imported_tracks: Array[TrackData],
+	stats: Dictionary,
+	visited_dirs: Dictionary
 ) -> void:
 	var normalized_root := normalize_path(root_path)
-	if not DirAccess.dir_exists_absolute(normalized_root):
+	if normalized_root.is_empty() or visited_dirs.has(normalized_root):
+		return
+	visited_dirs[normalized_root] = true
+
+	var list_result: Dictionary = DX.files.list_dir(normalized_root)
+	if not bool(list_result.get("ok", false)):
+		stats["invalid_targets"] = int(stats["invalid_targets"]) + 1
+		_debug_import("scan directory list failed", {
+			"path": normalized_root,
+			"error": str(list_result.get("error", ""))
+		})
 		return
 
-	var directory := DirAccess.open(normalized_root)
-	if directory == null:
-		return
-
-	directory.list_dir_begin()
-	while true:
-		var item_name := directory.get_next()
-		if item_name.is_empty():
-			break
-		if item_name in [".", ".."]:
+	stats["directories"] = int(stats["directories"]) + 1
+	var entries: Array = list_result.get("entries", [])
+	var lyric_paths_by_stem := {}
+	var file_entries: Array[Dictionary] = []
+	for entry_value in entries:
+		if not entry_value is Dictionary:
+			continue
+		var entry: Dictionary = entry_value
+		var item_name := str(entry.get("name", ""))
+		if _should_skip_file_system_entry(item_name):
 			continue
 
-		var item_path := normalize_path(normalized_root.path_join(item_name))
-		if directory.current_is_dir():
-			_collect_audio_tracks(item_path, existing_paths, imported_tracks)
+		var item_path := normalize_path(str(entry.get("path", "")))
+		if item_path.is_empty():
+			item_path = normalize_path(str(entry.get("native_path", "")))
+		if bool(entry.get("is_dir", false)):
+			_collect_audio_tracks(item_path, existing_paths, imported_tracks, stats, visited_dirs)
 			continue
 
-		if not is_audio_file(item_path) or existing_paths.has(item_path):
+		stats["files"] = int(stats["files"]) + 1
+		var file_stem := item_name.get_basename().to_lower()
+		if _is_lyric_file_name(item_name):
+			if not lyric_paths_by_stem.has(file_stem):
+				lyric_paths_by_stem[file_stem] = item_path
+			continue
+		file_entries.append({
+			"name": item_name,
+			"path": item_path,
+			"stem": file_stem
+		})
+
+	for file_entry in file_entries:
+		var item_name := str(file_entry.get("name", ""))
+		var item_path := str(file_entry.get("path", ""))
+		if not is_audio_file(item_path):
+			stats["unsupported_files"] = int(stats["unsupported_files"]) + 1
+			continue
+		stats["audio_files"] = int(stats["audio_files"]) + 1
+		if existing_paths.has(item_path):
+			stats["duplicates"] = int(stats["duplicates"]) + 1
 			continue
 
 		existing_paths[item_path] = true
-		imported_tracks.append(make_local_track_from_path(item_path))
-	directory.list_dir_end()
+		var lyric_path := str(lyric_paths_by_stem.get(str(file_entry.get("stem", "")), ""))
+		imported_tracks.append(
+			make_local_track_from_path(
+				item_path,
+				item_name,
+				_display_name_from_path(normalized_root),
+				lyric_path
+			)
+		)
 
 ## 判断指定路径是否为支持导入的音频文件。
 func is_audio_file(path: String) -> bool:
@@ -153,9 +220,17 @@ func is_audio_file(path: String) -> bool:
 	return AUDIO_EXTENSIONS.has(extension)
 
 ## 根据文件路径构造一条本地曲目数据。
-func make_local_track_from_path(path: String) -> TrackData:
+func make_local_track_from_path(
+	path: String,
+	display_file_name: String = "",
+	folder_display_name: String = "",
+	lyric_path: String = ""
+) -> TrackData:
 	var normalized_path := normalize_path(path)
-	var file_stem := normalized_path.get_file().get_basename()
+	var file_name := display_file_name.strip_edges()
+	if file_name.is_empty():
+		file_name = _display_name_from_path(normalized_path)
+	var file_stem := file_name.get_basename()
 	var title := file_stem
 	var artist := ""
 	var separator := " - "
@@ -166,7 +241,9 @@ func make_local_track_from_path(path: String) -> TrackData:
 		if title.is_empty():
 			title = file_stem
 
-	var subtitle := normalized_path.get_base_dir().get_file()
+	var subtitle := folder_display_name.strip_edges()
+	if subtitle.is_empty():
+		subtitle = _display_name_from_path(normalized_path.get_base_dir())
 
 	var track := TrackData.new()
 	track.title = title
@@ -177,8 +254,33 @@ func make_local_track_from_path(path: String) -> TrackData:
 	track.mark = title.left(1) if not title.is_empty() else "L"
 	track.source = "LOCAL"
 	track.file_path = normalized_path
+	track.lyric_path = lyric_path if not lyric_path.is_empty() else find_lyric_path_for_audio(normalized_path)
 	track.normalize()
 	return track
+
+## 查找与音频同名的旁挂歌词文件。
+func find_lyric_path_for_audio(path: String) -> String:
+	var normalized_path := normalize_path(path)
+	var base_path := normalized_path.get_basename()
+	for extension in LYRIC_EXTENSIONS:
+		var lyric_path := "%s.%s" % [base_path, extension]
+		if DX.files.exists(lyric_path):
+			return lyric_path
+	return ""
+
+func _is_lyric_file_name(file_name: String) -> bool:
+	return file_name.get_extension().to_lower() in ["lrc", "txt"]
+
+func _display_name_from_path(path: String) -> String:
+	var candidate := str(path).strip_edges().replace("\\", "/").uri_decode()
+	var fragment_index := candidate.find("#")
+	if fragment_index >= 0:
+		candidate = candidate.substr(fragment_index + 1)
+	var display_name := candidate.get_file()
+	var colon_index := display_name.rfind(":")
+	if colon_index >= 0 and colon_index < display_name.length() - 1:
+		display_name = display_name.substr(colon_index + 1)
+	return display_name.strip_edges()
 
 ## 解析给定路径所属的根目录。
 func path_root(path: String) -> String:
@@ -204,3 +306,15 @@ func is_scan_virtual_root(path: String) -> bool:
 ## 判断路径是否是 Windows 单个盘符根目录。
 func is_windows_drive_root(path: String) -> bool:
 	return path.length() == 3 and path.substr(1, 1) == ":" and path.ends_with("/")
+
+func _should_skip_file_system_entry(entry_name: String) -> bool:
+	if entry_name in [".", "..", ".DS_Store", "__MACOSX", "System Volume Information", "$RECYCLE.BIN"]:
+		return true
+	return entry_name.begins_with(".")
+
+func _debug_import(message: String, payload: Variant = null) -> void:
+	var text := message if payload == null else "%s | %s" % [message, str(payload)]
+	if DX != null and DX.logger != null:
+		DX.logger.log(DEBUG_TAG, text)
+	else:
+		print("[%s] %s" % [DEBUG_TAG, text])

@@ -18,7 +18,7 @@ func setup() -> void:
 		return
 	_is_bound = true
 
-	_mark_label = $Margin/Row/CoverPanel/MarkLabel
+	_mark_label = $Margin/Row/CoverSlot/CoverPanel/MarkLabel
 	_title_label = $Margin/Row/Info/TitleLabel
 	_count_label = $Margin/Row/Info/CountLabel
 	_delete_button = $Margin/Row/DeleteButton

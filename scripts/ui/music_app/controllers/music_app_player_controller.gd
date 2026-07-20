@@ -48,7 +48,7 @@ func is_current_track_liked() -> bool:
 	var track := get_current_track()
 	if track == null:
 		return false
-	return bool(get_liked_tracks().get(_track_key(track), false))
+	return is_track_liked(track)
 
 ## 切换播放器的播放或暂停状态。
 func toggle_playback() -> void:
@@ -87,7 +87,7 @@ func cycle_playback_mode() -> int:
 		else MusicAppStateDataType.PlaybackMode.LOOP_ALL
 	)
 
-## 切换当前播放曲目的收藏状态，并同步“我喜欢”歌单。
+## 切换当前播放曲目的收藏状态。
 func toggle_like_current_track() -> bool:
 	if not has_tracks():
 		return false
@@ -96,17 +96,7 @@ func toggle_like_current_track() -> bool:
 	if track == null:
 		return false
 
-	var liked_tracks: Dictionary = get_liked_tracks().duplicate(true)
-	var key := _track_key(track)
-	var next_state := not bool(liked_tracks.get(key, false))
-
-	if next_state:
-		liked_tracks[key] = true
-	else:
-		liked_tracks.erase(key)
-
-	set_liked_tracks(liked_tracks)
-	sync_favorite_playlist_from_likes()
+	var next_state := toggle_track_liked(track)
 	show_toast(
 		tr("music_app.toast.favorite_added")
 		if next_state
@@ -117,7 +107,3 @@ func toggle_like_current_track() -> bool:
 ## 展示当前播放队列弹窗。
 func show_playback_queue() -> void:
 	show_popup(DX_PopupRegistry.PopupId.MUSIC_APP_PLAYBACK_QUEUE)
-
-## 生成曲目的唯一标识，用于收藏状态映射。
-func _track_key(track: TrackData) -> String:
-	return track_key(track)

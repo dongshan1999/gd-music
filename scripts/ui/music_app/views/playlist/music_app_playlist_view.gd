@@ -13,7 +13,7 @@ var _playlist_controller: MusicAppPlaylistController
 var _is_bound := false
 var _management_mode := MODE_NORMAL
 var _selected_slots := {}
-var _visible_track_indices: Array[int] = []
+var _visible_track_ids: Array[String] = []
 var _dragging_slot_index := -1
 
 @onready var playlist_back_button: Button = %PlaylistBackButton
@@ -62,7 +62,7 @@ func refresh() -> void:
 		return
 
 	if _playlist_controller.get_playlists().is_empty():
-		_visible_track_indices = []
+		_visible_track_ids = []
 		playlist_hero_mark_label.text = tr("music_app.playlist.favorites_mark")
 		playlist_hero_title_label.text = tr("music_app.playlist.favorites_title")
 		playlist_hero_count_label.text = _playlist_controller.format_total_track_count(0)
@@ -72,19 +72,19 @@ func refresh() -> void:
 		return
 
 	var playlist: PlaylistData = _playlist_controller.get_selected_playlist()
-	_visible_track_indices = _playlist_controller.get_selected_playlist_track_indices()
+	_visible_track_ids = _playlist_controller.get_selected_playlist_track_ids()
 
-	_sync_song_rows(_visible_track_indices.size())
-	_sync_empty_state(not _visible_track_indices.is_empty())
-	if _visible_track_indices.is_empty():
+	_sync_song_rows(_visible_track_ids.size())
+	_sync_empty_state(not _visible_track_ids.is_empty())
+	if _visible_track_ids.is_empty():
 		_set_management_mode(MODE_NORMAL)
 	playlist_hero_title_label.text = _playlist_controller.get_playlist_display_title(playlist)
 	playlist_hero_count_label.text = _playlist_controller.format_total_track_count(playlist.count)
 	playlist_hero_mark_label.text = _playlist_controller.get_playlist_display_mark(playlist)
 
 	for index in song_rows.size():
-		var track_index: int = _visible_track_indices[index]
-		var track: TrackData = _playlist_controller.get_track(track_index)
+		var track_id: String = _visible_track_ids[index]
+		var track: TrackData = _playlist_controller.get_track(track_id)
 		song_rows[index].configure(index, track)
 		song_rows[index].set_management_mode(_management_mode, _is_slot_selected(index))
 
@@ -148,14 +148,14 @@ func _hide_more_menu() -> void:
 
 func _enter_sort_mode() -> void:
 	_hide_more_menu()
-	if _visible_track_indices.is_empty():
+	if _visible_track_ids.is_empty():
 		_playlist_controller.show_sort_empty_placeholder()
 		return
 	_set_management_mode(MODE_SORT)
 
 func _enter_delete_mode() -> void:
 	_hide_more_menu()
-	if _visible_track_indices.is_empty():
+	if _visible_track_ids.is_empty():
 		_playlist_controller.show_delete_empty_placeholder()
 		return
 	_set_management_mode(MODE_DELETE)
@@ -198,13 +198,13 @@ func _toggle_slot_selection(slot_index: int) -> void:
 	_update_action_buttons()
 
 func _toggle_select_all() -> void:
-	if _visible_track_indices.is_empty():
+	if _visible_track_ids.is_empty():
 		return
 	if _is_all_selected():
 		_selected_slots.clear()
 	else:
 		_selected_slots.clear()
-		for index in _visible_track_indices.size():
+		for index in _visible_track_ids.size():
 			_selected_slots[index] = true
 	_refresh_row_modes()
 	_update_action_buttons()
@@ -257,9 +257,9 @@ func _is_slot_selected(slot_index: int) -> bool:
 	return bool(_selected_slots.get(slot_index, false))
 
 func _is_all_selected() -> bool:
-	return not _visible_track_indices.is_empty() and _selected_slots.size() == _visible_track_indices.size()
+	return not _visible_track_ids.is_empty() and _selected_slots.size() == _visible_track_ids.size()
 
 func _prune_selected_slots() -> void:
 	for slot_index in _selected_slots.keys():
-		if int(slot_index) < 0 or int(slot_index) >= _visible_track_indices.size():
+		if int(slot_index) < 0 or int(slot_index) >= _visible_track_ids.size():
 			_selected_slots.erase(slot_index)

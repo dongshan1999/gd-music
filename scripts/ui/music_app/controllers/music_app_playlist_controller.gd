@@ -13,16 +13,13 @@ func get_selected_playlist():
 		return null
 	return playlists[playlist_index]
 
-## 返回当前选中歌单内的曲目索引列表。
-func get_selected_playlist_track_indices() -> Array[int]:
-	return _get_playlist_track_indices(get_selected_playlist_index())
+## 返回当前选中歌单内的曲目 ID 列表。
+func get_selected_playlist_track_ids() -> Array[String]:
+	return _get_playlist_track_ids(get_selected_playlist_index())
 
-## 根据全量曲目索引获取曲目对象。
-func get_track(track_index: int):
-	var tracks: Array[TrackData] = get_tracks_ref()
-	if track_index < 0 or track_index >= tracks.size():
-		return null
-	return tracks[track_index]
+## 根据曲目 ID 获取曲目对象。
+func get_track(track_id: String):
+	return get_track_by_id(track_id)
 
 ## 返回歌单详情页展示标题。
 func get_playlist_display_title(playlist) -> String:
@@ -46,17 +43,17 @@ func format_total_track_count(count: int) -> String:
 
 ## 从当前歌单第一首开始播放并打开播放器。
 func play_selected_playlist_from_start() -> bool:
-	var track_indices := get_selected_playlist_track_indices()
-	if track_indices.is_empty():
+	var track_ids := get_selected_playlist_track_ids()
+	if track_ids.is_empty():
 		return false
-	return _play_track_list(track_indices, 0, true)
+	return _play_track_list(track_ids, 0, true)
 
 ## 播放当前歌单指定槽位的曲目并打开播放器。
 func play_selected_playlist_track(slot_index: int) -> bool:
-	var track_indices := get_selected_playlist_track_indices()
-	if slot_index < 0 or slot_index >= track_indices.size():
+	var track_ids := get_selected_playlist_track_ids()
+	if slot_index < 0 or slot_index >= track_ids.size():
 		return false
-	return _play_track_list(track_indices, slot_index, true)
+	return _play_track_list(track_ids, slot_index, true)
 
 func move_selected_playlist_track(from_slot_index: int, to_slot_index: int) -> bool:
 	var playlist: PlaylistData = get_selected_playlist()
@@ -70,9 +67,9 @@ func move_selected_playlist_track(from_slot_index: int, to_slot_index: int) -> b
 	if from_slot_index == clamped_to_index:
 		return true
 
-	var track_index: int = playlist.tracks[from_slot_index]
+	var track_id: String = playlist.tracks[from_slot_index]
 	playlist.tracks.remove_at(from_slot_index)
-	playlist.tracks.insert(clamped_to_index, track_index)
+	playlist.tracks.insert(clamped_to_index, track_id)
 	playlist.count = playlist.tracks.size()
 	return true
 
@@ -87,11 +84,6 @@ func delete_selected_playlist_tracks(slot_indices: Array) -> int:
 	var normalized_slots := _normalize_slot_indices(slot_indices, playlist.tracks.size())
 	if normalized_slots.is_empty():
 		return 0
-
-	if MusicAppStateData.is_system_favorite_playlist(playlist):
-		_remove_likes_for_playlist_slots(playlist, normalized_slots)
-		sync_favorite_playlist_from_likes()
-		return normalized_slots.size()
 
 	for slot_index in normalized_slots:
 		playlist.tracks.remove_at(slot_index)
@@ -126,15 +118,15 @@ func show_song_more_placeholder() -> void:
 	show_toast("歌曲操作暂未接入。")
 
 
-## 返回指定歌单中的曲目索引列表副本。
-func _get_playlist_track_indices(index: int) -> Array[int]:
+## 返回指定歌单中的曲目 ID 列表副本。
+func _get_playlist_track_ids(index: int) -> Array[String]:
 	var playlists: Array[PlaylistData] = get_playlists_ref()
 	if index < 0 or index >= playlists.size():
 		return []
 
-	var result: Array[int] = []
-	for track_index in playlists[index].tracks:
-		result.append(track_index)
+	var result: Array[String] = []
+	for track_id in playlists[index].tracks:
+		result.append(track_id)
 	return result
 
 func _normalize_slot_indices(slot_indices: Array, track_count: int) -> Array[int]:
@@ -150,22 +142,12 @@ func _normalize_slot_indices(slot_indices: Array, track_count: int) -> Array[int
 	result.reverse()
 	return result
 
-func _remove_likes_for_playlist_slots(playlist: PlaylistData, slot_indices: Array[int]) -> void:
-	var tracks: Array[TrackData] = get_tracks_ref()
-	var liked_tracks := get_liked_tracks().duplicate(true)
-	for slot_index in slot_indices:
-		var track_index: int = playlist.tracks[slot_index]
-		if track_index < 0 or track_index >= tracks.size():
-			continue
-		liked_tracks.erase(track_key(tracks[track_index]))
-	set_liked_tracks(liked_tracks)
-
 ## 按给定顺序构建播放队列并跳到目标槽位。
-func _play_track_list(track_indices: Array[int], start_slot_index: int, autoplay: bool = true) -> bool:
+func _play_track_list(track_ids: Array[String], start_slot_index: int, autoplay: bool = true) -> bool:
 	var playback_controller = get_playback_controller()
 	if playback_controller == null:
 		return false
-	if not playback_controller.set_playback_queue(track_indices, start_slot_index):
+	if not playback_controller.set_playback_queue(track_ids, start_slot_index):
 		return false
 	if not playback_controller.play_queue_index(playback_controller.get_playback_queue_index(), autoplay):
 		return false

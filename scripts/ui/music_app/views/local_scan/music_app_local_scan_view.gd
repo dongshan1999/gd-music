@@ -2,17 +2,18 @@ class_name MusicAppLocalScanView
 extends "res://dx/runtime/scripts/managers/popup/popup_view.gd"
 
 const MusicAppScriptPathsType := preload("res://scripts/constants/music_app_script_paths.gd")
-const MusicAppIconsType := preload("res://scripts/constants/music_app_icons.gd")
 const SCAN_FOLDER_ROW_SCENE := preload(MusicAppScriptPathsType.LOCAL_SCAN_FOLDER_ROW)
 
 var _controller: MusicAppShowcaseController
 var _local_scan_controller: MusicAppLocalScanController
+var _local_music_controller: MusicAppLocalMusicController
 var _is_bound := false
 var _root_path := ""
 var _current_path := ""
 var _selected_paths := {}
 var _current_entries: Array[Dictionary] = []
 var _folder_rows: Array[MusicAppLocalMusicScanFolderRow] = []
+var _finished_callback := Callable()
 
 @onready var scan_back_button: Button = %ScanBackButton
 @onready var scan_path_label: Label = %ScanPathLabel
@@ -26,8 +27,14 @@ var _folder_rows: Array[MusicAppLocalMusicScanFolderRow] = []
 func setup(controller: MusicAppShowcaseController) -> void:
 	_controller = controller
 	_local_scan_controller = MusicAppLocalScanController.new(controller)
+	_local_music_controller = MusicAppLocalMusicController.new(controller)
+	_finished_callback = Callable()
 	bind()
 	refresh()
+
+## 设置扫描页关闭后的刷新回调。
+func set_finished_callback(finished_callback: Callable) -> void:
+	_finished_callback = finished_callback
 
 ## 绑定扫描页固定按钮事件。
 func bind() -> void:
@@ -68,6 +75,7 @@ func open_page() -> void:
 	refresh()
 
 func close_page() -> void:
+	_notify_finished()
 	close_popup()
 
 func navigate_back() -> void:
@@ -142,7 +150,7 @@ func _start_scan() -> void:
 			return
 		target_paths.append(_current_path)
 
-	var imported_count := _local_scan_controller.scan_local_music_directories(target_paths)
+	var imported_count := _local_music_controller.import_local_folders(target_paths)
 	_selected_paths.clear()
 
 	if imported_count <= 0:
@@ -150,7 +158,7 @@ func _start_scan() -> void:
 			tr("music_app.scan.not_found_title"),
 			tr("music_app.scan.not_found_message")
 		)
-		refresh()
+		close_page()
 		return
 
 	_local_scan_controller.show_common_alert(
@@ -158,3 +166,10 @@ func _start_scan() -> void:
 		tr("music_app.scan.complete_message").format({"count": imported_count})
 	)
 	close_page()
+
+func _notify_finished() -> void:
+	if not _finished_callback.is_valid():
+		return
+	var finished_callback := _finished_callback
+	_finished_callback = Callable()
+	finished_callback.call()

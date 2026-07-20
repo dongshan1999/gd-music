@@ -108,29 +108,9 @@ func _refresh_cover(track: TrackData) -> void:
 		return
 
 	_apply_cover_placeholder(track)
-	var next_artwork_source := track.artwork_url.strip_edges()
-	if next_artwork_source.is_empty():
-		_artwork_source = ""
-		mini_cover_texture_rect.texture = null
-		mini_cover_texture_rect.visible = false
-		return
-
-	if next_artwork_source == _artwork_source and mini_cover_texture_rect.texture != null:
-		mini_cover_texture_rect.visible = true
-		mini_cover_mark_label.visible = false
-		return
-
-	_artwork_source = next_artwork_source
-	_artwork_request_id += 1
 	mini_cover_texture_rect.texture = null
 	mini_cover_texture_rect.visible = false
-	mini_cover_mark_label.visible = true
-
-	if _artwork_texture_cache.has(next_artwork_source):
-		_display_cover_texture(_artwork_texture_cache[next_artwork_source] as Texture2D)
-		return
-
-	call_deferred("_load_cover_artwork", next_artwork_source, _artwork_request_id)
+	_artwork_source = ""
 
 ## 重置封面到默认占位状态。
 func _reset_cover_state() -> void:

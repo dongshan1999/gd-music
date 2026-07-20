@@ -31,7 +31,9 @@ func configure(folder_path: String, display_name: String, selected: bool) -> voi
 	_folder_button.text = display_name
 	MusicAppIconsType.apply_icon_button(
 		_toggle_button,
-		MusicAppIconsType.CHECKED if _selected else MusicAppIconsType.UNCHECKED
+		MusicAppIconsType.CHECKED if _selected else MusicAppIconsType.UNCHECKED,
+		false,
+		false
 	)
 
 func _on_open_pressed() -> void:
@@ -45,6 +47,8 @@ func _on_toggle_pressed() -> void:
 	_selected = not _selected
 	MusicAppIconsType.apply_icon_button(
 		_toggle_button,
-		MusicAppIconsType.CHECKED if _selected else MusicAppIconsType.UNCHECKED
+		MusicAppIconsType.CHECKED if _selected else MusicAppIconsType.UNCHECKED,
+		false,
+		false
 	)
 	selection_toggled.emit(_folder_path, _selected)

@@ -34,11 +34,13 @@ music_app.queue.empty,The playback queue is empty.,当前播放列表为空,当�
 music_app.mini_player.empty,"No tracks, import music first","暂无歌曲，请先导入","暂无歌曲，请先导入"
 music_app.mini_player.placeholder_track,Virtual - Chen Li,虚拟 - 陈粒,虚拟 - 陈粒
 music_app.local.title,Local Music,本地音乐,本地音乐
-music_app.local.empty_line1,🎵 No local music yet,🎵 暂无本地音乐,🎵 暂无本地音乐
-music_app.local.empty_line2,Tap the ⋯ menu to import first,点击右上角 ⋯ 先导入,点击右上角 ⋯ 先导入
-music_app.local.menu.scan,🔍 Import Local Music,🔍 导入本地音乐,🔍 导入本地音乐
-music_app.local.menu.edit,✏️ Edit,✏️ 批量编辑,✏️ 批量编辑
-music_app.local.menu.download,⬇️ Download List,⬇️ 下载列表,⬇️ 下载列表
+music_app.local.empty_line1,No local music yet,暂无本地音乐,暂无本地音乐
+music_app.local.empty_line2,Use the menu to add scan folders,点击右上角添加扫描文件夹,点击右上角添加扫描文件夹
+music_app.local.menu.scan,Add Scan Folder,添加扫描文件夹,添加扫描文件夹
+music_app.local.menu.edit,Edit,批量编辑,批量编辑
+music_app.local.menu.download,Download List,下载列表,下载列表
+music_app.local.folder_unknown,Folder,文件夹,文件夹
+music_app.local.folder_title,Scan Folders,扫描文件夹,扫描文件夹
 music_app.local.search_title,Search,搜索,搜索
 music_app.local.search_message,Search will be added later.,搜索功能稍后补齐。,搜索功能稍后补齐。
 music_app.local.edit_title,Edit,编辑,编辑
@@ -47,14 +49,14 @@ music_app.local.download_title,Download List,下载列表,下载列表
 music_app.local.download_message,Download list is not implemented yet. Local import is available for now.,下载列表暂未实现，当前先支持本地导入。,下载列表暂未实现，当前先支持本地导入。
 music_app.scan.select_all,Select All,全选,全选
 music_app.scan.unselect_all,Clear All,取消全选,取消全选
-music_app.scan.hint,📁 Select folders to scan,📁 选择要扫描的文件夹,📁 选择要扫描的文件夹
+music_app.scan.hint,Select folders to scan,选择要扫描的文件夹,选择要扫描的文件夹
 music_app.scan.start,Start Scan,开始扫描,开始扫描
 music_app.scan.select_folder_title,Select a Folder,请选择文件夹,请选择文件夹
 music_app.scan.select_folder_message,Enter a drive first or select folders to scan.,请先进入一个磁盘，或勾选要扫描的目录。,请先进入一个磁盘，或勾选要扫描的目录。
 music_app.scan.not_found_title,No Music Found,未找到音乐,未找到音乐
 music_app.scan.not_found_message,No new audio files were found in the selected folders.,所选文件夹里没有新的音频文件。,所选文件夹里没有新的音频文件。
 music_app.scan.complete_title,Scan Complete,扫描完成,扫描完成
-music_app.scan.complete_message,Added {count} local tracks.,新增 {count} 首本地音乐。,新增 {count} 首本地音乐。
+music_app.scan.complete_message,Imported {count} new local tracks.,新增 {count} 首本地音乐。,新增 {count} 首本地音乐。
 music_app.scan.windows_root,Windows,Windows,Windows
 music_app.track.local_file,Local File,本地文件,本地文件
 music_app.track.local_folder,Local Folder,本地文件夹,本地文件夹

@@ -333,41 +333,13 @@ func search(plugin_id: String, query: String, page: int = 1, media_type: String 
 	last_error = ""
 	return result if result is Dictionary else {"isEnd": true, "data": []}
 
-func get_media_source(track, quality: String = "standard") -> Dictionary:
-	if track == null or not track.has_method("to_plugin_media_item"):
-		_fail("Track does not provide plugin media payload.")
-		return {}
+func get_media_source(_track, _quality: String = "standard") -> Dictionary:
+	_fail("Plugin media resolving is disabled in the local-only save format.")
+	return {}
 
-	var plugin_result = _require_plugin_entry(str(track.platform))
-	if plugin_result.is_empty():
-		return {}
-
-	var plugin = plugin_result.get("plugin")
-	if plugin == null or not plugin.has_method("get_media_source"):
-		_fail("Selected plugin does not support media source resolving.")
-		return {}
-
-	var result = await plugin.get_media_source(track.to_plugin_media_item(), quality)
-	last_error = ""
-	return result if result is Dictionary else {}
-
-func get_lyric(track) -> Dictionary:
-	if track == null or not track.has_method("to_plugin_media_item"):
-		_fail("Track does not provide plugin media payload.")
-		return {}
-
-	var plugin_result = _require_plugin_entry(str(track.platform))
-	if plugin_result.is_empty():
-		return {}
-
-	var plugin = plugin_result.get("plugin")
-	if plugin == null or not plugin.has_method("get_lyric"):
-		_fail("Selected plugin does not support lyric resolving.")
-		return {}
-
-	var result = await plugin.get_lyric(track.to_plugin_media_item())
-	last_error = ""
-	return result if result is Dictionary else {}
+func get_lyric(_track) -> Dictionary:
+	_fail("Plugin lyric resolving is disabled in the local-only save format.")
+	return {}
 
 func get_toplists(plugin_id: String) -> Array:
 	var plugin_result = _require_plugin_entry(plugin_id)

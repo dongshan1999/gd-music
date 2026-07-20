@@ -2,13 +2,33 @@
 
 [ext_resource type="Texture2D" uid="uid://c2kbdu1mp5y13" path="res://textures/magnifying-glass.svg" id="3_fq6oh"]
 [ext_resource type="Texture2D" uid="uid://c7774k8kqtfij" path="res://textures/ellipsis-vertical.svg" id="4_cln7v"]
-[ext_resource type="Texture2D" uid="uid://ce5stibbp74yi" path="res://textures/pencil-outline.svg" id="5_ur60a"]
-[ext_resource type="Texture2D" uid="uid://casrni7xdp13e" path="res://textures/inbox-arrow-down.svg" id="6_sppb8"]
+[ext_resource type="Texture2D" path="res://textures/folder-plus.svg" id="5_folder_plus"]
 [ext_resource type="Script" uid="uid://dbmbxfaq7rbyk" path="res://scripts/ui/music_app/views/local_music/music_app_local_music_view.gd" id="7_local_music_script"]
 [ext_resource type="Script" uid="uid://bym33i5tdjhtg" path="res://dx/runtime/scripts/managers/localization/localize_comp.gd" id="999_localize_comp"]
 
 [sub_resource type="CompressedTexture2D" id="CompressedTexture2D_pnlqs"]
 load_path = "res://.godot/imported/arrow-left.svg-15ca7f2f7c94de7423aad0019b413bff.ctex"
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_local_folder_panel"]
+bg_color = Color(0.121569, 0.12549, 0.141176, 1)
+corner_radius_top_left = 10
+corner_radius_top_right = 10
+corner_radius_bottom_right = 10
+corner_radius_bottom_left = 10
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_local_menu_panel"]
+bg_color = Color(0.164706, 0.168627, 0.188235, 1)
+corner_radius_top_left = 8
+corner_radius_top_right = 8
+corner_radius_bottom_right = 8
+corner_radius_bottom_left = 8
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_local_menu_button"]
+bg_color = Color(1, 1, 1, 0)
+corner_radius_top_left = 6
+corner_radius_top_right = 6
+corner_radius_bottom_right = 6
+corner_radius_bottom_left = 6
 
 [node name="LocalMusicPage" type="Control" unique_id=1377588459]
 unique_name_in_owner = true
@@ -79,6 +99,39 @@ unique_name_in_owner = true
 layout_mode = 2
 icon = ExtResource("4_cln7v")
 
+[node name="LocalFolderPanel" type="PanelContainer" parent="Margin/LocalMusicVBox" unique_id=815277666]
+unique_name_in_owner = true
+visible = false
+layout_mode = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_local_folder_panel")
+
+[node name="Margin" type="MarginContainer" parent="Margin/LocalMusicVBox/LocalFolderPanel" unique_id=518881958]
+layout_mode = 2
+theme_override_constants/margin_left = 12
+theme_override_constants/margin_top = 10
+theme_override_constants/margin_right = 12
+theme_override_constants/margin_bottom = 10
+
+[node name="FolderVBox" type="VBoxContainer" parent="Margin/LocalMusicVBox/LocalFolderPanel/Margin" unique_id=1349182220]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="LocalFolderTitleLabel" type="Label" parent="Margin/LocalMusicVBox/LocalFolderPanel/Margin/FolderVBox" unique_id=589389465]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.643137, 0.65098, 0.690196, 1)
+theme_override_font_sizes/font_size = 12
+text = "扫描文件夹"
+
+[node name="LocalizeComp" type="Node" parent="Margin/LocalMusicVBox/LocalFolderPanel/Margin/FolderVBox/LocalFolderTitleLabel" unique_id=1409664052]
+script = ExtResource("999_localize_comp")
+tr_key = "music_app.local.folder_title"
+
+[node name="LocalFolderChips" type="FlowContainer" parent="Margin/LocalMusicVBox/LocalFolderPanel/Margin/FolderVBox" unique_id=1494689589]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_constants/h_separation = 6
+theme_override_constants/v_separation = 6
+
 [node name="LocalMusicScroll" type="ScrollContainer" parent="Margin/LocalMusicVBox" unique_id=1747168716]
 layout_mode = 2
 size_flags_vertical = 3
@@ -125,7 +178,8 @@ layout_mode = 0
 offset_left = 192.0
 offset_top = 56.0
 offset_right = 390.0
-offset_bottom = 208.0
+offset_bottom = 116.0
+theme_override_styles/panel = SubResource("StyleBoxFlat_local_menu_panel")
 
 [node name="Margin" type="MarginContainer" parent="LocalMusicMenuPanel" unique_id=2000997070]
 layout_mode = 0
@@ -140,40 +194,25 @@ theme_override_constants/margin_bottom = 12
 
 [node name="MenuVBox" type="VBoxContainer" parent="LocalMusicMenuPanel/Margin" unique_id=446984095]
 layout_mode = 2
-theme_override_constants/separation = 10
+theme_override_constants/separation = 4
 
 [node name="ScanMusicButton" type="Button" parent="LocalMusicMenuPanel/Margin/MenuVBox" unique_id=990709116]
 unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 36)
 layout_mode = 2
-text = "导入本地音乐"
-icon = ExtResource("3_fq6oh")
+theme_override_colors/font_color = Color(0.968627, 0.968627, 0.972549, 1)
+theme_override_font_sizes/font_size = 14
+theme_override_styles/normal = SubResource("StyleBoxFlat_local_menu_button")
+theme_override_styles/pressed = SubResource("StyleBoxFlat_local_menu_button")
+theme_override_styles/hover = SubResource("StyleBoxFlat_local_menu_button")
+theme_override_styles/disabled = SubResource("StyleBoxFlat_local_menu_button")
+theme_override_styles/focus = SubResource("StyleBoxFlat_local_menu_button")
+text = "添加扫描文件夹"
+icon = ExtResource("5_folder_plus")
+expand_icon = false
 flat = true
 alignment = 0
 
 [node name="LocalizeComp" type="Node" parent="LocalMusicMenuPanel/Margin/MenuVBox/ScanMusicButton" unique_id=483608757]
 script = ExtResource("999_localize_comp")
 tr_key = "music_app.local.menu.scan"
-
-[node name="EditMusicButton" type="Button" parent="LocalMusicMenuPanel/Margin/MenuVBox" unique_id=1609157111]
-unique_name_in_owner = true
-layout_mode = 2
-text = "批量编辑"
-icon = ExtResource("5_ur60a")
-flat = true
-alignment = 0
-
-[node name="LocalizeComp" type="Node" parent="LocalMusicMenuPanel/Margin/MenuVBox/EditMusicButton" unique_id=1123569535]
-script = ExtResource("999_localize_comp")
-tr_key = "music_app.local.menu.edit"
-
-[node name="DownloadListButton" type="Button" parent="LocalMusicMenuPanel/Margin/MenuVBox" unique_id=199534854]
-unique_name_in_owner = true
-layout_mode = 2
-text = "下载列表"
-icon = ExtResource("6_sppb8")
-flat = true
-alignment = 0
-
-[node name="LocalizeComp" type="Node" parent="LocalMusicMenuPanel/Margin/MenuVBox/DownloadListButton" unique_id=1672435050]
-script = ExtResource("999_localize_comp")
-tr_key = "music_app.local.menu.download"

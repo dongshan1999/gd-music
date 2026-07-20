@@ -46,7 +46,7 @@ func _ready() -> void:
 		DX.debug.register_target("MusicAppShowcase", self)
 
 	mini_player.setup(self)
-	_playlist_state_controller.sync_favorite_playlist_from_likes()
+	_playlist_state_controller.normalize_favorite_playlist()
 
 	add_child(_timer)
 	_timer.wait_time = 1.0
@@ -65,8 +65,6 @@ func _exit_tree() -> void:
 	_playback_state_controller.stop_audio_playback(true)
 	_plugin_controller.in_quit()
 	_popup_router_controller.detach_popup_hosts(normal_popup_host, fullscreen_popup_host)
-	if DX != null and DX.debug != null:
-		DX.debug.unregister_target("MusicAppShowcase")
 	if instance == self:
 		instance = null
 
