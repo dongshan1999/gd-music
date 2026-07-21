@@ -25,6 +25,7 @@ music_app.player.placeholder_title,Virtual,虚拟,虚拟
 music_app.player.placeholder_mark,V,虚,虚
 music_app.player.placeholder_artist,Chen Li,陈粒,陈粒
 music_app.player.placeholder_source,Yuanli QQ,元力QQ,元力QQ
+music_app.player.no_lyrics,No lyrics,暂无歌词,暂无歌词
 music_app.queue.title_with_count,Playback Queue ({count}),播放列表 ({count}首),播放列表 ({count}首)
 music_app.queue.mode.loop_all,Loop All,循环播放,循环播放
 music_app.queue.mode.repeat_one,Repeat One,单曲循环,单曲循环

@@ -1,6 +1,6 @@
 # DX README
 
-更新时间：2026-06-23 17:54
+更新时间：2026-07-21 11:10
 
 ## 概览
 
@@ -12,6 +12,7 @@
 - 弹窗管理
 - 保存与序列化
 - 跨平台虚拟文件路径
+- 滚动、拖拽与触摸交互
 - 本地化
 - 简单对象池
 - JSON 配置管理
@@ -705,18 +706,33 @@ var ok := DX.save.save(true)
 
 作用：
 
-- 提供跨平台文件读写入口
-- 用虚拟路径隔离 Windows 原生路径、Godot `user://` 和 Android SAF `content://`
-- 避免业务层把 Android 虚拟路径误当作真实文件路径
+- 提供跨平台文件、目录和系统选择器入口
+- 用虚拟路径隔离本机路径、Godot `user://` 与 Android SAF `content://`
+- 负责路径规范化、读写、列举、复制、移动、删除、系统打开和文件选择
+- 业务层始终保存 `path` 虚拟路径；只在需要传给系统 API 时读取 `native_path` 或 `uri`
+
+实现分层：
+
+- `DX_FileManager` 负责虚拟路径、provider 选择和文件/目录操作；`pick_*()`、`open_path()` 与 `reveal_path()` 委派给当前平台对象。
+- `files/platforms/file_platform.gd` 定义选择器和打开路径的通用接口；`macos_file_platform.gd`、`windows_file_platform.gd`、`linux_file_platform.gd`、`android_file_platform.gd`、`ios_file_platform.gd` 分别承载平台差异。
+- `files/providers/` 负责实际存储访问：`app://` 使用 AppData provider，`local://` 使用 Local provider，Android `content://` 使用 SAF provider。复制、粘贴、移动和删除属于 `DX_FileManager` 的跨 provider 逻辑，不在 platform 脚本中实现。
 
 当前虚拟路径：
 
 | 路径 | 平台 | 状态 | 说明 |
 | --- | --- | --- | --- |
-| `app://exports/demo.csv` | 全平台 | 可读写 | 映射到 `user://exports/demo.csv`，适合 App 私有导入导出缓存 |
-| `local://E:/tmp/demo.csv` | Windows/editor | 可读写 | 映射到桌面原生路径，Android 不支持 |
-| `saf-file://content://...` | Android | 可读写 | 单文件 SAF URI，适合导入或写入系统返回的单文件目标 |
-| `saf-tree://content://...#exports/demo.csv` | Android | 可读写 | 目录 SAF URI + 相对路径，适合用户选择导出文件夹后写文件 |
+| `app://exports/demo.csv` | 全平台 | 可读写 | 映射到 `user://exports/demo.csv`，适合应用私有导入导出缓存 |
+| `local:///Users/me/demo.csv` | 非 Android | 可读写 | 映射到原生绝对路径；移动端实际可访问范围仍受应用沙盒约束 |
+| `local://E:/tmp/demo.csv` | Windows/editor | 可读写 | Windows 盘符路径使用正斜杠 |
+| `saf-file://content://...` | Android | 可读写 | 单文件 SAF URI，适合系统返回的导入或保存目标 |
+| `saf-tree://content://...#exports/demo.csv` | Android | 可读写 | 目录 SAF URI + 相对路径，适合用户选择导出文件夹后继续读写 |
+
+路径规则：
+
+- `app://` 与 `saf-tree://` 的相对部分拒绝 `..`，`path_join()` 失败时返回空字符串。
+- `app://` 根、SAF tree 根、Unix `/`、Windows 盘符根和 UNC share 根不能删除、移动或作为覆盖目标。
+- `local://` 与 `app://` 指向同一原生文件时视为同一路径，不会自我复制或移动。
+- 对于目录链接，递归删除只删除链接本身；复制链接会失败，不会进入链接目标。
 
 常用方式：
 
@@ -730,36 +746,126 @@ if read_result.ok:
 	print(read_result.text)
 ```
 
-常用方法：
+路径与信息方法：
 
 - `app_path(relative_path) -> String`
 - `local_path(native_path) -> String`
 - `saf_file_path(uri) -> String`
 - `saf_tree_path(uri, relative_path := "") -> String`
+- `to_virtual_path(path, default_scheme := "") -> String`
+- `normalize_virtual_path(path) -> String`
+- `is_virtual_path(path) -> bool`
+- `path_join(base_path, relative_path) -> String`
+- `path_parent(path) -> String`
+- `path_name(path) -> String`
+- `globalize(path) -> String`
+- `native_path(path) -> String`
+- `file_uri(path) -> String`
+
+文件与目录方法：
+
 - `read_bytes(path) -> Dictionary`
 - `read_text(path) -> Dictionary`
 - `write_bytes(path, data) -> Dictionary`
 - `write_text(path, text) -> Dictionary`
 - `exists(path) -> bool`
+- `is_file(path) -> bool`
+- `is_dir(path) -> bool`
+- `is_link(path) -> bool`
+- `get_info(path) -> Dictionary`
 - `make_dir_recursive(path) -> Dictionary`
-- `globalize(path) -> String`
-- `persist_saf_uri_permission(path_or_uri, persist := true) -> bool`
+- `list_dir(path) -> Dictionary`
+- `delete_file(path) -> Dictionary`
+- `delete_dir(path) -> Dictionary`
+- `delete_dir_recursive(path) -> Dictionary`
+- `delete(path) -> Dictionary`
+- `copy_file(source_path, target_path, overwrite := true) -> Dictionary`
+- `copy_dir(source_dir, target_dir, recursive := true, overwrite := true) -> Dictionary`
+- `copy(source_path, target_path, overwrite := true) -> Dictionary`
+- `paste(source_path, target_dir, new_name := "", overwrite := true) -> Dictionary`
+- `move(source_path, target_path, overwrite := true) -> Dictionary`
+- `rename(path, new_name, overwrite := true) -> Dictionary`
+
+系统文件选择与打开：
+
 - `pick_file(title, filters, callback, current_directory := "") -> Dictionary`
+- `pick_files(title, filters, callback, current_directory := "") -> Dictionary`
+- `persist_saf_uri_permission(path_or_uri, persist := true) -> bool`
 - `pick_directory(title, callback, current_directory := "") -> Dictionary`
-- `path_join(base_path, relative_path) -> String`
+- `pick_save_file(title, default_filename, filters, callback, current_directory := "") -> Dictionary`
+- `save_bytes_with_picker(title, default_filename, data, callback, current_directory := "", filters := []) -> Dictionary`
+- `save_text_with_picker(title, default_filename, text, callback, current_directory := "", filters := []) -> Dictionary`
+- `open_path(path) -> Dictionary`
+- `reveal_path(path) -> Dictionary`
+- `platform_capabilities() -> Dictionary`
+
+复制、移动与覆盖：
+
+- 本地与 `app://` 文件写入先写入同目录临时文件，再替换目标；大文件复制按 1 MiB 分块处理。
+- 覆盖目录时先复制到 staging 目录，再整体替换，旧目录内未出现在源目录的文件不会残留。
+- 同 provider 的移动或重命名优先使用原生 rename；跨 provider 的移动会先复制，再删除源路径。若源删除失败，结果带 `partial: true`，表示目标已存在、源仍保留。
+- SAF tree 可使用同目录临时文档并安全替换；单一 `saf-file://` URI 没有可创建同级临时文档的保证，写入结果会标记 `atomic: false`。
+- 如果替换旧目标后的备份清理或回滚失败，结果可能包含 `cleanup_error`、`backup_path`、`rollback_succeeded` 或 `temporary_path`，调用方应记录并提供后续处理入口。
+
+示例：复制、粘贴与移动
+
+```gdscript
+var source := DX.files.local_path("/Users/me/Music/demo.mp3")
+var target_dir := DX.files.app_path("imports")
+
+var paste_result := DX.files.paste(source, target_dir)
+if paste_result.ok:
+	print(paste_result.path) # app://imports/demo.mp3
+
+var rename_result := DX.files.rename(paste_result.path, "favorite-demo.mp3")
+if not rename_result.ok:
+	DX.logger.error("Files", rename_result.error)
+```
+
+文件选择回调结果：
+
+```gdscript
+func _on_directory_picked(result: Dictionary) -> void:
+	if result.cancelled:
+		return
+	if not result.ok:
+		DX.logger.error("Files", result.error)
+		return
+	var virtual_directory := str(result.path)
+	var system_path := str(result.native_path)
+```
+
+选择器的实际结果只在 `callback` 中返回。调用 `DisplayServer.file_dialog_show()` 的路径会立即返回 `{ "ok": true, "pending": true }`；macOS、Windows、Linux/BSD 的专用系统面板会等待面板关闭，并返回 `{ "ok": true, "pending": false, "system_dialog": true }`，其 callback 仍通过 deferred 调用，避免同步重入 UI。
 
 返回值约定：
 
 ```gdscript
 {
 	"ok": true,
-	"path": "user://exports/demo.csv",
+	"path": "app://exports/demo.csv",
+	"native_path": "/absolute/path/to/demo.csv",
+	"uri": "file:///absolute/path/to/demo.csv",
 	"data": PackedByteArray(),
 	"text": "file text",
 	"bytes": 12,
+	"atomic": true,
+	"cancelled": false,
 	"error": ""
 }
 ```
+
+平台选择器：
+
+| 平台 | 首选实现 | 失败回退/限制 |
+| --- | --- | --- |
+| macOS | `osascript` 系统文件、目录和保存面板 | 失败时回退 `DisplayServer.file_dialog_show()` |
+| Windows | PowerShell WinForms 系统面板 | 失败时回退 `DisplayServer.file_dialog_show()` |
+| Linux / BSD | `zenity` 或 `kdialog` | 未安装或失败时回退 `DisplayServer.file_dialog_show()` |
+| Android | `DX_AndroidFilePlatform` 调用 `DisplayServer.file_dialog_show()` | 依赖导出环境声明 `FEATURE_NATIVE_DIALOG_FILE`；SAF provider 只负责取得 URI 后的访问，不直接启动 `ACTION_OPEN_DOCUMENT` |
+| iOS | `DX_IOSFilePlatform` 调用 `DisplayServer.file_dialog_show()` | 依赖导出环境声明 `FEATURE_NATIVE_DIALOG_FILE`；当前没有 `UIDocumentPickerViewController` bridge，`platform_capabilities().requires_native_bridge` 会反映该限制 |
+| 其他平台 | `DX_FilePlatform` 调用 `DisplayServer.file_dialog_show()` | 仅在引擎声明原生文件对话框能力时可用 |
+
+因此，当前代码已为 macOS、Windows、Linux/BSD 使用各自的系统面板；Android 与 iOS 的“系统原生文档选择器”仍取决于 Godot 导出模板。若产品要求 Android 固定使用 `ACTION_OPEN_DOCUMENT` / `ACTION_OPEN_DOCUMENT_TREE`，或 iOS 固定使用 `UIDocumentPickerViewController`，应在对应 `platforms/` 脚本接入原生 bridge，再由 `DX_FileManager` 保持统一回调结果。
 
 Android 规则：
 
@@ -769,6 +875,67 @@ Android 规则：
 - 向用户选择的 SAF 目录写文件时，使用 `DX.files.path_join(tree_path, file_name)` 得到 `saf-tree://...#file_name`。
 - 需要长期访问时调用 `DX.files.persist_saf_uri_permission(uri)`。
 - SAF 读写通过 Godot `FileAccess` 处理 `content://` 或 `content://...#relative/path`，不要自己拼真实路径。
+
+---
+
+## 滚动交互
+
+### DX_ScrollInteractionComp
+
+作用：
+
+- 为 `ScrollContainer` 补充鼠标滚轮、鼠标拖拽、触摸拖拽和触控板 pan 手势。
+- 自动将滚动值限制在有效的水平或垂直范围内。
+- 内容拖拽开始和结束时发送信号；滚动条滑块不属于内容拖拽，不会发送这些信号。
+
+场景配置：
+
+```text
+LyricsStage (Control)
+├── LyricsMargin
+│   └── LyricsScroll (ScrollContainer)
+└── LyricsScrollInteraction (DX_ScrollInteractionComp)
+```
+
+在 `LyricsScrollInteraction` 上配置：
+
+```gdscript
+scroll_container_path = NodePath("LyricsMargin/LyricsScroll")
+enable_horizontal_scroll = false
+configure_scroll_modes = false
+```
+
+`scroll_container_path` 可以指向组件自身的子节点，也可以指向组件父节点下的同级 `ScrollContainer`。当 `configure_scroll_modes := true`（默认）时，组件会把两个方向设为 `SCROLL_MODE_AUTO`；需要由场景显式控制某个方向时设为 `false`。
+
+导出项：
+
+- `wheel_scroll_step := 96`：每次滚轮滚动的像素步长。
+- `drag_scroll_threshold := 8.0`：从点击识别为拖拽所需的最小距离。
+- `enable_mouse_wheel`、`enable_pan_gesture`、`enable_drag_scroll`、`enable_touch_drag_scroll`：按输入类型启用或关闭。
+- `enable_horizontal_scroll`、`enable_vertical_scroll`：允许组件修改的轴。
+- `force_pass_scroll_events`：初始化时把滚动容器中可交互子节点设为 `MOUSE_FILTER_PASS`，便于拖拽继续传递。
+- `configure_scroll_modes`：是否由组件覆盖 `ScrollContainer` 的滚动模式。
+
+信号：
+
+- `drag_scroll_started`：在内容拖拽越过阈值后发出。
+- `drag_scroll_finished`：内容拖拽松开后发出。
+
+滚动条滑块和横/竖滚动条区域被排除在内容拖拽识别外，因此可用于纯浏览，不会误触发依赖上述信号的业务动作。
+
+示例：拖拽完成后读取当前滚动位置
+
+```gdscript
+@onready var lyrics_scroll: ScrollContainer = %LyricsScroll
+@onready var scroll_interaction: DX_ScrollInteractionComp = %LyricsScrollInteraction
+
+func _ready() -> void:
+	scroll_interaction.drag_scroll_finished.connect(_on_drag_scroll_finished)
+
+func _on_drag_scroll_finished() -> void:
+	var center_y := lyrics_scroll.get_global_rect().get_center().y
+	# 根据 center_y 找到业务内容后再执行定位、预览或 seek。
+```
 
 ---
 
