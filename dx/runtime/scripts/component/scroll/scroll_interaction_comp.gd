@@ -1,6 +1,9 @@
 class_name DX_ScrollInteractionComp
 extends Node
 
+signal drag_scroll_started
+signal drag_scroll_finished
+
 @export_node_path("ScrollContainer") var scroll_container_path: NodePath
 @export var wheel_scroll_step := 96
 @export var drag_scroll_threshold := 8.0
@@ -11,6 +14,7 @@ extends Node
 @export var enable_horizontal_scroll := true
 @export var enable_vertical_scroll := true
 @export var force_pass_scroll_events := true
+@export var configure_scroll_modes := true
 
 var _scroll: ScrollContainer
 var _drag_scroll_active := false
@@ -32,8 +36,9 @@ func _ready() -> void:
 		return
 
 	set_process_input(true)
-	_scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_AUTO
-	_scroll.vertical_scroll_mode = ScrollContainer.SCROLL_MODE_AUTO
+	if configure_scroll_modes:
+		_scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_AUTO
+		_scroll.vertical_scroll_mode = ScrollContainer.SCROLL_MODE_AUTO
 	if force_pass_scroll_events:
 		_apply_scroll_event_passthrough(_scroll)
 
@@ -116,7 +121,7 @@ func _handle_drag_scroll_button(event: InputEventMouseButton) -> void:
 		return
 
 	if event.pressed:
-		if not _is_pointer_inside_scroll(event.position):
+		if not _is_pointer_inside_scroll_content(event.position):
 			return
 		_drag_scroll_active = true
 		_drag_scroll_started = false
@@ -124,8 +129,11 @@ func _handle_drag_scroll_button(event: InputEventMouseButton) -> void:
 		_drag_scroll_last_position = event.position
 		return
 
+	var did_drag_scroll := _drag_scroll_active and _drag_scroll_started
 	_drag_scroll_active = false
 	_drag_scroll_started = false
+	if did_drag_scroll:
+		drag_scroll_finished.emit()
 
 func _handle_drag_scroll_motion(event: InputEventMouseMotion) -> void:
 	if not _drag_scroll_active:
@@ -136,6 +144,7 @@ func _handle_drag_scroll_motion(event: InputEventMouseMotion) -> void:
 		if drag_offset.length() < drag_scroll_threshold:
 			return
 		_drag_scroll_started = true
+		drag_scroll_started.emit()
 
 	var delta := event.position - _drag_scroll_last_position
 	_drag_scroll_last_position = event.position
@@ -149,7 +158,7 @@ func _handle_drag_scroll_motion(event: InputEventMouseMotion) -> void:
 
 func _handle_touch_drag_touch(event: InputEventScreenTouch) -> void:
 	if event.pressed:
-		if not _is_pointer_inside_scroll(event.position):
+		if not _is_pointer_inside_scroll_content(event.position):
 			return
 		_touch_drag_active = true
 		_touch_drag_started = false
@@ -157,8 +166,11 @@ func _handle_touch_drag_touch(event: InputEventScreenTouch) -> void:
 		_touch_drag_last_position = event.position
 		return
 
+	var did_drag_scroll := _touch_drag_active and _touch_drag_started
 	_touch_drag_active = false
 	_touch_drag_started = false
+	if did_drag_scroll:
+		drag_scroll_finished.emit()
 
 func _handle_touch_drag_motion(event: InputEventScreenDrag) -> void:
 	if not _touch_drag_active:
@@ -169,6 +181,7 @@ func _handle_touch_drag_motion(event: InputEventScreenDrag) -> void:
 		if drag_offset.length() < drag_scroll_threshold:
 			return
 		_touch_drag_started = true
+		drag_scroll_started.emit()
 
 	_touch_drag_last_position = event.position
 	_set_scroll_axis(
@@ -181,6 +194,17 @@ func _handle_touch_drag_motion(event: InputEventScreenDrag) -> void:
 
 func _is_pointer_inside_scroll(position: Vector2) -> bool:
 	return _scroll != null and _scroll.get_global_rect().has_point(position)
+
+func _is_pointer_inside_scroll_content(position: Vector2) -> bool:
+	if not _is_pointer_inside_scroll(position):
+		return false
+	var vertical_bar := _scroll.get_v_scroll_bar()
+	if vertical_bar != null and vertical_bar.visible and vertical_bar.get_global_rect().has_point(position):
+		return false
+	var horizontal_bar := _scroll.get_h_scroll_bar()
+	if horizontal_bar != null and horizontal_bar.visible and horizontal_bar.get_global_rect().has_point(position):
+		return false
+	return true
 
 func _set_scroll_axis(value: Vector2) -> void:
 	_set_scroll_horizontal(value.x)
