@@ -3,7 +3,7 @@
 [ext_resource type="Script" uid="uid://cc1sd8xt2vllw" path="res://scripts/ui/music_app/views/plugin_browser/music_app_plugin_search_tab.gd" id="1_script"]
 
 [node name="PluginSearchTab" type="Control" unique_id=231272112]
-custom_minimum_size = Vector2(0, 48)
+custom_minimum_size = Vector2(0, 44)
 layout_mode = 3
 anchors_preset = 0
 offset_right = 430.0
@@ -11,19 +11,32 @@ offset_bottom = 48.0
 size_flags_horizontal = 3
 script = ExtResource("1_script")
 
+[node name="HitButton" type="Button" parent="." unique_id=1999306079]
+unique_name_in_owner = true
+layout_mode = 0
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+flat = false
+theme_type_variation = "SegmentButton"
+
 [node name="TitleLabel" type="Label" parent="." unique_id=1873842239]
 unique_name_in_owner = true
 layout_mode = 0
 anchor_right = 1.0
 anchor_bottom = 1.0
-offset_bottom = -4.0
+offset_bottom = 0.0
 grow_horizontal = 2
 grow_vertical = 2
 theme_override_colors/font_color = Color(0.968627, 0.968627, 0.972549, 1)
-theme_override_font_sizes/font_size = 17
+theme_override_font_sizes/font_size = 14
 text = "单曲"
 horizontal_alignment = 1
 vertical_alignment = 1
+mouse_filter = 2
+clip_text = true
+text_overrun_behavior = 3
 
 [node name="Underline" type="ColorRect" parent="." unique_id=301138548]
 unique_name_in_owner = true
@@ -33,12 +46,5 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 offset_top = -3.0
 color = Color(0.34902, 0.815686, 1, 1)
-
-[node name="HitButton" type="Button" parent="." unique_id=1999306079]
-unique_name_in_owner = true
-layout_mode = 0
-anchor_right = 1.0
-anchor_bottom = 1.0
-grow_horizontal = 2
-grow_vertical = 2
-flat = true
+visible = false
+mouse_filter = 2

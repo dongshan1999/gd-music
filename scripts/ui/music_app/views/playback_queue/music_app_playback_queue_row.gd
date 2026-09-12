@@ -6,7 +6,7 @@ const MusicAppIconsType := preload("res://scripts/constants/music_app_icons.gd")
 signal play_requested(queue_index: int)
 signal remove_requested(queue_index: int)
 
-const ACTIVE_TEXT := Color(0.411765, 0.756863, 1.0, 1.0)
+const ACTIVE_TEXT := Color(1.0, 0.3, 0.4, 1.0)
 const PRIMARY_TEXT := Color(0.968627, 0.968627, 0.972549, 1.0)
 const MUTED_TEXT := Color(0.643137, 0.65098, 0.690196, 1.0)
 

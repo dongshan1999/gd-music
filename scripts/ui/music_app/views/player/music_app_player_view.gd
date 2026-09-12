@@ -1,5 +1,5 @@
 class_name MusicAppPlayerView
-extends "res://dx/runtime/scripts/managers/popup/popup_view.gd"
+extends "res://scripts/ui/music_app/music_app_page.gd"
 
 const MusicAppScriptPathsType := preload("res://scripts/constants/music_app_script_paths.gd")
 const MusicAppIconsType := preload("res://scripts/constants/music_app_icons.gd")
@@ -38,7 +38,7 @@ var _is_lyrics_edge_padding_update_queued := false
 @onready var album_stage: CenterContainer = %AlbumStage
 @onready var cover_panel: Panel = %CoverPanel
 @onready var cover_circle: Panel = %CoverCircle
-@onready var cover_mark_label: Label = %CoverMarkLabel
+@onready var cover_icon_rect: TextureRect = %CoverIconRect
 @onready var lyrics_stage: Control = %LyricsStage
 @onready var lyrics_scroll: ScrollContainer = %LyricsScroll
 @onready var lyrics_scroll_interaction = %LyricsScrollInteraction
@@ -65,6 +65,8 @@ func setup(controller: MusicAppShowcaseController) -> void:
 	_finish_setup()
 
 func _ready() -> void:
+	album_stage.resized.connect(_resize_artwork)
+	_resize_artwork.call_deferred()
 	_apply_content_view_visibility()
 	if _controller != null:
 		_finish_setup()
@@ -103,7 +105,7 @@ func bind() -> void:
 	cover_panel.mouse_filter = Control.MOUSE_FILTER_STOP
 	cover_panel.mouse_default_cursor_shape = Control.CURSOR_POINTING_HAND
 	cover_circle.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	cover_mark_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	cover_icon_rect.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	no_lyrics_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	_bind_player_progress_bar_input()
 	DX.signals.subscribe(PlaybackStartedEventScript, _on_playback_started)
@@ -125,7 +127,7 @@ func refresh() -> void:
 		now_title_label.text = tr("music_app.player.empty_title")
 		now_artist_label.text = tr("music_app.player.empty_artist")
 		player_source_label.text = ""
-		cover_mark_label.text = ""
+		cover_icon_rect.visible = true
 		MusicAppIconsType.apply_icon_button(like_button, MusicAppIconsType.HEART_OUTLINE)
 		MusicAppIconsType.apply_icon_button(player_play_button, MusicAppIconsType.PLAY, false, false)
 		MusicAppIconsType.apply_icon_button(
@@ -151,7 +153,7 @@ func refresh() -> void:
 	now_title_label.text = track.title
 	now_artist_label.text = _player_controller.get_track_display_artist(track)
 	player_source_label.text = track.source
-	cover_mark_label.text = track.title
+	cover_icon_rect.visible = true
 	MusicAppIconsType.apply_icon_button(
 		like_button,
 		MusicAppIconsType.HEART_FILLED
@@ -360,6 +362,13 @@ func _apply_content_view_visibility() -> void:
 		return
 	album_stage.visible = not _is_lyrics_visible
 	lyrics_stage.visible = _is_lyrics_visible
+	var content := lyrics_stage if _is_lyrics_visible else album_stage
+	content.modulate.a = 0.0
+	create_tween().tween_property(content, "modulate:a", 1.0, 0.18)
+
+func _resize_artwork() -> void:
+	var side := clampf(minf(album_stage.size.x - 24, album_stage.size.y - 24), 48, 340)
+	cover_panel.custom_minimum_size = Vector2(side, side)
 
 func _refresh_lyrics_for_track(track: TrackData, elapsed_seconds: int) -> void:
 	var track_key := _get_lyrics_track_key(track)

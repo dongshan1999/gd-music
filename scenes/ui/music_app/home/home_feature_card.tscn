@@ -3,14 +3,14 @@
 [ext_resource type="Script" path="res://scripts/ui/music_app/views/home/music_app_home_feature_card.gd" id="1_script"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_feature_card_panel"]
-bg_color = Color(0.192157, 0.192157, 0.2, 1)
-corner_radius_top_left = 20
-corner_radius_top_right = 20
-corner_radius_bottom_right = 20
-corner_radius_bottom_left = 20
+bg_color = Color(0.109804, 0.109804, 0.117647, 1)
+corner_radius_top_left = 14
+corner_radius_top_right = 14
+corner_radius_bottom_right = 14
+corner_radius_bottom_left = 14
 
 [node name="HomeFeatureCard" type="Panel" unique_id=500341263]
-custom_minimum_size = Vector2(86, 120)
+custom_minimum_size = Vector2(0, 72)
 size_flags_horizontal = 3
 theme_override_styles/panel = SubResource("StyleBoxFlat_feature_card_panel")
 script = ExtResource("1_script")
@@ -21,26 +21,32 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-theme_override_constants/margin_left = 8
+theme_override_constants/margin_left = 14
 theme_override_constants/margin_top = 8
-theme_override_constants/margin_right = 8
+theme_override_constants/margin_right = 12
 theme_override_constants/margin_bottom = 8
 
-[node name="VBox" type="VBoxContainer" parent="Margin" unique_id=124033812]
+[node name="VBox" type="HBoxContainer" parent="Margin" unique_id=124033812]
 layout_mode = 2
 theme_override_constants/separation = 12
-alignment = 1
+alignment = 0
 
 [node name="IconRect" type="TextureRect" parent="Margin/VBox" unique_id=45399221]
-custom_minimum_size = Vector2(30, 30)
+custom_minimum_size = Vector2(26, 26)
 layout_mode = 2
+texture_filter = 2
+expand_mode = 1
 stretch_mode = 5
+modulate = Color(1, 0.3, 0.4, 1)
+size_flags_vertical = 4
 
 [node name="TextLabel" type="Label" parent="Margin/VBox" unique_id=322862711]
 layout_mode = 2
 theme_override_colors/font_color = Color(0.968627, 0.968627, 0.972549, 1)
 theme_override_font_sizes/font_size = 14
-horizontal_alignment = 1
+horizontal_alignment = 0
+size_flags_horizontal = 3
+text_overrun_behavior = 3
 
 [node name="OpenButton" type="Button" parent="." unique_id=250689779]
 layout_mode = 0
@@ -48,4 +54,8 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-flat = true
+theme_override_colors/icon_normal_color = Color(0.84, 0.84, 0.86, 1)
+mouse_default_cursor_shape = 2
+flat = false
+theme_type_variation = "CardHit"
+focus_mode = 2

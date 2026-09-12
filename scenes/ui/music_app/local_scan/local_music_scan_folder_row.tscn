@@ -40,15 +40,21 @@ theme_override_font_sizes/font_size = 14
 icon = ExtResource("2_folder")
 expand_icon = false
 text = "Folder"
-flat = true
+flat = false
 alignment = 0
+text_overrun_behavior = 3
+clip_text = true
+theme_type_variation = "NavigationButton"
 
 [node name="ToggleButton" type="Button" parent="Margin/Row"]
-custom_minimum_size = Vector2(40, 34)
+custom_minimum_size = Vector2(44, 44)
 layout_mode = 2
 theme_override_constants/icon_max_width = 18
 icon = ExtResource("3_unchecked")
 expand_icon = false
 icon_alignment = 1
 vertical_icon_alignment = 1
-flat = true
+flat = false
+theme_type_variation = "NavigationButton"
+mouse_default_cursor_shape = 2
+size_flags_vertical = 4

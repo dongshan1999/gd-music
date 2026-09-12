@@ -17,7 +17,7 @@ corner_radius_bottom_right = 999
 corner_radius_bottom_left = 999
 
 [node name="LocalMusicRow" type="Panel"]
-custom_minimum_size = Vector2(0, 86)
+custom_minimum_size = Vector2(0, 72)
 layout_mode = 2
 theme_override_styles/panel = SubResource("StyleBoxFlat_local_music_row_panel")
 script = ExtResource("1_script")
@@ -53,18 +53,23 @@ alignment = 1
 
 [node name="TitleLabel" type="Label" parent="Margin/Row/Info"]
 layout_mode = 2
-theme_override_font_sizes/font_size = 18
+theme_override_font_sizes/font_size = 16
 text = "Track Title"
+text_overrun_behavior = 3
+clip_text = true
 
 [node name="SubtitleLabel" type="Label" parent="Margin/Row/Info"]
 layout_mode = 2
 theme_override_font_sizes/font_size = 14
 text = "o Artist - Album"
+text_overrun_behavior = 3
+clip_text = true
 
 [node name="SourceChip" type="Panel" parent="Margin/Row"]
 custom_minimum_size = Vector2(64, 28)
 layout_mode = 2
 theme_override_styles/panel = SubResource("StyleBoxFlat_local_music_source_chip")
+size_flags_vertical = 4
 
 [node name="Margin" type="MarginContainer" parent="Margin/Row/SourceChip"]
 layout_mode = 0
@@ -90,4 +95,7 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-flat = true
+flat = false
+theme_type_variation = "RowHit"
+focus_mode = 2
+mouse_default_cursor_shape = 2

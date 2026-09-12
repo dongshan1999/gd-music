@@ -5,9 +5,9 @@
 
 2. **弹窗命名与结构规范**
    - 命名必须统一：
-     - 预制体：`{前缀}_page`
-     - View 脚本：`{前缀}_view`
-     - Controller 脚本：`{前缀}_controller`
+	 - 预制体：`{前缀}_page`
+	 - View 脚本：`{前缀}_view`
+	 - Controller 脚本：`{前缀}_controller`
    - 每个弹窗 **必须** 包含 View 与 Controller。
    - Controller 只能在 View 脚本内部实例化。
 

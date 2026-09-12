@@ -1,7 +1,8 @@
 class_name MusicAppPlaylistView
-extends "res://dx/runtime/scripts/managers/popup/popup_view.gd"
+extends "res://scripts/ui/music_app/music_app_page.gd"
 
 const MusicAppScriptPathsType := preload("res://scripts/constants/music_app_script_paths.gd")
+const MusicAppIconsType := preload("res://scripts/constants/music_app_icons.gd")
 const PLAYLIST_SONG_ROW_SCENE := preload(MusicAppScriptPathsType.PLAYLIST_SONG_ROW)
 
 const MODE_NORMAL := MusicAppPlaylistSongRow.MODE_NORMAL
@@ -19,7 +20,7 @@ var _dragging_slot_index := -1
 @onready var playlist_back_button: Button = %PlaylistBackButton
 @onready var playlist_search_button: Button = %PlaylistSearchButton
 @onready var playlist_more_button: Button = %PlaylistMoreButton
-@onready var playlist_hero_mark_label: Label = %PlaylistHeroMarkLabel
+@onready var playlist_hero_icon_rect: TextureRect = %PlaylistHeroIconRect
 @onready var playlist_hero_title_label: Label = %PlaylistHeroTitleLabel
 @onready var playlist_hero_count_label: Label = %PlaylistHeroCountLabel
 @onready var play_all_button: Button = %PlayAllButton
@@ -63,7 +64,7 @@ func refresh() -> void:
 
 	if _playlist_controller.get_playlists().is_empty():
 		_visible_track_ids = []
-		playlist_hero_mark_label.text = tr("music_app.playlist.favorites_mark")
+		playlist_hero_icon_rect.texture = MusicAppIconsType.HEART_FILLED
 		playlist_hero_title_label.text = tr("music_app.playlist.favorites_title")
 		playlist_hero_count_label.text = _playlist_controller.format_total_track_count(0)
 		_sync_song_rows(0)
@@ -80,7 +81,11 @@ func refresh() -> void:
 		_set_management_mode(MODE_NORMAL)
 	playlist_hero_title_label.text = _playlist_controller.get_playlist_display_title(playlist)
 	playlist_hero_count_label.text = _playlist_controller.format_total_track_count(playlist.count)
-	playlist_hero_mark_label.text = _playlist_controller.get_playlist_display_mark(playlist)
+	playlist_hero_icon_rect.texture = (
+		MusicAppIconsType.HEART_FILLED
+		if MusicAppStateData.is_system_favorite_playlist(playlist)
+		else MusicAppIconsType.MUSICAL_NOTE
+	)
 
 	for index in song_rows.size():
 		var track_id: String = _visible_track_ids[index]

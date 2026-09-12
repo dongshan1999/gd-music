@@ -1,5 +1,5 @@
 class_name MusicAppHomeView
-extends "res://dx/runtime/scripts/managers/popup/popup_view.gd"
+extends "res://scripts/ui/music_app/music_app_page.gd"
 
 const MusicAppScriptPathsType := preload("res://scripts/constants/music_app_script_paths.gd")
 const MusicAppIconsType := preload("res://scripts/constants/music_app_icons.gd")
@@ -56,9 +56,10 @@ func bind() -> void:
 	home_menu_button.pressed.connect(_open_settings)
 	new_playlist_button.pressed.connect(_create_playlist_from_current)
 	import_button.pressed.connect(_open_local_music)
-	search_bar.gui_input.connect(_on_search_bar_gui_input)
+	%SearchButton.pressed.connect(_open_plugin_browser)
 	search_icon_rect.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	search_prompt_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	$Margin/HomeVBox/LibraryHeader/LibraryTitle.text = tr("music_app.ui.library")
 
 ## 根据当前歌单数据刷新首页统计、功能卡片与歌单列表。
 func refresh() -> void:
@@ -122,12 +123,6 @@ func _open_plugin_browser() -> void:
 
 func _open_settings() -> void:
 	_home_controller.open_settings()
-
-func _on_search_bar_gui_input(event: InputEvent) -> void:
-	if event is InputEventMouseButton:
-		var mouse_event := event as InputEventMouseButton
-		if mouse_event.button_index == MOUSE_BUTTON_LEFT and mouse_event.pressed:
-			_open_plugin_browser()
 
 func _delete_playlist(index: int) -> void:
 	_home_controller.delete_playlist(index)

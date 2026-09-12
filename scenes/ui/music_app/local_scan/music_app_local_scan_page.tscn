@@ -4,6 +4,8 @@
 [ext_resource type="Script" uid="uid://bxlxk77s8dtmi" path="res://scripts/ui/music_app/views/local_scan/music_app_local_scan_view.gd" id="8_local_scan_script"]
 [ext_resource type="Script" uid="uid://bym33i5tdjhtg" path="res://dx/runtime/scripts/managers/localization/localize_comp.gd" id="999_localize_comp"]
 
+[ext_resource type="Script" path="res://scripts/ui/music_app/music_app_scroll.gd" id="90_scroll"]
+
 [node name="LocalScanPage" type="Control" unique_id=767850004]
 unique_name_in_owner = true
 layout_mode = 3
@@ -21,7 +23,7 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 mouse_filter = 2
-color = Color(0.0862745, 0.0901961, 0.101961, 1)
+color = Color(0.055, 0.055, 0.065, 1)
 
 [node name="Margin" type="MarginContainer" parent="." unique_id=1192320192]
 layout_mode = 0
@@ -29,9 +31,9 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-theme_override_constants/margin_left = 14
-theme_override_constants/margin_top = 14
-theme_override_constants/margin_right = 14
+theme_override_constants/margin_left = 20
+theme_override_constants/margin_top = 20
+theme_override_constants/margin_right = 20
 theme_override_constants/margin_bottom = 14
 
 [node name="ScanVBox" type="VBoxContainer" parent="Margin" unique_id=1087578797]
@@ -46,6 +48,15 @@ theme_override_constants/separation = 10
 unique_name_in_owner = true
 layout_mode = 2
 icon = ExtResource("2_xvpdw")
+custom_minimum_size = Vector2(44, 44)
+theme_type_variation = "NavigationButton"
+flat = false
+theme_override_constants/icon_max_width = 22
+expand_icon = true
+mouse_default_cursor_shape = 2
+icon_alignment = 1
+vertical_icon_alignment = 1
+size_flags_vertical = 4
 
 [node name="ScanPathLabel" type="Label" parent="Margin/ScanVBox/ScanTopRow" unique_id=1474766410]
 unique_name_in_owner = true
@@ -59,8 +70,10 @@ clip_text = true
 unique_name_in_owner = true
 layout_mode = 2
 text = "全选"
-flat = true
+flat = false
 alignment = 0
+custom_minimum_size = Vector2(0, 44)
+theme_type_variation = "NavigationButton"
 
 [node name="LocalizeComp" type="Node" parent="Margin/ScanVBox/ScanSelectAllButton" unique_id=123748500]
 script = ExtResource("999_localize_comp")
@@ -71,6 +84,8 @@ update_in_runtime = false
 layout_mode = 2
 size_flags_vertical = 3
 horizontal_scroll_mode = 0
+vertical_scroll_mode = 1
+follow_focus = true
 
 [node name="ScanFolderList" type="VBoxContainer" parent="Margin/ScanVBox/ScanScroll" unique_id=519277331]
 unique_name_in_owner = true
@@ -81,10 +96,13 @@ theme_override_constants/separation = 8
 [node name="ScanHintLabel" type="Label" parent="Margin/ScanVBox/ScanScroll/ScanFolderList" unique_id=1478582596]
 unique_name_in_owner = true
 layout_mode = 2
-theme_override_colors/font_color = Color(0.643137, 0.65098, 0.690196, 1)
+theme_override_colors/font_color = Color(0.6, 0.6, 0.64, 1)
 theme_override_font_sizes/font_size = 14
 text = "选择要扫描的文件夹"
 horizontal_alignment = 1
+custom_minimum_size = Vector2(0, 180)
+autowrap_mode = 3
+vertical_alignment = 1
 
 [node name="LocalizeComp" type="Node" parent="Margin/ScanVBox/ScanScroll/ScanFolderList/ScanHintLabel" unique_id=1602412346]
 script = ExtResource("999_localize_comp")
@@ -98,7 +116,13 @@ layout_mode = 2
 unique_name_in_owner = true
 layout_mode = 2
 text = "开始扫描"
+theme_type_variation = "PrimaryButton"
+custom_minimum_size = Vector2(0, 50)
 
 [node name="LocalizeComp" type="Node" parent="Margin/ScanVBox/StartScanButton" unique_id=82370510]
 script = ExtResource("999_localize_comp")
 tr_key = "music_app.scan.start"
+
+[node name="ScrollInteraction" type="Node" parent="Margin/ScanVBox/ScanScroll"]
+script = ExtResource("90_scroll")
+scroll_container_path = NodePath("..")
