@@ -12,8 +12,6 @@ corner_radius_top_right = 16
 corner_radius_bottom_right = 16
 corner_radius_bottom_left = 16
 
-[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_song_button"]
-
 [node name="PlaylistSongRow" type="Panel" unique_id=7246353]
 custom_minimum_size = Vector2(0, 66)
 offset_right = 430.0
@@ -27,13 +25,10 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-focus_mode = 0
-theme_override_styles/normal = SubResource("StyleBoxEmpty_song_button")
-theme_override_styles/pressed = SubResource("StyleBoxEmpty_song_button")
-theme_override_styles/hover = SubResource("StyleBoxEmpty_song_button")
-theme_override_styles/disabled = SubResource("StyleBoxEmpty_song_button")
-theme_override_styles/focus = SubResource("StyleBoxEmpty_song_button")
-flat = true
+focus_mode = 2
+flat = false
+theme_type_variation = "RowHit"
+mouse_default_cursor_shape = 2
 
 [node name="Margin" type="MarginContainer" parent="." unique_id=711090947]
 layout_mode = 0
@@ -56,8 +51,12 @@ visible = false
 custom_minimum_size = Vector2(32, 36)
 layout_mode = 2
 icon = ExtResource("4_select")
-flat = true
+flat = false
 icon_alignment = 1
+theme_type_variation = "NavigationButton"
+mouse_default_cursor_shape = 2
+vertical_icon_alignment = 1
+size_flags_vertical = 4
 
 [node name="SongIndexLabel" type="Label" parent="Margin/Row" unique_id=1528215325]
 custom_minimum_size = Vector2(28, 0)
@@ -101,13 +100,21 @@ visible = false
 custom_minimum_size = Vector2(36, 36)
 layout_mode = 2
 icon = ExtResource("5_trash")
-flat = true
+flat = false
 icon_alignment = 1
+theme_type_variation = "NavigationButton"
+mouse_default_cursor_shape = 2
+vertical_icon_alignment = 1
+size_flags_vertical = 4
 
 [node name="SongDragHandleButton" type="Button" parent="Margin/Row" unique_id=750733926]
 visible = false
 custom_minimum_size = Vector2(36, 36)
 layout_mode = 2
 icon = ExtResource("3_drag")
-flat = true
+flat = false
 icon_alignment = 1
+theme_type_variation = "NavigationButton"
+mouse_default_cursor_shape = 2
+vertical_icon_alignment = 1
+size_flags_vertical = 4

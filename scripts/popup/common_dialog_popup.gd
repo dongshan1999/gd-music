@@ -1,5 +1,5 @@
 class_name CommonDialogPopup
-extends "res://dx/runtime/scripts/managers/popup/popup_view.gd"
+extends "res://scripts/ui/music_app/music_app_page.gd"
 
 var _confirm_action: Callable = Callable()
 var _cancel_action: Callable = Callable()
@@ -10,8 +10,13 @@ var _cancel_action: Callable = Callable()
 @onready var confirm_button: Button = %ConfirmButton
 
 func _ready() -> void:
+	resized.connect(_fit_dialog)
+	_fit_dialog()
 	cancel_button.pressed.connect(_on_cancel_pressed)
 	confirm_button.pressed.connect(_on_confirm_pressed)
+
+func _fit_dialog() -> void:
+	%Panel.custom_minimum_size.x = clampf(size.x - 48, 240, 340)
 
 func show_alert(
 	title: String,

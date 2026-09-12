@@ -1,4 +1,4 @@
-[gd_scene load_steps=3 format=3]
+[gd_scene load_steps=6 format=3]
 
 [ext_resource type="Script" path="res://scripts/ui/music_app/views/plugin_browser/music_app_plugin_history_tag.gd" id="1_script"]
 
@@ -8,6 +8,27 @@ corner_radius_top_left = 999
 corner_radius_top_right = 999
 corner_radius_bottom_right = 999
 corner_radius_bottom_left = 999
+
+[sub_resource type="StyleBoxFlat" id="Chip_normal"]
+bg_color = Color(1, 1, 1, 0)
+content_margin_left = 14.0
+content_margin_right = 8.0
+corner_radius_top_left = 19
+corner_radius_bottom_left = 19
+
+[sub_resource type="StyleBoxFlat" id="Chip_hover"]
+bg_color = Color(1, 1, 1, 0.08)
+content_margin_left = 14.0
+content_margin_right = 8.0
+corner_radius_top_left = 19
+corner_radius_bottom_left = 19
+
+[sub_resource type="StyleBoxFlat" id="Chip_pressed"]
+bg_color = Color(1, 1, 1, 0.16)
+content_margin_left = 14.0
+content_margin_right = 8.0
+corner_radius_top_left = 19
+corner_radius_bottom_left = 19
 
 [node name="PluginHistoryTag" type="PanelContainer"]
 custom_minimum_size = Vector2(0, 38)
@@ -25,23 +46,20 @@ custom_minimum_size = Vector2(0, 38)
 layout_mode = 2
 size_flags_horizontal = 3
 theme_override_colors/font_color = Color(0.952941, 0.956863, 0.972549, 1)
-theme_override_styles/disabled = null
-theme_override_styles/focus = null
-theme_override_styles/hover = null
-theme_override_styles/normal = null
-theme_override_styles/pressed = null
-flat = true
+flat = false
 text = "周杰伦"
+theme_override_styles/pressed = SubResource("Chip_pressed")
+theme_override_styles/hover = SubResource("Chip_hover")
+theme_override_styles/normal = SubResource("Chip_normal")
+theme_type_variation = "CardHit"
+focus_mode = 2
+mouse_default_cursor_shape = 2
 
 [node name="RemoveButton" type="Button" parent="Row" unique_id=281496193]
 unique_name_in_owner = true
 custom_minimum_size = Vector2(32, 38)
 layout_mode = 2
 theme_override_colors/font_color = Color(0.854902, 0.862745, 0.894118, 1)
-theme_override_styles/disabled = null
-theme_override_styles/focus = null
-theme_override_styles/hover = null
-theme_override_styles/normal = null
-theme_override_styles/pressed = null
-flat = true
+flat = false
 text = "×"
+theme_type_variation = "NavigationButton"

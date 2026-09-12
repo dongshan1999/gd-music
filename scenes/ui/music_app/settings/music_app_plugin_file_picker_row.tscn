@@ -30,8 +30,11 @@ size_flags_horizontal = 3
 icon = ExtResource("2_folder")
 expand_icon = false
 text = "Entry"
-flat = true
+flat = false
 alignment = 0
+text_overrun_behavior = 3
+clip_text = true
+theme_type_variation = "NavigationButton"
 
 [node name="ActionButton" type="Button" parent="Margin/Row"]
 custom_minimum_size = Vector2(72, 34)

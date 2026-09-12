@@ -21,8 +21,9 @@ var _artwork_texture_cache := {}
 
 @onready var mini_cover_panel: Panel = %MiniCoverPanel
 @onready var mini_cover_texture_rect: TextureRect = %MiniCoverTextureRect
-@onready var mini_cover_mark_label: Label = %MiniCoverMarkLabel
+@onready var mini_cover_icon_rect: TextureRect = %MiniCoverIconRect
 @onready var mini_track_label: Label = %MiniTrackLabel
+@onready var mini_artist_label: Label = %MiniArtistLabel
 @onready var mini_play_ring: Control = %MiniPlayRing
 @onready var mini_play_button: Button = %MiniPlayButton
 @onready var mini_list_button: Button = %MiniListButton
@@ -40,6 +41,8 @@ func bind() -> void:
 	if _is_bound:
 		return
 	_is_bound = true
+	$Margin/Row/MiniPlaySlot.item_rect_changed.connect(_update_open_hit_area)
+	_update_open_hit_area.call_deferred()
 
 	mini_play_button.pressed.connect(_toggle_playback)
 	mini_list_button.pressed.connect(_show_playback_queue)
@@ -47,6 +50,10 @@ func bind() -> void:
 	DX.signals.subscribe(PlaybackStartedEventScript, _on_playback_started)
 	DX.signals.subscribe(PlaybackFinishedEventScript, _on_playback_finished)
 	DX.signals.subscribe(PlaybackProgressChangedEventScript, _on_playback_progress_changed)
+
+func _update_open_hit_area() -> void:
+	# Stop before the play control, even after container layout or window resize.
+	mini_open_button.offset_right = $Margin/Row/MiniPlaySlot.global_position.x - global_position.x - size.x - 6.0
 
 ## 根据当前播放状态刷新迷你播放器文案、图标和封面。
 func refresh() -> void:
@@ -56,13 +63,15 @@ func refresh() -> void:
 	if not _mini_player_controller.has_tracks():
 		_reset_cover_state()
 		mini_track_label.text = tr("music_app.mini_player.empty")
+		mini_artist_label.text = tr("music_app.ui.mini_hint")
 		mini_play_ring.progress = 0.0
 		MusicAppIconsType.apply_icon_button(mini_play_button, MusicAppIconsType.PLAY, false, false)
 		return
 
 	var track: TrackData = _mini_player_controller.get_current_track()
 	_refresh_cover(track)
-	mini_track_label.text = "%s - %s" % [track.title, _mini_player_controller.get_track_display_artist(track)]
+	mini_track_label.text = track.title
+	mini_artist_label.text = _mini_player_controller.get_track_display_artist(track)
 	mini_play_ring.progress = _mini_player_controller.get_playback_progress_ratio()
 	MusicAppIconsType.apply_icon_button(
 		mini_play_button,
@@ -117,14 +126,12 @@ func _reset_cover_state() -> void:
 	_artwork_source = ""
 	mini_cover_texture_rect.texture = null
 	mini_cover_texture_rect.visible = false
-	mini_cover_mark_label.visible = true
-	mini_cover_mark_label.text = ""
+	mini_cover_icon_rect.visible = true
 	_apply_cover_colors(DEFAULT_COVER_BG, DEFAULT_COVER_FG)
 
 ## 根据当前曲目主色与标记生成封面占位样式。
-func _apply_cover_placeholder(track: TrackData) -> void:
-	mini_cover_mark_label.visible = true
-	mini_cover_mark_label.text = track.mark if not track.mark.is_empty() else track.title.left(1)
+func _apply_cover_placeholder(_track: TrackData) -> void:
+	mini_cover_icon_rect.visible = true
 	_apply_cover_colors(DEFAULT_COVER_BG, DEFAULT_COVER_FG)
 
 ## 更新封面背景色和占位文字色。
@@ -134,19 +141,19 @@ func _apply_cover_colors(background_color: Color, foreground_color: Color) -> vo
 		var style_copy := (panel_style as StyleBoxFlat).duplicate() as StyleBoxFlat
 		style_copy.bg_color = background_color
 		mini_cover_panel.add_theme_stylebox_override("panel", style_copy)
-	mini_cover_mark_label.add_theme_color_override("font_color", foreground_color)
+	mini_cover_icon_rect.modulate = foreground_color
 
 ## 将成功解析到的封面纹理应用到界面。
 func _display_cover_texture(texture: Texture2D) -> void:
 	if texture == null:
 		mini_cover_texture_rect.texture = null
 		mini_cover_texture_rect.visible = false
-		mini_cover_mark_label.visible = true
+		mini_cover_icon_rect.visible = true
 		return
 
 	mini_cover_texture_rect.texture = texture
 	mini_cover_texture_rect.visible = true
-	mini_cover_mark_label.visible = false
+	mini_cover_icon_rect.visible = false
 
 ## 异步加载指定来源的封面，并校验请求是否仍然有效。
 func _load_cover_artwork(source: String, request_id: int) -> void:

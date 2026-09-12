@@ -1,5 +1,5 @@
 class_name MusicAppPlaybackQueueView
-extends "res://dx/runtime/scripts/managers/popup/popup_view.gd"
+extends "res://scripts/ui/music_app/music_app_page.gd"
 
 const MusicAppScriptPathsType := preload("res://scripts/constants/music_app_script_paths.gd")
 const MusicAppIconsType := preload("res://scripts/constants/music_app_icons.gd")
@@ -39,6 +39,7 @@ func bind() -> void:
 	_is_bound = true
 
 	close_backdrop_button.pressed.connect(close_popup)
+	%CloseQueueButton.pressed.connect(close_popup)
 	playback_mode_button.pressed.connect(_cycle_playback_mode)
 	clear_queue_button.pressed.connect(_clear_queue)
 

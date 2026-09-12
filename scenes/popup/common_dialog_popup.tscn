@@ -10,6 +10,8 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 script = ExtResource("1_script")
+presentation = 3
+transition_target = NodePath("Center")
 
 [node name="Overlay" type="ColorRect" parent="."]
 layout_mode = 1
@@ -29,13 +31,14 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 
-[node name="Panel" type="Panel" parent="Center"]
+[node name="Panel" type="PanelContainer" parent="Center"]
 unique_name_in_owner = true
-custom_minimum_size = Vector2(320, 0)
+custom_minimum_size = Vector2(280, 0)
 layout_mode = 2
+theme_type_variation = "DialogPanel"
 
 [node name="Margin" type="MarginContainer" parent="Center/Panel"]
-layout_mode = 1
+layout_mode = 2
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
@@ -55,6 +58,8 @@ unique_name_in_owner = true
 layout_mode = 2
 horizontal_alignment = 1
 text = "标题"
+theme_override_font_sizes/font_size = 19
+autowrap_mode = 3
 
 [node name="MessageLabel" type="Label" parent="Center/Panel/Margin/VBox"]
 unique_name_in_owner = true
@@ -62,6 +67,8 @@ layout_mode = 2
 text = "内容"
 horizontal_alignment = 1
 autowrap_mode = 3
+theme_override_font_sizes/font_size = 14
+theme_override_colors/font_color = Color(0.72, 0.72, 0.76, 1)
 
 [node name="Buttons" type="HBoxContainer" parent="Center/Panel/Margin/VBox"]
 layout_mode = 2
@@ -70,12 +77,16 @@ theme_override_constants/separation = 12
 
 [node name="CancelButton" type="Button" parent="Center/Panel/Margin/VBox/Buttons"]
 unique_name_in_owner = true
-custom_minimum_size = Vector2(112, 46)
+custom_minimum_size = Vector2(0, 46)
 layout_mode = 2
 text = "取消"
+size_flags_horizontal = 3
 
 [node name="ConfirmButton" type="Button" parent="Center/Panel/Margin/VBox/Buttons"]
 unique_name_in_owner = true
-custom_minimum_size = Vector2(112, 46)
+custom_minimum_size = Vector2(0, 46)
 layout_mode = 2
 text = "确定"
+size_flags_horizontal = 3
+theme_type_variation = "PrimaryButton"
+

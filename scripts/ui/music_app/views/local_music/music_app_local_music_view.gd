@@ -1,5 +1,5 @@
 class_name MusicAppLocalMusicView
-extends "res://dx/runtime/scripts/managers/popup/popup_view.gd"
+extends "res://scripts/ui/music_app/music_app_page.gd"
 
 const MusicAppScriptPathsType := preload("res://scripts/constants/music_app_script_paths.gd")
 const LOCAL_MUSIC_ROW_SCENE := preload(MusicAppScriptPathsType.LOCAL_MUSIC_ROW)
@@ -44,6 +44,8 @@ func bind() -> void:
 	local_music_more_button.pressed.connect(_toggle_menu)
 	local_music_menu_scrim.pressed.connect(_hide_menu)
 	scan_music_button.pressed.connect(_open_native_import)
+	%ImportMusicButton.pressed.connect(_open_native_import)
+	%ImportMusicButton.text = tr("music_app.ui.import")
 
 ## 刷新本地音乐列表、空态文案与当前可见曲目索引。
 func refresh() -> void:

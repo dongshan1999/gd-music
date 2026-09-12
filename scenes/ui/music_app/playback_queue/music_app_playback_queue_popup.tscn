@@ -4,15 +4,34 @@
 [ext_resource type="Texture2D" path="res://textures/arrow-path.svg" id="2_loop_all"]
 [ext_resource type="Texture2D" path="res://textures/trash-outline.svg" id="3_trash"]
 
+[ext_resource type="Script" path="res://scripts/ui/music_app/music_app_scroll.gd" id="90_scroll"]
+
 [sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_backdrop"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_sheet"]
 bg_color = Color(0.180392, 0.180392, 0.188235, 1)
-corner_radius_top_left = 18
-corner_radius_top_right = 18
+corner_radius_top_left = 28
+corner_radius_top_right = 28
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_action_button"]
 bg_color = Color(0.223529, 0.223529, 0.239216, 1)
+corner_radius_top_left = 8
+corner_radius_top_right = 8
+corner_radius_bottom_right = 8
+corner_radius_bottom_left = 8
+
+[sub_resource type="StyleBoxFlat" id="StyleBox_scrim"]
+bg_color = Color(0, 0, 0, 0.42)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_action_button_hover"]
+bg_color = Color(0.28352900000000003, 0.28352900000000003, 0.29921600000000004, 1.0)
+corner_radius_top_left = 8
+corner_radius_top_right = 8
+corner_radius_bottom_right = 8
+corner_radius_bottom_left = 8
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_action_button_pressed"]
+bg_color = Color(0.343529, 0.343529, 0.359216, 1.0)
 corner_radius_top_left = 8
 corner_radius_top_right = 8
 corner_radius_bottom_right = 8
@@ -26,6 +45,8 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 script = ExtResource("1_script")
+presentation = 2
+transition_target = NodePath("Sheet")
 
 [node name="CloseBackdropButton" type="Button" parent="." unique_id=156316854]
 unique_name_in_owner = true
@@ -35,19 +56,19 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 focus_mode = 0
-theme_override_styles/normal = SubResource("StyleBoxEmpty_backdrop")
-theme_override_styles/pressed = SubResource("StyleBoxEmpty_backdrop")
-theme_override_styles/hover = SubResource("StyleBoxEmpty_backdrop")
+theme_override_styles/normal = SubResource("StyleBox_scrim")
+theme_override_styles/pressed = SubResource("StyleBox_scrim")
+theme_override_styles/hover = SubResource("StyleBox_scrim")
 theme_override_styles/disabled = SubResource("StyleBoxEmpty_backdrop")
 theme_override_styles/focus = SubResource("StyleBoxEmpty_backdrop")
 flat = true
 
 [node name="Sheet" type="PanelContainer" parent="." unique_id=189030625]
 layout_mode = 0
-anchor_top = 1.0
+anchor_top = 0.24
 anchor_right = 1.0
 anchor_bottom = 1.0
-offset_top = -620.0
+offset_top = 0.0
 grow_horizontal = 2
 grow_vertical = 0
 mouse_filter = 1
@@ -64,6 +85,16 @@ theme_override_constants/margin_bottom = 18
 layout_mode = 2
 theme_override_constants/separation = 12
 
+[node name="GrabberCenter" type="CenterContainer" parent="Sheet/Margin/SheetVBox"]
+layout_mode = 2
+mouse_filter = 2
+
+[node name="Grabber" type="ColorRect" parent="Sheet/Margin/SheetVBox/GrabberCenter"]
+layout_mode = 2
+custom_minimum_size = Vector2(36, 4)
+color = Color(0.45, 0.45, 0.48, 1)
+mouse_filter = 2
+
 [node name="HeaderVBox" type="VBoxContainer" parent="Sheet/Margin/SheetVBox" unique_id=408263687]
 layout_mode = 2
 theme_override_constants/separation = 10
@@ -77,9 +108,18 @@ unique_name_in_owner = true
 layout_mode = 2
 size_flags_horizontal = 3
 theme_override_colors/font_color = Color(0.968627, 0.968627, 0.972549, 1)
-theme_override_font_sizes/font_size = 18
+theme_override_font_sizes/font_size = 22
 text = "播放列表 (0首)"
 vertical_alignment = 1
+text_overrun_behavior = 3
+
+[node name="CloseQueueButton" type="Button" parent="Sheet/Margin/SheetVBox/HeaderVBox/HeaderRow"]
+unique_name_in_owner = true
+layout_mode = 2
+custom_minimum_size = Vector2(44, 44)
+theme_type_variation = "NavigationButton"
+text = "×"
+tooltip_text = "music_app.ui.dismiss"
 
 [node name="HeaderDivider" type="ColorRect" parent="Sheet/Margin/SheetVBox/HeaderVBox" unique_id=527512464]
 custom_minimum_size = Vector2(0, 1)
@@ -92,7 +132,7 @@ theme_override_constants/separation = 6
 
 [node name="PlaybackModeButton" type="Button" parent="Sheet/Margin/SheetVBox/HeaderVBox/ActionsRow" unique_id=879982783]
 unique_name_in_owner = true
-custom_minimum_size = Vector2(0, 32)
+custom_minimum_size = Vector2(0, 44)
 layout_mode = 2
 size_flags_horizontal = 3
 icon = ExtResource("2_loop_all")
@@ -101,15 +141,15 @@ theme_override_colors/font_color = Color(0.968627, 0.968627, 0.972549, 1)
 theme_override_colors/font_disabled_color = Color(0.643137, 0.65098, 0.690196, 0.7)
 theme_override_font_sizes/font_size = 13
 theme_override_styles/normal = SubResource("StyleBoxFlat_action_button")
-theme_override_styles/pressed = SubResource("StyleBoxFlat_action_button")
-theme_override_styles/hover = SubResource("StyleBoxFlat_action_button")
+theme_override_styles/pressed = SubResource("StyleBoxFlat_action_button_pressed")
+theme_override_styles/hover = SubResource("StyleBoxFlat_action_button_hover")
 theme_override_styles/disabled = SubResource("StyleBoxFlat_action_button")
-theme_override_styles/focus = SubResource("StyleBoxFlat_action_button")
 text = "循环播放"
+theme_override_constants/icon_max_width = 20
 
 [node name="ClearQueueButton" type="Button" parent="Sheet/Margin/SheetVBox/HeaderVBox/ActionsRow" unique_id=901168110]
 unique_name_in_owner = true
-custom_minimum_size = Vector2(80, 32)
+custom_minimum_size = Vector2(0, 44)
 layout_mode = 2
 icon = ExtResource("3_trash")
 expand_icon = false
@@ -117,18 +157,20 @@ theme_override_colors/font_color = Color(0.968627, 0.968627, 0.972549, 1)
 theme_override_colors/font_disabled_color = Color(0.643137, 0.65098, 0.690196, 0.7)
 theme_override_font_sizes/font_size = 13
 theme_override_styles/normal = SubResource("StyleBoxFlat_action_button")
-theme_override_styles/pressed = SubResource("StyleBoxFlat_action_button")
-theme_override_styles/hover = SubResource("StyleBoxFlat_action_button")
+theme_override_styles/pressed = SubResource("StyleBoxFlat_action_button_pressed")
+theme_override_styles/hover = SubResource("StyleBoxFlat_action_button_hover")
 theme_override_styles/disabled = SubResource("StyleBoxFlat_action_button")
-theme_override_styles/focus = SubResource("StyleBoxFlat_action_button")
 text = "清空"
+theme_override_constants/icon_max_width = 20
 
 [node name="QueueScroll" type="ScrollContainer" parent="Sheet/Margin/SheetVBox" unique_id=747227457]
 unique_name_in_owner = true
-custom_minimum_size = Vector2(0, 470)
+custom_minimum_size = Vector2(0, 0)
 layout_mode = 2
 size_flags_vertical = 3
 horizontal_scroll_mode = 0
+vertical_scroll_mode = 1
+follow_focus = true
 
 [node name="QueueList" type="VBoxContainer" parent="Sheet/Margin/SheetVBox/QueueScroll" unique_id=1738163236]
 unique_name_in_owner = true
@@ -139,10 +181,15 @@ theme_override_constants/separation = 4
 [node name="EmptyLabel" type="Label" parent="Sheet/Margin/SheetVBox" unique_id=852467333]
 unique_name_in_owner = true
 visible = false
-custom_minimum_size = Vector2(0, 220)
+custom_minimum_size = Vector2(0, 0)
 layout_mode = 2
 theme_override_colors/font_color = Color(0.643137, 0.65098, 0.690196, 1)
 theme_override_font_sizes/font_size = 14
 text = "当前播放列表为空"
 horizontal_alignment = 1
 vertical_alignment = 1
+size_flags_vertical = 3
+
+[node name="ScrollInteraction" type="Node" parent="Sheet/Margin/SheetVBox/QueueScroll"]
+script = ExtResource("90_scroll")
+scroll_container_path = NodePath("..")

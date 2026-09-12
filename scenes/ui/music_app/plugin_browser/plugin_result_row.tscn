@@ -48,9 +48,10 @@ vertical_alignment = 1
 text_overrun_behavior = 3
 
 [node name="SourceChip" type="PanelContainer" parent="MainRow" unique_id=2107628720]
-custom_minimum_size = Vector2(84, 30)
+custom_minimum_size = Vector2(60, 28)
 layout_mode = 2
 theme_override_styles/panel = SubResource("StyleBoxFlat_result_chip")
+size_flags_vertical = 4
 
 [node name="Margin" type="MarginContainer" parent="MainRow/SourceChip" unique_id=1632376483]
 layout_mode = 2
@@ -62,10 +63,11 @@ theme_override_constants/margin_bottom = 5
 [node name="SourceLabel" type="Label" parent="MainRow/SourceChip/Margin" unique_id=749396262]
 unique_name_in_owner = true
 layout_mode = 2
-theme_override_font_sizes/font_size = 13
+theme_override_font_sizes/font_size = 11
 text = "网易云音乐"
 horizontal_alignment = 1
 vertical_alignment = 1
+text_overrun_behavior = 3
 
 [node name="MoreLabel" type="Label" parent="MainRow" unique_id=2117045211]
 unique_name_in_owner = true
@@ -83,4 +85,7 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-flat = true
+flat = false
+theme_type_variation = "RowHit"
+focus_mode = 2
+mouse_default_cursor_shape = 2

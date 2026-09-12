@@ -116,5 +116,5 @@ func handle_cancel_input(event: InputEvent) -> bool:
 	if popup_manager == null:
 		return false
 
-	popup_manager.hide()
+	current_popup.close_popup()
 	return true

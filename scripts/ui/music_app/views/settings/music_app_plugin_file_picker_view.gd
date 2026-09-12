@@ -1,5 +1,5 @@
 class_name MusicAppPluginFilePickerView
-extends "res://dx/runtime/scripts/managers/popup/popup_view.gd"
+extends "res://scripts/ui/music_app/music_app_page.gd"
 
 const MusicAppScriptPathsType := preload("res://scripts/constants/music_app_script_paths.gd")
 const PickerControllerScript := preload("res://scripts/ui/music_app/controllers/music_app_plugin_file_picker_controller.gd")

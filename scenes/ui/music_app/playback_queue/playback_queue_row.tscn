@@ -4,8 +4,6 @@
 [ext_resource type="Texture2D" uid="uid://dbe0ctn8q7vry" path="res://textures/musical-note.svg" id="2_dted5"]
 [ext_resource type="Texture2D" uid="uid://cubqft3yh86od" path="res://textures/x-mark.svg" id="3_1s7ss"]
 
-[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_open_button"]
-
 [node name="PlaybackQueueRow" type="Control" unique_id=785226465]
 custom_minimum_size = Vector2(0, 64)
 layout_mode = 3
@@ -37,6 +35,8 @@ custom_minimum_size = Vector2(20, 20)
 layout_mode = 2
 texture = ExtResource("2_dted5")
 stretch_mode = 5
+expand_mode = 1
+size_flags_vertical = 4
 
 [node name="Info" type="VBoxContainer" parent="Margin/Row" unique_id=410402750]
 layout_mode = 2
@@ -66,12 +66,17 @@ text_overrun_behavior = 3
 
 [node name="RemoveButton" type="Button" parent="Margin/Row" unique_id=1825104450]
 unique_name_in_owner = true
-custom_minimum_size = Vector2(34, 34)
+custom_minimum_size = Vector2(44, 44)
 layout_mode = 2
 icon = ExtResource("3_1s7ss")
-flat = true
+flat = false
 icon_alignment = 1
 expand_icon = true
+theme_type_variation = "NavigationButton"
+theme_override_constants/icon_max_width = 18
+mouse_default_cursor_shape = 2
+vertical_icon_alignment = 1
+size_flags_vertical = 4
 
 [node name="OpenButton" type="Button" parent="." unique_id=1119164959]
 unique_name_in_owner = true
@@ -80,10 +85,8 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-focus_mode = 0
-theme_override_styles/normal = SubResource("StyleBoxEmpty_open_button")
-theme_override_styles/pressed = SubResource("StyleBoxEmpty_open_button")
-theme_override_styles/hover = SubResource("StyleBoxEmpty_open_button")
-theme_override_styles/disabled = SubResource("StyleBoxEmpty_open_button")
-theme_override_styles/focus = SubResource("StyleBoxEmpty_open_button")
-flat = true
+focus_mode = 2
+flat = false
+theme_type_variation = "RowHit"
+offset_right = -48.0
+mouse_default_cursor_shape = 2

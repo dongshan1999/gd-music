@@ -1,5 +1,5 @@
 class_name MusicAppPluginManagementView
-extends "res://dx/runtime/scripts/managers/popup/popup_view.gd"
+extends "res://scripts/ui/music_app/music_app_page.gd"
 
 const MusicAppScriptPathsType := preload("res://scripts/constants/music_app_script_paths.gd")
 const PluginManagementControllerScript := preload(

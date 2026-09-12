@@ -87,3 +87,12 @@ music_app.plugin_management.uninstall.failed,Uninstall failed.,卸载失败。,�
 music_app.plugin_management.uninstall.success,Plugin uninstalled.,插件已卸载。,插件已卸载。
 music_app.plugin_management.item.version,Version: {value},版本号: {value},版本号: {value}
 music_app.plugin_management.item.author,Author: {value},作者: {value},作者: {value}
+music_app.ui.library,My Music,我的音乐,我的音乐
+music_app.ui.settings,Settings,设置,设置
+music_app.ui.import,Import Music,导入音乐,导入音乐
+music_app.ui.new_playlist,New Playlist,新建歌单,新建歌单
+music_app.ui.dismiss,Close,关闭,关闭
+music_app.ui.about,About GDMusic,关于 GDMusic,关于 GDMusic
+music_app.ui.back_library,Back to My Music,返回我的音乐,返回我的音乐
+music_app.ui.add_plugin,Install Plugin,安装插件,安装插件
+music_app.ui.mini_hint,Choose a song to begin,选一首歌开始聆听,选一首歌开始聆听

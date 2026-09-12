@@ -5,6 +5,8 @@
 [ext_resource type="Texture2D" uid="uid://l64plqxfd10g" path="res://textures/arrow-left.svg" id="2_sym7y"]
 [ext_resource type="Texture2D" uid="uid://c2kbdu1mp5y13" path="res://textures/magnifying-glass.svg" id="3_npfvv"]
 
+[ext_resource type="Script" path="res://scripts/ui/music_app/music_app_scroll.gd" id="90_scroll"]
+
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_search_bar"]
 bg_color = Color(0.129412, 0.133333, 0.145098, 1)
 corner_radius_top_left = 20
@@ -39,7 +41,7 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-color = Color(0.137255, 0.137255, 0.145098, 1)
+color = Color(0.055, 0.055, 0.065, 1)
 
 [node name="Margin" type="MarginContainer" parent="." unique_id=1460156404]
 layout_mode = 0
@@ -47,9 +49,9 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-theme_override_constants/margin_left = 14
-theme_override_constants/margin_top = 10
-theme_override_constants/margin_right = 14
+theme_override_constants/margin_left = 20
+theme_override_constants/margin_top = 20
+theme_override_constants/margin_right = 20
 theme_override_constants/margin_bottom = 10
 
 [node name="RootVBox" type="VBoxContainer" parent="Margin" unique_id=1855336854]
@@ -65,10 +67,17 @@ theme_override_constants/separation = 10
 
 [node name="BackButton" type="Button" parent="Margin/RootVBox/SearchRow" unique_id=1695653304]
 unique_name_in_owner = true
-custom_minimum_size = Vector2(42, 42)
+custom_minimum_size = Vector2(44, 44)
 layout_mode = 2
 icon = ExtResource("2_sym7y")
-flat = true
+flat = false
+theme_type_variation = "NavigationButton"
+theme_override_constants/icon_max_width = 22
+expand_icon = true
+mouse_default_cursor_shape = 2
+icon_alignment = 1
+vertical_icon_alignment = 1
+size_flags_vertical = 4
 
 [node name="SearchBarPanel" type="PanelContainer" parent="Margin/RootVBox/SearchRow" unique_id=1576339099]
 layout_mode = 2
@@ -99,6 +108,8 @@ layout_mode = 2
 size_flags_horizontal = 3
 placeholder_text = "输入要搜索的歌曲"
 flat = true
+theme_type_variation = "SearchInput"
+theme_override_font_sizes/font_size = 15
 
 [node name="ClearQueryButton" type="Button" parent="Margin/RootVBox/SearchRow/SearchBarPanel/SearchBarMargin/SearchBarRow" unique_id=2106999030]
 unique_name_in_owner = true
@@ -106,14 +117,17 @@ visible = false
 custom_minimum_size = Vector2(24, 24)
 layout_mode = 2
 text = "×"
-flat = true
+flat = false
+theme_type_variation = "NavigationButton"
 
 [node name="SubmitSearchButton" type="Button" parent="Margin/RootVBox/SearchRow" unique_id=161286635]
 unique_name_in_owner = true
 custom_minimum_size = Vector2(52, 42)
 layout_mode = 2
 text = "搜索"
-flat = true
+flat = false
+theme_override_colors/font_color = Color(1, 0.3, 0.4, 1)
+theme_type_variation = "NavigationButton"
 
 [node name="SearchContent" type="VBoxContainer" parent="Margin/RootVBox" unique_id=1882077670]
 unique_name_in_owner = true
@@ -134,14 +148,15 @@ unique_name_in_owner = true
 layout_mode = 2
 size_flags_horizontal = 3
 theme_override_colors/font_color = Color(0.968627, 0.968627, 0.972549, 1)
-theme_override_font_sizes/font_size = 17
+theme_override_font_sizes/font_size = 22
 text = "历史记录"
 
 [node name="ClearHistoryButton" type="Button" parent="Margin/RootVBox/SearchContent/HistorySection/HistoryHeader" unique_id=1277190165]
 unique_name_in_owner = true
 layout_mode = 2
 text = "清空"
-flat = true
+flat = false
+theme_type_variation = "NavigationButton"
 
 [node name="HistoryTagsContainer" type="FlowContainer" parent="Margin/RootVBox/SearchContent/HistorySection" unique_id=832174555]
 unique_name_in_owner = true
@@ -153,8 +168,12 @@ theme_override_constants/v_separation = 10
 unique_name_in_owner = true
 visible = false
 layout_mode = 2
-theme_override_colors/font_color = Color(0.643137, 0.65098, 0.690196, 1)
+theme_override_colors/font_color = Color(0.6, 0.6, 0.64, 1)
 text = "暂无搜索记录"
+custom_minimum_size = Vector2(0, 180)
+autowrap_mode = 3
+horizontal_alignment = 1
+vertical_alignment = 1
 
 [node name="ResultsSection" type="VBoxContainer" parent="Margin/RootVBox/SearchContent" unique_id=282897553]
 unique_name_in_owner = true
@@ -165,22 +184,26 @@ theme_override_constants/separation = 0
 
 [node name="SearchTypeTabs" type="HBoxContainer" parent="Margin/RootVBox/SearchContent/ResultsSection" unique_id=1242667516]
 unique_name_in_owner = true
-custom_minimum_size = Vector2(0, 48)
+custom_minimum_size = Vector2(0, 44)
 layout_mode = 2
+theme_override_constants/separation = 4
 
 [node name="SearchTypeTabTemplate" parent="Margin/RootVBox/SearchContent/ResultsSection/SearchTypeTabs" unique_id=88470861 instance=ExtResource("2_search_tab")]
 visible = false
 
 [node name="PluginTabs" type="HBoxContainer" parent="Margin/RootVBox/SearchContent/ResultsSection" unique_id=168431907]
 unique_name_in_owner = true
-custom_minimum_size = Vector2(0, 46)
+custom_minimum_size = Vector2(0, 44)
 layout_mode = 2
+theme_override_constants/separation = 4
 
 [node name="ResultsScroll" type="ScrollContainer" parent="Margin/RootVBox/SearchContent/ResultsSection" unique_id=957302576]
 unique_name_in_owner = true
 layout_mode = 2
 size_flags_vertical = 3
 horizontal_scroll_mode = 0
+vertical_scroll_mode = 1
+follow_focus = true
 
 [node name="ResultsList" type="VBoxContainer" parent="Margin/RootVBox/SearchContent/ResultsSection/ResultsScroll" unique_id=1798120618]
 unique_name_in_owner = true
@@ -304,3 +327,7 @@ unique_name_in_owner = true
 custom_minimum_size = Vector2(0, 96)
 layout_mode = 2
 text = "{}"
+
+[node name="ScrollInteraction" type="Node" parent="Margin/RootVBox/SearchContent/ResultsSection/ResultsScroll"]
+script = ExtResource("90_scroll")
+scroll_container_path = NodePath("..")
