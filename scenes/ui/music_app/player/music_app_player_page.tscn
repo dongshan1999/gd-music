@@ -10,20 +10,20 @@
 [ext_resource type="Texture2D" path="res://textures/play.svg" id="15_play"]
 [ext_resource type="Script" path="res://dx/runtime/scripts/component/scroll/scroll_interaction_comp.gd" id="16_scroll_interaction"]
 [ext_resource type="Script" path="res://scripts/ui/music_app/player/music_app_lyric_time_cursor.gd" id="17_lyric_time_cursor"]
-[ext_resource type="Texture2D" path="res://textures/musical-note.svg" id="18_music_icon"]
+[ext_resource type="Texture2D" path="res://textures/player-placeholder-art.svg" id="18_music_icon"]
 [ext_resource type="Script" uid="uid://bym33i5tdjhtg" path="res://dx/runtime/scripts/managers/localization/localize_comp.gd" id="999_localize_comp"]
 
 [ext_resource type="Texture2D" path="res://textures/chevron-down.svg" id="91_dismiss"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_player_cover_panel"]
-bg_color = Color(0.21, 0.17, 0.22, 1)
-corner_radius_top_left = 20
-corner_radius_top_right = 20
-corner_radius_bottom_right = 20
-corner_radius_bottom_left = 20
+bg_color = Color(0.07, 0.071, 0.08, 1)
+corner_radius_top_left = 24
+corner_radius_top_right = 24
+corner_radius_bottom_right = 24
+corner_radius_bottom_left = 24
 shadow_color = Color(0, 0, 0, 0.22)
-shadow_size = 16
-shadow_offset = Vector2(0, 8)
+shadow_size = 20
+shadow_offset = Vector2(0, 6)
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_player_cover_circle"]
 bg_color = Color(0, 0, 0, 0)
@@ -36,6 +36,24 @@ corner_radius_top_left = 999
 corner_radius_top_right = 999
 corner_radius_bottom_right = 999
 corner_radius_bottom_left = 999
+
+[sub_resource type="Shader" id="Shader_player_cover_mask"]
+code = "shader_type canvas_item;
+
+void fragment() {
+    vec2 p = UV;
+    float radius = 0.075;
+    vec2 q = abs(p - vec2(0.5)) - vec2(0.5 - radius);
+    float distance_to_corner = length(max(q, vec2(0.0))) + min(max(q.x, q.y), 0.0) - radius;
+    float antialias = max(fwidth(distance_to_corner), 0.001);
+    float alpha = 1.0 - smoothstep(0.0, antialias, distance_to_corner);
+    COLOR = texture(TEXTURE, UV) * COLOR;
+    COLOR.a *= alpha;
+}
+"
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_player_cover_mask"]
+shader = SubResource("Shader_player_cover_mask")
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_player_progress_background"]
 bg_color = Color(1, 1, 1, 0.14)
@@ -69,7 +87,7 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-color = Color(0.109804, 0.113725, 0.129412, 1)
+color = Color(0.07, 0.071, 0.08, 1)
 
 [node name="PlayerMargin" type="MarginContainer" parent="." unique_id=909338491]
 layout_mode = 0
@@ -119,7 +137,7 @@ alignment = 1
 unique_name_in_owner = true
 layout_mode = 2
 text = "虚拟"
-horizontal_alignment = 0
+horizontal_alignment = 1
 theme_override_font_sizes/font_size = 16
 text_overrun_behavior = 3
 clip_text = true
@@ -141,6 +159,7 @@ size_flags_horizontal = 3
 unique_name_in_owner = true
 layout_mode = 2
 text = "陈粒"
+horizontal_alignment = 1
 theme_override_font_sizes/font_size = 17
 theme_override_colors/font_color = Color(0.7, 0.7, 0.74, 1)
 size_flags_horizontal = 3
@@ -153,6 +172,7 @@ update_in_runtime = false
 
 [node name="PlayerSourceChip" type="Panel" parent="PlayerMargin/PlayerVBox/PlayerTitleBlock/ArtistCenter/ArtistRow" unique_id=1018701668]
 unique_name_in_owner = true
+visible = false
 custom_minimum_size = Vector2(64, 28)
 layout_mode = 2
 theme_type_variation = "GroupedPanel"
@@ -209,6 +229,8 @@ layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
+offset_top = -48.0
+offset_bottom = -48.0
 grow_horizontal = 2
 grow_vertical = 2
 
@@ -216,10 +238,12 @@ grow_vertical = 2
 unique_name_in_owner = true
 custom_minimum_size = Vector2(48, 48)
 layout_mode = 2
+clip_contents = true
 theme_override_styles/panel = SubResource("StyleBoxFlat_player_cover_panel")
 
 [node name="CoverCircle" type="Panel" parent="PlayerMargin/PlayerVBox/CoverStage/AlbumStage/CoverPanel" unique_id=1021963745]
 unique_name_in_owner = true
+visible = false
 layout_mode = 0
 offset_left = 0.0
 offset_top = 0.0
@@ -233,15 +257,10 @@ anchor_bottom = 0.83
 
 [node name="CoverIconRect" type="TextureRect" parent="PlayerMargin/PlayerVBox/CoverStage/AlbumStage/CoverPanel" unique_id=522729667]
 unique_name_in_owner = true
-layout_mode = 0
-anchor_left = 0.5
-anchor_top = 0.5
-anchor_right = 0.5
-anchor_bottom = 0.5
-offset_left = -42.0
-offset_top = -42.0
-offset_right = 42.0
-offset_bottom = 42.0
+material = SubResource("ShaderMaterial_player_cover_mask")
+layout_mode = 1
+anchor_right = 1.0
+anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 mouse_filter = 2

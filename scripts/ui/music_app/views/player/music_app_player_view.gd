@@ -27,6 +27,7 @@ var _lyric_pointer_start := Vector2.ZERO
 var _lyric_touch_index := -1
 var _is_lyrics_content_dragging := false
 var _is_lyrics_scrollbar_dragging := false
+var _cover_animation_tween: Tween
 var _lyrics_top_padding: Control
 var _lyrics_bottom_padding: Control
 var _is_lyrics_edge_padding_update_queued := false
@@ -138,6 +139,7 @@ func refresh() -> void:
 		elapsed_label.text = "00:00"
 		remaining_label.text = "00:00"
 		_refresh_lyrics_for_track(null, 0)
+		_sync_cover_animation(false)
 		return
 
 	var track: TrackData = _player_controller.get_current_track()
@@ -172,6 +174,7 @@ func refresh() -> void:
 	elapsed_label.text = _format_seconds(_player_controller.get_current_elapsed_seconds())
 	remaining_label.text = _format_seconds(duration)
 	_refresh_lyrics_for_track(track, _player_controller.get_current_elapsed_seconds())
+	_sync_cover_animation(_player_controller.is_playing())
 
 func open_from_current() -> void:
 	_player_controller.show_popup(DX_PopupRegistry.PopupId.MUSIC_APP_PLAYER)
@@ -369,6 +372,22 @@ func _apply_content_view_visibility() -> void:
 func _resize_artwork() -> void:
 	var side := clampf(minf(album_stage.size.x - 24, album_stage.size.y - 24), 48, 340)
 	cover_panel.custom_minimum_size = Vector2(side, side)
+	cover_icon_rect.pivot_offset = Vector2(side * 0.5, side * 0.5)
+
+## 播放时让占位封面做轻微呼吸缩放，暂停时回到静止状态。
+func _sync_cover_animation(playing: bool) -> void:
+	if playing:
+		if _cover_animation_tween != null and _cover_animation_tween.is_valid():
+			return
+		_cover_animation_tween = create_tween().set_loops()
+		_cover_animation_tween.set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
+		_cover_animation_tween.tween_property(cover_icon_rect, "scale", Vector2(1.018, 1.018), 1.8)
+		_cover_animation_tween.tween_property(cover_icon_rect, "scale", Vector2.ONE, 1.8)
+		return
+	if _cover_animation_tween != null:
+		_cover_animation_tween.kill()
+		_cover_animation_tween = null
+	cover_icon_rect.scale = Vector2.ONE
 
 func _refresh_lyrics_for_track(track: TrackData, elapsed_seconds: int) -> void:
 	var track_key := _get_lyrics_track_key(track)

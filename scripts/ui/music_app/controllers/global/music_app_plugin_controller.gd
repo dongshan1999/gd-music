@@ -4,6 +4,7 @@ extends "res://scripts/ui/music_app/controllers/music_app_controller_base.gd"
 const PLUGIN_ROOT_DIR := "user://gdmusic_plugins"
 const PLUGIN_ENTRY_FILE := "plugin.gd"
 const PLUGIN_IMPORT_TEMP_DIR := "user://temp/gdmusic_plugin_import"
+const BUILTIN_PLUGINS := [preload("res://plugins/builtin/bilibili.gd")]
 const DXAndroidSafTreeScript := preload("res://dx/runtime/scripts/platform/android/dx_android_saf_tree.gd")
 
 var _plugins: Dictionary = {}
@@ -29,6 +30,16 @@ func get_settings() -> MusicPluginSettingsData:
 func refresh_plugins() -> bool:
 	_ensure_plugin_root()
 	_plugins.clear()
+	# User installations may override a bundled plugin; removing the override restores it.
+	for script in BUILTIN_PLUGINS:
+		var result := _build_loaded_plugin_result(script, script.resource_path, script.resource_path.get_base_dir())
+		if result.is_empty():
+			return false
+		_plugins[result.plugin_data.id] = {
+			"plugin": result.plugin,
+			"plugin_data": result.plugin_data,
+			"install_mode": "builtin"
+		}
 
 	var root_absolute = ProjectSettings.globalize_path(PLUGIN_ROOT_DIR)
 	var root_dir = DirAccess.open(root_absolute)
@@ -84,6 +95,8 @@ func uninstall_plugin(plugin_id: String) -> bool:
 	var plugin_entry = _get_plugin_entry(normalized_plugin_id)
 	if plugin_entry.is_empty():
 		return _fail("Plugin not found: %s" % normalized_plugin_id)
+	if str(plugin_entry.get("install_mode", "")) == "builtin":
+		return _fail("内置插件不能卸载，可通过开关停用。")
 
 	if str(plugin_entry.get("install_mode", "")) == "android_tree":
 		var settings := get_settings()
@@ -95,7 +108,7 @@ func uninstall_plugin(plugin_id: String) -> bool:
 				continue
 			settings.android_tree_plugins.remove_at(index)
 		settings.normalize()
-		_plugins.erase(normalized_plugin_id)
+		refresh_plugins()
 		get_settings().disabled_plugin_ids.erase(normalized_plugin_id)
 		last_error = ""
 		return true
@@ -108,7 +121,7 @@ func uninstall_plugin(plugin_id: String) -> bool:
 			{"plugin_id": normalized_plugin_id, "code": remove_error}
 		)
 
-	_plugins.erase(normalized_plugin_id)
+	refresh_plugins()
 	get_settings().disabled_plugin_ids.erase(normalized_plugin_id)
 	last_error = ""
 	return true
@@ -330,16 +343,46 @@ func search(plugin_id: String, query: String, page: int = 1, media_type: String 
 			"is_end": result.get("isEnd", null) if result is Dictionary else null
 		}
 	)
-	last_error = ""
+	last_error = _get_plugin_error(plugin)
+	if not last_error.is_empty():
+		return {}
 	return result if result is Dictionary else {"isEnd": true, "data": []}
 
-func get_media_source(_track, _quality: String = "standard") -> Dictionary:
-	_fail("Plugin media resolving is disabled in the local-only save format.")
-	return {}
+func get_media_source(track: TrackData, quality: String = "standard") -> Dictionary:
+	if track == null or track.plugin_id.is_empty():
+		_fail("曲目没有关联的音源插件。")
+		return {}
+	var entry := _require_plugin_entry(track.plugin_id)
+	if entry.is_empty():
+		return {}
+	var plugin = entry.get("plugin")
+	if not plugin.has_method("get_media_source"):
+		_fail("插件不支持解析音频。")
+		return {}
+	var result = await plugin.get_media_source(track.plugin_data.duplicate(true), quality)
+	last_error = _get_plugin_error(plugin)
+	if not (result is Dictionary) or str(result.get("url", "")).is_empty():
+		if last_error.is_empty():
+			_fail("插件未返回可播放的音频地址。")
+		return {}
+	return result
 
-func get_lyric(_track) -> Dictionary:
-	_fail("Plugin lyric resolving is disabled in the local-only save format.")
-	return {}
+func get_lyric(track: TrackData) -> Dictionary:
+	last_error = ""
+	if track == null or track.plugin_id.is_empty():
+		return {}
+	var entry := _require_plugin_entry(track.plugin_id)
+	if entry.is_empty() or not bool(entry.plugin_data.get("hasGetLyric", false)):
+		return {}
+	var result = await entry.plugin.get_lyric(track.plugin_data.duplicate(true))
+	last_error = _get_plugin_error(entry.plugin)
+	return result if result is Dictionary else {}
+
+func _get_plugin_error(plugin) -> String:
+	for property in plugin.get_property_list():
+		if str(property.name) == "last_error":
+			return str(plugin.get("last_error"))
+	return ""
 
 func get_toplists(plugin_id: String) -> Array:
 	var plugin_result = _require_plugin_entry(plugin_id)
@@ -435,7 +478,7 @@ func _build_plugin_payload(plugin_instance, plugin_dir: String, entry_script_pat
 
 	return {
 		"id": plugin_id,
-		"name": plugin_id,
+		"name": _call_plugin_string(plugin_instance, "get_name", plugin_id),
 		"version": _call_plugin_string(plugin_instance, "get_version"),
 		"path": entry_script_path,
 		"dir": plugin_dir,
@@ -455,7 +498,10 @@ func _serialize_plugin(plugin_entry: Variant) -> Dictionary:
 	if not (plugin_entry is Dictionary):
 		return {}
 	var payload = (plugin_entry as Dictionary).get("plugin_data", {})
-	return payload.duplicate(true) if payload is Dictionary else {}
+	var result: Dictionary = payload.duplicate(true) if payload is Dictionary else {}
+	result["builtin"] = plugin_entry.get("install_mode", "") == "builtin"
+	result["enabled"] = is_plugin_enabled(str(result.get("id", "")))
+	return result
 
 func _get_plugin_entry(plugin_id: String) -> Dictionary:
 	var normalized_plugin_id = plugin_id.strip_edges()
@@ -474,6 +520,9 @@ func _require_plugin_entry(plugin_id: String) -> Dictionary:
 	var plugin_entry = _get_plugin_entry(plugin_id)
 	if plugin_entry.is_empty():
 		_fail("Plugin not found: %s" % plugin_id)
+		return {}
+	if not is_plugin_enabled(str(plugin_entry.plugin_data.id)):
+		_fail("插件已停用，请在设置中启用。")
 		return {}
 
 	last_error = ""
@@ -553,6 +602,8 @@ func _looks_like_plugin_script(script_path: String) -> bool:
 	return _looks_like_plugin_source(source_text)
 
 func _looks_like_plugin_source(source_text: String) -> bool:
+	if source_text.contains('extends "res://plugins/builtin/bilibili.gd"'):
+		return true
 	if source_text.contains("func get_platform") and source_text.contains("func get_supported_search_types"):
 		return true
 	if source_text.contains("extends GDMusicPluginBase") or source_text.contains("extends GDMusicPluginMethods"):

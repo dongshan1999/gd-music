@@ -2,6 +2,7 @@ class_name GDMusicHttpJsonClient
 extends RefCounted
 
 const DEFAULT_TIMEOUT_SEC := 15.0
+var last_error := ""
 
 func get_json(
 	url: String,
@@ -19,15 +20,21 @@ func request_json(
 	body: String = "",
 	timeout_sec: float = DEFAULT_TIMEOUT_SEC
 ) -> Variant:
+	last_error = ""
 	var response = await request(_build_url(url, query), headers, method, body, timeout_sec)
 	if not bool(response.get("ok", false)):
+		last_error = "%s (HTTP %s)" % [str(response.get("error", "Network request failed.")), str(response.get("response_code", 0))]
 		return null
 
 	var response_body: PackedByteArray = response.get("body", PackedByteArray())
 	if response_body.is_empty():
+		last_error = "Empty HTTP response."
 		return null
 
-	return JSON.parse_string(response_body.get_string_from_utf8())
+	var parsed = JSON.parse_string(response_body.get_string_from_utf8())
+	if parsed == null:
+		last_error = "HTTP response is not valid JSON."
+	return parsed
 
 func build_url(base_url: String, query: Dictionary = {}) -> String:
 	return _build_url(base_url, query)

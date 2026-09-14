@@ -16,6 +16,7 @@ var _management_mode := MODE_NORMAL
 var _selected_slots := {}
 var _visible_track_ids: Array[String] = []
 var _dragging_slot_index := -1
+var _collection_saved := false
 
 @onready var playlist_back_button: Button = %PlaylistBackButton
 @onready var playlist_search_button: Button = %PlaylistSearchButton
@@ -33,6 +34,7 @@ var _dragging_slot_index := -1
 @onready var playlist_more_menu_panel: Panel = %PlaylistMoreMenuPanel
 @onready var sort_mode_button: Button = %SortModeButton
 @onready var delete_mode_button: Button = %DeleteModeButton
+@onready var save_collection_button: Button = get_node_or_null("%SaveCollectionButton") as Button
 @onready var song_list: VBoxContainer = $Margin/PlaylistVBox/PlaylistScroll/SongList
 @onready var song_bottom_space: Control = $Margin/PlaylistVBox/PlaylistScroll/SongList/SongBottomSpace
 
@@ -41,6 +43,7 @@ var song_rows: Array[MusicAppPlaylistSongRow] = []
 func setup(controller: MusicAppShowcaseController) -> void:
 	_controller = controller
 	_playlist_controller = MusicAppPlaylistController.new(controller)
+	_collection_saved = false
 	bind()
 	refresh()
 
@@ -57,6 +60,8 @@ func bind() -> void:
 	playlist_more_menu_scrim.pressed.connect(_hide_more_menu)
 	sort_mode_button.pressed.connect(_enter_sort_mode)
 	delete_mode_button.pressed.connect(_enter_delete_mode)
+	if save_collection_button != null:
+		save_collection_button.pressed.connect(_save_collection)
 
 func refresh() -> void:
 	if _controller == null:
@@ -95,10 +100,21 @@ func refresh() -> void:
 
 	_prune_selected_slots()
 	_update_action_buttons()
+	if save_collection_button != null:
+		var is_temporary_collection := playlist != null and playlist.mark == "__plugin_collection__"
+		save_collection_button.visible = is_temporary_collection or _collection_saved
+		save_collection_button.disabled = _collection_saved
+		save_collection_button.text = "已收藏" if _collection_saved else "收藏歌单"
+		save_collection_button.icon = MusicAppIconsType.HEART_FILLED if _collection_saved else MusicAppIconsType.HEART_OUTLINE
 
 func close_page() -> void:
 	_hide_more_menu()
+	_playlist_controller.cleanup_temporary_collection()
 	close_popup()
+
+func close_popup() -> void:
+	_playlist_controller.cleanup_temporary_collection()
+	super.close_popup()
 
 func _on_primary_action_pressed() -> void:
 	if _management_mode == MODE_SORT:
@@ -146,6 +162,22 @@ func _toggle_more_menu() -> void:
 		return
 	playlist_more_menu_panel.visible = true
 	playlist_more_menu_scrim.visible = true
+
+func _save_collection() -> void:
+	_hide_more_menu()
+	var saved := _playlist_controller.save_temporary_collection()
+	if saved:
+		_collection_saved = true
+		refresh()
+		var home_popup = _playlist_controller.get_popup_router_controller().get_popup(DX_PopupRegistry.PopupId.MUSIC_APP_HOME)
+		if home_popup != null and home_popup.has_method("refresh"):
+			home_popup.refresh()
+		_playlist_controller.show_toast("专辑已收藏到我的歌单")
+	else:
+		# 重复收藏时控制器会切换到已有歌单，按钮仍保持明确的已收藏状态。
+		_collection_saved = true
+		refresh()
+		_playlist_controller.show_toast("歌单已在我的歌单中")
 
 func _hide_more_menu() -> void:
 	playlist_more_menu_panel.visible = false

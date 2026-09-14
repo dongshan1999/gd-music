@@ -97,6 +97,9 @@ func toggle_like_current_track() -> bool:
 		return false
 
 	var next_state := toggle_track_liked(track)
+	var home_popup = get_popup_router_controller().get_popup(DX_PopupRegistry.PopupId.MUSIC_APP_HOME)
+	if home_popup != null and home_popup.has_method("refresh"):
+		home_popup.refresh()
 	show_toast(
 		tr("music_app.toast.favorite_added")
 		if next_state

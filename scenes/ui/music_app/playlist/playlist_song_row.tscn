@@ -36,6 +36,7 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
+mouse_filter = 2
 theme_override_constants/margin_left = 2
 theme_override_constants/margin_top = 8
 theme_override_constants/margin_right = 0
@@ -43,6 +44,7 @@ theme_override_constants/margin_bottom = 8
 
 [node name="Row" type="HBoxContainer" parent="Margin" unique_id=1927211102]
 layout_mode = 2
+mouse_filter = 2
 theme_override_constants/separation = 10
 alignment = 1
 
@@ -70,12 +72,14 @@ vertical_alignment = 1
 [node name="SongInfo" type="VBoxContainer" parent="Margin/Row" unique_id=1187513079]
 layout_mode = 2
 size_flags_horizontal = 3
+mouse_filter = 2
 theme_override_constants/separation = 4
 alignment = 1
 
 [node name="SongTitleLabel" type="Label" parent="Margin/Row/SongInfo" unique_id=1837534805]
 layout_mode = 2
 size_flags_horizontal = 3
+mouse_filter = 2
 theme_override_colors/font_color = Color(0.968627, 0.968627, 0.972549, 1)
 theme_override_font_sizes/font_size = 15
 text = "歌曲标题"
@@ -84,6 +88,7 @@ text_overrun_behavior = 3
 [node name="SongSubtitleLabel" type="Label" parent="Margin/Row/SongInfo" unique_id=322176812]
 layout_mode = 2
 size_flags_horizontal = 3
+mouse_filter = 2
 theme_override_colors/font_color = Color(0.643137, 0.65098, 0.690196, 1)
 theme_override_font_sizes/font_size = 12
 text = "歌手 - 来源"

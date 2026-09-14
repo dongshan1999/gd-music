@@ -223,7 +223,7 @@ func _render_results() -> void:
 		_result_row_nodes.append(row)
 
 func _plugin_key(plugin: Dictionary) -> String:
-	return str(plugin.get("name", plugin.get("id", "")))
+	return str(plugin.get("id", plugin.get("name", "")))
 
 func _get_selected_plugin() -> Dictionary:
 	for plugin in _plugins:
@@ -300,6 +300,9 @@ func _result_title(item: Dictionary) -> String:
 		title = str(item.get("name", "")).strip_edges()
 	if title.is_empty():
 		title = "Untitled"
+	var is_collection := _get_selected_search_type() == "album" or str(item.get("collectionType", "")) == "album" or str(item.get("mediaType", "")) == "album"
+	if is_collection and not title.begins_with("专辑 · "):
+		return "专辑 · %s" % title
 	return title
 
 ## 解析搜索结果项的副标题，优先展示作者与专辑。
@@ -307,6 +310,13 @@ func _result_subtitle(item: Dictionary) -> String:
 	var parts := PackedStringArray()
 	var artist := str(item.get("artist", "")).strip_edges()
 	var album := str(item.get("album", "")).strip_edges()
+	if _get_selected_search_type() == "album" or str(item.get("collectionType", "")) == "album" or str(item.get("mediaType", "")) == "album":
+		var part_hint := ""
+		var duration := int(item.get("duration", 0))
+		if duration <= 0:
+			part_hint = "点击打开合集"
+		if not part_hint.is_empty():
+			parts.append(part_hint)
 	if not artist.is_empty():
 		parts.append(artist)
 	if not album.is_empty() and album != artist:
@@ -429,10 +439,27 @@ func _on_plugin_tab_selected(plugin_id: String) -> void:
 		await _search_page(1)
 
 func _on_result_row_pressed(index: int) -> void:
+	if _is_searching:
+		return
 	if index < 0 or index >= _search_results.size():
 		return
-	if _get_selected_search_type() != DEFAULT_SEARCH_TYPE:
-		_toast("当前只支持播放单曲搜索结果。")
+	var result_type := "album" if str(_search_results[index].get("collectionType", "")) == "album" or str(_search_results[index].get("mediaType", "")) == "album" else _get_selected_search_type()
+	# A music-tab video can still be a multi-track collection. Resolve it from
+	# Bilibili's page data before deciding how the result should open.
+	if result_type == "music" and _plugin_controller != null:
+		var candidate := _search_results[index]
+		var detail := await _plugin_controller.resolve_collection_result(candidate, _get_selected_plugin_id())
+		if int(detail.get("track_count", 0)) > 1:
+			result_type = "album"
+			candidate["mediaType"] = "album"
+			candidate["collectionType"] = "album"
+	print("[PluginBrowserView] result clicked: ", {"index": index, "selected_type": result_type, "item_id": _search_results[index].get("id", ""), "item_media_type": _search_results[index].get("mediaType", ""), "item_collection_type": _search_results[index].get("collectionType", "")})
+	if result_type == "album" or result_type == "artist":
+		if _plugin_controller != null:
+			await _plugin_controller.open_collection_result(_search_results[index], _get_selected_plugin_id(), result_type)
+		return
+	if result_type != DEFAULT_SEARCH_TYPE:
+		_toast("当前搜索类型暂不支持打开详情。")
 		return
 	if _plugin_controller == null:
 		return
@@ -518,6 +545,7 @@ func _search_page(page: int) -> void:
 
 	_current_page = maxi(1, page)
 	_last_query = query
+	var requested_type := _get_selected_search_type()
 	_sync_query_state()
 	_set_searching(true)
 
@@ -526,9 +554,13 @@ func _search_page(page: int) -> void:
 		plugin_id,
 		query,
 		_current_page,
-		_get_selected_search_type()
+		requested_type
 	)
 	_set_searching(false)
+	if plugin_id != _get_selected_plugin_id() or requested_type != _get_selected_search_type() or query != query_input.text.strip_edges():
+		if not query_input.text.strip_edges().is_empty():
+			await _search_page(1)
+		return
 	if result.is_empty():
 		_search_results = []
 		_last_is_end = true
@@ -551,6 +583,7 @@ func _search_page(page: int) -> void:
 
 ## 刷新插件状态并重新加载插件列表。
 func _reload_plugins(_auto_start: bool) -> void:
+	var previous_plugin_id := _selected_plugin_id
 	var plugin_controller: MusicAppPluginController = _get_plugin_controller()
 	if plugin_controller == null:
 		_set_status("Plugin controller unavailable.")
@@ -577,7 +610,7 @@ func _reload_plugins(_auto_start: bool) -> void:
 		_render_results()
 		_set_status("Plugins ready, but listing failed: %s" % plugin_controller.last_error)
 		return
-	_plugins = plugins
+	_plugins = plugins.filter(func(plugin: Dictionary) -> bool: return bool(plugin.get("enabled", true)))
 
 	if _plugins.is_empty():
 		_selected_plugin_id = ""
@@ -592,6 +625,8 @@ func _reload_plugins(_auto_start: bool) -> void:
 		if not search_types.has(_selected_search_type):
 			_selected_search_type = search_types[0]
 
+	if previous_plugin_id != _selected_plugin_id:
+		_search_results = []
 	_render_tabs()
 	_set_plugin_info()
 	_render_results()

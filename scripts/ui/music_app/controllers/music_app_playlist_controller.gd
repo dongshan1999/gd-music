@@ -153,3 +153,37 @@ func _play_track_list(track_ids: Array[String], start_slot_index: int, autoplay:
 		return false
 	show_popup(DX_PopupRegistry.PopupId.MUSIC_APP_PLAYER)
 	return true
+
+func cleanup_temporary_collection() -> void:
+	var playlists := get_playlists_ref()
+	var selected := get_selected_playlist_index()
+	for index in range(playlists.size() - 1, -1, -1):
+		if playlists[index].mark != "__plugin_collection__":
+			continue
+		playlists.remove_at(index)
+		if index < selected:
+			selected -= 1
+	set_selected_playlist_index(clampi(selected, 0, maxi(0, playlists.size() - 1)))
+
+func save_temporary_collection() -> bool:
+	var index := get_selected_playlist_index()
+	var playlists := get_playlists_ref()
+	if index < 0 or index >= playlists.size():
+		return false
+	var playlist: PlaylistData = playlists[index]
+	if playlist.mark != "__plugin_collection__":
+		return false
+	for existing_index in playlists.size():
+		if existing_index == index:
+			continue
+		var existing: PlaylistData = playlists[existing_index]
+		if existing.title == playlist.title and existing.tracks == playlist.tracks and existing.mark != "__plugin_collection__":
+			playlists.remove_at(index)
+			set_selected_playlist_index(existing_index if existing_index < index else existing_index - 1)
+			return false
+	playlist.mark = playlist.title.left(1)
+	playlist.deletable = true
+	var save_manager := get_save_manager()
+	if save_manager != null:
+		save_manager.save(false)
+	return true

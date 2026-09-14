@@ -7,6 +7,7 @@ const MusicAppScriptPathsType := preload("res://scripts/constants/music_app_scri
 const PlaybackStartedEventScript := preload(MusicAppScriptPathsType.MUSIC_APP_PLAYBACK_STARTED_EVENT)
 const PlaybackFinishedEventScript := preload(MusicAppScriptPathsType.MUSIC_APP_PLAYBACK_FINISHED_EVENT)
 const PlaybackProgressChangedEventScript := preload(MusicAppScriptPathsType.MUSIC_APP_PLAYBACK_PROGRESS_CHANGED_EVENT)
+const M4ADecoderScript := preload("res://scripts/audio/music_app_m4a_decoder.gd")
 
 var controller
 
@@ -15,6 +16,7 @@ const REMOTE_STREAM_TIMEOUT_SECONDS := 20.0
 
 var _audio_sync_request_id := 0
 var _loaded_track_key := ""
+var last_error := ""
 
 ## 记录当前全局播放状态控制器所属的 showcase。
 func _init(owner = null) -> void:
@@ -195,6 +197,9 @@ func _sync_audio_state(sync_request_id: int) -> void:
 			_emit_playback_progress_changed(track)
 		return
 
+	stop_audio_playback(true)
+	_loaded_track_key = ""
+	last_error = ""
 	var stream = await _resolve_stream_for_track(track, sync_request_id)
 	if sync_request_id != _audio_sync_request_id:
 		return
@@ -213,9 +218,25 @@ func _sync_audio_state(sync_request_id: int) -> void:
 	_emit_playback_progress_changed(track)
 
 ## 为当前曲目解析可播放音频流。
-func _resolve_stream_for_track(track: TrackData, _sync_request_id: int) -> AudioStream:
+func _resolve_stream_for_track(track: TrackData, sync_request_id: int) -> AudioStream:
 	if not track.file_path.is_empty():
 		return _load_local_stream(track.file_path)
+	if not track.plugin_id.is_empty():
+		var plugins = _get_base_controller().get_plugin_controller()
+		if plugins == null:
+			return null
+		var source: Dictionary = await plugins.get_media_source(track)
+		if sync_request_id != _audio_sync_request_id:
+			return null
+		if source.is_empty():
+			last_error = plugins.last_error
+			return null
+		var url := str(source.get("url", ""))
+		if not _is_remote_stream_url(url):
+			last_error = "插件返回了无效的音频地址。"
+			return null
+		var headers: Dictionary = source.get("headers", {}) if source.get("headers", {}) is Dictionary else {}
+		return await _load_remote_stream(url, headers, sync_request_id, str(source.get("format", "")))
 
 	push_warning("Track \"%s\" does not have a local audio file path." % track.title)
 	return null
@@ -247,7 +268,8 @@ func _load_local_stream(path: String) -> AudioStream:
 func _load_remote_stream(
 	url: String,
 	headers: Dictionary,
-	sync_request_id: int
+	sync_request_id: int,
+	format_hint: String = ""
 ) -> AudioStream:
 	var resolved_controller = get_showcase()
 	if resolved_controller == null:
@@ -255,10 +277,12 @@ func _load_remote_stream(
 
 	var request := HTTPRequest.new()
 	request.timeout = REMOTE_STREAM_TIMEOUT_SECONDS
+	request.body_size_limit = 64 * 1024 * 1024
 	resolved_controller.add_child(request)
 
 	var err := request.request(url, _build_http_headers(headers), HTTPClient.METHOD_GET)
 	if err != OK:
+		last_error = "无法发起音频下载请求。"
 		request.queue_free()
 		push_warning("Failed to dispatch audio request for URL: %s" % url)
 		return null
@@ -272,16 +296,25 @@ func _load_remote_stream(
 	var response_code := int(signal_result[1])
 	var body: PackedByteArray = signal_result[3]
 	if result_code != HTTPRequest.RESULT_SUCCESS:
+		last_error = "音频下载失败，请检查网络或尝试较短的视频。"
 		push_warning("Audio request failed for URL %s with result code %d." % [url, result_code])
 		return null
 	if response_code < 200 or response_code >= 300:
+		last_error = "音频下载失败 (HTTP %d)，请重试。" % response_code
 		push_warning("Audio request returned HTTP %d for URL: %s" % [response_code, url])
 		return null
 	if body.is_empty():
+		last_error = "音频响应为空。"
 		push_warning("Audio request returned an empty response body for URL: %s" % url)
 		return null
 
-	return _load_stream_from_buffer(body, _get_audio_extension(url))
+	var extension := format_hint if not format_hint.is_empty() else _get_audio_extension(url)
+	if extension in ["m4a", "aac", "mp4"] or (body.size() > 8 and body.slice(4, 8).get_string_from_ascii() == "ftyp"):
+		var decoder := M4ADecoderScript.new()
+		var stream: AudioStream = await decoder.decode(body, func() -> bool: return sync_request_id != _audio_sync_request_id or not is_instance_valid(resolved_controller) or not resolved_controller.is_inside_tree())
+		last_error = decoder.last_error
+		return stream
+	return _load_stream_from_buffer(body, extension)
 
 ## 按候选格式顺序尝试从二进制缓冲区构建音频流。
 func _load_stream_from_buffer(buffer: PackedByteArray, preferred_extension: String) -> AudioStream:
@@ -330,6 +363,8 @@ func _is_remote_stream_url(path_or_url: String) -> bool:
 func _get_track_playback_key(track: TrackData) -> String:
 	if not track.file_path.is_empty():
 		return "file:%s" % track.file_path
+	if not track.plugin_id.is_empty():
+		return track.id
 	return "title:%s:%s" % [track.title, track.artist]
 
 ## 在已存在的 AudioStreamPlayer 上应用 seek，并维持暂停/播放状态。
@@ -370,6 +405,8 @@ func _sync_track_duration_from_stream(track: TrackData, stream: AudioStream) -> 
 func _mark_playback_unavailable(track: TrackData) -> void:
 	push_warning("Unable to play track \"%s\" with the currently supported audio loaders." % track.title)
 	stop_audio_playback(true)
+	if not last_error.is_empty():
+		_get_base_controller().show_toast(last_error)
 	if not is_playing():
 		return
 	set_is_playing(false)

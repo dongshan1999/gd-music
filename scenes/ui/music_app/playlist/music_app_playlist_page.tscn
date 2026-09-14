@@ -5,7 +5,7 @@
 [ext_resource type="Texture2D" path="res://textures/magnifying-glass.svg" id="5_search"]
 [ext_resource type="Texture2D" path="res://textures/ellipsis-vertical.svg" id="6_more"]
 [ext_resource type="Texture2D" path="res://textures/play.svg" id="7_play"]
-[ext_resource type="Texture2D" path="res://textures/heart.svg" id="9_heart_icon"]
+[ext_resource type="Texture2D" path="res://textures/heart-outline.svg" id="9_heart_icon"]
 [ext_resource type="Script" path="res://dx/runtime/scripts/managers/localization/localize_comp.gd" id="999_localize_comp"]
 
 [ext_resource type="Script" path="res://scripts/ui/music_app/music_app_scroll.gd" id="90_scroll"]
@@ -448,6 +448,19 @@ theme_override_styles/hover = SubResource("StyleBoxFlat_playlist_menu_button_hov
 theme_override_styles/disabled = SubResource("StyleBoxFlat_playlist_menu_button")
 text = "删除"
 alignment = 0
+
+[node name="SaveCollectionButton" type="Button" parent="Margin/PlaylistVBox/PlaylistActionsRow"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(112, 44)
+layout_mode = 2
+icon = ExtResource("9_heart_icon")
+theme_override_font_sizes/font_size = 13
+theme_override_styles/normal = SubResource("StyleBoxFlat_playlist_primary_action")
+theme_override_styles/pressed = SubResource("StyleBoxFlat_playlist_primary_action_pressed")
+theme_override_styles/hover = SubResource("StyleBoxFlat_playlist_primary_action_hover")
+theme_override_styles/disabled = SubResource("StyleBoxFlat_playlist_primary_action")
+text = "收藏歌单"
+icon_max_width = 18
 
 [node name="ScrollInteraction" type="Node" parent="Margin/PlaylistVBox/PlaylistScroll"]
 script = ExtResource("90_scroll")
