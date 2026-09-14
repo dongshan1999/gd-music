@@ -119,6 +119,7 @@ layout_mode = 2
 custom_minimum_size = Vector2(44, 44)
 theme_type_variation = "NavigationButton"
 text = "×"
+visible = false
 tooltip_text = "music_app.ui.dismiss"
 
 [node name="HeaderDivider" type="ColorRect" parent="Sheet/Margin/SheetVBox/HeaderVBox" unique_id=527512464]

@@ -39,7 +39,6 @@ func bind() -> void:
 	_is_bound = true
 
 	close_backdrop_button.pressed.connect(close_popup)
-	%CloseQueueButton.pressed.connect(close_popup)
 	playback_mode_button.pressed.connect(_cycle_playback_mode)
 	clear_queue_button.pressed.connect(_clear_queue)
 
@@ -67,7 +66,8 @@ func refresh() -> void:
 	)
 	playback_mode_button.text = tr(_queue_controller.get_playback_mode_label_key())
 	playback_mode_button.disabled = not has_tracks
-	clear_queue_button.text = tr("music_app.queue.clear")
+	clear_queue_button.text = "清空"
+	MusicAppIconsType.apply_icon_button(clear_queue_button, MusicAppIconsType.PLAYLIST, true, false)
 	clear_queue_button.disabled = not has_tracks
 
 	_sync_queue_rows(rows.size())
@@ -102,6 +102,7 @@ func _cycle_playback_mode() -> void:
 	if _queue_controller == null:
 		return
 	_queue_controller.cycle_playback_mode()
+	refresh()
 
 func _clear_queue() -> void:
 	if _queue_controller == null:

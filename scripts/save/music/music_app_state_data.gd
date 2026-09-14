@@ -106,6 +106,10 @@ func _normalize_playlists(track_id_map: Dictionary) -> void:
 	for playlist in playlists:
 		if playlist == null:
 			continue
+		# Plugin album/artist detail uses a transient playlist view; it must never
+		# become a user playlist after save/reload.
+		if playlist.mark == "__plugin_collection__":
+			continue
 
 		var is_favorite_playlist := is_system_favorite_playlist(playlist)
 		if is_favorite_playlist:

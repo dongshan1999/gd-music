@@ -40,10 +40,8 @@ func set_playback_mode(value: int, _persist_state: bool = true) -> void:
 
 ## 循环切换播放模式，并返回切换后的值。
 func cycle_playback_mode() -> int:
-	var next_mode := posmod(
-		get_playback_mode() + 1,
-		MusicAppStateDataType.PlaybackMode.size()
-	)
+	const PLAYBACK_MODE_COUNT := 3
+	var next_mode := posmod(get_playback_mode() + 1, PLAYBACK_MODE_COUNT)
 	set_playback_mode(next_mode)
 	return next_mode
 

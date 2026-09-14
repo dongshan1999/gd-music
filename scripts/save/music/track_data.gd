@@ -11,6 +11,8 @@ var duration: int = 1
 var preview_start: int = 0
 var mark: String = ""
 var source: String = ""
+var plugin_id: String = ""
+var plugin_data: Dictionary = {}
 
 func normalize() -> void:
 	id = id.strip_edges()
@@ -25,6 +27,7 @@ func normalize() -> void:
 	preview_start = clampi(maxi(0, preview_start), 0, duration)
 	mark = mark.strip_edges()
 	source = source.strip_edges()
+	plugin_id = plugin_id.strip_edges()
 
 static func make_local_id(path: String) -> String:
 	var normalized_path := path.strip_edges().replace("\\", "/")

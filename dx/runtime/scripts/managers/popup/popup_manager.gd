@@ -14,7 +14,7 @@ var _popup_stacks := {
 	DX_PopupView.PopupLayer.FULLSCREEN: [],
 }
 
-func show(popup_id: int) -> DX_PopupView:
+func show(popup_id: int, layer_override: int = -1) -> DX_PopupView:
 	var existing_popup := get_popup(popup_id)
 	if existing_popup != null:
 		_bring_popup_to_front(existing_popup)
@@ -22,9 +22,9 @@ func show(popup_id: int) -> DX_PopupView:
 		popup_shown.emit(popup_id, existing_popup)
 		return existing_popup
 
-	return _show_new_popup(popup_id)
+	return _show_new_popup(popup_id, layer_override)
 
-func _show_new_popup(popup_id: int) -> DX_PopupView:
+func _show_new_popup(popup_id: int, layer_override: int = -1) -> DX_PopupView:
 	if not DX_PopupRegistry.has_popup(popup_id):
 		push_error("Popup id is not registered: %s" % popup_id)
 		return null
@@ -41,6 +41,8 @@ func _show_new_popup(popup_id: int) -> DX_PopupView:
 		return null
 
 	var popup: DX_PopupView = instance as DX_PopupView
+	if layer_override >= 0:
+		popup.popup_layer = layer_override
 	var popup_layer := popup.get_resolved_popup_layer()
 	var host := _get_popup_host(popup_layer)
 	if host == null:

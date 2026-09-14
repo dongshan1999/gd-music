@@ -44,6 +44,10 @@ func configure(plugin: Dictionary, enabled: bool) -> void:
 	meta_label.text = "   ".join(meta_parts)
 
 	enabled_check_box.set_pressed_no_signal(enabled)
+	var builtin := bool(plugin.get("builtin", false))
+	uninstall_button.visible = not builtin
+	update_button.visible = not builtin
+	share_button.visible = not builtin
 
 func _on_enabled_toggled(toggled_on: bool) -> void:
 	enabled_toggled.emit(_plugin_id, toggled_on)

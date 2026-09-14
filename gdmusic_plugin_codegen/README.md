@@ -3,7 +3,9 @@
 这个目录是一个独立开发区，用来研究把参考插件源码
 `source_plugins/*/index.ts` 转成 Godot 可接收的 `.gd` 插件骨架。
 
-这里不接入当前项目运行逻辑，只做三件事：
+此目录提供插件生成工具和运行时接口。Bilibili 的维护实现已迁移到
+`res://plugins/builtin/bilibili.gd` 并随应用内置；`.generated/gdmusic_bilibili_plugin.gd`
+保留为手动导入的兼容入口。其余自动生成骨架不会自动加载。主要用途：
 
 1. 定义一版 Godot 原生插件接口
 2. 定义一版 Godot 侧基础数据结构

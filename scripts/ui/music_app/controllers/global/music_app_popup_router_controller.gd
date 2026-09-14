@@ -65,12 +65,12 @@ func get_current_popup():
 	return popup_manager.get_current_popup()
 
 ## 打开指定弹窗，并在支持时注入 showcase 控制器。
-func show_popup(popup_id: int):
+func show_popup(popup_id: int, layer_override: int = -1):
 	var popup_manager := get_popup_manager()
 	if popup_manager == null:
 		return null
 
-	var popup = popup_manager.show(popup_id)
+	var popup = popup_manager.show(popup_id, layer_override)
 	if popup != null and popup.has_method("setup"):
 		popup.setup(get_showcase())
 	return popup
