@@ -1,7 +1,7 @@
 class_name DX_SaveData
 extends DX_JsonObject
-const MUSIC_APP_STATE_DATA_SCRIPT := preload("res://scripts/save/music/music_app_state_data.gd")
-const MUSIC_PLUGIN_SETTINGS_DATA_SCRIPT := preload("res://scripts/save/music/music_plugin_settings_data.gd")
+const MUSIC_APP_STATE_DATA_SCRIPT := preload("res://assets/scripts/save/music/music_app_state_data.gd")
+const MUSIC_PLUGIN_SETTINGS_DATA_SCRIPT := preload("res://assets/scripts/save/music/music_plugin_settings_data.gd")
 
 var music = MUSIC_APP_STATE_DATA_SCRIPT.new()
 var music_plugins = MUSIC_PLUGIN_SETTINGS_DATA_SCRIPT.new()

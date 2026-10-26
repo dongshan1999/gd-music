@@ -15,22 +15,24 @@ enum PopupId {
 	MUSIC_APP_PLUGIN_MANAGEMENT,
 	MUSIC_APP_PLUGIN_FILE_PICKER,
 	DX_DEBUG,
+	MUSIC_APP_BILIBILI_LOGIN,
 }
 
 const POPUP_SCENES := {
-	PopupId.COMMON_DIALOG: preload("res://scenes/popup/common_dialog_popup.tscn"),
-	PopupId.COMMON_TOAST: preload("res://scenes/popup/common_toast_popup.tscn"),
-	PopupId.MUSIC_APP_HOME: preload("res://scenes/ui/music_app/home/music_app_home_page.tscn"),
-	PopupId.MUSIC_APP_PLAYLIST: preload("res://scenes/ui/music_app/playlist/music_app_playlist_page.tscn"),
-	PopupId.MUSIC_APP_PLAYER: preload("res://scenes/ui/music_app/player/music_app_player_page.tscn"),
-	PopupId.MUSIC_APP_PLAYBACK_QUEUE: preload("res://scenes/ui/music_app/playback_queue/music_app_playback_queue_popup.tscn"),
-	PopupId.MUSIC_APP_LOCAL_MUSIC: preload("res://scenes/ui/music_app/local_music/music_app_local_music_page.tscn"),
-	PopupId.MUSIC_APP_LOCAL_SCAN: preload("res://scenes/ui/music_app/local_scan/music_app_local_scan_page.tscn"),
-	PopupId.MUSIC_APP_PLUGIN_BROWSER: preload("res://scenes/ui/music_app/plugin_browser/music_app_plugin_browser_page.tscn"),
-	PopupId.MUSIC_APP_SETTINGS: preload("res://scenes/ui/music_app/settings/music_app_settings_page.tscn"),
-	PopupId.MUSIC_APP_PLUGIN_MANAGEMENT: preload("res://scenes/ui/music_app/settings/music_app_plugin_management_page.tscn"),
-	PopupId.MUSIC_APP_PLUGIN_FILE_PICKER: preload("res://scenes/ui/music_app/settings/music_app_plugin_file_picker_page.tscn"),
+	PopupId.COMMON_DIALOG: preload("res://assets/scenes/popup/common_dialog_popup.tscn"),
+	PopupId.COMMON_TOAST: preload("res://assets/scenes/popup/common_toast_popup.tscn"),
+	PopupId.MUSIC_APP_HOME: preload("res://assets/scenes/ui/music_app/home/music_app_home_page.tscn"),
+	PopupId.MUSIC_APP_PLAYLIST: preload("res://assets/scenes/ui/music_app/playlist/music_app_playlist_page.tscn"),
+	PopupId.MUSIC_APP_PLAYER: preload("res://assets/scenes/ui/music_app/player/music_app_player_page.tscn"),
+	PopupId.MUSIC_APP_PLAYBACK_QUEUE: preload("res://assets/scenes/ui/music_app/playback_queue/music_app_playback_queue_popup.tscn"),
+	PopupId.MUSIC_APP_LOCAL_MUSIC: preload("res://assets/scenes/ui/music_app/local_music/music_app_local_music_page.tscn"),
+	PopupId.MUSIC_APP_LOCAL_SCAN: preload("res://assets/scenes/ui/music_app/local_scan/music_app_local_scan_page.tscn"),
+	PopupId.MUSIC_APP_PLUGIN_BROWSER: preload("res://assets/scenes/ui/music_app/plugin_browser/music_app_plugin_browser_page.tscn"),
+	PopupId.MUSIC_APP_SETTINGS: preload("res://assets/scenes/ui/music_app/settings/music_app_settings_page.tscn"),
+	PopupId.MUSIC_APP_PLUGIN_MANAGEMENT: preload("res://assets/scenes/ui/music_app/settings/music_app_plugin_management_page.tscn"),
+	PopupId.MUSIC_APP_PLUGIN_FILE_PICKER: preload("res://assets/scenes/ui/music_app/settings/music_app_plugin_file_picker_page.tscn"),
 	PopupId.DX_DEBUG: preload("res://dx/runtime/scenes/debug/dx_debug_popup.tscn"),
+	PopupId.MUSIC_APP_BILIBILI_LOGIN: preload("res://assets/scenes/popup/music_app_bilibili_login_popup.tscn"),
 }
 
 static func has_popup(popup_id: int) -> bool:

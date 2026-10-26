@@ -134,6 +134,9 @@ func _handle_drag_scroll_button(event: InputEventMouseButton) -> void:
 	_drag_scroll_started = false
 	if did_drag_scroll:
 		drag_scroll_finished.emit()
+		# The release ends a scroll gesture, so it must not reach a row button
+		# and be interpreted as a click on the item under the pointer.
+		get_viewport().set_input_as_handled()
 
 func _handle_drag_scroll_motion(event: InputEventMouseMotion) -> void:
 	if not _drag_scroll_active:
@@ -171,6 +174,9 @@ func _handle_touch_drag_touch(event: InputEventScreenTouch) -> void:
 	_touch_drag_started = false
 	if did_drag_scroll:
 		drag_scroll_finished.emit()
+		# Prevent the touch-up from activating the control that was pressed
+		# before the finger moved far enough to start scrolling.
+		get_viewport().set_input_as_handled()
 
 func _handle_touch_drag_motion(event: InputEventScreenDrag) -> void:
 	if not _touch_drag_active:

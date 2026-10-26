@@ -36,7 +36,10 @@ func in_pause(paused: bool) -> void:
 		_flush_pending_save(true)
 
 func in_focus(has_focus: bool) -> void:
-	if not has_focus:
+	# Desktop focus loss only means another window is active. Serializing the
+	# whole library here stalls the main thread and starves frame-fed audio.
+	# Keep desktop autosave deadlines intact; pause/quit still flush immediately.
+	if not has_focus and OS.has_feature("mobile"):
 		_flush_pending_save(true)
 
 func save(force: bool = true) -> bool:
