@@ -1,0 +1,61 @@
+class_name MusicAppScriptPaths
+extends RefCounted
+
+# 脚本路径
+const MUSIC_APP_SHOWCASE := "res://assets/scripts/ui/music_app/music_app_showcase.gd"
+
+const MUSIC_APP_CONTROLLER_BASE := "res://assets/scripts/ui/music_app/controllers/music_app_controller_base.gd"
+const MUSIC_APP_HOME_CONTROLLER := "res://assets/scripts/ui/music_app/controllers/music_app_home_controller.gd"
+const MUSIC_APP_LOCAL_MUSIC_CONTROLLER := "res://assets/scripts/ui/music_app/controllers/music_app_local_music_controller.gd"
+const MUSIC_APP_LOCAL_SCAN_CONTROLLER := "res://assets/scripts/ui/music_app/controllers/music_app_local_scan_controller.gd"
+const MUSIC_APP_MINI_PLAYER_CONTROLLER := "res://assets/scripts/ui/music_app/controllers/music_app_mini_player_controller.gd"
+const MUSIC_APP_PLAYBACK_CONTROLLER := "res://assets/scripts/ui/music_app/controllers/global/music_app_playback_controller.gd"
+const MUSIC_APP_PLAYBACK_STATE_CONTROLLER := "res://assets/scripts/ui/music_app/controllers/global/music_app_audio_controller.gd"
+const MUSIC_APP_PLAYLIST_STATE_CONTROLLER := "res://assets/scripts/ui/music_app/controllers/global/music_app_playlist_state_controller.gd"
+const MUSIC_APP_POPUP_ROUTER_CONTROLLER := "res://assets/scripts/ui/music_app/controllers/global/music_app_popup_router_controller.gd"
+const MUSIC_APP_PLUGIN_CONTROLLER := "res://assets/scripts/ui/music_app/controllers/global/music_app_plugin_controller.gd"
+const MUSIC_APP_PLAYBACK_QUEUE_CONTROLLER := "res://assets/scripts/ui/music_app/controllers/music_app_playback_queue_controller.gd"
+const MUSIC_APP_PLAYER_CONTROLLER := "res://assets/scripts/ui/music_app/controllers/music_app_player_controller.gd"
+const MUSIC_APP_PLAYLIST_CONTROLLER := "res://assets/scripts/ui/music_app/controllers/music_app_playlist_controller.gd"
+const MUSIC_APP_PLUGIN_BROWSER_CONTROLLER := "res://assets/scripts/ui/music_app/controllers/music_app_plugin_browser_controller.gd"
+const MUSIC_APP_SETTINGS_CONTROLLER := "res://assets/scripts/ui/music_app/controllers/music_app_settings_controller.gd"
+const MUSIC_APP_PLUGIN_MANAGEMENT_CONTROLLER := "res://assets/scripts/ui/music_app/controllers/music_app_plugin_management_controller.gd"
+const MUSIC_APP_PLUGIN_FILE_PICKER_CONTROLLER := "res://assets/scripts/ui/music_app/controllers/music_app_plugin_file_picker_controller.gd"
+
+const MUSIC_APP_PLAYBACK_STARTED_EVENT := "res://assets/scripts/ui/music_app/events/music_app_playback_started_event.gd"
+const MUSIC_APP_PLAYBACK_FINISHED_EVENT := "res://assets/scripts/ui/music_app/events/music_app_playback_finished_event.gd"
+const MUSIC_APP_PLAYBACK_PROGRESS_CHANGED_EVENT := "res://assets/scripts/ui/music_app/events/music_app_playback_progress_changed_event.gd"
+
+const MUSIC_APP_HOME_FEATURE_CARD_VIEW := "res://assets/scripts/ui/music_app/views/home/music_app_home_feature_card.gd"
+const MUSIC_APP_HOME_PLAYLIST_ROW_VIEW := "res://assets/scripts/ui/music_app/views/home/music_app_home_playlist_row.gd"
+const MUSIC_APP_LOCAL_MUSIC_ROW_VIEW := "res://assets/scripts/ui/music_app/views/local_music/music_app_local_music_row.gd"
+const MUSIC_APP_LOCAL_SCAN_FOLDER_ROW_VIEW := "res://assets/scripts/ui/music_app/views/local_scan/music_app_local_music_scan_folder_row.gd"
+const MUSIC_APP_PLUGIN_BROWSER_HISTORY_TAG_VIEW := "res://assets/scripts/ui/music_app/views/plugin_browser/music_app_plugin_history_tag.gd"
+const MUSIC_APP_PLUGIN_BROWSER_SEARCH_TAB_VIEW := "res://assets/scripts/ui/music_app/views/plugin_browser/music_app_plugin_search_tab.gd"
+const MUSIC_APP_PLUGIN_BROWSER_RESULT_ROW_VIEW := "res://assets/scripts/ui/music_app/views/plugin_browser/music_app_plugin_result_row.gd"
+const MUSIC_APP_PLUGIN_MANAGEMENT_ITEM_VIEW := "res://assets/scripts/ui/music_app/views/settings/music_app_plugin_management_item.gd"
+const MUSIC_APP_PLUGIN_FILE_PICKER_ROW_VIEW := "res://assets/scripts/ui/music_app/views/settings/music_app_plugin_file_picker_row.gd"
+const MUSIC_APP_PLUGIN_FILE_PICKER_VIEW := "res://assets/scripts/ui/music_app/views/settings/music_app_plugin_file_picker_view.gd"
+const MUSIC_APP_PLAYBACK_QUEUE_ROW_VIEW := "res://assets/scripts/ui/music_app/views/playback_queue/music_app_playback_queue_row.gd"
+const MUSIC_APP_PLAYLIST_SONG_ROW_VIEW := "res://assets/scripts/ui/music_app/views/playlist/music_app_playlist_song_row.gd"
+
+const TRACK_DATA := "res://assets/scripts/save/music/track_data.gd"
+const PLAYLIST_DATA := "res://assets/scripts/save/music/playlist_data.gd"
+const MUSIC_PLUGIN_SETTINGS_DATA := "res://assets/scripts/save/music/music_plugin_settings_data.gd"
+const MUSIC_APP_STATE_DATA := "res://assets/scripts/save/music/music_app_state_data.gd"
+
+const COMMON_DIALOG_POPUP := "res://assets/scripts/popup/common_dialog_popup.gd"
+const COMMON_TOAST_POPUP := "res://assets/scripts/popup/common_toast_popup.gd"
+
+# 场景路径
+const HOME_PLAYLIST_ROW := "res://assets/scenes/ui/music_app/home/home_playlist_row.tscn"
+const LOCAL_MUSIC_ROW := "res://assets/scenes/ui/music_app/local_music/local_music_row.tscn"
+const LOCAL_SCAN_FOLDER_ROW := "res://assets/scenes/ui/music_app/local_scan/local_music_scan_folder_row.tscn"
+const PLUGIN_BROWSER_HISTORY_TAG := "res://assets/scenes/ui/music_app/plugin_browser/plugin_history_tag.tscn"
+const PLUGIN_BROWSER_SEARCH_TAB := "res://assets/scenes/ui/music_app/plugin_browser/plugin_search_tab.tscn"
+const PLUGIN_BROWSER_RESULT_ROW := "res://assets/scenes/ui/music_app/plugin_browser/plugin_result_row.tscn"
+const PLUGIN_MANAGEMENT_ITEM := "res://assets/scenes/ui/music_app/settings/music_app_plugin_management_item.tscn"
+const PLUGIN_FILE_PICKER_ROW := "res://assets/scenes/ui/music_app/settings/music_app_plugin_file_picker_row.tscn"
+const PLUGIN_FILE_PICKER_PAGE := "res://assets/scenes/ui/music_app/settings/music_app_plugin_file_picker_page.tscn"
+const PLAYBACK_QUEUE_ROW := "res://assets/scenes/ui/music_app/playback_queue/playback_queue_row.tscn"
+const PLAYLIST_SONG_ROW := "res://assets/scenes/ui/music_app/playlist/playlist_song_row.tscn"

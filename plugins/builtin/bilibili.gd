@@ -42,7 +42,7 @@ const SEARCH_HEADERS := {
 	"accept-language": "zh-CN,zh;q=0.9,en;q=0.8,en-GB;q=0.7,en-US;q=0.6",
 }
 const MOBILE_SAFARI_USER_AGENT := "Mozilla/5.0 (iPhone; CPU iPhone OS 13_2_3 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/13.0.3 Mobile/15E148 Safari/604.1 Edg/114.0.0.0"
-const PAGE_SIZE := 20
+const PAGE_SIZE := 50
 const MIXIN_KEY_TABLE := [
 	46, 47, 18, 2, 53, 8, 23, 32, 15, 50, 10, 31, 58, 3, 45, 35,
 	27, 43, 5, 49, 33, 9, 42, 19, 29, 28, 14, 39, 12, 38, 41, 13,
@@ -54,6 +54,9 @@ var last_error := ""
 
 var _http = HttpJsonClientScript.new()
 var _cookie: Dictionary = {}
+# 用户自定义 cookie（登录态）。为空时走匿名 spi 设备指纹。
+var user_cookie_header := ""
+var _user_cookie: Dictionary = {}
 var _wbi_img: String = ""
 var _wbi_sub: String = ""
 var _wbi_sync_date: String = ""
@@ -90,18 +93,14 @@ func get_migration_difficulty() -> String:
 
 func search(query: String, page: int, media_type: String) -> Dictionary:
 	last_error = ""
-	print("[Bilibili] search request: ", {"query": query, "page": page, "media_type": media_type})
 	if media_type == "music":
 		var music_result := await _search_music(query, page)
-		_log_search_result("music", music_result)
 		return music_result
 	if media_type == "album":
 		var album_result := await _search_album(query, page)
-		_log_search_result("album", album_result)
 		return album_result
 	if media_type == "artist":
 		var artist_result := await _search_artist(query, page)
-		_log_search_result("artist", artist_result)
 		return artist_result
 	return {"isEnd": true, "data": []}
 
@@ -140,12 +139,13 @@ func get_artist_works(artist_item: Dictionary, page: int, media_type: String) ->
 	query_headers["sec-fetch-site"] = "same-site"
 	query_headers["sec-fetch-mode"] = "cors"
 	query_headers["sec-fetch-dest"] = "empty"
-	query_headers["referer"] = "https://space.bilibili.com/%s/video" % str(artist_item.get("id", ""))
+	var mid_text := str(_int_id(artist_item.get("id", 0)))
+	query_headers["referer"] = "https://space.bilibili.com/%s/video" % mid_text
 	query_headers["cookie"] = _build_cookie_header()
 
 	var now = int(Time.get_unix_time_from_system())
 	var params = {
-		"mid": str(artist_item.get("id", "")),
+		"mid": mid_text,
 		"ps": 30,
 		"tid": 0,
 		"pn": page,
@@ -351,7 +351,12 @@ func _search_album(query: String, page: int) -> Dictionary:
 	var result_items = _ensure_array((result_data as Dictionary).get("result", []))
 	var mapped: Array = []
 	for item in result_items:
+		if not _is_searchable_video(item):
+			continue
 		var collection := _format_media(item)
+		# 「专辑」标签只放真正的多曲合集，避免和「单曲」标签展示同一批视频。
+		if not _is_collection_result(item, collection):
+			continue
 		collection["id"] = str(item.get("bvid", item.get("aid", "")))
 		collection["mediaType"] = "album"
 		collection["collectionType"] = "album"
@@ -368,39 +373,30 @@ func _search_music(query: String, page: int) -> Dictionary:
 	var result_items = _ensure_array((result_data as Dictionary).get("result", []))
 	var mapped: Array = []
 	for item in result_items:
+		if not _is_searchable_video(item):
+			continue
 		var music := _format_media(item)
-		# Search API returns videos for both tabs. Keep the raw API evidence so
-		# the click handler can resolve the actual page count before classifying.
+		# 合集条目统一归到「专辑」标签，两个标签互不重复。
+		# 单曲标签里点击分P视频时仍由 resolve_collection_result 自动识别并打开合集。
+		if _is_collection_result(item, music):
+			continue
 		music["mediaType"] = "music"
 		music["collectionType"] = ""
-		if _is_collection_result(item, music):
-			music["mediaType"] = "album"
-			music["collectionType"] = "album"
-			music["album"] = "视频合集"
-			music["duration"] = 0
 		mapped.append(music)
 	return {
 		"isEnd": int((result_data as Dictionary).get("numResults", 0)) <= page * PAGE_SIZE,
 		"data": mapped,
 	}
 
-func _log_search_result(result_type: String, result: Dictionary) -> void:
-	var items: Array = result.get("data", []) if result is Dictionary else []
-	var first: Dictionary = items[0] if not items.is_empty() and items[0] is Dictionary else {}
-	print("[Bilibili] search result: ", {
-		"result_type": result_type,
-		"count": items.size(),
-		"is_end": result.get("isEnd", true),
-		"first_id": first.get("id", ""),
-		"first_bvid": first.get("bvid", ""),
-		"first_title": first.get("title", first.get("name", "")),
-		"first_media_type": first.get("mediaType", ""),
-		"first_collection_type": first.get("collectionType", ""),
-		"first_keys": first.keys(),
-	})
-	if not items.is_empty():
-		for index in mini(items.size(), 3):
-			print("[Bilibili] raw result[%d]: %s" % [index, JSON.stringify(items[index])])
+## 过滤搜索结果中无法直接播放的条目（付费课堂、无 bvid 的占位行）。
+func _is_searchable_video(item: Variant) -> bool:
+	if not (item is Dictionary):
+		return false
+	var source: Dictionary = item
+	var item_type := str(source.get("type", ""))
+	if not item_type.is_empty() and item_type != "video":
+		return false
+	return not str(source.get("bvid", "")).strip_edges().is_empty()
 
 func _looks_like_collection_title(title: String) -> bool:
 	var normalized := title.strip_edges()
@@ -432,7 +428,8 @@ func _is_collection_result(raw_item: Dictionary, mapped_item: Dictionary) -> boo
 		reason = "title-count"
 	for marker in ["合集", "选集", "歌单", "串烧", "全辑", "多首"]:
 		if tag_text.contains(marker):
-			evidence += 4
+			# 单个 tag 不足以判定合集：258 秒单曲也常带「歌单」标签。
+			evidence += 3
 			reason = "tag:%s" % marker
 			break
 	for marker in ["合集", "选集", "歌单", "串烧", "曲目列表", "共"]:
@@ -445,7 +442,6 @@ func _is_collection_result(raw_item: Dictionary, mapped_item: Dictionary) -> boo
 	var exclusion := title.contains("教程") or title.contains("教学") or title.contains("直播") or title.contains("演奏")
 	if exclusion and evidence < 8:
 		evidence -= 4
-	print("[Bilibili] collection evidence: ", {"score": evidence, "reason": reason, "title": title, "tags": tag_text, "duration": mapped_item.get("duration", 0)})
 	return evidence >= 4
 
 func _search_artist(query: String, page: int) -> Dictionary:
@@ -459,11 +455,11 @@ func _search_artist(query: String, page: int) -> Dictionary:
 			avatar = "https:%s" % avatar
 		mapped.append({
 			"name": str(source.get("uname", "")),
-			"id": source.get("mid", ""),
-			"fans": source.get("fans", 0),
+			"id": _int_id(source.get("mid", 0)),
+			"fans": _int_id(source.get("fans", 0)),
 			"description": str(source.get("usign", "")),
 			"avatar": avatar,
-			"worksNum": source.get("videos", 0),
+			"worksNum": _int_id(source.get("videos", 0)),
 			"platform": PLATFORM,
 		})
 	return {
@@ -475,30 +471,43 @@ func _search_base(query: String, page: int, search_type: String) -> Variant:
 	await _ensure_cookie()
 	var headers = SEARCH_HEADERS.duplicate(true)
 	headers["cookie"] = _build_cookie_header()
+	var params := {
+		"context": "",
+		"page": page,
+		"order": "",
+		"page_size": PAGE_SIZE,
+		"keyword": query,
+		"duration": "",
+		"tids_1": "",
+		"tids_2": "",
+		"__refresh__": true,
+		"_extra": "",
+		"highlight": 1,
+		"single_column": 0,
+		"platform": "pc",
+		"from_source": "",
+		"search_type": search_type,
+		"dynamic_offset": 0,
+		"wts": str(int(Time.get_unix_time_from_system())),
+	}
+	# 旧的 x/web-interface/search/type 对未签名请求会整段 412 风控，
+	# 搜索统一走 WBI 签名接口。
+	var w_rid = await _get_rid(params)
+	if w_rid.is_empty():
+		return {}
+	params["w_rid"] = w_rid
 	var data = await _request_api(
-		"https://api.bilibili.com/x/web-interface/search/type",
-		{
-			"context": "",
-			"page": page,
-			"order": "",
-			"page_size": PAGE_SIZE,
-			"keyword": query,
-			"duration": "",
-			"tids_1": "",
-			"tids_2": "",
-			"__refresh__": true,
-			"_extra": "",
-			"highlight": 1,
-			"single_column": 0,
-			"platform": "pc",
-			"from_source": "",
-			"search_type": search_type,
-			"dynamic_offset": 0,
-		},
+		"https://api.bilibili.com/x/web-interface/wbi/search/type",
+		params,
 		headers
 	)
 	if data is Dictionary:
-		return (data as Dictionary).get("data", {})
+		var payload: Dictionary = (data as Dictionary).get("data", {})
+		if payload.has("v_voucher"):
+			# 风控命中时 B 站仍返回 code 0，但 data 里只有 v_voucher 而没有结果。
+			last_error = "Bilibili 触发了风控验证，请稍后重试或切换网络。"
+			return {}
+		return payload
 	return {}
 
 func _get_favorite_list(media_id: String) -> Array:
@@ -536,7 +545,63 @@ func _get_cid(bvid: String, aid: Variant) -> Variant:
 		DEFAULT_HEADERS
 	)
 
+## 注入用户 cookie（浏览器登录态或扫码登录结果）。传空串等于恢复匿名模式。
+func set_user_cookie(cookie_header: String) -> void:
+	var normalized := cookie_header.strip_edges()
+	if normalized.begins_with("Cookie:"):
+		normalized = normalized.substr(7).strip_edges()
+	user_cookie_header = normalized
+	_user_cookie = _parse_cookie_header(normalized)
+	# 设备指纹缓存可能属于上一个身份，清掉让下次重新获取。
+	_cookie = {}
+	_wbi_img = ""
+	_wbi_sub = ""
+	_wbi_sync_date = ""
+
+## 返回当前注入的用户 cookie 串。
+func get_user_cookie() -> String:
+	return user_cookie_header
+
+## 用当前 cookie 查询登录态，供登录弹窗校验与显示昵称。
+func fetch_login_status() -> Dictionary:
+	# 没有用户 cookie 时不发网络请求：匿名 nav 必然返回未登录，等它只会拖慢界面。
+	if user_cookie_header.is_empty():
+		return {"is_login": false, "uname": "", "mid": 0, "error": ""}
+	await _ensure_cookie()
+	var headers := DEFAULT_HEADERS.duplicate(true)
+	var cookie_header := _build_cookie_header()
+	if not cookie_header.is_empty():
+		headers["cookie"] = cookie_header
+	var response = await _http.get_json("https://api.bilibili.com/x/web-interface/nav", {}, headers)
+	if not (response is Dictionary):
+		return {"is_login": false, "uname": "", "mid": 0, "error": _http.last_error}
+	var data: Dictionary = response.get("data", {}) if response.get("data") is Dictionary else {}
+	return {
+		"is_login": bool(data.get("isLogin", false)),
+		"uname": str(data.get("uname", "")),
+		"mid": _int_id(data.get("mid", 0)),
+		"error": "",
+	}
+
+func _parse_cookie_header(cookie_header: String) -> Dictionary:
+	var parsed := {}
+	for pair in cookie_header.split(";", false):
+		var entry := pair.strip_edges()
+		if entry.is_empty():
+			continue
+		var separator := entry.find("=")
+		if separator <= 0:
+			continue
+		parsed[entry.substr(0, separator).strip_edges()] = entry.substr(separator + 1).strip_edges()
+	return parsed
+
+func _has_user_buvid() -> bool:
+	return not str(_user_cookie.get("buvid3", "")).strip_edges().is_empty()
+
 func _ensure_cookie() -> void:
+	# 用户 cookie 自带设备指纹时不需要匿名 spi。
+	if not user_cookie_header.is_empty() and (_has_user_buvid() or not _cookie.is_empty()):
+		return
 	if not _cookie.is_empty():
 		return
 	var data = await _request_api(
@@ -552,12 +617,24 @@ func _ensure_cookie() -> void:
 		_cookie = {}
 
 func _build_cookie_header() -> String:
-	if _cookie.is_empty():
-		return ""
-	return "buvid3=%s;buvid4=%s" % [
-		str(_cookie.get("b_3", "")),
-		str(_cookie.get("b_4", "")),
-	]
+	if user_cookie_header.is_empty():
+		if _cookie.is_empty():
+			return ""
+		return "buvid3=%s;buvid4=%s" % [
+			str(_cookie.get("b_3", "")),
+			str(_cookie.get("b_4", "")),
+		]
+	# 用户 cookie 优先；缺 buvid 时用匿名 spi 的值补齐，避免设备指纹不一致。
+	var parts := PackedStringArray([user_cookie_header])
+	if not _has_user_buvid():
+		var fallback_buvid3 := str(_cookie.get("b_3", "")).strip_edges()
+		if not fallback_buvid3.is_empty():
+			parts.append("buvid3=%s" % fallback_buvid3)
+	if str(_user_cookie.get("buvid4", "")).strip_edges().is_empty():
+		var fallback_buvid4 := str(_cookie.get("b_4", "")).strip_edges()
+		if not fallback_buvid4.is_empty():
+			parts.append("buvid4=%s" % fallback_buvid4)
+	return "; ".join(parts)
 
 func _format_media(result: Variant) -> Dictionary:
 	var source: Dictionary = result if result is Dictionary else {}
@@ -703,7 +780,18 @@ func _ensure_array(value: Variant) -> Array:
 		return [value]
 	return []
 
+## B 站 JSON 里的数字在 Godot 中是 float，直接 str() 会得到 "6963428.0"，
+## 服务端会把它判成非法 ID（-400）。统一转成整数文本。
+func _int_id(value: Variant) -> int:
+	if value is int:
+		return value
+	if value is float:
+		return int(value)
+	var text := str(value).strip_edges()
+	return text.to_int() if text.is_valid_int() else 0
+
 func _request_api(url: String, query: Dictionary = {}, headers: Dictionary = {}) -> Dictionary:
+	last_error = ""
 	var response = await _http.get_json(url, query, headers)
 	if not (response is Dictionary):
 		last_error = _http.last_error if not _http.last_error.is_empty() else "Bilibili 返回了无效响应。"

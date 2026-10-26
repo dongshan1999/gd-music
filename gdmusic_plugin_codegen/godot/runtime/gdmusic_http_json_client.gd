@@ -77,7 +77,12 @@ func request(
 	var http_request = HTTPRequest.new()
 	http_request.timeout = timeout_sec
 	request_host.add_child(http_request)
-	tree.root.add_child(request_host)
+	# 挂在 SceneTree.root（Window）下时 HTTPRequest 会返回 ERR_UNCONFIGURED，
+	# 因此优先挂到当前场景这个普通节点上。
+	var host: Node = tree.current_scene
+	if host == null or not host.is_inside_tree():
+		host = tree.root
+	host.add_child(request_host)
 
 	var error = http_request.request(url, _build_header_array(headers), method, body)
 	if error != OK:
@@ -89,8 +94,30 @@ func request(
 			"url": url,
 		}
 
-	var result: Array = await http_request.request_completed
+	var state := {"done": false, "result": null}
+	http_request.request_completed.connect(
+		func(req_result: int, response_code: int, response_headers: PackedStringArray, response_body: PackedByteArray) -> void:
+			state["done"] = true
+			state["result"] = [req_result, response_code, response_headers, response_body]
+	)
+
+	# 自己计时：部分环境下 request_completed 不会回调，只能靠帧计数兜底。
+	var frames := 0
+	var max_frames := int((timeout_sec + 3.0) * 60.0)
+	while not bool(state["done"]) and frames < max_frames:
+		await tree.process_frame
+		frames += 1
+
+	if not bool(state["done"]):
+		http_request.cancel_request()
+		request_host.queue_free()
+		var fallback := _request_via_curl(url, headers, method, body, timeout_sec)
+		if not fallback.is_empty():
+			return fallback
+		return {"ok": false, "error": "HTTP request timed out.", "url": url}
+
 	request_host.queue_free()
+	var result: Array = state["result"]
 	if result.size() < 4:
 		return {"ok": false, "error": "HTTPRequest returned an incomplete result.", "url": url}
 
@@ -127,6 +154,65 @@ func request(
 		"url": url,
 		"headers": response_headers,
 		"body": response_body,
+	}
+
+## 桌面平台兜底：HTTPRequest 卡死时改用系统 curl，避免整条插件链路挂住。
+func _request_via_curl(
+	url: String,
+	headers: Dictionary,
+	method: HTTPClient.Method,
+	body: String,
+	timeout_sec: float
+) -> Dictionary:
+	var platform := OS.get_name()
+	if platform != "macOS" and platform != "Linux" and platform != "Windows":
+		return {}
+
+	var curl_path := "curl.exe" if platform == "Windows" else "/usr/bin/curl"
+	var args := PackedStringArray(["-s", "-i", "--max-time", str(int(timeout_sec))])
+	for key in headers.keys():
+		args.append("-H")
+		args.append("%s: %s" % [str(key), str(headers[key])])
+	if method == HTTPClient.METHOD_POST:
+		args.append("-X")
+		args.append("POST")
+		if not body.is_empty():
+			args.append("--data-binary")
+			args.append(body)
+	args.append(url)
+
+	var output: Array = []
+	var exit_code := OS.execute(curl_path, args, output, true)
+	if exit_code != 0 or output.is_empty():
+		return {}
+
+	var text := str(output[0]).replace("\r\n", "\n")
+	var parts := text.split("\n\n")
+	if parts.size() < 2:
+		return {}
+
+	var header_block := parts[parts.size() - 2]
+	var body_text := parts[parts.size() - 1]
+	var header_lines := header_block.split("\n")
+	var response_code := 0
+	var response_headers := PackedStringArray()
+	for index in header_lines.size():
+		var line := header_lines[index]
+		if index == 0 and line.begins_with("HTTP/"):
+			var pieces := line.split(" ")
+			if pieces.size() > 1:
+				response_code = int(pieces[1])
+			continue
+		if not line.strip_edges().is_empty():
+			response_headers.append(line)
+
+	return {
+		"ok": response_code >= 200 and response_code < 300,
+		"response_code": response_code,
+		"url": url,
+		"headers": response_headers,
+		"body": body_text.to_utf8_buffer(),
+		"via": "curl",
 	}
 
 func _build_url(base_url: String, query: Dictionary) -> String:
