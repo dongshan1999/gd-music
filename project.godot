@@ -16,9 +16,10 @@ compatibility/default_parent_skeleton_in_mesh_instance_3d=true
 
 config/name="gd-music"
 config/version="1.0.0"
-run/main_scene="res://scenes/music_app_showcase_scene.tscn"
+run/main_scene="res://assets/scenes/music_app_showcase_scene.tscn"
+config/quit_on_go_back=false
 config/features=PackedStringArray("4.7", "Forward Plus")
-config/icon="res://textures/icon.svg"
+config/icon="res://assets/textures/icon.png"
 
 [autoload]
 
@@ -44,11 +45,11 @@ enabled=PackedStringArray("res://addons/AnchorsOnlyPreset/plugin.cfg", "res://ad
 
 [gui]
 
-theme/custom="res://themes/gd_music_theme.tres"
+theme/custom="res://assets/themes/gd_music_theme.tres"
 
 [internationalization]
 
-locale/translations=PackedStringArray("res://translations/music_app.en.translation", "res://translations/music_app.zh.translation", "res://translations/music_app.zh_CN.translation")
+locale/translations=PackedStringArray("res://assets/translations/music_app.en.translation", "res://assets/translations/music_app.zh.translation", "res://assets/translations/music_app.zh_CN.translation")
 
 [rendering]
 

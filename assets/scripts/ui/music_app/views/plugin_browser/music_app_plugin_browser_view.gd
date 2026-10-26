@@ -1,0 +1,727 @@
+class_name MusicAppPluginBrowserView
+extends "res://assets/scripts/ui/music_app/music_app_page.gd"
+
+const MusicAppScriptPathsType := preload("res://assets/scripts/constants/music_app_script_paths.gd")
+const MusicAppIconsType := preload("res://assets/scripts/constants/music_app_icons.gd")
+const HISTORY_TAG_SCENE := preload(MusicAppScriptPathsType.PLUGIN_BROWSER_HISTORY_TAG)
+const SEARCH_TAB_SCENE := preload(MusicAppScriptPathsType.PLUGIN_BROWSER_SEARCH_TAB)
+const RESULT_ROW_SCENE := preload(MusicAppScriptPathsType.PLUGIN_BROWSER_RESULT_ROW)
+
+const DEFAULT_SEARCH_TYPE := "music"
+const EMPTY_HISTORY_TEXT := "暂无搜索记录"
+const EMPTY_READY_TEXT := "请选择插件并输入搜索关键字"
+const EMPTY_RESULT_TEXT := "暂无搜索结果"
+const RESULT_ROWS_PER_FRAME := 6
+
+var _controller: MusicAppShowcaseController
+var _plugin_controller: MusicAppPluginBrowserController
+var _is_bound := false
+var _plugins: Array[Dictionary] = []
+var _search_results: Array[Dictionary] = []
+var _search_history: Array[String] = []
+var _reload_requested := false
+var _current_page := 1
+var _last_query := ""
+var _last_is_end := true
+var _is_searching := false
+var _selected_plugin_id := ""
+var _selected_search_type := DEFAULT_SEARCH_TYPE
+
+@onready var back_button: Button = %BackButton
+@onready var search_icon_rect: TextureRect = %SearchIconRect
+@onready var query_input: LineEdit = %QueryInput
+@onready var clear_query_button: Button = %ClearQueryButton
+@onready var submit_search_button: Button = %SubmitSearchButton
+@onready var search_content: VBoxContainer = %SearchContent
+@onready var history_section: VBoxContainer = %HistorySection
+@onready var clear_history_button: Button = %ClearHistoryButton
+@onready var history_tags_container: FlowContainer = %HistoryTagsContainer
+@onready var history_empty_label: Label = %HistoryEmptyLabel
+@onready var results_section: VBoxContainer = %ResultsSection
+@onready var search_type_tabs: HBoxContainer = %SearchTypeTabs
+@onready var plugin_tabs: HBoxContainer = %PluginTabs
+@onready var results_list: VBoxContainer = %ResultsList
+@onready var empty_results_label: Label = %EmptyResultsLabel
+@onready var management_panel: PanelContainer = %ManagementPanel
+@onready var host_status_label: Label = %HostStatusLabel
+@onready var manage_toggle_button: Button = %ManageToggleButton
+@onready var start_host_button: Button = %StartHostButton
+@onready var refresh_plugins_button: Button = %RefreshPluginsButton
+@onready var install_file_input: LineEdit = %InstallFileInput
+@onready var install_file_button: Button = %InstallFileButton
+@onready var install_url_input: LineEdit = %InstallUrlInput
+@onready var install_url_button: Button = %InstallUrlButton
+@onready var plugin_info_label: Label = %PluginInfoLabel
+
+var _history_tag_nodes: Array = []
+var _search_type_tab_nodes: Array = []
+var _plugin_tab_nodes: Array = []
+var _result_row_nodes: Array = []
+var _result_render_generation := 0
+var _pagination_bar: HBoxContainer
+var _prev_page_button: Button
+var _next_page_button: Button
+var _page_label: Label
+
+## 注入插件浏览页控制器，并触发首轮插件列表加载。
+func setup(controller: MusicAppShowcaseController) -> void:
+	_controller = controller
+	_plugin_controller = MusicAppPluginBrowserController.new(controller)
+	bind()
+	refresh()
+	_request_reload_plugins()
+
+## 绑定插件浏览页所有固定交互事件。
+func bind() -> void:
+	if _is_bound:
+		return
+	_is_bound = true
+
+	back_button.pressed.connect(close_popup)
+	clear_query_button.pressed.connect(_on_clear_query_pressed)
+	submit_search_button.pressed.connect(_on_search_pressed)
+	query_input.text_submitted.connect(_on_query_submitted)
+	query_input.text_changed.connect(_on_query_text_changed)
+	clear_history_button.pressed.connect(_on_clear_history_pressed)
+	manage_toggle_button.pressed.connect(_on_manage_toggle_pressed)
+	start_host_button.pressed.connect(_on_start_host_pressed)
+	refresh_plugins_button.pressed.connect(_on_refresh_plugins_pressed)
+	install_file_button.pressed.connect(_on_install_file_pressed)
+	install_url_button.pressed.connect(_on_install_url_pressed)
+	_ensure_pagination_bar()
+
+## 弹窗显示时刷新界面并重新请求插件状态。
+func on_popup_shown() -> void:
+	refresh()
+	_request_reload_plugins()
+
+## 刷新搜索历史、分页结果、标签页和管理区状态。
+func refresh() -> void:
+	_search_history = _copy_string_array(
+		_plugin_controller.get_plugin_search_history() if _plugin_controller != null else []
+	)
+	_sync_query_state()
+	_render_history()
+	_render_tabs()
+	_render_results()
+	_set_plugin_info()
+	_sync_action_state()
+
+## 根据当前查询内容切换历史区与结果区可见性。
+func _sync_query_state() -> void:
+	var query := query_input.text.strip_edges()
+	clear_query_button.visible = not query.is_empty()
+	var showing_results := not _last_query.is_empty()
+	history_section.visible = not showing_results
+	results_section.visible = showing_results
+	if not showing_results:
+		empty_results_label.text = EMPTY_READY_TEXT
+
+## 重新生成搜索历史标签区域。
+func _render_history() -> void:
+	for node in _history_tag_nodes:
+		node.queue_free()
+	_history_tag_nodes.clear()
+
+	history_empty_label.visible = _search_history.is_empty()
+	history_empty_label.text = EMPTY_HISTORY_TEXT
+	clear_history_button.visible = not _search_history.is_empty()
+	for text in _search_history:
+		var chip = HISTORY_TAG_SCENE.instantiate()
+		history_tags_container.add_child(chip)
+		chip.configure(text)
+		chip.pressed.connect(_on_history_tag_pressed)
+		chip.remove_requested.connect(_on_history_tag_remove_requested)
+		_history_tag_nodes.append(chip)
+
+## 重新生成搜索类型标签和插件标签。
+func _render_tabs() -> void:
+	_sync_tab_row(
+		search_type_tabs,
+		_search_type_tab_nodes,
+		_get_search_type_tab_items(),
+		_selected_search_type,
+		_on_search_type_tab_selected
+	)
+	_sync_tab_row(
+		plugin_tabs,
+		_plugin_tab_nodes,
+		_get_plugin_tab_items(),
+		_selected_plugin_id,
+		_on_plugin_tab_selected
+	)
+
+## 复用统一逻辑重建某一行 Tab 节点并设置选中态。
+func _sync_tab_row(
+	container: HBoxContainer,
+	storage: Array,
+	items: Array[Dictionary],
+	selected_id: String,
+	callback: Callable
+) -> void:
+	for node in storage:
+		node.queue_free()
+	storage.clear()
+
+	for item in items:
+		var tab = SEARCH_TAB_SCENE.instantiate()
+		container.add_child(tab)
+		tab.configure(
+			str(item.get("id", "")),
+			str(item.get("text", "")),
+			str(item.get("id", "")) == selected_id
+		)
+		tab.selected.connect(callback)
+		storage.append(tab)
+
+## 根据当前插件支持的搜索类型生成顶部搜索分类标签数据。
+func _get_search_type_tab_items() -> Array[Dictionary]:
+	var plugin := _get_selected_plugin()
+	var search_types := _string_list_from_array(plugin.get("supportedSearchType", []))
+	if search_types.is_empty():
+		search_types.append(DEFAULT_SEARCH_TYPE)
+
+	var items: Array[Dictionary] = []
+	for search_type in search_types:
+		items.append({
+			"id": search_type,
+			"text": _get_search_type_label(search_type),
+		})
+	return items
+
+## 根据当前已加载插件列表生成插件标签数据。
+func _get_plugin_tab_items() -> Array[Dictionary]:
+	var items: Array[Dictionary] = []
+	for plugin in _plugins:
+		items.append({
+			"id": _plugin_key(plugin),
+			"text": str(plugin.get("name", _plugin_key(plugin))),
+		})
+	return items
+
+## 根据当前搜索结果重新生成结果列表与空态。
+func _render_results() -> void:
+	_result_render_generation += 1
+	var render_generation := _result_render_generation
+	for node in _result_row_nodes:
+		node.queue_free()
+	_result_row_nodes.clear()
+
+	var showing_results := not _last_query.is_empty()
+	if not showing_results:
+		empty_results_label.visible = false
+		return
+
+	if _search_results.is_empty():
+		empty_results_label.visible = true
+		empty_results_label.text = EMPTY_RESULT_TEXT if not _last_query.is_empty() else EMPTY_READY_TEXT
+		return
+
+	empty_results_label.visible = false
+	call_deferred("_render_result_rows_batched", render_generation)
+
+## 分帧创建搜索结果，避免结果页刷新阻塞音频主循环。
+func _render_result_rows_batched(render_generation: int) -> void:
+	var next_index := 0
+	while next_index < _search_results.size():
+		if render_generation != _result_render_generation:
+			return
+		var end_index := mini(next_index + RESULT_ROWS_PER_FRAME, _search_results.size())
+		for index in range(next_index, end_index):
+			var item := _search_results[index]
+			var row = RESULT_ROW_SCENE.instantiate()
+			results_list.add_child(row)
+			row.configure(
+				index,
+				_result_title(item),
+				_result_subtitle(item),
+				str(item.get("platform", _get_selected_plugin_id()))
+			)
+			row.play_requested.connect(_on_result_row_pressed)
+			_result_row_nodes.append(row)
+		next_index = end_index
+		if next_index < _search_results.size():
+			await get_tree().process_frame
+
+func _plugin_key(plugin: Dictionary) -> String:
+	return str(plugin.get("id", plugin.get("name", "")))
+
+func _get_selected_plugin() -> Dictionary:
+	for plugin in _plugins:
+		if _plugin_key(plugin) == _selected_plugin_id:
+			return plugin
+	return {}
+
+func _get_selected_plugin_id() -> String:
+	return _selected_plugin_id
+
+func _get_selected_search_type() -> String:
+	return _selected_search_type if not _selected_search_type.is_empty() else DEFAULT_SEARCH_TYPE
+
+func _set_status(text: String) -> void:
+	host_status_label.text = text
+
+## 汇总当前选中插件的元数据并展示在管理面板。
+func _set_plugin_info() -> void:
+	var plugin := _get_selected_plugin()
+	if plugin.is_empty():
+		plugin_info_label.text = "No plugin selected. Install a MusicFree-compatible plugin before searching."
+		return
+
+	var search_types := _string_list_from_array(plugin.get("supportedSearchType", []))
+	if search_types.is_empty():
+		search_types.append(DEFAULT_SEARCH_TYPE)
+
+	var details := PackedStringArray()
+	details.append("Name: %s" % str(plugin.get("name", "")))
+	details.append("Version: %s" % str(plugin.get("version", "")))
+	details.append("Search types: %s" % ", ".join(search_types))
+	if not str(plugin.get("author", "")).is_empty():
+		details.append("Author: %s" % str(plugin.get("author", "")))
+	if not str(plugin.get("description", "")).is_empty():
+		details.append(str(plugin.get("description", "")))
+	plugin_info_label.text = "\n".join(details)
+
+## 将任意数组值规范成去重后的字符串数组。
+func _string_list_from_array(value: Variant) -> PackedStringArray:
+	var result := PackedStringArray()
+	if not (value is Array):
+		return result
+	for item in value:
+		var text := str(item).strip_edges()
+		if not text.is_empty() and not result.has(text):
+			result.append(text)
+	return result
+
+## 复制字符串数组，避免直接持有外部引用。
+func _copy_string_array(value: Array) -> Array[String]:
+	var result: Array[String] = []
+	for item in value:
+		result.append(str(item))
+	return result
+
+## 将搜索类型标识转换为界面显示文案。
+func _get_search_type_label(search_type: String) -> String:
+	match search_type:
+		"music":
+			return "单曲"
+		"album":
+			return "专辑"
+		"artist":
+			return "作者"
+		"playlist":
+			return "歌单"
+		_:
+			return search_type.capitalize()
+
+## 解析搜索结果项的主标题。
+func _result_title(item: Dictionary) -> String:
+	var title := str(item.get("title", "")).strip_edges()
+	if title.is_empty():
+		title = str(item.get("name", "")).strip_edges()
+	if title.is_empty():
+		title = "Untitled"
+	var is_collection := _get_selected_search_type() == "album" or str(item.get("collectionType", "")) == "album" or str(item.get("mediaType", "")) == "album"
+	if is_collection and not title.begins_with("专辑 · "):
+		return "专辑 · %s" % title
+	return title
+
+## 解析搜索结果项的副标题，优先展示作者与专辑。
+func _result_subtitle(item: Dictionary) -> String:
+	var parts := PackedStringArray()
+	var artist := str(item.get("artist", "")).strip_edges()
+	var album := str(item.get("album", "")).strip_edges()
+	if _get_selected_search_type() == "album" or str(item.get("collectionType", "")) == "album" or str(item.get("mediaType", "")) == "album":
+		var part_hint := ""
+		var duration := int(item.get("duration", 0))
+		if duration <= 0:
+			part_hint = "点击打开合集"
+		if not part_hint.is_empty():
+			parts.append(part_hint)
+	if not artist.is_empty():
+		parts.append(artist)
+	if not album.is_empty() and album != artist:
+		parts.append(album)
+	if parts.is_empty():
+		var raw_text := JSON.stringify(item)
+		return raw_text.left(96) if raw_text.length() > 96 else raw_text
+	return " - ".join(parts)
+
+func _show_error(message: String) -> void:
+	if _plugin_controller != null:
+		_plugin_controller.show_common_alert("Plugin Search", message)
+
+func _toast(message: String) -> void:
+	if _plugin_controller != null:
+		_plugin_controller.show_toast(message)
+
+func _ensure_controller() -> bool:
+	if _controller != null and _plugin_controller != null:
+		return true
+	_set_status("Plugin search controller is not ready.")
+	return false
+
+## 根据插件、查询和加载状态统一刷新所有操作按钮可用性。
+func _sync_action_state() -> void:
+	var has_plugin := not _get_selected_plugin().is_empty()
+	var has_query := not query_input.text.strip_edges().is_empty()
+	submit_search_button.disabled = not has_plugin or not has_query or _is_searching
+	start_host_button.disabled = _is_searching
+	refresh_plugins_button.disabled = _is_searching
+	clear_history_button.disabled = _search_history.is_empty() or _is_searching
+	manage_toggle_button.text = "Hide" if management_panel.visible else "Manage"
+	_sync_pagination_state()
+
+## 在结果区底部创建上一页/下一页分页条，只创建一次。
+func _ensure_pagination_bar() -> void:
+	if _pagination_bar != null or results_section == null:
+		return
+	_pagination_bar = HBoxContainer.new()
+	_pagination_bar.name = "PaginationBar"
+	_pagination_bar.alignment = BoxContainer.ALIGNMENT_CENTER
+	_pagination_bar.add_theme_constant_override("separation", 12)
+	_pagination_bar.visible = false
+	results_section.add_child(_pagination_bar)
+
+	_prev_page_button = _make_page_button("上一页")
+	_prev_page_button.name = "PrevPageButton"
+	_next_page_button = _make_page_button("下一页")
+	_next_page_button.name = "NextPageButton"
+	_page_label = Label.new()
+	_page_label.name = "PageLabel"
+	_page_label.text = "第 1 页"
+	_page_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	_page_label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+	_page_label.custom_minimum_size = Vector2(72, 0)
+	_page_label.add_theme_color_override("font_color", Color(0.643137, 0.65098, 0.690196, 1))
+	_page_label.add_theme_font_size_override("font_size", 14)
+
+	_pagination_bar.add_child(_prev_page_button)
+	_pagination_bar.add_child(_page_label)
+	_pagination_bar.add_child(_next_page_button)
+	_prev_page_button.pressed.connect(_on_prev_page_pressed)
+	_next_page_button.pressed.connect(_on_next_page_pressed)
+
+## 创建与现有深色主题一致的分页按钮。
+func _make_page_button(text: String) -> Button:
+	var button := Button.new()
+	button.text = text
+	button.theme_type_variation = "SegmentButton"
+	button.custom_minimum_size = Vector2(84, 36)
+	button.focus_mode = Control.FOCUS_NONE
+	return button
+
+## 同步分页条可见性、页码与首末页禁用状态。
+func _sync_pagination_state() -> void:
+	if _pagination_bar == null:
+		return
+	var has_query := not _last_query.is_empty()
+	var has_results := not _search_results.is_empty()
+	# 有结果时始终显示分页条；首末页通过禁用态表达，避免用户以为翻页入口又丢了。
+	# 结果为空但后面还有页时也要显示：插件侧过滤（例如「专辑」标签只留合集）
+	# 可能让整页变空，此时用户仍需要能翻到下一页。
+	_pagination_bar.visible = has_query and (has_results or not _last_is_end)
+	_page_label.text = "第 %d 页" % _current_page
+	_prev_page_button.disabled = _is_searching or _current_page <= 1
+	_next_page_button.disabled = _is_searching or _last_is_end
+
+func _on_prev_page_pressed() -> void:
+	if _is_searching or _current_page <= 1:
+		return
+	await _search_page(_current_page - 1)
+
+func _on_next_page_pressed() -> void:
+	if _is_searching or _last_is_end:
+		return
+	await _search_page(_current_page + 1)
+
+## 切换搜索中状态，并同步按钮禁用与文案。
+func _set_searching(value: bool) -> void:
+	_is_searching = value
+	submit_search_button.text = "搜索中" if value else "搜索"
+	_sync_action_state()
+
+## 过滤并复制结果数组中的字典项。
+func _normalize_dictionary_array(value: Variant) -> Array[Dictionary]:
+	var result: Array[Dictionary] = []
+	if not (value is Array):
+		return result
+	for item in value:
+		if item is Dictionary:
+			result.append(item)
+	return result
+
+func _get_plugin_controller() -> MusicAppPluginController:
+	if _plugin_controller == null:
+		return null
+	return _plugin_controller.get_plugin_controller()
+
+func _request_reload_plugins() -> void:
+	if _reload_requested:
+		return
+	_reload_requested = true
+	call_deferred("_reload_plugins_deferred")
+
+## 延迟执行插件刷新，合并同一帧内的重复请求。
+func _reload_plugins_deferred() -> void:
+	_reload_requested = false
+	if not _ensure_controller():
+		return
+	_reload_plugins(true)
+
+func _on_query_text_changed(_text: String) -> void:
+	_sync_query_state()
+	_sync_action_state()
+
+func _on_clear_query_pressed() -> void:
+	query_input.text = ""
+	_last_query = ""
+	_search_results = []
+	_current_page = 1
+	_last_is_end = true
+	_sync_query_state()
+	_render_results()
+	_sync_action_state()
+
+func _on_clear_history_pressed() -> void:
+	_plugin_controller.clear_plugin_search_history()
+	_search_history = _copy_string_array(_plugin_controller.get_plugin_search_history())
+	_render_history()
+	_sync_action_state()
+
+func _on_history_tag_pressed(text: String) -> void:
+	query_input.text = text
+	await _search_page(1)
+
+func _on_history_tag_remove_requested(text: String) -> void:
+	_plugin_controller.remove_plugin_search_history(text)
+	_search_history = _copy_string_array(_plugin_controller.get_plugin_search_history())
+	_render_history()
+	_sync_action_state()
+
+func _on_search_type_tab_selected(search_type: String) -> void:
+	if search_type == _selected_search_type:
+		return
+	_selected_search_type = search_type
+	_render_tabs()
+	if not _last_query.is_empty():
+		await _search_page(1)
+
+func _on_plugin_tab_selected(plugin_id: String) -> void:
+	if plugin_id == _selected_plugin_id:
+		return
+	_selected_plugin_id = plugin_id
+	var plugin := _get_selected_plugin()
+	var supported_types := _string_list_from_array(plugin.get("supportedSearchType", []))
+	if supported_types.is_empty():
+		supported_types.append(DEFAULT_SEARCH_TYPE)
+	if not supported_types.has(_selected_search_type):
+		_selected_search_type = supported_types[0]
+	_set_plugin_info()
+	_render_tabs()
+	_sync_action_state()
+	if not _last_query.is_empty():
+		await _search_page(1)
+
+func _on_result_row_pressed(index: int) -> void:
+	if _is_searching:
+		return
+	if index < 0 or index >= _search_results.size():
+		return
+	var result_type := "album" if str(_search_results[index].get("collectionType", "")) == "album" or str(_search_results[index].get("mediaType", "")) == "album" else _get_selected_search_type()
+	# A music-tab video can still be a multi-track collection. Resolve it from
+	# Bilibili's page data before deciding how the result should open.
+	if result_type == "music" and _plugin_controller != null:
+		var candidate := _search_results[index]
+		var detail := await _plugin_controller.resolve_collection_result(candidate, _get_selected_plugin_id())
+		if int(detail.get("track_count", 0)) > 1:
+			result_type = "album"
+			candidate["mediaType"] = "album"
+			candidate["collectionType"] = "album"
+	print("[PluginBrowserView] result clicked: ", {"index": index, "selected_type": result_type, "item_id": _search_results[index].get("id", ""), "item_media_type": _search_results[index].get("mediaType", ""), "item_collection_type": _search_results[index].get("collectionType", "")})
+	if result_type == "album" or result_type == "artist":
+		if _plugin_controller != null:
+			await _plugin_controller.open_collection_result(_search_results[index], _get_selected_plugin_id(), result_type)
+		return
+	if result_type != DEFAULT_SEARCH_TYPE:
+		_toast("当前搜索类型暂不支持打开详情。")
+		return
+	if _plugin_controller == null:
+		return
+	if not _plugin_controller.play_search_result(_search_results, index, _get_selected_plugin_id()):
+		_show_error("播放失败")
+
+func _on_manage_toggle_pressed() -> void:
+	management_panel.visible = not management_panel.visible
+	_sync_action_state()
+
+func _on_start_host_pressed() -> void:
+	if not _ensure_controller():
+		return
+	_set_status("Refreshing plugins...")
+	var ok: bool = _plugin_controller.refresh_music_plugins()
+	if not ok:
+		var error_text := "Failed to refresh plugins. Check console output."
+		_set_status("Plugin refresh failed: %s" % error_text)
+		_show_error(error_text)
+		return
+	_set_status("Plugins refreshed.")
+	_toast("Plugins refreshed.")
+	_reload_plugins(false)
+
+func _on_refresh_plugins_pressed() -> void:
+	if not _ensure_controller():
+		return
+	_reload_plugins(true)
+
+func _on_install_file_pressed() -> void:
+	if not _ensure_controller():
+		return
+	var plugin_path := install_file_input.text.strip_edges()
+	if plugin_path.is_empty():
+		_show_error("Please enter a plugin file path.")
+		return
+	var plugin_controller = _get_plugin_controller()
+	var result: Dictionary = plugin_controller.install_plugin_from_file(plugin_path)
+	if result.is_empty():
+		_show_error(plugin_controller.last_error if not plugin_controller.last_error.is_empty() else "Install failed.")
+		return
+	_toast("Plugin installed from file.")
+	_reload_plugins(false)
+
+func _on_install_url_pressed() -> void:
+	if not _ensure_controller():
+		return
+	var plugin_url := install_url_input.text.strip_edges()
+	if plugin_url.is_empty():
+		_show_error("Please enter a plugin URL.")
+		return
+	var plugin_controller: MusicAppPluginController = _get_plugin_controller()
+	var ok: bool = plugin_controller.install_plugin_from_url(plugin_url)
+	if not ok:
+		_show_error(plugin_controller.last_error if not plugin_controller.last_error.is_empty() else "Install failed.")
+		return
+	_toast("Plugin installed from URL.")
+	_reload_plugins(false)
+
+func _on_query_submitted(_text: String) -> void:
+	await _search_page(1)
+
+func _on_search_pressed() -> void:
+	await _search_page(1)
+
+## 执行指定页的插件搜索，并同步历史、结果与空态。
+func _search_page(page: int) -> void:
+	if not _ensure_controller() or _is_searching:
+		return
+	var plugin := _get_selected_plugin()
+	var plugin_id := _get_selected_plugin_id()
+	if plugin_id.is_empty():
+		_show_error("Please select a plugin first.")
+		return
+	if plugin.has("hasSearch") and not bool(plugin.get("hasSearch", true)):
+		_show_error("Selected plugin does not support search.")
+		return
+
+	var query := query_input.text.strip_edges()
+	if query.is_empty():
+		_show_error("Please enter a search keyword.")
+		return
+
+	var target_page := maxi(1, page)
+	var previous_page := _current_page
+	_last_query = query
+	var requested_type := _get_selected_search_type()
+	_sync_query_state()
+	_set_searching(true)
+
+	var plugin_controller: MusicAppPluginController = _get_plugin_controller()
+	var result: Dictionary = await plugin_controller.search(
+		plugin_id,
+		query,
+		target_page,
+		requested_type
+	)
+	_set_searching(false)
+	if plugin_id != _get_selected_plugin_id() or requested_type != _get_selected_search_type() or query != query_input.text.strip_edges():
+		if not query_input.text.strip_edges().is_empty():
+			await _search_page(1)
+		return
+	if result.is_empty():
+		# 翻页失败时回滚页码，避免页码前进但列表为空。
+		_current_page = previous_page
+		_search_results = []
+		_last_is_end = true
+		_render_results()
+		_sync_action_state()
+		_show_error(plugin_controller.last_error if not plugin_controller.last_error.is_empty() else "Search failed.")
+		return
+
+	_current_page = target_page
+	_plugin_controller.push_plugin_search_history(query)
+	_search_history = _copy_string_array(_plugin_controller.get_plugin_search_history())
+	_render_history()
+
+	if result is Dictionary:
+		_search_results = _normalize_dictionary_array(result.get("data", []))
+		_last_is_end = bool(result.get("isEnd", true))
+	else:
+		_search_results = []
+		_last_is_end = true
+	_render_results()
+	_sync_action_state()
+
+## 刷新插件状态并重新加载插件列表。
+func _reload_plugins(_auto_start: bool) -> void:
+	var previous_plugin_id := _selected_plugin_id
+	var plugin_controller: MusicAppPluginController = _get_plugin_controller()
+	if plugin_controller == null:
+		_set_status("Plugin controller unavailable.")
+		return
+
+	_set_status("Refreshing plugins...")
+	var refresh_ok: bool = plugin_controller.refresh_plugins()
+	if not refresh_ok:
+		_plugins = []
+		_selected_plugin_id = ""
+		_search_results = []
+		_last_is_end = true
+		_render_tabs()
+		_render_results()
+		_set_status("Plugins unavailable: %s" % plugin_controller.last_error)
+		return
+
+	_set_status("Plugins ready.")
+	var plugins: Array[Dictionary] = plugin_controller.list_plugins()
+	if plugins.is_empty() and not plugin_controller.last_error.is_empty():
+		_plugins = []
+		_selected_plugin_id = ""
+		_render_tabs()
+		_render_results()
+		_set_status("Plugins ready, but listing failed: %s" % plugin_controller.last_error)
+		return
+	_plugins = plugins.filter(func(plugin: Dictionary) -> bool: return bool(plugin.get("enabled", true)))
+
+	if _plugins.is_empty():
+		_selected_plugin_id = ""
+		_selected_search_type = DEFAULT_SEARCH_TYPE
+	else:
+		if _selected_plugin_id.is_empty() or _get_selected_plugin().is_empty():
+			_selected_plugin_id = _plugin_key(_plugins[0])
+		var plugin := _get_selected_plugin()
+		var search_types := _string_list_from_array(plugin.get("supportedSearchType", []))
+		if search_types.is_empty():
+			search_types.append(DEFAULT_SEARCH_TYPE)
+		if not search_types.has(_selected_search_type):
+			_selected_search_type = search_types[0]
+
+	if previous_plugin_id != _selected_plugin_id:
+		_search_results = []
+	_render_tabs()
+	_set_plugin_info()
+	_render_results()
+	_sync_action_state()
+	if _plugins.is_empty():
+		_set_status("Plugins ready. No plugins installed yet.")
+	else:
+		_set_status("Plugins ready. %d plugin(s) loaded." % _plugins.size())
