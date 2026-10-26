@@ -1,0 +1,6 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" uid="uid://b2fw87vgr6sxy" path="res://assets/tests/music_app/music_app_focus_save_test.gd" id="1"]
+
+[node name="FocusSaveTest" type="Node"]
+script = ExtResource("1")
