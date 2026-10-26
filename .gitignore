@@ -2,8 +2,13 @@
 .godot/
 .DS_Store
 .vscode/
-/android/
+/android/*
+!/android/plugins/
+!/android/plugins/GDMusicBackgroundAudio/
+!/android/plugins/GDMusicBackgroundAudio/**
 *.translation
 plugin_host/node_modules/
 plugin_host/data/
 builds/
+.build/
+.tools/
