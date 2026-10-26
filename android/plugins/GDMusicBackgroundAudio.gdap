@@ -1,0 +1,5 @@
+[config]
+
+name="GDMusicBackgroundAudio"
+binary_type="local"
+binary="GDMusicBackgroundAudio/GDMusicBackgroundAudio.aar"
