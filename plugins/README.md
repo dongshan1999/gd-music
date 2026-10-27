@@ -18,6 +18,19 @@ Bilibili DASH 通常提供 AAC/M4A，Godot 原生播放器不能直接解码。
 
 音频先下载再播放，下载超时 20 秒、大小上限 64 MiB；转换超时 30 秒。切换歌曲后的过期结果不会启动播放，转换临时文件在完成或取消后删除。
 
+## 标题净化
+
+B 站视频标题常带 UP 主自加的「001.」「01、」类序号。插件在 `_format_media()`、多 P 专辑标题、`import_music_sheet()` 三处统一调用 `_strip_title_order_prefix()` 剥掉此前缀（剥空时保留原值），避免序号进入曲库与下载记录。若某个标题仍不合意，可在播放器页点歌名/UP 主名手动编辑（只改本机）。
+
+## 音乐下载与离线播放
+
+播放器页右上角的下载按钮会把当前 B 站单曲的完整音频保存到本地。下载索引独立存放在 `MusicAppStateData.downloads`（`MusicDownloadRecordData`），不回写 `TrackData.file_path`，避免被本地音乐页当作扫描曲目、在移除本地文件夹时被误删。
+
+- 下载：先通过插件重新解析 `playurl` 得到带时效的 CDN 地址，再带 Referer / User-Agent 拉取字节；超时 60 秒、上限 128 MiB、失败自动重试 2 次，先写 `.part` 临时文件，校验 M4A `ftyp` 头后再改名。
+- 目录：`app://music_downloads/<插件 ID>/<曲目 ID 前 16 位>.<扩展名>`；设置 › 音乐下载可看到系统真实路径，并复制路径或打开目录。
+- 播放：命中下载记录的曲目直接读取本地文件，不再请求 `playurl` 与 CDN；播放键为 `download:<track id>`，删除下载后立即回到在线解析。
+- 移动端：iOS 当前没有 AAC 解码后端，能下载但无法播放；下载目录为应用私有目录，暂不支持导出到系统音乐目录。
+
 ## 验证
 
 离线集成测试覆盖加载/禁用/卸载保护、搜索映射、队列、存档往返、请求头与整数 CID/AID、失败响应及 M4A 转换：
@@ -30,6 +43,13 @@ godot --headless --path . tests/music_app/music_app_bilibili_test.tscn
 
 ```sh
 godot --headless --path . tests/music_app/music_app_bilibili_smoke.tscn
+```
+
+下载功能的离线单测与实网冒烟：
+
+```sh
+godot --headless --path . tests/music_app/music_app_download_test.tscn
+godot --headless --path . tests/music_app/music_app_download_smoke.tscn
 ```
 
 `tests/music_app/fixtures/tone.m4a` 是本项目生成的 0.1 秒、440 Hz 测试音，不来自 Bilibili。

@@ -538,7 +538,6 @@ func _on_result_row_pressed(index: int) -> void:
 			result_type = "album"
 			candidate["mediaType"] = "album"
 			candidate["collectionType"] = "album"
-	print("[PluginBrowserView] result clicked: ", {"index": index, "selected_type": result_type, "item_id": _search_results[index].get("id", ""), "item_media_type": _search_results[index].get("mediaType", ""), "item_collection_type": _search_results[index].get("collectionType", "")})
 	if result_type == "album" or result_type == "artist":
 		if _plugin_controller != null:
 			await _plugin_controller.open_collection_result(_search_results[index], _get_selected_plugin_id(), result_type)

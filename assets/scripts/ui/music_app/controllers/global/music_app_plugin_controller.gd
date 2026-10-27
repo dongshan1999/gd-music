@@ -317,34 +317,16 @@ func set_plugin_enabled(plugin_id: String, enabled: bool) -> void:
 		settings.disabled_plugin_ids.append(normalized_plugin_id)
 
 func search(plugin_id: String, query: String, page: int = 1, media_type: String = "music") -> Dictionary:
-	print("[MusicPluginController] search request:",
-		{
-			"plugin_id": plugin_id,
-			"query": query,
-			"page": page,
-			"media_type": media_type
-		}
-	)
 	var plugin_result = _require_plugin_entry(plugin_id)
 	if plugin_result.is_empty():
-		print("[MusicPluginController] search aborted: plugin entry missing, last_error=", last_error)
 		return {}
 
 	var plugin = plugin_result.get("plugin")
 	if plugin == null or not plugin.has_method("search"):
 		_fail("Selected plugin does not support search.")
-		print("[MusicPluginController] search aborted: plugin missing search(), last_error=", last_error)
 		return {}
 
 	var result = await plugin.search(query, maxi(1, page), media_type)
-	print("[MusicPluginController] search result:",
-		{
-			"is_dictionary": result is Dictionary,
-			"keys": result.keys() if result is Dictionary else [],
-			"data_size": (result.get("data", []) as Array).size() if result is Dictionary and result.get("data", []) is Array else -1,
-			"is_end": result.get("isEnd", null) if result is Dictionary else null
-		}
-	)
 	last_error = _get_plugin_error(plugin)
 	if not last_error.is_empty():
 		return {}

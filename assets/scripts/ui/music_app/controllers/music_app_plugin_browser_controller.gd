@@ -113,7 +113,6 @@ func open_collection_result(item: Dictionary, plugin_id: String, collection_type
 	_cleanup_temporary_collections()
 	show_toast("正在加载%s…" % ("专辑" if collection_type == "album" else "作者作品"))
 	var response: Dictionary = {}
-	print("[PluginBrowser] collection request: ", {"plugin_id": plugin_id, "collection_type": collection_type, "item_id": item.get("id", ""), "bvid": item.get("bvid", "")})
 	if collection_type == "album" and plugin.has_method("get_album_info"):
 		response = await plugin.get_album_info(item, 1)
 	elif collection_type == "artist" and plugin.has_method("get_artist_works"):
@@ -123,13 +122,10 @@ func open_collection_result(item: Dictionary, plugin_id: String, collection_type
 	for value in raw_items:
 		if value is Dictionary:
 			typed_items.append(value)
-	print("[PluginBrowser] resolved collection evidence: ", {"item_id": item.get("id", ""), "pages_or_tracks": typed_items.size(), "title": item.get("title", ""), "description": item.get("description", ""), "tag": item.get("tag", "")})
-	print("[PluginBrowser] collection result: ", {"collection_type": collection_type, "count": typed_items.size(), "first_keys": typed_items[0].keys() if not typed_items.is_empty() else []})
 	var indices := ensure_plugin_tracks_from_search_results(typed_items, plugin_id)
 	if indices.is_empty():
 		# 插件失败时把真实原因带给用户：否则只会看到「未找到可播放内容」。
 		var plugin_error := str(plugin.get("last_error")) if plugin != null else ""
-		print("[PluginBrowser] collection open aborted: ", plugin_error)
 		show_toast(plugin_error if not plugin_error.is_empty() else "未找到可播放内容。")
 		return
 	var playlist := PlaylistData.new()
@@ -147,7 +143,6 @@ func open_collection_result(item: Dictionary, plugin_id: String, collection_type
 		DX_PopupRegistry.PopupId.MUSIC_APP_PLAYLIST,
 		DX_PopupView.PopupLayer.FULLSCREEN
 	)
-	print("[PluginBrowser] collection popup shown: ", popup != null)
 
 ## Resolve collection size without mutating playlists; used for music-tab videos.
 func resolve_collection_result(item: Dictionary, plugin_id: String) -> Dictionary:
@@ -159,7 +154,6 @@ func resolve_collection_result(item: Dictionary, plugin_id: String) -> Dictionar
 		return {}
 	var response: Dictionary = await entry.plugin.get_album_info(item, 1)
 	var tracks: Array = response.get("musicList", []) if response is Dictionary else []
-	print("[PluginBrowser] collection probe: ", {"id": item.get("id", ""), "track_count": tracks.size(), "title": item.get("title", "")})
 	return {"track_count": tracks.size()}
 
 func cleanup_temporary_collection() -> void:

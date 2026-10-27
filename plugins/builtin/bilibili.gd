@@ -4,11 +4,13 @@ const HttpJsonClientScript = preload("res://gdmusic_plugin_codegen/godot/runtime
 const TextUtilsScript = preload("res://gdmusic_plugin_codegen/godot/runtime/gdmusic_text_utils.gd")
 
 const PLATFORM := "bilibili"
-const AUTHOR := "猫头猫"
-const VERSION := "0.2.4"
+const AUTHOR := "gd-music"
+const VERSION := "0.0.1"
 const SRC_URL := "https://gitee.com/maotoumao/MusicFreePlugins/raw/v0.1/dist/bilibili/index.js"
 const DEFAULT_SEARCH_TYPE := "music"
 const SUPPORTED_SEARCH_TYPES := ["music", "album", "artist"]
+## UP 主常在视频标题前加「001.」「01、」这类序号，统一剥掉，避免进入曲库与下载记录。
+const TITLE_ORDER_PREFIX_PATTERN := "^\\s*\\d{1,3}\\s*[.、．]\\s*"
 const SUPPORTED_METHODS := [
 	"search",
 	"get_media_source",
@@ -120,7 +122,7 @@ func get_album_info(album_item: Dictionary, _page: int) -> Dictionary:
 			var part: Dictionary = page_item
 			var mapped = album_item.duplicate(true)
 			mapped["cid"] = part.get("cid", null)
-			mapped["title"] = str(part.get("part", mapped.get("title", "")))
+			mapped["title"] = _strip_title_order_prefix(str(part.get("part", mapped.get("title", ""))))
 			mapped["duration"] = _duration_to_sec(part.get("duration", 0))
 			mapped["id"] = part.get("cid", mapped.get("id", ""))
 			music_list.append(mapped)
@@ -338,7 +340,7 @@ func import_music_sheet(url_like: String) -> Array:
 			"aid": source.get("aid", null),
 			"bvid": str(source.get("bvid", "")),
 			"artwork": str(source.get("cover", "")),
-			"title": str(source.get("title", "")),
+			"title": _strip_title_order_prefix(str(source.get("title", ""))),
 			"artist": str(source.get("upper", {}).get("name", "")),
 			"album": str(source.get("bvid", source.get("aid", ""))),
 			"duration": _duration_to_sec(source.get("duration", 0)),
@@ -641,6 +643,7 @@ func _format_media(result: Variant) -> Dictionary:
 	var raw_title = str(source.get("title", ""))
 	raw_title = TextUtilsScript.strip_html_emphasis(raw_title)
 	raw_title = TextUtilsScript.decode_basic_html_entities(raw_title)
+	raw_title = _strip_title_order_prefix(raw_title)
 
 	var artwork = str(source.get("pic", ""))
 	if artwork.begins_with("//"):
@@ -779,6 +782,20 @@ func _ensure_array(value: Variant) -> Array:
 	if value is Dictionary:
 		return [value]
 	return []
+
+## 去掉标题开头的「001.」「01、」类序号；剥空时保留原值。
+func _strip_title_order_prefix(value: String) -> String:
+	var text := value.strip_edges()
+	if text.is_empty():
+		return value
+	var regex := RegEx.new()
+	if regex.compile(TITLE_ORDER_PREFIX_PATTERN) != OK:
+		return text
+	var match_result = regex.search(text)
+	if match_result == null or match_result.get_start() != 0:
+		return text
+	var stripped := text.substr(match_result.get_end()).strip_edges()
+	return stripped if not stripped.is_empty() else text
 
 ## B 站 JSON 里的数字在 Godot 中是 float，直接 str() 会得到 "6963428.0"，
 ## 服务端会把它判成非法 ID（-400）。统一转成整数文本。

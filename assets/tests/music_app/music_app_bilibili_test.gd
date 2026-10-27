@@ -53,6 +53,7 @@ func _ready() -> void:
 	call_deferred("_run")
 
 func _run() -> void:
+	_test_title_cleanup()
 	var host := Host.new()
 	add_child(host)
 	var plugins := Plugins.new(host)
@@ -162,6 +163,18 @@ func _run() -> void:
 	row.queue_free()
 	host.queue_free()
 	_finish()
+
+func _test_title_cleanup() -> void:
+	var plugin = Bilibili.new()
+	var cleaned: Dictionary = plugin._format_media({
+		"title": "001.周杰伦-晴天", "cid": 1, "bvid": "BV1x", "owner": {"name": "超级爱下雨天"}
+	})
+	_check(str(cleaned.get("title", "")) == "周杰伦-晴天", "Plugin strips numeric title prefix")
+	_check(str(cleaned.get("artist", "")) == "超级爱下雨天", "Plugin keeps uploader as artist")
+	var kept: Dictionary = plugin._format_media({"title": "2026.10.26 跨年歌单", "cid": 2, "bvid": "BV1y"})
+	_check(str(kept.get("title", "")) == "2026.10.26 跨年歌单", "Plugin keeps four-digit years in title")
+	var blank: Dictionary = plugin._format_media({"title": "01.", "cid": 3, "bvid": "BV1z"})
+	_check(str(blank.get("title", "")) == "01.", "Plugin keeps title when stripping leaves nothing")
 
 func _check(ok: bool, message: String) -> void:
 	if not ok:
