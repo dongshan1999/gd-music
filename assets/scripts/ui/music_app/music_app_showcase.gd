@@ -9,6 +9,7 @@ const PlaybackStateControllerScript := preload(MusicAppScriptPathsType.MUSIC_APP
 const PlaylistStateControllerScript := preload(MusicAppScriptPathsType.MUSIC_APP_PLAYLIST_STATE_CONTROLLER)
 const PopupRouterControllerScript := preload(MusicAppScriptPathsType.MUSIC_APP_POPUP_ROUTER_CONTROLLER)
 const PluginControllerScript := preload(MusicAppScriptPathsType.MUSIC_APP_PLUGIN_CONTROLLER)
+const DownloadControllerScript := preload(MusicAppScriptPathsType.MUSIC_APP_DOWNLOAD_CONTROLLER)
 
 @onready var normal_popup_host: Control = %NormalPopupHost
 @onready var mini_player: Control = %MiniPlayer
@@ -22,6 +23,7 @@ var _playback_state_controller = PlaybackStateControllerScript.new(self)
 var _playlist_state_controller = PlaylistStateControllerScript.new(self)
 var _popup_router_controller = PopupRouterControllerScript.new(self)
 var _plugin_controller = PluginControllerScript.new(self)
+var _download_controller = DownloadControllerScript.new(self)
 
 const BACK_CONFIRM_WINDOW_MSEC := 2000
 const BACK_EVENT_DEBOUNCE_MSEC := 120
@@ -51,6 +53,7 @@ func _ready() -> void:
 
 	_popup_router_controller.attach_popup_hosts(normal_popup_host, fullscreen_popup_host)
 	_plugin_controller.in_ready()
+	_download_controller.in_ready()
 	_playback_state_controller.bind_background_audio_controls()
 	if DX != null and DX.debug != null:
 		DX.debug.register_target("MusicAppShowcase", self)
@@ -82,7 +85,7 @@ func _exit_tree() -> void:
 	if instance == self:
 		instance = null
 
-## 处理翻译切换和窗口关闭时的状态刷新与保存。
+## 处理返回键与窗口关闭请求。
 func _notification(_what: int) -> void:
 	if _what == NOTIFICATION_WM_GO_BACK_REQUEST:
 		_handle_back_requested()
@@ -101,6 +104,22 @@ func toggle_playback() -> void:
 
 func request_audio_sync() -> void:
 	_playback_state_controller.request_audio_sync()
+
+## 返回当前播放音量（线性 0–1）。
+func get_playback_volume() -> float:
+	return _playback_state_controller.get_playback_volume()
+
+## 设置播放音量（线性 0–1），立即下发并持久化。
+func set_playback_volume(value: float) -> void:
+	_playback_state_controller.set_playback_volume(value)
+
+## 让设置页在打开时同步一次音量。
+func sync_playback_volume() -> void:
+	_playback_state_controller.sync_playback_volume()
+
+## 返回音乐下载控制器。
+func get_download_controller():
+	return _download_controller
 
 func show_popup(popup_id: int):
 	return _popup_router_controller.show_popup(popup_id)

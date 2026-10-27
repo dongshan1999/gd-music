@@ -18,6 +18,8 @@ var _is_bound := false
 var _artwork_source := ""
 var _artwork_request_id := 0
 var _artwork_texture_cache := {}
+## 当前已渲染的「曲目 + 封面来源」标识，用于避免每秒进度刷新时重建封面。
+var _artwork_key := ""
 
 @onready var mini_cover_panel: Panel = %MiniCoverPanel
 @onready var mini_cover_texture_rect: TextureRect = %MiniCoverTextureRect
@@ -111,19 +113,38 @@ func _on_playback_progress_changed(_event: MusicAppPlaybackProgressChangedEvent)
 	refresh()
 
 ## 刷新当前曲目的封面展示，必要时触发异步加载。
+##
+## 这个方法每秒都会被进度事件调到一次，所以只有「曲目 + 封面来源」真正变化时才重建，
+## 否则会把已经显示出来的封面每秒清空一次。
 func _refresh_cover(track: TrackData) -> void:
 	if track == null:
 		_reset_cover_state()
 		return
 
-	_apply_cover_placeholder(track)
+	var source := _mini_player_controller.get_track_artwork_source(track)
+	var artwork_key := "%s|%s" % [track.id, source]
+	if artwork_key == _artwork_key:
+		return
+	_artwork_key = artwork_key
+	_artwork_source = source
+	_artwork_request_id += 1
+
 	mini_cover_texture_rect.texture = null
 	mini_cover_texture_rect.visible = false
-	_artwork_source = ""
+	if source.is_empty():
+		_apply_cover_placeholder(track)
+		return
+
+	if _artwork_texture_cache.has(source):
+		_display_cover_texture(_artwork_texture_cache[source])
+		return
+	_apply_cover_placeholder(track)
+	_load_cover_artwork(source, _artwork_request_id)
 
 ## 重置封面到默认占位状态。
 func _reset_cover_state() -> void:
 	_artwork_source = ""
+	_artwork_key = ""
 	mini_cover_texture_rect.texture = null
 	mini_cover_texture_rect.visible = false
 	mini_cover_icon_rect.visible = true

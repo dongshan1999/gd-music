@@ -4,6 +4,9 @@ extends "res://assets/scripts/ui/music_app/controllers/music_app_controller_base
 func open_plugin_management() -> void:
 	show_popup(DX_PopupRegistry.PopupId.MUSIC_APP_PLUGIN_MANAGEMENT)
 
+func open_download_management() -> void:
+	show_popup(DX_PopupRegistry.PopupId.MUSIC_APP_DOWNLOAD_MANAGEMENT)
+
 func show_basic_settings_placeholder() -> void:
 	show_toast("基础设置暂未接入。")
 

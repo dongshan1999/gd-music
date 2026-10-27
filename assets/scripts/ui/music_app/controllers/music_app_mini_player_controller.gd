@@ -27,6 +27,13 @@ func get_playback_progress_ratio() -> float:
 		return 0.0
 	return clampf(float(get_current_elapsed_seconds()) / float(duration), 0.0, 1.0)
 
+## 返回曲目的封面来源（插件给的地址，或本地音频里内嵌的封面缓存路径）。
+func get_track_artwork_source(track: TrackData) -> String:
+	var playback_state_controller = get_playback_state_controller()
+	if playback_state_controller == null or track == null:
+		return ""
+	return playback_state_controller.get_track_artwork_source(track)
+
 ## 返回曲目在迷你播放器上的展示歌手名。
 func get_track_display_artist(track: TrackData) -> String:
 	if not track.artist.is_empty():

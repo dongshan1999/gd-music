@@ -56,6 +56,13 @@ func get_plugin_controller():
 	var resolved_controller = get_showcase()
 	return resolved_controller._plugin_controller if resolved_controller != null else null
 
+## 返回音乐下载控制器；宿主未提供下载能力时返回 null。
+func get_download_controller():
+	var resolved_controller = get_showcase()
+	if resolved_controller == null or not resolved_controller.has_method("get_download_controller"):
+		return null
+	return resolved_controller.get_download_controller()
+
 ## 返回曲目数组引用，供子控制器直接读写全局状态。
 func get_tracks_ref() -> Array[TrackData]:
 	return get_app_state().tracks

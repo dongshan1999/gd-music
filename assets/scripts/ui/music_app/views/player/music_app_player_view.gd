@@ -16,6 +16,8 @@ var _controller: MusicAppShowcaseController
 var _player_controller: MusicAppPlayerController
 var _is_bound := false
 var _is_progress_dragging := false
+## 松手 seek 之后的静默窗口：这段时间内进度条停在手指位置，等 mpv 吐出新的 time-pos。
+var _progress_seek_settle_until_msec := 0
 var _active_progress_touch_index := -1
 var _is_lyrics_visible := false
 var _lyrics_track_key := ""
@@ -28,11 +30,22 @@ var _lyric_touch_index := -1
 var _is_lyrics_content_dragging := false
 var _is_lyrics_scrollbar_dragging := false
 var _cover_animation_tween: Tween
+## 封面加载状态：同一「曲目 + 来源」只请求一次，失败/占位不重复重试。
+var _artwork_source := ""
+var _artwork_key := ""
+var _artwork_request_id := 0
+var _artwork_texture_cache := {}
+const REMOTE_ARTWORK_TIMEOUT_SECONDS := 10.0
 var _lyrics_top_padding: Control
 var _lyrics_bottom_padding: Control
 var _is_lyrics_edge_padding_update_queued := false
+var _download_delete_armed_track_id := ""
+var _download_delete_armed_msec := 0
+
+const DOWNLOAD_DELETE_CONFIRM_MSEC := 3000
 
 @onready var close_player_button: Button = %ClosePlayerButton
+@onready var download_button: Button = %DownloadButton
 @onready var now_title_label: Label = %NowTitleLabel
 @onready var now_artist_label: Label = %NowArtistLabel
 @onready var player_source_label: Label = %PlayerSourceLabel
@@ -40,6 +53,7 @@ var _is_lyrics_edge_padding_update_queued := false
 @onready var cover_panel: Panel = %CoverPanel
 @onready var cover_circle: Panel = %CoverCircle
 @onready var cover_icon_rect: TextureRect = %CoverIconRect
+@onready var album_artwork_rect: TextureRect = %AlbumArtworkRect
 @onready var lyrics_stage: Control = %LyricsStage
 @onready var lyrics_scroll: ScrollContainer = %LyricsScroll
 @onready var lyrics_scroll_interaction = %LyricsScrollInteraction
@@ -80,6 +94,29 @@ func _finish_setup() -> void:
 	bind()
 	refresh()
 
+## 让标题与创作者文本可点击，手动修正插件给错的歌名 / UP 主。
+func _bind_track_metadata_input() -> void:
+	for label in [now_title_label, now_artist_label]:
+		if label == null:
+			continue
+		label.mouse_filter = Control.MOUSE_FILTER_STOP
+		label.mouse_default_cursor_shape = Control.CURSOR_POINTING_HAND
+		label.tooltip_text = "点击编辑曲目信息"
+		if not label.gui_input.is_connected(_on_track_metadata_gui_input):
+			label.gui_input.connect(_on_track_metadata_gui_input)
+
+func _on_track_metadata_gui_input(event: InputEvent) -> void:
+	if event is InputEventMouseButton:
+		var mouse_event := event as InputEventMouseButton
+		if mouse_event.pressed and mouse_event.button_index == MOUSE_BUTTON_LEFT:
+			_open_track_edit()
+
+## 打开「编辑曲目信息」弹窗。
+func _open_track_edit() -> void:
+	if _player_controller == null or not _player_controller.has_tracks():
+		return
+	_player_controller.show_popup(DX_PopupRegistry.PopupId.MUSIC_APP_TRACK_EDIT)
+
 ## 绑定播放器固定按钮和进度条输入事件。
 func bind() -> void:
 	if _is_bound:
@@ -87,6 +124,8 @@ func bind() -> void:
 	_is_bound = true
 
 	close_player_button.pressed.connect(navigate_back)
+	download_button.pressed.connect(_on_download_pressed)
+	_bind_download_signals()
 	player_prev_button.pressed.connect(_play_previous)
 	player_play_button.pressed.connect(toggle_playback)
 	player_next_button.pressed.connect(_play_next)
@@ -108,6 +147,7 @@ func bind() -> void:
 	cover_circle.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	cover_icon_rect.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	no_lyrics_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_bind_track_metadata_input()
 	_bind_player_progress_bar_input()
 	DX.signals.subscribe(PlaybackStartedEventScript, _on_playback_started)
 	DX.signals.subscribe(PlaybackFinishedEventScript, _on_playback_finished)
@@ -131,6 +171,7 @@ func refresh() -> void:
 		cover_icon_rect.visible = true
 		MusicAppIconsType.apply_icon_button(like_button, MusicAppIconsType.HEART_OUTLINE)
 		MusicAppIconsType.apply_icon_button(player_play_button, MusicAppIconsType.PLAY, false, false)
+		_refresh_download_button(null)
 		MusicAppIconsType.apply_icon_button(
 			shuffle_button,
 			_player_controller.get_playback_mode_icon()
@@ -140,6 +181,7 @@ func refresh() -> void:
 		remaining_label.text = "00:00"
 		_refresh_lyrics_for_track(null, 0)
 		_sync_cover_animation(false)
+		_refresh_artwork(null)
 		return
 
 	var track: TrackData = _player_controller.get_current_track()
@@ -170,11 +212,15 @@ func refresh() -> void:
 		false,
 		false
 	)
-	player_progress_bar.value = progress * 100.0
-	elapsed_label.text = _format_seconds(_player_controller.get_current_elapsed_seconds())
+	# 拖拽期间与刚松手的 settle 窗口内，进度条由手指驱动，不能被每秒一次的进度事件拉回去。
+	if not _is_progress_dragging and Time.get_ticks_msec() >= _progress_seek_settle_until_msec:
+		player_progress_bar.value = progress * 100.0
+		elapsed_label.text = _format_seconds(_player_controller.get_current_elapsed_seconds())
 	remaining_label.text = _format_seconds(duration)
 	_refresh_lyrics_for_track(track, _player_controller.get_current_elapsed_seconds())
 	_sync_cover_animation(_player_controller.is_playing())
+	_refresh_artwork(track)
+	_refresh_download_button(track)
 
 func open_from_current() -> void:
 	_player_controller.show_popup(DX_PopupRegistry.PopupId.MUSIC_APP_PLAYER)
@@ -184,6 +230,7 @@ func on_popup_shown() -> void:
 	refresh()
 
 func _exit_tree() -> void:
+	_unbind_download_signals()
 	DX.signals.unsubscribe(PlaybackStartedEventScript, _on_playback_started)
 	DX.signals.unsubscribe(PlaybackFinishedEventScript, _on_playback_finished)
 	DX.signals.unsubscribe(PlaybackProgressChangedEventScript, _on_playback_progress_changed)
@@ -209,6 +256,126 @@ func _play_next() -> void:
 
 func _show_playback_queue() -> void:
 	_player_controller.show_playback_queue()
+
+## 绑定下载控制器事件，让下载进度实时反映到下载按钮。
+func _bind_download_signals() -> void:
+	var downloads := _get_download_controller()
+	if downloads == null:
+		return
+	if not downloads.download_state_changed.is_connected(_on_download_state_changed):
+		downloads.download_state_changed.connect(_on_download_state_changed)
+	if not downloads.download_progress_changed.is_connected(_on_download_progress_changed):
+		downloads.download_progress_changed.connect(_on_download_progress_changed)
+
+func _unbind_download_signals() -> void:
+	var downloads := _get_download_controller()
+	if downloads == null:
+		return
+	if downloads.download_state_changed.is_connected(_on_download_state_changed):
+		downloads.download_state_changed.disconnect(_on_download_state_changed)
+	if downloads.download_progress_changed.is_connected(_on_download_progress_changed):
+		downloads.download_progress_changed.disconnect(_on_download_progress_changed)
+
+func _get_download_controller() -> MusicAppDownloadController:
+	if _controller == null:
+		return null
+	return _controller.get_download_controller()
+
+func _on_download_state_changed(track_id: String) -> void:
+	var track: TrackData = _player_controller.get_current_track()
+	if track == null or track.id != track_id:
+		return
+	_refresh_download_button(track)
+
+func _on_download_progress_changed(track_id: String, _received: int, _total: int) -> void:
+	var track: TrackData = _player_controller.get_current_track()
+	if track == null or track.id != track_id:
+		return
+	_refresh_download_button(track)
+
+## 下载当前曲目；已下载时首次点击提示、再次点击删除。
+func _on_download_pressed() -> void:
+	var downloads := _get_download_controller()
+	if downloads == null:
+		return
+	var track: TrackData = _player_controller.get_current_track()
+	if track == null or track.plugin_id.is_empty():
+		return
+	if downloads.has_download(track.id):
+		var now_msec := Time.get_ticks_msec()
+		var armed := (
+			_download_delete_armed_track_id == track.id
+			and now_msec - _download_delete_armed_msec <= DOWNLOAD_DELETE_CONFIRM_MSEC
+		)
+		if armed:
+			_download_delete_armed_track_id = ""
+			var removed: Dictionary = downloads.remove_download(track.id)
+			if bool(removed.get("ok", false)):
+				_player_controller.show_toast("已删除下载，之后将重新联网播放")
+				_player_controller.request_audio_sync()
+			else:
+				_player_controller.show_toast(str(removed.get("error", "删除下载失败")))
+			refresh()
+			return
+		_download_delete_armed_track_id = track.id
+		_download_delete_armed_msec = now_msec
+		_player_controller.show_toast("已下载，再点一次删除")
+		return
+	var result: Dictionary = await downloads.download_track(track)
+	if bool(result.get("ok", false)):
+		_player_controller.show_toast("下载完成，之后将直接本地播放")
+	else:
+		_player_controller.show_toast(str(result.get("error", "下载失败")))
+	refresh()
+
+## 同步下载按钮的可见性、图标与进度文案。
+func _refresh_download_button(track: TrackData) -> void:
+	if not is_instance_valid(download_button):
+		return
+	var downloads := _get_download_controller()
+	if downloads == null or track == null or track.plugin_id.is_empty():
+		download_button.visible = false
+		return
+	download_button.visible = true
+	download_button.disabled = false
+	if downloads.is_downloading(track.id):
+		var progress: Dictionary = downloads.get_progress(track.id)
+		var received: int = maxi(0, int(progress.get("received", 0)))
+		var total: int = maxi(0, int(progress.get("total", 0)))
+		download_button.disabled = true
+		if total > 0:
+			var ratio := clampf(float(received) / float(total), 0.0, 1.0)
+			download_button.text = "%d%%" % int(roundi(ratio * 100.0))
+			download_button.tooltip_text = "正在下载 %s / %s" % [
+				_format_file_size(received),
+				_format_file_size(total),
+			]
+		else:
+			download_button.text = "…"
+			download_button.tooltip_text = "正在下载…"
+		MusicAppIconsType.apply_icon_button(
+			download_button,
+			MusicAppIconsType.DOWNLOAD,
+			true,
+			false
+		)
+		return
+	download_button.text = ""
+	var is_downloaded := downloads.has_download(track.id)
+	MusicAppIconsType.apply_icon_button(
+		download_button,
+		MusicAppIconsType.CHECKED if is_downloaded else MusicAppIconsType.DOWNLOAD
+	)
+	download_button.tooltip_text = (
+		"已下载，再次点击删除" if is_downloaded else "下载到本地，之后不再联网"
+	)
+
+func _format_file_size(bytes: int) -> String:
+	if bytes < 1024:
+		return "%d B" % bytes
+	if bytes < 1024 * 1024:
+		return "%.1f KB" % (float(bytes) / 1024.0)
+	return "%.1f MB" % (float(bytes) / (1024.0 * 1024.0))
 
 func _cycle_playback_mode() -> void:
 	_player_controller.cycle_playback_mode()
@@ -368,6 +535,97 @@ func _apply_content_view_visibility() -> void:
 	var content := lyrics_stage if _is_lyrics_visible else album_stage
 	content.modulate.a = 0.0
 	create_tween().tween_property(content, "modulate:a", 1.0, 0.18)
+
+## 根据当前曲目刷新播放页大图封面；没有封面时回落到默认唱片图标。
+func _refresh_artwork(track: TrackData) -> void:
+	if track == null:
+		_artwork_key = ""
+		_artwork_source = ""
+		_artwork_request_id += 1
+		album_artwork_rect.texture = null
+		album_artwork_rect.visible = false
+		cover_icon_rect.visible = true
+		return
+
+	var source: String = _player_controller.get_track_artwork_source(track)
+	var artwork_key := "%s|%s" % [track.id, source]
+	if artwork_key == _artwork_key:
+		return
+	_artwork_key = artwork_key
+	_artwork_source = source
+	_artwork_request_id += 1
+
+	if source.is_empty():
+		album_artwork_rect.texture = null
+		album_artwork_rect.visible = false
+		cover_icon_rect.visible = true
+		return
+
+	if _artwork_texture_cache.has(source):
+		_display_album_texture(_artwork_texture_cache[source])
+		return
+	album_artwork_rect.texture = null
+	album_artwork_rect.visible = false
+	cover_icon_rect.visible = true
+	_load_album_texture(source, _artwork_request_id)
+
+## 将封面纹理铺到播放页大图上；纹理为空则回落到默认图标。
+func _display_album_texture(texture: Texture2D) -> void:
+	if texture == null:
+		album_artwork_rect.texture = null
+		album_artwork_rect.visible = false
+		cover_icon_rect.visible = true
+		return
+	album_artwork_rect.texture = texture
+	album_artwork_rect.visible = true
+	cover_icon_rect.visible = false
+
+## 按来源类型选择本地读取或远程下载，并校验请求是否仍然有效。
+func _load_album_texture(source: String, request_id: int) -> void:
+	var texture: Texture2D = await _resolve_album_texture(source, request_id)
+	if request_id != _artwork_request_id or source != _artwork_source:
+		return
+	if texture == null:
+		return
+	_artwork_texture_cache[source] = texture
+	_display_album_texture(texture)
+
+## 解析封面来源：http(s) 走下载，其余按本地文件读取。
+func _resolve_album_texture(source: String, request_id: int) -> Texture2D:
+	if source.begins_with("http://") or source.begins_with("https://"):
+		return await _download_album_texture(source, request_id)
+	if not FileAccess.file_exists(source):
+		return null
+	var image := Image.load_from_file(source)
+	if image == null or image.is_empty():
+		return null
+	return ImageTexture.create_from_image(image)
+
+## 下载远程封面并解码成纹理；失败返回 null。
+func _download_album_texture(url: String, request_id: int) -> Texture2D:
+	if _controller == null:
+		return null
+	var request := HTTPRequest.new()
+	request.timeout = REMOTE_ARTWORK_TIMEOUT_SECONDS
+	_controller.add_child(request)
+	var error := request.request(url)
+	if error != OK:
+		request.queue_free()
+		return null
+	var response: Array = await request.request_completed
+	request.queue_free()
+	if request_id != _artwork_request_id:
+		return null
+	if int(response[0]) != HTTPRequest.RESULT_SUCCESS or int(response[1]) != 200:
+		return null
+	var bytes: PackedByteArray = response[3]
+	if bytes.is_empty():
+		return null
+	var image := Image.new()
+	if image.load_jpg_from_buffer(bytes) != OK and image.load_png_from_buffer(bytes) != OK:
+		if image.load_webp_from_buffer(bytes) != OK:
+			return null
+	return ImageTexture.create_from_image(image)
 
 func _resize_artwork() -> void:
 	var side := clampf(minf(album_stage.size.x - 24, album_stage.size.y - 24), 48, 340)
@@ -560,7 +818,7 @@ func _input(event: InputEvent) -> void:
 		return
 
 	if event is InputEventMouseMotion:
-		_seek_player_from_global_x(get_global_mouse_position().x, false)
+		_preview_progress_drag(get_global_mouse_position().x)
 		get_viewport().set_input_as_handled()
 		return
 
@@ -575,7 +833,7 @@ func _input(event: InputEvent) -> void:
 	if event is InputEventScreenDrag:
 		var drag_event := event as InputEventScreenDrag
 		if drag_event.index == _active_progress_touch_index:
-			_seek_player_from_global_x(drag_event.position.x, false)
+			_preview_progress_drag(drag_event.position.x)
 			get_viewport().set_input_as_handled()
 		return
 
@@ -606,11 +864,12 @@ func _on_player_progress_bar_gui_input(event: InputEvent) -> void:
 			return
 		if mouse_event.pressed:
 			_begin_progress_drag()
-			_seek_player_from_global_x(get_global_mouse_position().x, false)
+			_preview_progress_drag(get_global_mouse_position().x)
 		elif _is_progress_dragging:
+			# 先落 seek 再收拾状态；不立刻 refresh，否则 mpv 还没吐出新的 time-pos，
+			# 进度条会先被拉回旧位置再跳回来，看起来像顿一下。
 			_seek_player_from_global_x(get_global_mouse_position().x, true)
 			_finish_progress_drag()
-			refresh()
 		accept_event()
 		return
 
@@ -619,11 +878,10 @@ func _on_player_progress_bar_gui_input(event: InputEvent) -> void:
 		if touch_event.pressed:
 			_active_progress_touch_index = touch_event.index
 			_begin_progress_drag()
-			_seek_player_from_global_x(touch_event.position.x, false)
+			_preview_progress_drag(touch_event.position.x)
 		elif touch_event.index == _active_progress_touch_index and _is_progress_dragging:
 			_seek_player_from_global_x(touch_event.position.x, true)
 			_finish_progress_drag()
-			refresh()
 		accept_event()
 
 ## 标记当前进入播放器进度拖拽状态。
@@ -640,7 +898,24 @@ func _seek_player_from_global_x(global_x: float, persist_state: bool) -> void:
 	if _player_controller == null or not _player_controller.has_tracks():
 		return
 	var progress_ratio := _get_progress_ratio_from_global_x(global_x)
+	if persist_state:
+		_progress_seek_settle_until_msec = Time.get_ticks_msec() + 350
 	_player_controller.seek_to_progress_ratio(progress_ratio, persist_state)
+
+## 拖拽过程中只动 UI：进度条与已播时间跟着手指走，但**不**触发真正的 seek。
+##
+## mpv 的 seek 是 `absolute+exact`，每调一次都要重新定位解码，几十毫秒起步。
+## 手指快速滑动时一秒能产生几十个 drag 事件，若逐个下发 seek，主线程和 mpv
+## 线程都会被堵死，表现就是「进度条粘手、界面卡死」。真正跳转留到松手那一次。
+func _preview_progress_drag(global_x: float) -> void:
+	if _player_controller == null or not _player_controller.has_tracks():
+		return
+	var duration := _player_controller.get_current_duration()
+	if duration <= 0:
+		return
+	var progress_ratio := _get_progress_ratio_from_global_x(global_x)
+	player_progress_bar.value = progress_ratio * 100.0
+	elapsed_label.text = _format_seconds(int(round(progress_ratio * float(duration))))
 
 ## 将全局横坐标换算为进度条的 0 到 1 比例。
 func _get_progress_ratio_from_global_x(global_x: float) -> float:

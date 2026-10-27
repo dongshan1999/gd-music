@@ -3,7 +3,7 @@ extends "res://dx/runtime/scripts/serializer/json_object.gd"
 
 const PlaybackStateDataScript := preload("res://assets/scripts/save/music/music_app_playback_state_data.gd")
 
-const SAVE_VERSION := "0.0.1"
+const SAVE_VERSION := "0.0.2"
 const SYSTEM_FAVORITE_PLAYLIST_ID := "__music_app.favorite_playlist__"
 
 enum PlaybackMode {
@@ -20,13 +20,23 @@ var playlists: Array[PlaylistData] = []
 var playback_state = PlaybackStateDataScript.new()
 var plugin_search_history: Array[String] = []
 var local_music_folders: Array[String] = []
+## 已下载音乐索引；与 tracks 解耦，曲目被移除后下载文件仍保留。
+var downloads: Array[MusicDownloadRecordData] = []
 ## 曲目 ID -> TrackData 的运行时索引，避免列表刷新时对全库做线性查找。
 var _track_index: Dictionary = {}
 var _track_index_size: int = -1
+## 曲目 ID -> MusicDownloadRecordData 的运行时索引。
+var _download_index: Dictionary = {}
+var _download_index_size: int = -1
 
 ## 运行时索引不写入存档，避免存档体积翻倍。
 func _get_save_ignored_fields() -> Array:
-	return ["_track_index", "_track_index_size"]
+	return [
+		"_track_index",
+		"_track_index_size",
+		"_download_index",
+		"_download_index_size",
+	]
 
 static func is_system_favorite_playlist(playlist) -> bool:
 	return playlist != null and playlist.title == SYSTEM_FAVORITE_PLAYLIST_ID
@@ -59,6 +69,7 @@ func _init() -> void:
 	playback_state = PlaybackStateDataScript.new()
 	plugin_search_history = []
 	local_music_folders = []
+	downloads = []
 	normalize()
 
 func normalize() -> void:
@@ -79,6 +90,7 @@ func normalize() -> void:
 		playback_state.elapsed_seconds = clampi(playback_state.elapsed_seconds, 0, current_track.duration)
 	plugin_search_history = _normalize_string_array(plugin_search_history, 10)
 	local_music_folders = _normalize_path_array(local_music_folders)
+	_normalize_downloads()
 
 func get_track_by_id(track_id: String) -> TrackData:
 	var normalized_id := track_id.strip_edges()
@@ -178,6 +190,75 @@ func _normalize_path_array(source: Array) -> Array[String]:
 			continue
 		result.append(path)
 	return result
+
+## 读取某个曲目的下载记录。
+func get_download_record(track_id: String) -> MusicDownloadRecordData:
+	var normalized_id := track_id.strip_edges()
+	if normalized_id.is_empty():
+		return null
+	if _download_index_size != downloads.size():
+		_rebuild_download_index()
+	return _download_index.get(normalized_id)
+
+func has_download(track_id: String) -> bool:
+	return get_download_record(track_id) != null
+
+## 写入或替换一条下载记录（按 track_id 去重）。
+func set_download_record(record: MusicDownloadRecordData) -> void:
+	if record == null:
+		return
+	record.normalize()
+	if record.track_id.is_empty():
+		return
+	for index in downloads.size():
+		if downloads[index] != null and downloads[index].track_id == record.track_id:
+			downloads[index] = record
+			_rebuild_download_index()
+			return
+	downloads.append(record)
+	_rebuild_download_index()
+
+## 删除一条下载记录，返回被删除的记录（不存在时返回 null）。
+func remove_download_record(track_id: String) -> MusicDownloadRecordData:
+	var normalized_id := track_id.strip_edges()
+	for index in downloads.size():
+		var record := downloads[index]
+		if record == null or record.track_id != normalized_id:
+			continue
+		downloads.remove_at(index)
+		_rebuild_download_index()
+		return record
+	return null
+
+func get_download_records() -> Array[MusicDownloadRecordData]:
+	var result: Array[MusicDownloadRecordData] = []
+	for record in downloads:
+		if record != null:
+			result.append(record)
+	return result
+
+func _rebuild_download_index() -> void:
+	_download_index.clear()
+	_download_index_size = downloads.size()
+	for record in downloads:
+		if record != null and not record.track_id.is_empty():
+			_download_index[record.track_id] = record
+
+func _normalize_downloads() -> void:
+	var result: Array[MusicDownloadRecordData] = []
+	var seen := {}
+	for record in downloads:
+		if record == null:
+			continue
+		record.normalize()
+		if record.track_id.is_empty() or record.path.is_empty():
+			continue
+		if seen.has(record.track_id):
+			continue
+		seen[record.track_id] = true
+		result.append(record)
+	downloads = result
+	_rebuild_download_index()
 
 func _build_track_id_map() -> Dictionary:
 	var result := {}

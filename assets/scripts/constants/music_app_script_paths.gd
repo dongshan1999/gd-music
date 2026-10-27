@@ -14,6 +14,7 @@ const MUSIC_APP_PLAYBACK_STATE_CONTROLLER := "res://assets/scripts/ui/music_app/
 const MUSIC_APP_PLAYLIST_STATE_CONTROLLER := "res://assets/scripts/ui/music_app/controllers/global/music_app_playlist_state_controller.gd"
 const MUSIC_APP_POPUP_ROUTER_CONTROLLER := "res://assets/scripts/ui/music_app/controllers/global/music_app_popup_router_controller.gd"
 const MUSIC_APP_PLUGIN_CONTROLLER := "res://assets/scripts/ui/music_app/controllers/global/music_app_plugin_controller.gd"
+const MUSIC_APP_DOWNLOAD_CONTROLLER := "res://assets/scripts/ui/music_app/controllers/global/music_app_download_controller.gd"
 const MUSIC_APP_PLAYBACK_QUEUE_CONTROLLER := "res://assets/scripts/ui/music_app/controllers/music_app_playback_queue_controller.gd"
 const MUSIC_APP_PLAYER_CONTROLLER := "res://assets/scripts/ui/music_app/controllers/music_app_player_controller.gd"
 const MUSIC_APP_PLAYLIST_CONTROLLER := "res://assets/scripts/ui/music_app/controllers/music_app_playlist_controller.gd"
@@ -21,6 +22,7 @@ const MUSIC_APP_PLUGIN_BROWSER_CONTROLLER := "res://assets/scripts/ui/music_app/
 const MUSIC_APP_SETTINGS_CONTROLLER := "res://assets/scripts/ui/music_app/controllers/music_app_settings_controller.gd"
 const MUSIC_APP_PLUGIN_MANAGEMENT_CONTROLLER := "res://assets/scripts/ui/music_app/controllers/music_app_plugin_management_controller.gd"
 const MUSIC_APP_PLUGIN_FILE_PICKER_CONTROLLER := "res://assets/scripts/ui/music_app/controllers/music_app_plugin_file_picker_controller.gd"
+const MUSIC_APP_DOWNLOAD_MANAGEMENT_CONTROLLER := "res://assets/scripts/ui/music_app/controllers/music_app_download_management_controller.gd"
 
 const MUSIC_APP_PLAYBACK_STARTED_EVENT := "res://assets/scripts/ui/music_app/events/music_app_playback_started_event.gd"
 const MUSIC_APP_PLAYBACK_FINISHED_EVENT := "res://assets/scripts/ui/music_app/events/music_app_playback_finished_event.gd"
@@ -38,14 +40,19 @@ const MUSIC_APP_PLUGIN_FILE_PICKER_ROW_VIEW := "res://assets/scripts/ui/music_ap
 const MUSIC_APP_PLUGIN_FILE_PICKER_VIEW := "res://assets/scripts/ui/music_app/views/settings/music_app_plugin_file_picker_view.gd"
 const MUSIC_APP_PLAYBACK_QUEUE_ROW_VIEW := "res://assets/scripts/ui/music_app/views/playback_queue/music_app_playback_queue_row.gd"
 const MUSIC_APP_PLAYLIST_SONG_ROW_VIEW := "res://assets/scripts/ui/music_app/views/playlist/music_app_playlist_song_row.gd"
+const MUSIC_APP_DOWNLOAD_MANAGEMENT_VIEW := "res://assets/scripts/ui/music_app/views/settings/music_app_download_management_view.gd"
+const MUSIC_APP_DOWNLOAD_ROW_VIEW := "res://assets/scripts/ui/music_app/views/settings/music_app_download_row.gd"
+const MUSIC_APP_TRACK_EDIT_CONTROLLER := "res://assets/scripts/ui/music_app/controllers/music_app_track_edit_controller.gd"
 
 const TRACK_DATA := "res://assets/scripts/save/music/track_data.gd"
+const MUSIC_DOWNLOAD_RECORD_DATA := "res://assets/scripts/save/music/music_download_record_data.gd"
 const PLAYLIST_DATA := "res://assets/scripts/save/music/playlist_data.gd"
 const MUSIC_PLUGIN_SETTINGS_DATA := "res://assets/scripts/save/music/music_plugin_settings_data.gd"
 const MUSIC_APP_STATE_DATA := "res://assets/scripts/save/music/music_app_state_data.gd"
 
 const COMMON_DIALOG_POPUP := "res://assets/scripts/popup/common_dialog_popup.gd"
 const COMMON_TOAST_POPUP := "res://assets/scripts/popup/common_toast_popup.gd"
+const MUSIC_APP_TRACK_EDIT_POPUP := "res://assets/scripts/popup/music_app_track_edit_popup.gd"
 
 # 场景路径
 const HOME_PLAYLIST_ROW := "res://assets/scenes/ui/music_app/home/home_playlist_row.tscn"
@@ -57,5 +64,7 @@ const PLUGIN_BROWSER_RESULT_ROW := "res://assets/scenes/ui/music_app/plugin_brow
 const PLUGIN_MANAGEMENT_ITEM := "res://assets/scenes/ui/music_app/settings/music_app_plugin_management_item.tscn"
 const PLUGIN_FILE_PICKER_ROW := "res://assets/scenes/ui/music_app/settings/music_app_plugin_file_picker_row.tscn"
 const PLUGIN_FILE_PICKER_PAGE := "res://assets/scenes/ui/music_app/settings/music_app_plugin_file_picker_page.tscn"
+const DOWNLOAD_MANAGEMENT_PAGE := "res://assets/scenes/ui/music_app/settings/music_app_download_management_page.tscn"
+const DOWNLOAD_ROW := "res://assets/scenes/ui/music_app/settings/music_app_download_row.tscn"
 const PLAYBACK_QUEUE_ROW := "res://assets/scenes/ui/music_app/playback_queue/playback_queue_row.tscn"
 const PLAYLIST_SONG_ROW := "res://assets/scenes/ui/music_app/playlist/playlist_song_row.tscn"

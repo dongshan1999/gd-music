@@ -4,6 +4,7 @@
 [ext_resource type="Texture2D" uid="uid://l64plqxfd10g" path="res://assets/textures/arrow-left.svg" id="2_back"]
 [ext_resource type="Texture2D" uid="uid://dtuf7rfi24j0h" path="res://assets/textures/code-bracket-square.svg" id="4_plugin"]
 [ext_resource type="Texture2D" uid="uid://byhuy6i3y04d" path="res://assets/textures/language.svg" id="6_language"]
+[ext_resource type="Texture2D" path="res://assets/textures/arrow-down-tray.svg" id="7_download"]
 [ext_resource type="Script" uid="uid://dyd6xpjhv4j0k" path="res://dx/runtime/scripts/component/scroll/scroll_interaction_comp.gd" id="14_scroll_interaction"]
 
 [node name="SettingsPage" type="Control" unique_id=1130362248]
@@ -130,6 +131,31 @@ vertical_alignment = 1
 theme_override_font_sizes/font_size = 24
 theme_override_colors/font_color = Color(0.45, 0.45, 0.48, 1)
 
+[node name="DownloadManagementButton" type="Button" parent="Margin/RootVBox/Scroll/ContentVBox/SettingsSection/Group/Rows"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 56)
+layout_mode = 2
+text = "音乐下载"
+icon = ExtResource("7_download")
+alignment = 0
+theme_type_variation = "SettingsRow"
+theme_override_constants/icon_max_width = 22
+expand_icon = true
+theme_override_constants/h_separation = 14
+
+[node name="Disclosure" type="Label" parent="Margin/RootVBox/Scroll/ContentVBox/SettingsSection/Group/Rows/DownloadManagementButton"]
+layout_mode = 0
+anchor_left = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -30.0
+offset_right = -12.0
+mouse_filter = 2
+text = "›"
+vertical_alignment = 1
+theme_override_font_sizes/font_size = 24
+theme_override_colors/font_color = Color(0.45, 0.45, 0.48, 1)
+
 [node name="LanguageSettingsButton" type="Button" parent="Margin/RootVBox/Scroll/ContentVBox/SettingsSection/Group/Rows" unique_id=1425593028]
 unique_name_in_owner = true
 custom_minimum_size = Vector2(0, 56)
@@ -154,6 +180,32 @@ text = "›"
 vertical_alignment = 1
 theme_override_font_sizes/font_size = 24
 theme_override_colors/font_color = Color(0.45, 0.45, 0.48, 1)
+
+[node name="VolumeRow" type="VBoxContainer" parent="Margin/RootVBox/Scroll/ContentVBox/SettingsSection/Group/Rows"]
+custom_minimum_size = Vector2(0, 64)
+layout_mode = 2
+theme_override_constants/separation = 6
+
+[node name="VolumeHeader" type="HBoxContainer" parent="Margin/RootVBox/Scroll/ContentVBox/SettingsSection/Group/Rows/VolumeRow"]
+layout_mode = 2
+
+[node name="VolumeLabel" type="Label" parent="Margin/RootVBox/Scroll/ContentVBox/SettingsSection/Group/Rows/VolumeRow/VolumeHeader"]
+size_flags_horizontal = 3
+text = "播放音量"
+vertical_alignment = 1
+
+[node name="VolumeValueLabel" type="Label" parent="Margin/RootVBox/Scroll/ContentVBox/SettingsSection/Group/Rows/VolumeRow/VolumeHeader"]
+unique_name_in_owner = true
+text = "100%"
+horizontal_alignment = 2
+vertical_alignment = 1
+
+[node name="VolumeSlider" type="HSlider" parent="Margin/RootVBox/Scroll/ContentVBox/SettingsSection/Group/Rows/VolumeRow"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 24)
+layout_mode = 2
+max_value = 100.0
+value = 100.0
 
 [node name="BottomSpacer" type="Control" parent="Margin/RootVBox/Scroll/ContentVBox"]
 custom_minimum_size = Vector2(0, 0)

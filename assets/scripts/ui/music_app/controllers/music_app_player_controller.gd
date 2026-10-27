@@ -110,3 +110,10 @@ func toggle_like_current_track() -> bool:
 ## 展示当前播放队列弹窗。
 func show_playback_queue() -> void:
 	show_popup(DX_PopupRegistry.PopupId.MUSIC_APP_PLAYBACK_QUEUE)
+
+## 返回曲目的封面来源（插件给的地址，或本地音频里内嵌的封面缓存路径）。
+func get_track_artwork_source(track: TrackData) -> String:
+	var playback_state_controller = get_playback_state_controller()
+	if playback_state_controller == null or track == null:
+		return ""
+	return playback_state_controller.get_track_artwork_source(track)

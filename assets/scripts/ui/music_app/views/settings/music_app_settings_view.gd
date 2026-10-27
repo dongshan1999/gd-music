@@ -12,8 +12,11 @@ var _is_bound := false
 
 @onready var back_button: Button = %SettingsBackButton
 @onready var plugin_management_button: Button = %PluginManagementButton
+@onready var download_management_button: Button = %DownloadManagementButton
 @onready var language_settings_button: Button = %LanguageSettingsButton
 @onready var version_label: Label = %VersionLabel
+@onready var volume_slider: HSlider = %VolumeSlider
+@onready var volume_value_label: Label = %VolumeValueLabel
 
 func setup(controller: MusicAppShowcaseController) -> void:
 	_controller = controller
@@ -28,7 +31,9 @@ func bind() -> void:
 
 	back_button.pressed.connect(close_popup)
 	plugin_management_button.pressed.connect(_on_plugin_management_pressed)
+	download_management_button.pressed.connect(_on_download_management_pressed)
 	language_settings_button.pressed.connect(_on_language_settings_pressed)
+	volume_slider.value_changed.connect(_on_volume_slider_changed)
 	$Margin/RootVBox/TopRow/TitleLabel.text = tr("music_app.ui.settings")
 
 func on_popup_shown() -> void:
@@ -36,8 +41,25 @@ func on_popup_shown() -> void:
 
 func refresh() -> void:
 	_refresh_version_label()
+	_refresh_volume_slider()
 	if _controller == null:
 		return
+
+## 让滑块反映当前音量，并同步一次播放端状态。
+func _refresh_volume_slider() -> void:
+	if _controller == null or volume_slider == null:
+		return
+	_controller.sync_playback_volume()
+	var percent := int(round(_controller.get_playback_volume() * 100.0))
+	volume_slider.set_value_no_signal(percent)
+	volume_value_label.text = "%d%%" % percent
+
+## 拖动滑块时实时改音量。
+func _on_volume_slider_changed(value: float) -> void:
+	volume_value_label.text = "%d%%" % int(round(value))
+	if _controller == null:
+		return
+	_controller.set_playback_volume(clampf(value / 100.0, 0.0, 1.0))
 
 func _refresh_version_label() -> void:
 	if version_label == null:
@@ -55,6 +77,9 @@ func _read_exported_build_number() -> int:
 
 func _on_plugin_management_pressed() -> void:
 	_settings_controller.open_plugin_management()
+
+func _on_download_management_pressed() -> void:
+	_settings_controller.open_download_management()
 
 func _on_language_settings_pressed() -> void:
 	_settings_controller.show_language_settings_placeholder()

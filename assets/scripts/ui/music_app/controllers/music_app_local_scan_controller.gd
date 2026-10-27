@@ -6,7 +6,11 @@ const WINDOWS_SCAN_ROOT := "windows://drives"
 const AUDIO_EXTENSIONS := {
 	"mp3": true,
 	"wav": true,
-	"ogg": true
+	"ogg": true,
+	"flac": true,
+	"m4a": true,
+	"aac": true,
+	"opus": true
 }
 const LYRIC_EXTENSIONS := [
 	"lrc",
@@ -236,7 +240,8 @@ func _collect_audio_tracks(
 				item_path,
 				item_name,
 				_display_name_from_path(normalized_root),
-				lyric_path
+				lyric_path,
+				false
 			)
 		)
 
@@ -246,26 +251,25 @@ func is_audio_file(path: String) -> bool:
 	return AUDIO_EXTENSIONS.has(extension)
 
 ## 根据文件路径构造一条本地曲目数据。
+## lookup_lyric 为 false 时不再逐个探测旁挂歌词文件：目录扫描时同目录歌词已经
+## 汇总过，逐首 DX.files.exists 在 Android SAF 上是每首都走一次 JNI 查询，极慢。
 func make_local_track_from_path(
 	path: String,
 	display_file_name: String = "",
 	folder_display_name: String = "",
-	lyric_path: String = ""
+	lyric_path: String = "",
+	lookup_lyric: bool = true
 ) -> TrackData:
 	var normalized_path := normalize_path(path)
 	var file_name := display_file_name.strip_edges()
 	if file_name.is_empty():
 		file_name = _display_name_from_path(normalized_path)
 	var file_stem := file_name.get_basename()
-	var title := file_stem
-	var artist := ""
-	var separator := " - "
-	var separator_index := file_stem.find(separator)
-	if separator_index >= 0:
-		artist = file_stem.substr(0, separator_index).strip_edges()
-		title = file_stem.substr(separator_index + separator.length()).strip_edges()
-		if title.is_empty():
-			title = file_stem
+	var parsed_name := parse_track_name(file_stem)
+	var title := str(parsed_name.get("title", ""))
+	var artist := str(parsed_name.get("artist", ""))
+	if title.is_empty():
+		title = file_stem
 
 	var subtitle := folder_display_name.strip_edges()
 	if subtitle.is_empty():
@@ -280,9 +284,37 @@ func make_local_track_from_path(
 	track.mark = title.left(1) if not title.is_empty() else "L"
 	track.source = "LOCAL"
 	track.file_path = normalized_path
-	track.lyric_path = lyric_path if not lyric_path.is_empty() else find_lyric_path_for_audio(normalized_path)
+	if not lyric_path.is_empty():
+		track.lyric_path = lyric_path
+	elif lookup_lyric:
+		track.lyric_path = find_lyric_path_for_audio(normalized_path)
 	track.normalize()
 	return track
+
+## 从文件名主干解析标题与歌手。
+## 兼容两类常见命名："歌手 - 歌名" 与 "来源@ID@歌名@歌手"（如
+## "元力QQ@100380@香水百合@张韶涵" → 歌名 "香水百合"、歌手 "张韶涵"）。
+func parse_track_name(file_stem: String) -> Dictionary:
+	var stem := file_stem.strip_edges()
+	if stem.is_empty():
+		return {"title": "", "artist": ""}
+
+	var separator := " - "
+	var separator_index := stem.find(separator)
+	if separator_index >= 0:
+		var dash_artist := stem.substr(0, separator_index).strip_edges()
+		var dash_title := stem.substr(separator_index + separator.length()).strip_edges()
+		if not dash_title.is_empty():
+			return {"title": dash_title, "artist": dash_artist}
+
+	var segments := Array(stem.split("@", false))
+	if segments.size() >= 3:
+		var at_title := str(segments[segments.size() - 2]).strip_edges()
+		var at_artist := str(segments[segments.size() - 1]).strip_edges()
+		if not at_title.is_empty() and not at_artist.is_empty():
+			return {"title": at_title, "artist": at_artist}
+
+	return {"title": stem, "artist": ""}
 
 ## 查找与音频同名的旁挂歌词文件。
 func find_lyric_path_for_audio(path: String) -> String:

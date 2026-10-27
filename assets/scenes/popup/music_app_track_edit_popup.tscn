@@ -1,0 +1,106 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://assets/scripts/popup/music_app_track_edit_popup.gd" id="1_script"]
+
+[node name="MusicAppTrackEditPopup" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_script")
+presentation = 3
+transition_target = NodePath("Center")
+
+[node name="Overlay" type="ColorRect" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0, 0, 0, 0.58)
+mouse_filter = 1
+
+[node name="Center" type="CenterContainer" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="Panel" type="PanelContainer" parent="Center"]
+custom_minimum_size = Vector2(380, 0)
+layout_mode = 2
+theme_type_variation = "DialogPanel"
+
+[node name="Margin" type="MarginContainer" parent="Center/Panel"]
+layout_mode = 2
+theme_override_constants/margin_left = 24
+theme_override_constants/margin_top = 22
+theme_override_constants/margin_right = 24
+theme_override_constants/margin_bottom = 20
+
+[node name="VBox" type="VBoxContainer" parent="Center/Panel/Margin"]
+layout_mode = 2
+theme_override_constants/separation = 12
+
+[node name="HeaderLabel" type="Label" parent="Center/Panel/Margin/VBox"]
+layout_mode = 2
+text = "编辑曲目信息"
+theme_override_font_sizes/font_size = 17
+
+[node name="TrackEditHintLabel" type="Label" parent="Center/Panel/Margin/VBox"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "只修改本机曲库里的显示名称，不会改动音源平台的原始信息。"
+theme_override_colors/font_color = Color(0.62, 0.62, 0.66, 1)
+theme_override_font_sizes/font_size = 12
+autowrap_mode = 3
+
+[node name="TitleFieldLabel" type="Label" parent="Center/Panel/Margin/VBox"]
+layout_mode = 2
+text = "歌名"
+theme_override_colors/font_color = Color(0.62, 0.62, 0.66, 1)
+theme_override_font_sizes/font_size = 12
+
+[node name="TrackEditTitleInput" type="LineEdit" parent="Center/Panel/Margin/VBox"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 40)
+layout_mode = 2
+placeholder_text = "歌曲标题"
+clear_button_enabled = true
+
+[node name="ArtistFieldLabel" type="Label" parent="Center/Panel/Margin/VBox"]
+layout_mode = 2
+text = "UP 主 / 艺人"
+theme_override_colors/font_color = Color(0.62, 0.62, 0.66, 1)
+theme_override_font_sizes/font_size = 12
+
+[node name="TrackEditArtistInput" type="LineEdit" parent="Center/Panel/Margin/VBox"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 40)
+layout_mode = 2
+placeholder_text = "创作者名称"
+clear_button_enabled = true
+
+[node name="ButtonsRow" type="HBoxContainer" parent="Center/Panel/Margin/VBox"]
+layout_mode = 2
+theme_override_constants/separation = 10
+alignment = 2
+
+[node name="TrackEditCancelButton" type="Button" parent="Center/Panel/Margin/VBox/ButtonsRow"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(96, 40)
+layout_mode = 2
+text = "取消"
+theme_type_variation = "SegmentButton"
+
+[node name="TrackEditSaveButton" type="Button" parent="Center/Panel/Margin/VBox/ButtonsRow"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(96, 40)
+layout_mode = 2
+text = "保存"
+theme_type_variation = "PrimaryButton"

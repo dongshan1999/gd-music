@@ -14,6 +14,8 @@ enum PopupId {
 	MUSIC_APP_SETTINGS,
 	MUSIC_APP_PLUGIN_MANAGEMENT,
 	MUSIC_APP_PLUGIN_FILE_PICKER,
+	MUSIC_APP_DOWNLOAD_MANAGEMENT,
+	MUSIC_APP_TRACK_EDIT,
 	DX_DEBUG,
 	MUSIC_APP_BILIBILI_LOGIN,
 }
@@ -31,6 +33,8 @@ const POPUP_SCENES := {
 	PopupId.MUSIC_APP_SETTINGS: preload("res://assets/scenes/ui/music_app/settings/music_app_settings_page.tscn"),
 	PopupId.MUSIC_APP_PLUGIN_MANAGEMENT: preload("res://assets/scenes/ui/music_app/settings/music_app_plugin_management_page.tscn"),
 	PopupId.MUSIC_APP_PLUGIN_FILE_PICKER: preload("res://assets/scenes/ui/music_app/settings/music_app_plugin_file_picker_page.tscn"),
+	PopupId.MUSIC_APP_DOWNLOAD_MANAGEMENT: preload("res://assets/scenes/ui/music_app/settings/music_app_download_management_page.tscn"),
+	PopupId.MUSIC_APP_TRACK_EDIT: preload("res://assets/scenes/popup/music_app_track_edit_popup.tscn"),
 	PopupId.DX_DEBUG: preload("res://dx/runtime/scenes/debug/dx_debug_popup.tscn"),
 	PopupId.MUSIC_APP_BILIBILI_LOGIN: preload("res://assets/scenes/popup/music_app_bilibili_login_popup.tscn"),
 }
