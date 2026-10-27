@@ -1,0 +1,93 @@
+#!/usr/bin/env python
+# gdmpv 构建脚本
+#
+# 用法（需先装好 godot-cpp 与 libmpv，见 README.md）：
+#   scons platform=macos   target=template_debug arch=arm64   api_version=4.7 -j8
+#   scons platform=windows target=template_debug arch=x86_64  api_version=4.7 -j8
+#   scons platform=linux   target=template_debug arch=x86_64  api_version=4.7 -j8
+#   scons platform=android target=template_debug arch=arm64   api_version=4.7 -j8
+#
+# Android 额外要求：
+#   - NDK r29+（export ANDROID_NDK_ROOT=...）
+#   - 预编译的 Android 版 libmpv：先跑 tools/build_android_libmpv.sh
+#   - 环境变量 MPV_ANDROID_PREFIX 指向该目录（默认 thirdparty/mpv-android）
+#
+# 产物统一落在 bin/，命名遵循 Godot GDExtension 约定：
+#   libgdmpv.<platform>.<debug|release>[.<arch>].<ext>
+
+import os
+import subprocess
+
+# godot-cpp 源码位置，可用环境变量覆盖
+godot_cpp_path = os.environ.get("GODOT_CPP_PATH", "vendor/godot-cpp")
+
+if not os.path.isfile(os.path.join(godot_cpp_path, "SConstruct")):
+    print("[gdmpv] 缺少 godot-cpp：%s" % godot_cpp_path)
+    print("[gdmpv] 请先执行：")
+    print("        git clone --depth 1 -b master https://github.com/godotengine/godot-cpp.git %s" % godot_cpp_path)
+    Exit(1)
+
+env = SConscript(os.path.join(godot_cpp_path, "SConstruct"))
+
+env.Append(CPPPATH=["src"])
+
+platform = ARGUMENTS.get("platform", "macos")
+arch = ARGUMENTS.get("arch", "")
+
+# Android 交叉编译没有 pkg-config，改用显式的 include / lib 目录。
+if platform == "android":
+    mpv_prefix = os.environ.get("MPV_ANDROID_PREFIX", "thirdparty/mpv-android")
+    mpv_include = os.path.join(mpv_prefix, "include")
+    if not os.path.isdir(mpv_include):
+        print("[gdmpv] 找不到 Android 版 libmpv 头文件：%s" % mpv_include)
+        print("[gdmpv] 请先执行 tools/build_android_libmpv.sh 生成预编译库")
+        Exit(1)
+
+    env.Append(CPPPATH=[mpv_include])
+    # libmpv 及其依赖（ffmpeg）静态链入，架构目录由 NDK 的 arch 名决定
+    env.Append(LIBPATH=[os.path.join(mpv_prefix, "lib", arch)])
+    env.Append(LIBS=["mpv"])
+    # Android 动态库需要显式导出符号并链接 log / android
+    env.Append(LIBS=["log", "android", "OpenSLES"])
+    env.Append(LINKFLAGS=["-Wl,--no-undefined"])
+else:
+    def apply_pkg_config(env, package):
+        """把 pkg-config 的 cflags/libs 追加进构建环境。
+
+        libmpv 在 Homebrew / Linux 发行版里都用 pkg-config 暴露，
+        直接把 -I / -L / -l 拆开追加，比猜路径稳。
+        """
+        pkg_config = os.environ.get("PKG_CONFIG", "pkg-config")
+        try:
+            out = subprocess.check_output(
+                [pkg_config, "--cflags", "--libs", package],
+                text=True,
+                stderr=subprocess.DEVNULL,
+            )
+        except Exception as exc:  # noqa: BLE001 - 只需要知道失败原因
+            print("[gdmpv] pkg-config 调用失败：%s" % exc)
+            return False
+
+        for token in out.split():
+            if token.startswith("-I"):
+                env.Append(CPPPATH=[token[2:]])
+            elif token.startswith("-L"):
+                env.Append(LIBPATH=[token[2:]])
+            elif token.startswith("-l"):
+                env.Append(LIBS=[token[2:]])
+        return True
+
+    if not apply_pkg_config(env, "mpv"):
+        print("[gdmpv] 未找到 libmpv 开发包（mpv.pc / mpv/client.h）")
+        print("[gdmpv] macOS：brew install mpv && export PKG_CONFIG_PATH=\"$(brew --prefix)/lib/pkgconfig:$PKG_CONFIG_PATH\"")
+        print("[gdmpv] 注意：brew 的 mpv 是 GPL 构建，开发期可用，**不得用于分发**")
+        Exit(1)
+
+sources = Glob("src/*.cpp")
+
+library = env.SharedLibrary(
+    target="bin/libgdmpv" + env["suffix"] + env["SHLIBSUFFIX"],
+    source=sources,
+)
+
+Default(library)

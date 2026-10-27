@@ -1,0 +1,14 @@
+# 编译产物（各平台 .so/.dylib/.dll 由 CI 或本地构建生成）
+bin/*
+!bin/.gitkeep
+
+# godot-cpp 源码，按需 clone
+vendor/
+
+# scons 缓存
+.sconsign.dblite
+*.o
+*.os
+
+# 交叉编译产物（mpv-android 构建出的头文件与 libmpv.so）
+thirdparty/

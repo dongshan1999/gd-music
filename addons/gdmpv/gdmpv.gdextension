@@ -1,0 +1,60 @@
+; gdmpv —— Godot 的 libmpv 音频后端（GDExtension）
+;
+; ⚠️ 重要：本文件各段落内部【不能写注释】。
+; Godot 4.x 的 ConfigFile 解析器会把段内以 # 开头的行粘到下一个键名上，
+; 例如 android.arm64 会变成 "#说明文字...android.arm64"，标签匹配失败，
+; 该段依赖会被静默丢弃（APK 里就会缺 libmpv.so）。说明写在这里或 README。
+;
+; [dependencies] 说明
+; - 桌面开发期：libgdmpv 的 install_name 指向
+;   /opt/homebrew/opt/mpv/lib/libmpv.2.dylib，brew 装好 mpv 即可直接加载，
+;   无需在此声明拷贝。
+; - 桌面分发期：二选一——
+;   1. 把 libmpv.2.dylib 拷进 bin/，在 macos 段声明依赖，并用
+;      install_name_tool -change 把依赖路径改写为 @rpath/...；
+;   2. 或在构建产物上静态链接 libmpv（需自制 mpv 构建）。
+; - Android：libmpv.so 动态链接 ffmpeg 的 libav*.so 与 NDK 的 libc++_shared.so，
+;   必须一并打进 APK 的 lib/<abi>/，否则 dlopen 会因缺库失败。
+;   这些文件由 tools/build_android_libmpv.sh 生成（strip 后）到 bin/android_arm64/。
+; - 注意 android.arm64 与 android.x86_64 不要并列声明：Godot 的
+;   find_extension_dependencies() 遇到第一个标签全匹配的段就 break，
+;   导出时启用的架构都算 feature，两段并存可能互相遮蔽。
+
+[configuration]
+
+entry_symbol = "gdmpv_init"
+compatibility_minimum = "4.7"
+
+[libraries]
+windows.debug.x86_64 = "res://addons/gdmpv/bin/libgdmpv.windows.template_debug.x86_64.dll"
+windows.release.x86_64 = "res://addons/gdmpv/bin/libgdmpv.windows.template_release.x86_64.dll"
+linux.debug.x86_64 = "res://addons/gdmpv/bin/libgdmpv.linux.template_debug.x86_64.so"
+linux.release.x86_64 = "res://addons/gdmpv/bin/libgdmpv.linux.template_release.x86_64.so"
+android.debug.arm64 = "res://addons/gdmpv/bin/libgdmpv.android.template_debug.arm64.so"
+android.release.arm64 = "res://addons/gdmpv/bin/libgdmpv.android.template_release.arm64.so"
+macos.debug.arm64 = "res://addons/gdmpv/bin/libgdmpv.macos.template_debug.arm64.dylib"
+macos.release.arm64 = "res://addons/gdmpv/bin/libgdmpv.macos.template_release.arm64.dylib"
+macos.debug.x86_64 = "res://addons/gdmpv/bin/libgdmpv.macos.template_debug.x86_64.dylib"
+macos.release.x86_64 = "res://addons/gdmpv/bin/libgdmpv.macos.template_release.x86_64.dylib"
+
+[dependencies]
+linux.x86_64 =
+    {
+        "res://addons/gdmpv/bin/libmpv.so.2": ""
+    }
+windows.x86_64 =
+    {
+        "res://addons/gdmpv/bin/libmpv-2.dll": ""
+    }
+android.arm64 =
+    {
+        "res://addons/gdmpv/bin/android_arm64/libmpv.so": "",
+        "res://addons/gdmpv/bin/android_arm64/libavcodec.so": "",
+        "res://addons/gdmpv/bin/android_arm64/libavdevice.so": "",
+        "res://addons/gdmpv/bin/android_arm64/libavfilter.so": "",
+        "res://addons/gdmpv/bin/android_arm64/libavformat.so": "",
+        "res://addons/gdmpv/bin/android_arm64/libavutil.so": "",
+        "res://addons/gdmpv/bin/android_arm64/libswresample.so": "",
+        "res://addons/gdmpv/bin/android_arm64/libswscale.so": "",
+        "res://addons/gdmpv/bin/android_arm64/libc++_shared.so": ""
+    }
