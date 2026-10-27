@@ -6,12 +6,17 @@ import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.Service;
 import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.media.AudioAttributes;
 import android.media.AudioFocusRequest;
 import android.media.AudioManager;
 import android.media.MediaMetadata;
 import android.media.session.MediaSession;
 import android.media.session.PlaybackState;
+import android.os.Handler;
+import android.os.Looper;
+import android.os.SystemClock;
 import android.os.Build;
 import android.os.IBinder;
 import android.os.PowerManager;
@@ -19,6 +24,8 @@ import android.util.Log;
 
 /** Owns Android's background playback lifetime while Godot remains the decoder. */
 public final class GDMusicBackgroundService extends Service {
+    private static final long SKIP_THROTTLE_MS = 400L;
+    private long lastSkipToNextAt = 0L;
     private static final String TAG = "GDMusicBackgroundService";
     public static final String ACTION_START = "com.gdmusic.android.action.START";
     public static final String ACTION_UPDATE = "com.gdmusic.android.action.UPDATE";
@@ -30,23 +37,29 @@ public final class GDMusicBackgroundService extends Service {
     public static final String ACTION_MEDIA_NEXT = "com.gdmusic.android.action.MEDIA_NEXT";
     public static final String ACTION_MEDIA_PREVIOUS = "com.gdmusic.android.action.MEDIA_PREVIOUS";
     public static final String ACTION_MEDIA_STOP = "com.gdmusic.android.action.MEDIA_STOP";
+    public static final String ACTION_ARTWORK = "com.gdmusic.android.action.ARTWORK";
     public static final String MEDIA_PLAY = "play";
     public static final String MEDIA_PAUSE = "pause";
     public static final String MEDIA_TOGGLE = "toggle";
     public static final String MEDIA_NEXT = "next";
     public static final String MEDIA_PREVIOUS = "previous";
     public static final String MEDIA_STOP = "stop";
+    /** 锁屏/通知栏拖进度时回传的动作前缀，格式 `seek_to:<毫秒>`。 */
+    public static final String MEDIA_SEEK_PREFIX = "seek_to:";
     public static final String EXTRA_TITLE = "title";
     public static final String EXTRA_ARTIST = "artist";
     public static final String EXTRA_POSITION_SECONDS = "position_seconds";
     public static final String EXTRA_DURATION_SECONDS = "duration_seconds";
     public static final String EXTRA_PLAYING = "playing";
+    public static final String EXTRA_ARTWORK = "artwork";
 
     private static final int NOTIFICATION_ID = 7301;
     // Versioned so devices that already created the old LOW-importance
     // channel receive the visible media channel after an app update.
     private static final String CHANNEL_ID = "gdmusic_playback_v2";
     private static final String WAKE_LOCK_TAG = "gd-music:BackgroundPlayback";
+    /** 播放中定期刷新 PlaybackState 的时刻，避免系统外推漂移后进度条跳动。 */
+    private static final long PLAYBACK_STATE_REFRESH_MS = 1000L;
 
     private PowerManager.WakeLock wakeLock;
     private AudioManager audioManager;
@@ -58,6 +71,21 @@ public final class GDMusicBackgroundService extends Service {
     private long positionMillis;
     private long durationMillis;
     private boolean paused;
+    private Bitmap artworkBitmap;
+    /** 播放位置基准：以「位置 + 基准时刻」表达，供系统按 1x 速度自行外推。 */
+    private long positionBaseMillis;
+    private long positionBaseElapsedRealtime;
+    private final Handler progressHandler = new Handler(Looper.getMainLooper());
+    private final Runnable progressTicker = new Runnable() {
+        @Override
+        public void run() {
+            if (paused || mediaSession == null) {
+                return;
+            }
+            pushPlaybackState();
+            progressHandler.postDelayed(this, PLAYBACK_STATE_REFRESH_MS);
+        }
+    };
 
     @Override
     public void onCreate() {
@@ -71,7 +99,6 @@ public final class GDMusicBackgroundService extends Service {
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         String action = intent == null ? ACTION_START : intent.getAction();
-        Log.i(TAG, "onStartCommand action=" + action + " title=" + title);
         if (intent != null) {
             String nextTitle = intent.getStringExtra(EXTRA_TITLE);
             String nextArtist = intent.getStringExtra(EXTRA_ARTIST);
@@ -89,6 +116,10 @@ public final class GDMusicBackgroundService extends Service {
             }
             if (intent.hasExtra(EXTRA_PLAYING)) {
                 paused = !intent.getBooleanExtra(EXTRA_PLAYING, !paused);
+            }
+            if (action != null && action.equals(ACTION_ARTWORK)) {
+                String encodedArtwork = intent.getStringExtra(EXTRA_ARTWORK);
+                artworkBitmap = decodeArtwork(encodedArtwork);
             }
         }
 
@@ -146,13 +177,13 @@ public final class GDMusicBackgroundService extends Service {
         } else {
             startForeground(NOTIFICATION_ID, notification);
         }
-        Log.i(TAG, "foreground media notification posted id=" + NOTIFICATION_ID);
         updateMediaSession();
         return START_STICKY;
     }
 
     @Override
     public void onDestroy() {
+        progressHandler.removeCallbacks(progressTicker);
         releaseAudioFocus();
         releaseWakeLock();
         if (mediaSession != null) {
@@ -235,12 +266,24 @@ public final class GDMusicBackgroundService extends Service {
 
             @Override
             public void onSkipToNext() {
+                // 蓝牙 AVRCP 有时会连续下发多次「下一首」（元数据刷新后重同步），
+                // 不加节流会把队列一口气跳过好几首。
+                long now = SystemClock.elapsedRealtime();
+                if (now - lastSkipToNextAt < SKIP_THROTTLE_MS) {
+                    return;
+                }
+                lastSkipToNextAt = now;
                 dispatchMediaIntent(ACTION_MEDIA_NEXT);
             }
 
             @Override
             public void onSkipToPrevious() {
                 dispatchMediaIntent(ACTION_MEDIA_PREVIOUS);
+            }
+
+            @Override
+            public void onSeekTo(long position) {
+                GDMusicBackgroundAudioPlugin.dispatchMediaControl(MEDIA_SEEK_PREFIX + Math.max(0L, position));
             }
 
             @Override
@@ -338,6 +381,9 @@ public final class GDMusicBackgroundService extends Service {
                         "下一首",
                         ACTION_MEDIA_NEXT
                 ));
+        if (artworkBitmap != null) {
+            builder.setLargeIcon(artworkBitmap);
+        }
         if (contentIntent != null) {
             builder.setContentIntent(contentIntent);
         }
@@ -349,17 +395,37 @@ public final class GDMusicBackgroundService extends Service {
         return builder.build();
     }
 
+    /** 把 Godot 传来的 base64 JPEG 解成 Bitmap；任何异常都退化成「无封面」。 */
+    private static Bitmap decodeArtwork(String encoded) {
+        if (encoded == null || encoded.isEmpty()) {
+            return null;
+        }
+        try {
+            byte[] bytes = android.util.Base64.decode(encoded, android.util.Base64.DEFAULT);
+            return BitmapFactory.decodeByteArray(bytes, 0, bytes.length);
+        } catch (IllegalArgumentException error) {
+            Log.w(TAG, "Unable to decode artwork payload", error);
+            return null;
+        }
+    }
+
     private Notification.Action createAction(int icon, String label, String action) {
         int pendingIntentFlags = PendingIntent.FLAG_UPDATE_CURRENT;
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             pendingIntentFlags |= PendingIntent.FLAG_IMMUTABLE;
         }
-        PendingIntent pendingIntent = PendingIntent.getService(
-                this,
-                action.hashCode(),
-                new Intent(this, GDMusicBackgroundService.class).setAction(action),
-                pendingIntentFlags
-        );
+        // ⚠ 必须用 getForegroundService：应用退到后台后，系统禁止后台进程
+        // startService()（即使服务已在运行）。用 getService 时点击通知栏按钮
+        // 会被静默丢弃，表现为「App 在后台时媒体通知栏/灵动岛点了没反应」。
+        // getForegroundService 走 startForegroundService()，后台允许，且
+        // onStartCommand 里本来就会补 startForeground()，满足 5 秒约束。
+        Intent actionIntent = new Intent(this, GDMusicBackgroundService.class).setAction(action);
+        PendingIntent pendingIntent;
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            pendingIntent = PendingIntent.getForegroundService(this, action.hashCode(), actionIntent, pendingIntentFlags);
+        } else {
+            pendingIntent = PendingIntent.getService(this, action.hashCode(), actionIntent, pendingIntentFlags);
+        }
         return new Notification.Action.Builder(icon, label, pendingIntent).build();
     }
 
@@ -372,21 +438,65 @@ public final class GDMusicBackgroundService extends Service {
                 | PlaybackState.ACTION_PLAY_PAUSE
                 | PlaybackState.ACTION_SKIP_TO_NEXT
                 | PlaybackState.ACTION_SKIP_TO_PREVIOUS
+                | PlaybackState.ACTION_SEEK_TO
                 | PlaybackState.ACTION_STOP;
         int state = paused ? PlaybackState.STATE_PAUSED : PlaybackState.STATE_PLAYING;
         float playbackSpeed = paused ? 0.0f : 1.0f;
-        mediaSession.setMetadata(new MediaMetadata.Builder()
+        MediaMetadata.Builder metadata = new MediaMetadata.Builder()
                 .putString(MediaMetadata.METADATA_KEY_TITLE, title)
                 .putString(MediaMetadata.METADATA_KEY_ARTIST, artist)
                 .putString(MediaMetadata.METADATA_KEY_ALBUM, "gd-music")
-                .putLong(MediaMetadata.METADATA_KEY_DURATION, durationMillis)
-                .build());
+                .putLong(MediaMetadata.METADATA_KEY_DURATION, durationMillis);
+        if (artworkBitmap != null) {
+            metadata.putBitmap(MediaMetadata.METADATA_KEY_ALBUM_ART, artworkBitmap);
+            metadata.putBitmap(MediaMetadata.METADATA_KEY_ART, artworkBitmap);
+        }
+        mediaSession.setMetadata(metadata.build());
+        mediaSession.setActive(true);
+        positionBaseMillis = Math.max(0L, positionMillis);
+        positionBaseElapsedRealtime = SystemClock.elapsedRealtime();
+        pushPlaybackState();
+        scheduleProgressTicker();
+        updateNotification();
+    }
+
+    /**
+     * 只下发 PlaybackState（不重建通知）。
+     *
+     * 位置以「基准位置 + 已过时间」计算，并按 1x 速度交给系统外推；
+     * 小米 HyperOS 的媒体卡片/灵动岛进度条依赖这段持续更新的状态，
+     * 只下发一次会在几秒后变成一条不动的进度。
+     */
+    private void pushPlaybackState() {
+        if (mediaSession == null) {
+            return;
+        }
+        long actions = PlaybackState.ACTION_PLAY
+                | PlaybackState.ACTION_PAUSE
+                | PlaybackState.ACTION_PLAY_PAUSE
+                | PlaybackState.ACTION_SKIP_TO_NEXT
+                | PlaybackState.ACTION_SKIP_TO_PREVIOUS
+                | PlaybackState.ACTION_SEEK_TO
+                | PlaybackState.ACTION_STOP;
+        int state = paused ? PlaybackState.STATE_PAUSED : PlaybackState.STATE_PLAYING;
+        float playbackSpeed = paused ? 0.0f : 1.0f;
+        long elapsed = SystemClock.elapsedRealtime() - positionBaseElapsedRealtime;
+        long current = paused ? positionBaseMillis : positionBaseMillis + Math.max(0L, elapsed);
+        if (durationMillis > 0 && current > durationMillis) {
+            current = durationMillis;
+        }
         mediaSession.setPlaybackState(new PlaybackState.Builder()
                 .setActions(actions)
-                .setState(state, positionMillis, playbackSpeed)
+                .setState(state, current, playbackSpeed, SystemClock.elapsedRealtime())
                 .build());
-        mediaSession.setActive(true);
-        updateNotification();
+    }
+
+    /** 播放中每秒刷新一次状态；暂停/停止后停掉，避免无意义唤醒。 */
+    private void scheduleProgressTicker() {
+        progressHandler.removeCallbacks(progressTicker);
+        if (!paused) {
+            progressHandler.postDelayed(progressTicker, PLAYBACK_STATE_REFRESH_MS);
+        }
     }
 
     private void updateNotification() {

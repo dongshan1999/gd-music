@@ -1,0 +1,47 @@
+plugins {
+    id 'com.android.library'
+}
+
+// 插件源码保持在 ../ 下，构建前复制到 build 目录，避免把 AAR 输出目录当成源码目录。
+def generatedPluginSources = layout.buildDirectory.dir('generated-plugin-src')
+
+android {
+    namespace 'com.gdmusic.android'
+    compileSdk 36
+
+    defaultConfig {
+        minSdk 24
+    }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
+    }
+
+    buildFeatures {
+        buildConfig false
+    }
+
+    sourceSets {
+        main {
+            java.srcDirs = [generatedPluginSources.get().asFile]
+        }
+    }
+
+    lint {
+        abortOnError false
+    }
+}
+
+tasks.register('syncPluginSources', Copy) {
+    from('../../') { include '*.java' }
+    into generatedPluginSources
+}
+
+tasks.named('preBuild') {
+    dependsOn 'syncPluginSources'
+}
+
+dependencies {
+    compileOnly files('../../../../build/libs/debug/godot-lib.template_debug.aar')
+}

@@ -6,6 +6,10 @@
 !/android/plugins/
 !/android/plugins/GDMusicBackgroundAudio/
 !/android/plugins/GDMusicBackgroundAudio/**
+/android/plugins/GDMusicBackgroundAudio/aar-build/build/
+/android/plugins/GDMusicBackgroundAudio/aar-build/plugin/build/
+/android/plugins/GDMusicBackgroundAudio/aar-build/.gradle/
+/android/plugins/GDMusicBackgroundAudio/aar-build/local.properties
 *.translation
 plugin_host/node_modules/
 plugin_host/data/

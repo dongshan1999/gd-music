@@ -80,6 +80,19 @@ public final class GDMusicBackgroundAudioPlugin extends GodotPlugin {
         startServiceCompat(context, intent);
     }
 
+    /** 把封面（base64 编码的 JPEG）交给前台服务，用于通知栏与锁屏。 */
+    @UsedByGodot
+    public void updateArtwork(String artworkBase64) {
+        Context context = getContext();
+        if (context == null || artworkBase64 == null) {
+            return;
+        }
+        Intent intent = new Intent(context, GDMusicBackgroundService.class)
+                .setAction(GDMusicBackgroundService.ACTION_ARTWORK)
+                .putExtra(GDMusicBackgroundService.EXTRA_ARTWORK, artworkBase64);
+        startServiceCompat(context, intent);
+    }
+
     @UsedByGodot
     public void pause() {
         sendSimpleAction(GDMusicBackgroundService.ACTION_PAUSE);
@@ -113,6 +126,11 @@ public final class GDMusicBackgroundAudioPlugin extends GodotPlugin {
                 new String[]{android.Manifest.permission.POST_NOTIFICATIONS},
                 NOTIFICATION_PERMISSION_REQUEST_CODE
         );
+    }
+
+    /** True while a Godot instance with this plugin loaded is alive in this process. */
+    public static boolean isAlive() {
+        return instance != null;
     }
 
     /** Delivers notification and headset commands to the active Godot singleton. */
