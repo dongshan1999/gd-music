@@ -35,7 +35,13 @@ const LOGIN_HEADERS := {
 	"referer": "https://www.bilibili.com/",
 }
 
+const JavaHttpBridgeScript := preload("res://assets/scripts/ui/music_app/controllers/music_app_java_http_bridge.gd")
+
 var last_error := ""
+
+## Android 上由插件代发 HTTP：Godot 的 HTTPRequest 在本机连超时回调都不触发。
+## 通道实现与封面下载共用，见 music_app_java_http_bridge.gd。
+var _java_http_bridge = JavaHttpBridgeScript.new()
 
 ## 申请一个登录二维码；返回 {"url": String, "qrcode_key": String}，失败返回 {}。
 func generate_qrcode() -> Dictionary:
@@ -133,6 +139,9 @@ func _request(url: String, query: Dictionary) -> Dictionary:
 			pairs.append("%s=%s" % [str(key).uri_encode(), str(query[key]).uri_encode()])
 		full_url = "%s?%s" % [url, "&".join(pairs)]
 
+	if OS.get_name() == "Android":
+		return await _request_via_java(full_url)
+
 	# 桌面平台优先用系统 curl：这类请求量极小，curl 比 HTTPRequest 稳得多。
 	var curl_result := _request_via_curl(full_url)
 	if not curl_result.is_empty():
@@ -141,71 +150,105 @@ func _request(url: String, query: Dictionary) -> Dictionary:
 	var host = get_showcase()
 	if host == null:
 		last_error = "应用窗口未就绪。"
+		print("[BiliLogin] _request host=null url=%s" % url)
 		return {}
 	var tree: SceneTree = host.get_tree()
 	if tree == null:
 		last_error = "应用窗口未就绪。"
+		print("[BiliLogin] _request tree=null url=%s" % url)
 		return {}
 
 	var request := HTTPRequest.new()
 	request.timeout = REQUEST_TIMEOUT_SECONDS
 	host.add_child(request)
 
-	var state := {
-		"done": false,
-		"result": HTTPRequest.RESULT_CANT_CONNECT,
-		"code": 0,
-		"headers": PackedStringArray(),
-		"body": PackedByteArray(),
-	}
-	request.request_completed.connect(
-		func(result: int, code: int, headers: PackedStringArray, body: PackedByteArray) -> void:
-			state["done"] = true
-			state["result"] = result
-			state["code"] = code
-			state["headers"] = headers
-			state["body"] = body
-	)
-
 	var err := request.request(full_url, _build_header_lines(LOGIN_HEADERS), HTTPClient.METHOD_GET)
+	print("[BiliLogin] _request fire err=%d url=%s" % [err, full_url.get_slice("?", 0)])
 	if err != OK:
 		request.queue_free()
 		last_error = "无法发起登录请求（%d）。" % err
 		return {}
 
-	# 自己计时：HTTPRequest 的 timeout 只管建连，卡住时必须靠这里兜底。
-	# 用 process_frame 而不是 SceneTreeTimer：前者每帧必发，最不容易被卡住。
-	var frames := 0
-	var max_frames := int((REQUEST_TIMEOUT_SECONDS + 5.0) * 60.0)
-	while not bool(state["done"]) and frames < max_frames:
-		await tree.process_frame
-		frames += 1
+	# 直接等引擎的完成信号：request.timeout 到点时引擎会带 RESULT_TIMEOUT 触发它。
+	# 之前手写 `await tree.process_frame` 轮询在这台机器上会永久挂住（协程再也没有恢复过），
+	# 表现就是「一直卡在正在申请二维码…」且没有任何超时提示。
+	var started_msec := Time.get_ticks_msec()
+	print("[BiliLogin] ctx paused=%s host_mode=%d in_tree=%s" % [
+		host.get_tree().paused,
+		int(host.process_mode),
+		request.is_inside_tree(),
+	])
+	var watchdog: SceneTreeTimer = host.get_tree().create_timer(3.0)
+	watchdog.timeout.connect(func() -> void:
+		print("[BiliLogin] watchdog fired @3s (scene tree still pumping)")
+	)
+	var completed: Array = await request.request_completed
+	var elapsed_msec := Time.get_ticks_msec() - started_msec
+	print("[BiliLogin] %dms completed=%d" % [elapsed_msec, completed.size()])
 
-	if not bool(state["done"]):
-		request.cancel_request()
+	if completed.size() < 4:
 		request.queue_free()
-		var fallback := _request_via_curl(full_url)
-		if not fallback.is_empty():
-			return fallback
-		last_error = "连接 B 站超时，请检查网络后重试。"
+		last_error = "登录请求没有返回结果，请检查网络后重试。"
 		return {}
 
 	request.queue_free()
-	var result_code := int(state["result"])
-	var response_code := int(state["code"])
+	var result_code := int(completed[0])
+	var response_code := int(completed[1])
+	var headers: PackedStringArray = completed[2]
+	var body: PackedByteArray = completed[3]
+
 	if result_code != HTTPRequest.RESULT_SUCCESS:
 		last_error = "网络请求失败（%d），请检查网络后重试。" % result_code
 		return {}
 
-	var body_text := (state["body"] as PackedByteArray).get_string_from_utf8()
+	var body_text := body.get_string_from_utf8()
+	if body_text.strip_edges().is_empty():
+		last_error = "登录请求没有返回结果，请检查网络后重试。"
+		return {}
+
 	var parsed: Variant = JSON.parse_string(body_text)
 	return {
 		"body": parsed if parsed is Dictionary else {},
-		"headers": state["headers"],
+		"headers": headers,
 		"response_code": response_code,
 	}
 
-## HTTPRequest 在部分桌面环境下会卡死（TLS/代理层不回调），此时用系统 curl 兜底。
+
+## Android：Godot 的 HTTPRequest 在本机**连 request_completed 的超时回调都不触发**
+## （同一个 URL 用系统浏览器立刻返回 200，所以不是网络、不是 DNS），
+## 改由 Android 插件用系统网络栈代发，结果通过 `media_control` 信号回传。
+func _request_via_java(full_url: String) -> Dictionary:
+	var host = get_showcase()
+	if host == null:
+		last_error = "应用窗口未就绪。"
+		return {}
+	var result: Dictionary = await _java_http_bridge.request_bytes(
+		host, full_url, REQUEST_TIMEOUT_SECONDS, "login"
+	)
+	if not bool(result.get("ok", false)):
+		var reason := String(result.get("error", ""))
+		match reason:
+			"plugin_unavailable", "signal_missing":
+				last_error = "原生网络通道不可用。"
+			"method_missing":
+				last_error = "原生网络通道未就绪。"
+			"timeout":
+				last_error = "登录请求超时，请检查网络后重试。"
+			_:
+				last_error = "网络请求失败（%s），请检查网络后重试。" % reason
+		return {}
+	var bytes: PackedByteArray = result.get("bytes", PackedByteArray())
+	if bytes.is_empty() or bytes.get_string_from_utf8().strip_edges().is_empty():
+		last_error = "登录请求没有返回结果，请检查网络后重试。"
+		return {}
+	var parsed: Variant = JSON.parse_string(bytes.get_string_from_utf8())
+	return {
+		"body": parsed if parsed is Dictionary else {},
+		"headers": PackedStringArray(),
+		"response_code": 200,
+	}
+
+
 func _request_via_curl(full_url: String) -> Dictionary:
 	var platform := OS.get_name()
 	if platform != "macOS" and platform != "Linux" and platform != "Windows":

@@ -12,6 +12,9 @@ const POLL_INTERVAL_SECONDS := 2.0
 const QR_PIXELS_PER_MODULE := 6
 const QR_QUIET_ZONE := 4
 
+const COLOR_LOGGED_IN := Color(0.62, 0.85, 0.66, 1.0)
+const COLOR_LOGGED_OUT := Color(0.78, 0.78, 0.82, 1.0)
+
 @onready var status_label: Label = %LoginStatusLabel
 @onready var qr_frame: PanelContainer = %LoginQrFrame
 @onready var qr_texture: TextureRect = %LoginQrTexture
@@ -21,6 +24,7 @@ const QR_QUIET_ZONE := 4
 @onready var cookie_input: LineEdit = %LoginCookieInput
 @onready var apply_button: Button = %LoginApplyButton
 @onready var refresh_button: Button = %LoginRefreshButton
+@onready var logout_button: Button = %LoginLogoutButton
 @onready var close_button: Button = %LoginCloseButton
 
 var _controller
@@ -38,10 +42,11 @@ func setup(controller, action_controller = null) -> void:
 	_action_controller = action_controller
 	_login_controller = LoginControllerScript.new(controller)
 	bind()
-	await _sync_login_state()
-	if _is_logged_in:
-		return
+	# 先申请二维码再校验登录态：用户点开弹窗的第一诉求是拿到二维码。
+	# 反过来先 await 登录态校验时，有 cookie 但已失效的情况下会先卡 10 秒网络，
+	# 这段时间连「正在申请二维码…」都不会出现。
 	_request_qrcode()
+	await _sync_login_state()
 
 func bind() -> void:
 	if _is_bound:
@@ -50,6 +55,7 @@ func bind() -> void:
 
 	close_button.pressed.connect(close_popup)
 	refresh_button.pressed.connect(_on_refresh_pressed)
+	logout_button.pressed.connect(_on_logout_pressed)
 	manual_toggle_button.pressed.connect(_on_manual_toggle_pressed)
 	apply_button.pressed.connect(_on_apply_pressed)
 	cookie_input.text_submitted.connect(func(_text: String) -> void: _on_apply_pressed())
@@ -77,35 +83,56 @@ func _sync_login_state() -> void:
 		return
 	var status: Dictionary = await _login_controller.fetch_current_login()
 	if bool(status.get("logged_in", false)):
-		_is_logged_in = true
-		_stop_polling()
-		var uname := str(status.get("uname", "")).strip_edges()
-		status_label.text = "已登录：%s" % uname if not uname.is_empty() else "已登录"
-		status_label.add_theme_color_override("font_color", Color(0.62, 0.85, 0.66, 1.0))
-		qr_frame.visible = false
-		qr_texture.texture = null
-		hint_label.text = "当前账号已登录，搜索会带上登录凭据。"
-		refresh_button.text = "重新扫码登录"
-		refresh_button.visible = true
+		_render_logged_in(str(status.get("uname", "")))
 		return
+	_render_logged_out()
+
+## 已登录视图：只显示账号名与「重新扫码 / 退出登录」，二维码区域收起。
+func _render_logged_in(uname_raw: String) -> void:
+	_is_logged_in = true
+	_stop_polling()
+	_qrcode_key = ""
+	var uname := uname_raw.strip_edges()
+	status_label.text = "已登录：%s" % uname if not uname.is_empty() else "已登录"
+	status_label.add_theme_color_override("font_color", COLOR_LOGGED_IN)
+	qr_frame.visible = false
+	qr_texture.texture = null
+	hint_label.text = "当前账号已登录，搜索会带上登录凭据。"
+	refresh_button.text = "重新扫码登录"
+	refresh_button.visible = true
+	logout_button.visible = true
+	manual_toggle_button.visible = false
+	manual_box.visible = false
+
+## 未登录视图：显示二维码与「改用粘贴 Cookie」入口。
+func _render_logged_out() -> void:
 	_is_logged_in = false
 	status_label.text = "未登录（匿名访问，可能被风控拦截）"
-	status_label.add_theme_color_override("font_color", Color(0.78, 0.78, 0.82, 1.0))
+	status_label.add_theme_color_override("font_color", COLOR_LOGGED_OUT)
 	refresh_button.visible = false
+	logout_button.visible = false
+	manual_toggle_button.visible = true
 
 func _request_qrcode() -> void:
+	print("[BiliLogin] request_qrcode enter busy=%s ctrl=%s" % [_is_busy, _login_controller != null])
 	if _login_controller == null or _is_busy:
 		return
 	_is_logged_in = false
 	_is_busy = true
 	_stop_polling()
 	refresh_button.visible = false
+	logout_button.visible = false
 	hint_label.text = "正在申请二维码…"
 	qr_frame.visible = false
 	qr_texture.texture = null
 
+	print("[BiliLogin] request_qrcode awaiting network…")
 	var result: Dictionary = await _login_controller.generate_qrcode()
+	print("[BiliLogin] request_qrcode got result empty=%s" % result.is_empty())
 	_is_busy = false
+	# 竞态：申请期间登录态校验可能已经判定「已登录」，此时不要把二维码盖回去。
+	if _is_logged_in:
+		return
 	if result.is_empty():
 		hint_label.text = str(_login_controller.last_error) if not _login_controller.last_error.is_empty() else "二维码申请失败，请稍后重试。"
 		refresh_button.text = "重试"
@@ -193,6 +220,17 @@ func _apply_cookie(cookie_header: String) -> void:
 		close_popup()
 		return
 	hint_label.text = str(result.get("message", "登录失败，请重试。"))
+
+## 退出登录：清掉存档里的 cookie，立刻回到未登录视图并重新申请二维码。
+func _on_logout_pressed() -> void:
+	if _login_controller == null or _is_busy:
+		return
+	_stop_polling()
+	_login_controller.logout()
+	_render_logged_out()
+	hint_label.text = "已退出登录。"
+	_show_toast("已退出 B 站账号")
+	_request_qrcode()
 
 func _on_refresh_pressed() -> void:
 	# 上一次申请可能卡死在网络 await 上（协程不会恢复），这里强制解锁后重来。

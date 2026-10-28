@@ -56,18 +56,18 @@ theme_override_constants/separation = 14
 layout_mode = 2
 theme_override_constants/separation = 12
 
-[node name="LoginTitleLabel" type="Label" parent="Center/Panel/Margin/VBox/HeaderRow"]
-layout_mode = 2
-size_flags_horizontal = 3
-text = "Bilibili 账号"
-theme_override_font_sizes/font_size = 19
-
 [node name="LoginCloseButton" type="Button" parent="Center/Panel/Margin/VBox/HeaderRow"]
 unique_name_in_owner = true
 custom_minimum_size = Vector2(64, 32)
 layout_mode = 2
 text = "关闭"
 theme_type_variation = "SegmentButton"
+
+[node name="LoginTitleLabel" type="Label" parent="Center/Panel/Margin/VBox/HeaderRow"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "Bilibili 账号"
+theme_override_font_sizes/font_size = 19
 
 [node name="LoginStatusLabel" type="Label" parent="Center/Panel/Margin/VBox"]
 unique_name_in_owner = true
@@ -108,6 +108,14 @@ custom_minimum_size = Vector2(0, 40)
 layout_mode = 2
 visible = false
 text = "刷新二维码"
+theme_type_variation = "SegmentButton"
+
+[node name="LoginLogoutButton" type="Button" parent="Center/Panel/Margin/VBox"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 40)
+layout_mode = 2
+visible = false
+text = "退出登录"
 theme_type_variation = "SegmentButton"
 
 [node name="LoginManualToggleButton" type="Button" parent="Center/Panel/Margin/VBox"]

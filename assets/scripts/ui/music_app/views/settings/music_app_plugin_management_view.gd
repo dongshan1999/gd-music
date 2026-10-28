@@ -99,6 +99,7 @@ func _sync_plugin_items() -> void:
 		plugin_list.add_child(item)
 		item.enabled_toggled.connect(_on_plugin_enabled_toggled)
 		item.login_requested.connect(_on_plugin_login_requested)
+		item.logout_requested.connect(_on_plugin_logout_requested)
 		_plugin_items.append(item)
 
 	while _plugin_items.size() > _plugins.size():
@@ -110,6 +111,7 @@ func _sync_plugin_items() -> void:
 		var plugin_id := str(plugin.get("id", ""))
 		var login_state: Dictionary = _plugin_management_controller.get_cached_login_state(plugin_id)
 		plugin["logged_in"] = bool(login_state.get("logged_in", false))
+		plugin["uname"] = str(login_state.get("uname", ""))
 		_plugin_items[index].configure(
 			plugin,
 			_plugin_management_controller.is_plugin_enabled(plugin_id)
@@ -250,6 +252,12 @@ func _on_plugin_login_requested(plugin_id: String) -> void:
 		popup.setup(_controller, _plugin_management_controller)
 		# 弹窗关掉后重新拉一次列表，登录状态和按钮才会跟着变。
 		popup.tree_exited.connect(_request_reload)
+
+func _on_plugin_logout_requested(plugin_id: String) -> void:
+	if plugin_id.strip_edges().is_empty():
+		return
+	await _plugin_management_controller.logout(plugin_id)
+	_request_reload()
 
 func _on_plugin_file_picked(path: String) -> void:
 	_install_plugin_from_path(path)

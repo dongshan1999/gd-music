@@ -81,6 +81,17 @@ func refresh_login_state(plugin_id: String) -> Dictionary:
 		return {}
 	return await plugin_controller.refresh_login_state(plugin_id)
 
+## 退出登录：清空 cookie 后重新拉一次登录态，让列表与弹窗都回到未登录。
+func logout(plugin_id: String) -> void:
+	var normalized_plugin_id := plugin_id.strip_edges()
+	if normalized_plugin_id.is_empty():
+		return
+	var plugin_controller: MusicAppPluginController = get_plugin_controller()
+	if plugin_controller == null:
+		return
+	plugin_controller.set_plugin_cookie(normalized_plugin_id, "")
+	await plugin_controller.refresh_login_state(normalized_plugin_id)
+
 func show_install_placeholder() -> void:
 	show_toast("请从本地文件或网络地址安装插件。")
 
