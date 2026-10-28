@@ -4,6 +4,9 @@ plugins {
 
 // 插件源码保持在 ../ 下，构建前复制到 build 目录，避免把 AAR 输出目录当成源码目录。
 def generatedPluginSources = layout.buildDirectory.dir('generated-plugin-src')
+// 清单同理：插件根目录的 AndroidManifest.xml 是唯一事实源，
+// 构建时复制一份并去掉 package 属性（AGP 8 改用 namespace，保留它会直接报错）。
+def generatedPluginManifest = layout.buildDirectory.dir('generated-plugin-manifest')
 
 android {
     namespace 'com.gdmusic.android'
@@ -25,6 +28,7 @@ android {
     sourceSets {
         main {
             java.srcDirs = [generatedPluginSources.get().asFile]
+            manifest.srcFile generatedPluginManifest.get().asFile.toPath().resolve('AndroidManifest.xml').toFile()
         }
     }
 
@@ -38,8 +42,23 @@ tasks.register('syncPluginSources', Copy) {
     into generatedPluginSources
 }
 
+// 把插件根目录的清单同步成 AGP 可用的版本：去掉 package 属性，其余原样保留
+// （<service>、权限和 org.godotengine.plugin.v1.* 的 meta-data 全靠它进 APK，
+// 少了这一步生成的 AAR 会带上空清单，装进 APK 后就是「没有通知栏媒体控制、没有灵动岛」）。
+tasks.register('syncPluginManifest') {
+    def source = file('../../AndroidManifest.xml')
+    inputs.file(source)
+    outputs.dir(generatedPluginManifest)
+    doLast {
+        def outDir = generatedPluginManifest.get().asFile
+        outDir.mkdirs()
+        def text = source.getText('UTF-8').replaceAll(/\s+package="[^"]*"/, '')
+        new File(outDir, 'AndroidManifest.xml').setText(text, 'UTF-8')
+    }
+}
+
 tasks.named('preBuild') {
-    dependsOn 'syncPluginSources'
+    dependsOn 'syncPluginSources', 'syncPluginManifest'
 }
 
 dependencies {

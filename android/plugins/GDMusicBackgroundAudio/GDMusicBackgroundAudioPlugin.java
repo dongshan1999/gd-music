@@ -93,6 +93,24 @@ public final class GDMusicBackgroundAudioPlugin extends GodotPlugin {
         startServiceCompat(context, intent);
     }
 
+    /**
+     * 由系统网络栈代发一条 GET（Godot 的 HTTPRequest 在部分机型上连超时都不回调）。
+     * 结果通过 {@code media_control} 信号回传，格式 {@code http_result:<请求号>:<base64>}，
+     * 失败时是 {@code http_error:<请求号>:<异常类名>}。
+     */
+    @UsedByGodot
+    public void httpGet(String url, String requestId) {
+        Context context = getContext();
+        if (context == null || url == null || requestId == null) {
+            return;
+        }
+        Intent intent = new Intent(context, GDMusicBackgroundService.class)
+                .setAction(GDMusicBackgroundService.ACTION_HTTP_GET)
+                .putExtra(GDMusicBackgroundService.EXTRA_HTTP_URL, url)
+                .putExtra(GDMusicBackgroundService.EXTRA_HTTP_REQUEST_ID, requestId);
+        startServiceCompat(context, intent);
+    }
+
     @UsedByGodot
     public void pause() {
         sendSimpleAction(GDMusicBackgroundService.ACTION_PAUSE);

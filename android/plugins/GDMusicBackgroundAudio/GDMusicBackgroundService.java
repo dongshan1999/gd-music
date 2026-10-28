@@ -20,6 +20,7 @@ import android.os.SystemClock;
 import android.os.Build;
 import android.os.IBinder;
 import android.os.PowerManager;
+import android.util.Base64;
 import android.util.Log;
 
 /** Owns Android's background playback lifetime while Godot remains the decoder. */
@@ -52,6 +53,13 @@ public final class GDMusicBackgroundService extends Service {
     public static final String EXTRA_DURATION_SECONDS = "duration_seconds";
     public static final String EXTRA_PLAYING = "playing";
     public static final String EXTRA_ARTWORK = "artwork";
+    /** 由 Godot 侧发起的 HTTPS GET：Godot 自带的 HTTPRequest 在部分机型上
+     *  连 request_completed 超时都不触发，登录等关键请求改走系统网络栈。 */
+    public static final String ACTION_HTTP_GET = "com.gdmusic.android.action.HTTP_GET";
+    public static final String EXTRA_HTTP_URL = "http_url";
+    public static final String EXTRA_HTTP_REQUEST_ID = "http_request_id";
+    private static final int HTTP_CONNECT_TIMEOUT_MS = 8000;
+    private static final int HTTP_READ_TIMEOUT_MS = 8000;
 
     private static final int NOTIFICATION_ID = 7301;
     // Versioned so devices that already created the old LOW-importance
@@ -82,6 +90,10 @@ public final class GDMusicBackgroundService extends Service {
             if (paused || mediaSession == null) {
                 return;
             }
+            // 每秒回调一次 Godot：App 在后台时引擎主循环基本不推进，mpv 播完发出的
+            // finished 走 call_deferred，会一直卡在消息队列里 —— 表现为「锁屏/后台播完
+            // 不自动切下一首」。这里复用 media_control 通道把「该巡检了」送进 GDScript。
+            GDMusicBackgroundAudioPlugin.dispatchMediaControl("tick");
             pushPlaybackState();
             progressHandler.postDelayed(this, PLAYBACK_STATE_REFRESH_MS);
         }
@@ -99,6 +111,15 @@ public final class GDMusicBackgroundService extends Service {
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         String action = intent == null ? ACTION_START : intent.getAction();
+        // 网络上代发：与播放状态无关，投递后台线程后继续走下面的 startForeground
+        //（服务可能正是被这次请求拉起，5 秒时限不能跳）。
+        if (ACTION_HTTP_GET.equals(action) && intent != null) {
+            String httpUrl = intent.getStringExtra(EXTRA_HTTP_URL);
+            String httpRequestId = intent.getStringExtra(EXTRA_HTTP_REQUEST_ID);
+            if (httpUrl != null && httpRequestId != null) {
+                fetchHttpInBackground(httpUrl, httpRequestId);
+            }
+        }
         if (intent != null) {
             String nextTitle = intent.getStringExtra(EXTRA_TITLE);
             String nextArtist = intent.getStringExtra(EXTRA_ARTIST);
@@ -179,6 +200,53 @@ public final class GDMusicBackgroundService extends Service {
         }
         updateMediaSession();
         return START_STICKY;
+    }
+
+    /** 在后台线程发一条 GET，把结果以 `http_result:<id>:<base64>` 回传给 Godot。 */
+    private void fetchHttpInBackground(final String url, final String requestId) {
+        Thread worker = new Thread(new Runnable() {
+            @Override
+            public void run() {
+                String resultAction;
+                try {
+                    java.net.HttpURLConnection connection =
+                            (java.net.HttpURLConnection) new java.net.URL(url).openConnection();
+                    connection.setRequestMethod("GET");
+                    connection.setConnectTimeout(HTTP_CONNECT_TIMEOUT_MS);
+                    connection.setReadTimeout(HTTP_READ_TIMEOUT_MS);
+                    connection.setRequestProperty("User-Agent",
+                            "Mozilla/5.0 (Linux; Android 14) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0 Mobile Safari/537.36");
+                    connection.setRequestProperty("Referer", "https://www.bilibili.com/");
+                    int status = connection.getResponseCode();
+                    java.io.InputStream stream = (status >= 200 && status < 300)
+                            ? connection.getInputStream()
+                            : connection.getErrorStream();
+                    // 必须按字节读：封面是 JPEG/PNG，按行读文本会把二进制内容拆坏。
+                    java.io.ByteArrayOutputStream buffer = new java.io.ByteArrayOutputStream();
+                    if (stream != null) {
+                        byte[] chunk = new byte[8192];
+                        int read;
+                        while ((read = stream.read(chunk)) != -1) {
+                            buffer.write(chunk, 0, read);
+                        }
+                        stream.close();
+                    }
+                    connection.disconnect();
+                    String encoded = Base64.encodeToString(buffer.toByteArray(), Base64.NO_WRAP);
+                    resultAction = "http_result:" + requestId + ":" + encoded;
+                } catch (Exception error) {
+                    resultAction = "http_error:" + requestId + ":" + error.getClass().getSimpleName();
+                }
+                final String finalAction = resultAction;
+                new Handler(Looper.getMainLooper()).post(new Runnable() {
+                    @Override
+                    public void run() {
+                        GDMusicBackgroundAudioPlugin.dispatchMediaControl(finalAction);
+                    }
+                });
+            }
+        }, "gdmusic-http");
+        worker.start();
     }
 
     @Override
