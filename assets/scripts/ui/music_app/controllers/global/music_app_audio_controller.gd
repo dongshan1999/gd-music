@@ -13,19 +13,26 @@ const FFMPEG_CACHE_DIR := "gdmusic-ffmpeg-audio"
 const LOCAL_SOURCE_CACHE_DIR := "gdmusic-local-source"
 ## 本地曲目内嵌封面解出来的小图缓存目录（必须带 user://，Android 上相对路径会解析到根目录）。
 const LOCAL_ARTWORK_CACHE_DIR := "user://gdmusic-artwork"
+const REMOTE_BYTES_TIMEOUT_SECONDS := 12.0
 const AudioArtworkReaderScript := preload("res://assets/scripts/save/music/audio_artwork_reader.gd")
 ## Phase 1 播放后端抽象层：默认不使用，gdmpv 扩展可用时由工厂自动接管。
 const AudioBackendFactoryScript := preload("res://assets/scripts/ui/music_app/audio/audio_backend_factory.gd")
+const JavaHttpBridgeScript := preload("res://assets/scripts/ui/music_app/controllers/music_app_java_http_bridge.gd")
 
 var controller
 
 const SUPPORTED_AUDIO_LOADERS := ["mp3", "ogg", "wav"]
 const REMOTE_STREAM_TIMEOUT_SECONDS := 20.0
+## 自动切歌去重窗口：前台的 finished 信号与后台的 tick 巡检可能在同一秒内先后到达，
+## 两者都会触发队列推进，不加这层去重会在一次播完后连跳两首。
+const AUTO_FINISH_DEDUPE_MSEC := 1500
 
 var _audio_sync_request_id := 0
 var _loaded_track_key := ""
 var _pending_seek_track_key := ""
 var _pending_seek_until_msec := 0
+## 最近一次「自动切歌」的时间戳，用于前台 finished 与后台 tick 巡检互斥。
+var _last_auto_finish_msec := 0
 var last_error := ""
 
 ## Phase 1 播放后端：null = 沿用 Godot 原生播放器（AudioStreamPlayer / FFmpegVideoStream）。
@@ -47,6 +54,8 @@ var _notification_artwork_source := ""
 var _notification_artwork_track_key := ""
 var _artwork_bytes_cache: Dictionary = {}
 var _artwork_inflight: Dictionary = {}
+## 登录与封面共用同一条原生 HTTP 通道，实现见 music_app_java_http_bridge.gd。
+var _java_http_bridge = JavaHttpBridgeScript.new()
 ## 本地曲目内嵌封面：file_path 的 md5 -> 缓存图片路径（找不到时记空串，避免反复解析）。
 var _local_artwork_sources: Dictionary = {}
 ## 播放音量（线性 0–1），与后端解耦后统一折算成 dB 下发。
@@ -156,11 +165,81 @@ func _on_background_media_control(action: String) -> void:
 			var playback_controller = get_playback_controller()
 			if playback_controller != null and playback_controller.step_queue(-1, true):
 				_apply_immediate_load()
+		"tick":
+			# 前台服务每秒的心跳：后台没有主循环，mpv 播完的 finished 会一直排在
+			# 延迟队列里，只能靠这里主动查播放器状态补一次「播完了」的收尾。
+			_poll_background_playback_end()
 		"stop":
 			if is_playing():
 				set_is_playing(false)
 			stop_audio_playback(true)
 			_loaded_track_key = ""
+
+## 后台巡检：发现底层播放器已经自然播到结尾，就替 finished 信号完成一次切歌。
+## ⚠ 只在引擎主循环不推进的后台场景有意义；前台时 finished 会自己到达，
+## 两边靠 `_last_auto_finish_msec` 去重，避免一次播完连跳两首。
+func _poll_background_playback_end() -> void:
+	if not is_playing() or not has_tracks():
+		return
+	if not _player_reached_end():
+		var stalled_player: Variant = _get_active_player()
+		if stalled_player != null and not stalled_player.is_playing():
+			# 只留一条诊断：真机上的「后台播完不切歌」要靠它定位是判定没过还是切歌没过。
+			print("[MusicAppAudio] tick 未判定播完 pos=", _get_player_position_seconds(stalled_player),
+					" dur=", _get_player_duration_seconds(stalled_player),
+					" paused=", _player_is_paused(stalled_player),
+					" err=", str(stalled_player.get_last_error()) if stalled_player.has_method("get_last_error") else "-")
+		return
+	if Time.get_ticks_msec() - _last_auto_finish_msec < AUTO_FINISH_DEDUPE_MSEC:
+		return
+	_last_auto_finish_msec = Time.get_ticks_msec()
+	var playback_ctl: Variant = get_playback_controller()
+	var queue_index_before: int = playback_ctl.get_playback_queue_index() if playback_ctl != null else -2
+	on_audio_finished(null)
+	var queue_index_after: int = playback_ctl.get_playback_queue_index() if playback_ctl != null else -2
+	# on_audio_finished() 只推进队列状态，真正把新曲目交给播放器还得同步下发：
+	# 后台里 request_audio_sync() 同样是 deferred，排不上队。
+	var advancing := is_playing()
+	if advancing:
+		_apply_immediate_load()
+	print("[MusicAppAudio] tick 巡检：队列 %d → %d，下发=%s，playing=%s" % [queue_index_before, queue_index_after, advancing, is_playing()])
+
+## 判断底层播放器是否已经自然播到结尾。
+## 依据与 `_sync_streaming_playback()` 里「播到结尾」的分支一致：自然播完时
+## is_playing() 与 is_paused() 同时为假。
+## 位置只用来兜底区分「播完」和「主动 stop()」：播完时 mpv 一般把位置停在结尾，
+## 但某些后端在 EOF 之后会把位置归零，所以位置接近 0 时改用「进度已经走过一段」
+## 来判定——真播完的那一首，控制器记录的进度一定大于几秒。
+func _player_reached_end(player: Variant = null) -> bool:
+	if player == null:
+		player = _get_active_player()
+	if player == null or not _player_has_stream(player):
+		return false
+	if player.is_playing() or _player_is_paused(player):
+		return false
+	if player.has_method("get_last_error") and not str(player.get_last_error()).is_empty():
+		return false
+	var position := _get_player_position_seconds(player)
+	if position <= 1.0 and get_elapsed_seconds() <= 3:
+		return false
+	var duration := _get_player_duration_seconds(player)
+	if position > 1.0 and duration > 0.0 and position < duration - 2.0:
+		return false
+	return true
+
+## 读取底层播放器上报的播放位置（后端各实现方法名不统一，这里做一次探测）。
+func _get_player_position_seconds(player: Variant) -> float:
+	if player.has_method("get_position"):
+		return float(player.get_position())
+	if player.has_method("get_playback_position"):
+		return float(player.get_playback_position())
+	return 0.0
+
+## 读取底层播放器上报的媒体时长；拿不到时返回 0（调用方按「不校验时长」处理）。
+func _get_player_duration_seconds(player: Variant) -> float:
+	if player.has_method("get_duration"):
+		return float(player.get_duration())
+	return 0.0
 
 ## 后台媒体按钮专用：同步把播放位置跳到指定秒数（拖动通知栏进度条）。
 func _apply_immediate_seek(target_seconds: int) -> void:
@@ -1142,6 +1221,15 @@ func _get_audio_backend() -> Variant:
 	return _audio_backend
 
 func _on_backend_finished() -> void:
+	# 后台 tick 巡检已经处理过这一轮播完时，延迟队列里的 finished 会晚一步才被
+	# 主循环取到（用户回到前台、队列被冲刷的瞬间）。此时新曲目通常已经在播，
+	# 再推进一次会直接吞掉刚切过去的这首。
+	var player: Variant = _get_active_player()
+	if player != null and _player_has_stream(player) and player.is_playing():
+		return
+	if Time.get_ticks_msec() - _last_auto_finish_msec < AUTO_FINISH_DEDUPE_MSEC:
+		return
+	_last_auto_finish_msec = Time.get_ticks_msec()
 	on_audio_finished(null)
 
 func _on_backend_error(message: String) -> void:
@@ -1429,3 +1517,46 @@ func _save_playback_settings() -> void:
 func sync_playback_volume() -> void:
 	_load_playback_settings()
 	_apply_playback_volume()
+
+## 远程二进制拉取：Android 上引擎的 HTTPRequest 在本机不回吐结果（实测连超时都不触发），
+## 改用插件暴露的 Java HttpURLConnection 通道；桌面/其他平台仍走 HTTPRequest。
+func fetch_remote_bytes(url: String) -> PackedByteArray:
+	var target := url.strip_edges()
+	if target.is_empty():
+		return PackedByteArray()
+	if OS.get_name() == "Android":
+		return await _fetch_remote_bytes_via_java(target)
+	return await _fetch_remote_bytes_via_http(target)
+
+
+func _fetch_remote_bytes_via_java(url: String) -> PackedByteArray:
+	var result: Dictionary = await _java_http_bridge.request_bytes(
+		get_showcase(), url, REMOTE_BYTES_TIMEOUT_SECONDS, "artwork"
+	)
+	if not bool(result.get("ok", false)):
+		return PackedByteArray()
+	return result.get("bytes", PackedByteArray())
+
+
+func _fetch_remote_bytes_via_http(url: String) -> PackedByteArray:
+	var host: Variant = get_showcase()
+	if host == null or not is_instance_valid(host):
+		return PackedByteArray()
+	var request := HTTPRequest.new()
+	request.timeout = REMOTE_BYTES_TIMEOUT_SECONDS
+	host.add_child(request)
+	var error := request.request(url)
+	if error != OK:
+		request.queue_free()
+		return PackedByteArray()
+	var response: Array = await request.request_completed
+	request.queue_free()
+	if int(response[0]) != HTTPRequest.RESULT_SUCCESS:
+		return PackedByteArray()
+	var response_code := int(response[1])
+	if response_code < 200 or response_code >= 300:
+		return PackedByteArray()
+	return response[3]
+
+
+## Java 侧回传的是 base64 原始字节，这里只认自己的 artwork-* 请求号，避免和各登录请求串台。

@@ -35,6 +35,14 @@ func get_track_artwork_source(track: TrackData) -> String:
 	return playback_state_controller.get_track_artwork_source(track)
 
 ## 返回曲目在迷你播放器上的展示歌手名。
+
+## 跨平台拉取远程二进制：Android 走 Java 原生通道，桌面走 HTTPRequest。
+func fetch_remote_bytes(url: String) -> PackedByteArray:
+	var playback_state_controller = get_playback_state_controller()
+	if playback_state_controller == null:
+		return PackedByteArray()
+	return await playback_state_controller.fetch_remote_bytes(url)
+
 func get_track_display_artist(track: TrackData) -> String:
 	if not track.artist.is_empty():
 		return track.artist

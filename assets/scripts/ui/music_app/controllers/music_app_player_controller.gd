@@ -36,6 +36,16 @@ func seek_to_progress_ratio(progress_ratio: float, persist_state: bool = true) -
 	seek_to_elapsed_seconds(target_seconds, persist_state)
 
 ## 返回播放器展示用的歌手文案。
+## 返回播放器展示用的标题文案，空标题回退到文件名。
+func get_track_display_title(track: TrackData) -> String:
+	if track == null:
+		return ""
+	if not track.title.is_empty():
+		return track.title
+	if not track.file_path.is_empty():
+		return track.file_path.get_file().get_basename()
+	return tr("music_app.player.empty_title")
+
 func get_track_display_artist(track: TrackData) -> String:
 	if not track.artist.is_empty():
 		return track.artist
@@ -117,3 +127,11 @@ func get_track_artwork_source(track: TrackData) -> String:
 	if playback_state_controller == null or track == null:
 		return ""
 	return playback_state_controller.get_track_artwork_source(track)
+
+## 跨平台拉取远程二进制：Android 走 Java 原生通道，桌面走 HTTPRequest。
+func fetch_remote_bytes(url: String) -> PackedByteArray:
+	var playback_state_controller = get_playback_state_controller()
+	if playback_state_controller == null:
+		return PackedByteArray()
+	return await playback_state_controller.fetch_remote_bytes(url)
+
