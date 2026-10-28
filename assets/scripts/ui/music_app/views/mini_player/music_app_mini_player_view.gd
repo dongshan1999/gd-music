@@ -203,29 +203,11 @@ func _load_local_cover_texture(path: String) -> Texture2D:
 
 ## 通过 HTTP 请求下载远程封面，并在返回后校验请求上下文。
 func _load_remote_cover_texture(url: String, request_id: int) -> Texture2D:
-	if _controller == null:
+	if _mini_player_controller == null:
 		return null
 
-	var request := HTTPRequest.new()
-	request.timeout = REMOTE_ARTWORK_TIMEOUT_SECONDS
-	_controller.add_child(request)
-
-	var err := request.request(url)
-	if err != OK:
-		request.queue_free()
-		return null
-
-	var signal_result: Array = await request.request_completed
-	request.queue_free()
+	var body: PackedByteArray = await _mini_player_controller.fetch_remote_bytes(url)
 	if request_id != _artwork_request_id or url != _artwork_source:
-		return null
-
-	var result_code := int(signal_result[0])
-	var response_code := int(signal_result[1])
-	var body: PackedByteArray = signal_result[3]
-	if result_code != HTTPRequest.RESULT_SUCCESS:
-		return null
-	if response_code < 200 or response_code >= 300:
 		return null
 	if body.is_empty():
 		return null

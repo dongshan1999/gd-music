@@ -194,10 +194,10 @@ func refresh() -> void:
 			1.0
 		)
 
-	now_title_label.text = track.title
+	now_title_label.text = _player_controller.get_track_display_title(track)
 	now_artist_label.text = _player_controller.get_track_display_artist(track)
 	player_source_label.text = track.source
-	cover_icon_rect.visible = true
+	# 占位图的显隐由 _refresh_artwork() 统一管理：这里每帧强制置真会把已加载的封面盖回去。
 	MusicAppIconsType.apply_icon_button(
 		like_button,
 		MusicAppIconsType.HEART_FILLED
@@ -603,22 +603,11 @@ func _resolve_album_texture(source: String, request_id: int) -> Texture2D:
 
 ## 下载远程封面并解码成纹理；失败返回 null。
 func _download_album_texture(url: String, request_id: int) -> Texture2D:
-	if _controller == null:
+	if _player_controller == null:
 		return null
-	var request := HTTPRequest.new()
-	request.timeout = REMOTE_ARTWORK_TIMEOUT_SECONDS
-	_controller.add_child(request)
-	var error := request.request(url)
-	if error != OK:
-		request.queue_free()
-		return null
-	var response: Array = await request.request_completed
-	request.queue_free()
+	var bytes: PackedByteArray = await _player_controller.fetch_remote_bytes(url)
 	if request_id != _artwork_request_id:
 		return null
-	if int(response[0]) != HTTPRequest.RESULT_SUCCESS or int(response[1]) != 200:
-		return null
-	var bytes: PackedByteArray = response[3]
 	if bytes.is_empty():
 		return null
 	var image := Image.new()

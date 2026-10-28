@@ -77,6 +77,7 @@ alignment = 1
 
 [node name="MiniCoverPanel" type="Panel" parent="Margin/Row" unique_id=1043050561]
 unique_name_in_owner = true
+clip_contents = true
 custom_minimum_size = Vector2(54, 54)
 layout_mode = 2
 theme_override_styles/panel = SubResource("StyleBoxFlat_mini_cover_panel")
@@ -89,6 +90,7 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
+expand_mode = 1
 stretch_mode = 6
 
 [node name="MiniCoverIconRect" type="TextureRect" parent="Margin/Row/MiniCoverPanel" unique_id=985287164]
