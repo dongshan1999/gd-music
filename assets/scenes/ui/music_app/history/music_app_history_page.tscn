@@ -1,0 +1,156 @@
+[gd_scene format=3]
+
+[ext_resource type="Texture2D" path="res://assets/textures/arrow-left.svg" id="91_back_arrow"]
+[ext_resource type="Texture2D" path="res://assets/textures/trash-outline.svg" id="92_clear_icon"]
+[ext_resource type="Script" path="res://assets/scripts/ui/music_app/views/history/music_app_history_view.gd" id="7_history_script"]
+[ext_resource type="Script" path="res://assets/scripts/ui/music_app/music_app_scroll.gd" id="90_scroll"]
+
+[node name="HistoryPage" type="Control"]
+unique_name_in_owner = true
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("7_history_script")
+popup_layer = 0
+
+[node name="Background" type="ColorRect" parent="."]
+layout_mode = 0
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+color = Color(0.055, 0.055, 0.065, 1)
+
+[node name="Margin" type="MarginContainer" parent="."]
+layout_mode = 0
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/margin_left = 20
+theme_override_constants/margin_top = 20
+theme_override_constants/margin_right = 20
+theme_override_constants/margin_bottom = 14
+
+[node name="HistoryVBox" type="VBoxContainer" parent="Margin"]
+layout_mode = 2
+theme_override_constants/separation = 12
+
+[node name="HistoryTopRow" type="HBoxContainer" parent="Margin/HistoryVBox"]
+layout_mode = 2
+theme_override_constants/separation = 10
+
+[node name="HistoryBackButton" type="Button" parent="Margin/HistoryVBox/HistoryTopRow"]
+unique_name_in_owner = true
+layout_mode = 2
+icon = ExtResource("91_back_arrow")
+custom_minimum_size = Vector2(44, 44)
+theme_type_variation = "NavigationButton"
+flat = false
+theme_override_constants/icon_max_width = 22
+expand_icon = true
+mouse_default_cursor_shape = 2
+icon_alignment = 1
+vertical_icon_alignment = 1
+size_flags_vertical = 4
+
+[node name="HistoryTitleLabel" type="Label" parent="Margin/HistoryVBox/HistoryTopRow"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_font_sizes/font_size = 24
+text = "播放历史"
+vertical_alignment = 1
+
+[node name="Spacer" type="Control" parent="Margin/HistoryVBox/HistoryTopRow"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="HistoryClearButton" type="Button" parent="Margin/HistoryVBox/HistoryTopRow"]
+unique_name_in_owner = true
+layout_mode = 2
+icon = ExtResource("92_clear_icon")
+custom_minimum_size = Vector2(44, 44)
+theme_type_variation = "NavigationButton"
+flat = false
+theme_override_constants/icon_max_width = 20
+expand_icon = true
+mouse_default_cursor_shape = 2
+icon_alignment = 1
+vertical_icon_alignment = 1
+size_flags_vertical = 4
+
+[node name="HistorySummaryLabel" type="Label" parent="Margin/HistoryVBox"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_colors/font_color = Color(0.643137, 0.65098, 0.690196, 1)
+theme_override_font_sizes/font_size = 13
+text = "共 0 首 · 累计播放 0 次"
+text_overrun_behavior = 3
+clip_text = true
+
+[node name="HistoryTabRow" type="HBoxContainer" parent="Margin/HistoryVBox"]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="HistoryRecentTabButton" type="Button" parent="Margin/HistoryVBox/HistoryTabRow"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+custom_minimum_size = Vector2(0, 38)
+focus_mode = 2
+mouse_default_cursor_shape = 2
+text = "最近播放"
+
+[node name="HistoryMostPlayedTabButton" type="Button" parent="Margin/HistoryVBox/HistoryTabRow"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+custom_minimum_size = Vector2(0, 38)
+focus_mode = 2
+mouse_default_cursor_shape = 2
+text = "播放最多"
+
+[node name="HistoryScroll" type="ScrollContainer" parent="Margin/HistoryVBox"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_vertical = 3
+horizontal_scroll_mode = 0
+vertical_scroll_mode = 1
+follow_focus = true
+
+[node name="HistoryList" type="Control" parent="Margin/HistoryVBox/HistoryScroll"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="HistoryEmptyPanel" type="VBoxContainer" parent="Margin/HistoryVBox/HistoryScroll/HistoryList"]
+unique_name_in_owner = true
+visible = false
+layout_mode = 2
+theme_override_constants/separation = 8
+alignment = 1
+
+[node name="HistoryEmptyTitleLabel" type="Label" parent="Margin/HistoryVBox/HistoryScroll/HistoryList/HistoryEmptyPanel"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_font_sizes/font_size = 16
+text = "还没有播放记录"
+horizontal_alignment = 1
+autowrap_mode = 3
+
+[node name="HistoryEmptyHintLabel" type="Label" parent="Margin/HistoryVBox/HistoryScroll/HistoryList/HistoryEmptyPanel"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_colors/font_color = Color(0.6, 0.6, 0.64, 1)
+theme_override_font_sizes/font_size = 13
+text = "去首页随便听一首，这里就会记录下来"
+horizontal_alignment = 1
+autowrap_mode = 3
+
+[node name="ScrollInteraction" type="Node" parent="Margin/HistoryVBox/HistoryScroll"]
+script = ExtResource("90_scroll")
+scroll_container_path = NodePath("..")

@@ -46,6 +46,11 @@ func get_playlist_state_controller():
 	var resolved_controller = get_showcase()
 	return resolved_controller._playlist_state_controller if resolved_controller != null else null
 
+## 返回全局播放历史状态控制器。
+func get_history_state_controller():
+	var resolved_controller = get_showcase()
+	return resolved_controller._history_state_controller if resolved_controller != null else null
+
 ## 返回全局弹窗路由控制器。
 func get_popup_router_controller():
 	var resolved_controller = get_showcase()

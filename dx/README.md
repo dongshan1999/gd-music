@@ -903,23 +903,38 @@ LyricsStage (Control)
 scroll_container_path = NodePath("LyricsMargin/LyricsScroll")
 enable_horizontal_scroll = false
 configure_scroll_modes = false
+touch_fling_enabled = false
 ```
+
+歌词列表松手后会把当前行吸附到中间，所以关掉惯性；其余可滚动页面保留惯性。
 
 `scroll_container_path` 可以指向组件自身的子节点，也可以指向组件父节点下的同级 `ScrollContainer`。当 `configure_scroll_modes := true`（默认）时，组件会把两个方向设为 `SCROLL_MODE_AUTO`；需要由场景显式控制某个方向时设为 `false`。
 
 导出项：
 
 - `wheel_scroll_step := 96`：每次滚轮滚动的像素步长。
+- `wheel_smooth_time := 0.18`：滚轮滚到目标的补间时长，`<= 0` 时立即跳转。
 - `drag_scroll_threshold := 8.0`：从点击识别为拖拽所需的最小距离。
 - `enable_mouse_wheel`、`enable_pan_gesture`、`enable_drag_scroll`、`enable_touch_drag_scroll`：按输入类型启用或关闭。
 - `enable_horizontal_scroll`、`enable_vertical_scroll`：允许组件修改的轴。
 - `force_pass_scroll_events`：初始化时把滚动容器中可交互子节点设为 `MOUSE_FILTER_PASS`，便于拖拽继续传递。
 - `configure_scroll_modes`：是否由组件覆盖 `ScrollContainer` 的滚动模式。
+- `touch_drag_scale := 1.0`：内容位移与手指位移的比例，`1.0` 为完全跟手。
+- `touch_fling_enabled := true`：松手后是否按松手速度继续滑动。
+- `touch_fling_decay := 3.2`：惯性衰减系数，越大停得越快（1 秒后速度降到 `e^-3.2`）。
+- `touch_fling_min_speed := 80.0`：低于该速度（像素/秒）停止惯性。
+- `touch_fling_max_speed := 5200.0`：惯性起始速度上限。
+- `touch_fling_stale_time := 0.1`：最后一次移动距今超过该时长（秒）就不再产生惯性，对应「手指停住再松手」。
+
+触摸相关的两个行为需要知道：
+
+- **不会双倍滚动**：`emulate_mouse_from_touch` 默认开启时，触摸设备会额外派发一份 `device == InputEvent.DEVICE_ID_EMULATION` 的鼠标事件。组件只处理 `InputEventScreenTouch/ScreenDrag`，模拟鼠标事件仅用于「惯性刹车」判定。
+- **滚动不会误触按钮**：开始拖动时向子树广播 `Control.NOTIFICATION_SCROLL_BEGIN`，`BaseButton` 会清除按压态并吞掉随后的 `pressed`，结束时广播 `NOTIFICATION_SCROLL_END`。所以「手指放下高亮、一开始滚动就取消，只有真点击才触发」是默认行为。
 
 信号：
 
 - `drag_scroll_started`：在内容拖拽越过阈值后发出。
-- `drag_scroll_finished`：内容拖拽松开后发出。
+- `drag_scroll_finished`：内容拖拽松开后发出（先发信号、再恢复惯性）。
 
 滚动条滑块和横/竖滚动条区域被排除在内容拖拽识别外，因此可用于纯浏览，不会误触发依赖上述信号的业务动作。
 

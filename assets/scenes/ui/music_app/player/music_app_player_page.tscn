@@ -340,6 +340,7 @@ script = ExtResource("16_scroll_interaction")
 scroll_container_path = NodePath("LyricsMargin/LyricsScroll")
 enable_horizontal_scroll = false
 configure_scroll_modes = false
+touch_fling_enabled = false
 
 [node name="LyricsTimeCursor" type="Control" parent="PlayerMargin/PlayerVBox/CoverStage/LyricsStage" unique_id=1019012353]
 unique_name_in_owner = true

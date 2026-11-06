@@ -18,6 +18,7 @@ enum PopupId {
 	MUSIC_APP_TRACK_EDIT,
 	DX_DEBUG,
 	MUSIC_APP_BILIBILI_LOGIN,
+	MUSIC_APP_HISTORY,
 }
 
 const POPUP_SCENES := {
@@ -37,6 +38,7 @@ const POPUP_SCENES := {
 	PopupId.MUSIC_APP_TRACK_EDIT: preload("res://assets/scenes/popup/music_app_track_edit_popup.tscn"),
 	PopupId.DX_DEBUG: preload("res://dx/runtime/scenes/debug/dx_debug_popup.tscn"),
 	PopupId.MUSIC_APP_BILIBILI_LOGIN: preload("res://assets/scenes/popup/music_app_bilibili_login_popup.tscn"),
+	PopupId.MUSIC_APP_HISTORY: preload("res://assets/scenes/ui/music_app/history/music_app_history_page.tscn"),
 }
 
 static func has_popup(popup_id: int) -> bool:

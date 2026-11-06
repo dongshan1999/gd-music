@@ -70,6 +70,12 @@ func open_local_music() -> void:
 	if popup != null and popup.has_method("open_page"):
 		popup.open_page()
 
+## 打开播放历史页面。
+func open_history() -> void:
+	var popup = show_popup(DX_PopupRegistry.PopupId.MUSIC_APP_HISTORY)
+	if popup != null and popup.has_method("open_page"):
+		popup.open_page()
+
 ## 打开插件音乐浏览页。
 func open_plugin_browser() -> void:
 	show_popup(DX_PopupRegistry.PopupId.MUSIC_APP_PLUGIN_BROWSER)
@@ -79,6 +85,9 @@ func open_settings() -> void:
 
 ## 处理首页功能入口点击。
 func open_feature_card(index: int) -> bool:
+	if index == 2:
+		open_history()
+		return true
 	if index == 3:
 		open_local_music()
 		return true

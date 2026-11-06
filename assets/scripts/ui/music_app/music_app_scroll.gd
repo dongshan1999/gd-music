@@ -1,16 +1,15 @@
 extends "res://dx/runtime/scripts/component/scroll/scroll_interaction_comp.gd"
-## Smooth wheel movement and quiet, automatically fading scroll indicators.
 
-var _wheel_tween: Tween
-var _indicator_tween: Tween
-var _wheel_target := 0.0
-var _touch_event := false
-var _touch_velocity := 0.0
+## 音乐应用统一的滚动手感：滚轮平滑、隐藏滚动条（滚动时短暂显示）。
+## 触摸拖拽 / 惯性 / 按压高亮取消都沿用基类，改基类即对所有列表生效。
 
-func _input(event: InputEvent) -> void:
-	_touch_event = event is InputEventScreenTouch or event is InputEventScreenDrag
-	super._input(event)
-	_touch_event = false
+const INDICATOR_ALPHA := 0.8
+const INDICATOR_HOLD_SEC := 0.9
+const INDICATOR_FADE_SEC := 0.25
+
+var _indicator_alpha := 0.0
+var _indicator_hold := 0.0
+var _indicator_bar: VScrollBar
 
 func _ready() -> void:
 	configure_scroll_modes = false
@@ -20,65 +19,41 @@ func _ready() -> void:
 	if _scroll == null:
 		return
 	_scroll.follow_focus = true
-	_scroll.get_v_scroll_bar().modulate.a = 0.0
-	_scroll.get_v_scroll_bar().value_changed.connect(_show_indicator)
-	_scroll.get_v_scroll_bar().mouse_entered.connect(_show_indicator.bind(0.0))
-	drag_scroll_started.connect(_stop_wheel)
+	_indicator_bar = _scroll.get_v_scroll_bar()
+	if _indicator_bar == null:
+		return
+	_indicator_bar.modulate.a = 0.0
+	_indicator_bar.value_changed.connect(_show_indicator)
+	_indicator_bar.mouse_entered.connect(_show_indicator.bind(0.0))
 
+func _process(delta: float) -> void:
+	super._process(delta)
+	_update_indicator(delta)
+
+## 只在指针确实落在本滚动容器上时才响应，避免叠放页面里的列表同时滚动。
 func _is_pointer_inside_scroll(pointer: Vector2) -> bool:
 	if not super._is_pointer_inside_scroll(pointer) or not _scroll.is_visible_in_tree():
 		return false
-	var hovered := get_viewport().gui_get_hovered_control()
-	return hovered == _scroll or (hovered != null and _scroll.is_ancestor_of(hovered))
-
-func _handle_mouse_wheel(event: InputEventMouseButton) -> void:
-	if not event.pressed or not _is_pointer_inside_scroll(event.position):
-		return
-	if event.button_index not in [MOUSE_BUTTON_WHEEL_UP, MOUSE_BUTTON_WHEEL_DOWN]:
-		return
-	var bar := _scroll.get_v_scroll_bar()
-	if _wheel_tween == null or not _wheel_tween.is_running():
-		_wheel_target = bar.value
-	else:
-		_wheel_tween.kill()
-	var direction := -1.0 if event.button_index == MOUSE_BUTTON_WHEEL_UP else 1.0
-	_wheel_target = clampf(_wheel_target + direction * wheel_scroll_step * event.factor, 0, maxf(0, bar.max_value - bar.page))
-	_wheel_tween = create_tween().set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_OUT)
-	_wheel_tween.tween_property(bar, "value", _wheel_target, 0.2)
-	get_viewport().set_input_as_handled()
-
-func _stop_wheel() -> void:
-	if _wheel_tween != null:
-		_wheel_tween.kill()
-
-func _handle_touch_drag_touch(event: InputEventScreenTouch) -> void:
-	var was_dragging := _touch_drag_started
-	if event.pressed:
-		_stop_wheel()
-		_touch_velocity = 0.0
-	super._handle_touch_drag_touch(event)
-	if not event.pressed and was_dragging:
-		var bar := _scroll.get_v_scroll_bar()
-		var target := clampf(bar.value + _touch_velocity * 0.16, 0, maxf(0, bar.max_value - bar.page))
-		_wheel_target = target
-		_wheel_tween = create_tween().set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_OUT)
-		_wheel_tween.tween_property(bar, "value", target, 0.4)
-		get_viewport().set_input_as_handled()
-
-func _handle_touch_drag_motion(event: InputEventScreenDrag) -> void:
-	super._handle_touch_drag_motion(event)
-	if _touch_drag_started:
-		_touch_velocity = -event.velocity.y
-
-func _handle_pan_gesture(event: InputEventPanGesture) -> void:
-	_stop_wheel()
-	super._handle_pan_gesture(event)
+	var viewport := get_viewport()
+	if viewport == null:
+		return true
+	var hovered := viewport.gui_get_hovered_control()
+	if hovered == null:
+		return true
+	return hovered == _scroll or _scroll.is_ancestor_of(hovered)
 
 func _show_indicator(_value: float) -> void:
-	if _indicator_tween != null:
-		_indicator_tween.kill()
-	var bar := _scroll.get_v_scroll_bar()
-	bar.modulate.a = 0.8
-	_indicator_tween = create_tween()
-	_indicator_tween.tween_interval(0.9)
-	_indicator_tween.tween_property(bar, "modulate:a", 0.0, 0.25)
+	if _indicator_bar == null:
+		return
+	_indicator_alpha = INDICATOR_ALPHA
+	_indicator_hold = INDICATOR_HOLD_SEC
+	_indicator_bar.modulate.a = INDICATOR_ALPHA
+
+func _update_indicator(delta: float) -> void:
+	if _indicator_alpha <= 0.0 or _indicator_bar == null:
+		return
+	if _indicator_hold > 0.0:
+		_indicator_hold = maxf(0.0, _indicator_hold - delta)
+		return
+	_indicator_alpha = maxf(0.0, _indicator_alpha - delta * (INDICATOR_ALPHA / INDICATOR_FADE_SEC))
+	_indicator_bar.modulate.a = _indicator_alpha

@@ -3,8 +3,13 @@ extends "res://dx/runtime/scripts/serializer/json_object.gd"
 
 const PlaybackStateDataScript := preload("res://assets/scripts/save/music/music_app_playback_state_data.gd")
 
+## 版本号必须保持不变：DX_SaveData.sanitize_payload() 用严格相等比对版本，
+## 升版本会把旧存档里的整个 music 节点直接丢弃（曲目、歌单、下载记录全丢）。
+## 新增字段对旧存档天然向后兼容（缺字段走默认值），因此按新增字段而不升版本。
 const SAVE_VERSION := "0.0.2"
 const SYSTEM_FAVORITE_PLAYLIST_ID := "__music_app.favorite_playlist__"
+## 播放历史最多保留多少首曲目；超出时丢弃最久未播放的记录。
+const PLAY_HISTORY_LIMIT := 500
 
 enum PlaybackMode {
 	LOOP_ALL,
@@ -22,6 +27,9 @@ var plugin_search_history: Array[String] = []
 var local_music_folders: Array[String] = []
 ## 已下载音乐索引；与 tracks 解耦，曲目被移除后下载文件仍保留。
 var downloads: Array[MusicDownloadRecordData] = []
+## 播放历史统计；与 tracks 解耦，按 track_id 聚合播放次数与最近播放时间。
+## 进入存档时按「最近播放」降序排列，读档后无需再排一次。
+var play_history: Array[MusicPlayHistoryData] = []
 ## 曲目 ID -> TrackData 的运行时索引，避免列表刷新时对全库做线性查找。
 var _track_index: Dictionary = {}
 var _track_index_size: int = -1
@@ -70,6 +78,7 @@ func _init() -> void:
 	plugin_search_history = []
 	local_music_folders = []
 	downloads = []
+	play_history = []
 	normalize()
 
 func normalize() -> void:
@@ -91,6 +100,7 @@ func normalize() -> void:
 	plugin_search_history = _normalize_string_array(plugin_search_history, 10)
 	local_music_folders = _normalize_path_array(local_music_folders)
 	_normalize_downloads()
+	_normalize_play_history()
 
 func get_track_by_id(track_id: String) -> TrackData:
 	var normalized_id := track_id.strip_edges()
@@ -259,6 +269,82 @@ func _normalize_downloads() -> void:
 		result.append(record)
 	downloads = result
 	_rebuild_download_index()
+
+## 读取某首曲目的播放统计，没有记录时返回 null。
+func get_play_history_entry(track_id: String) -> MusicPlayHistoryData:
+	var normalized_id := track_id.strip_edges()
+	if normalized_id.is_empty():
+		return null
+	for entry in play_history:
+		if entry != null and entry.track_id == normalized_id:
+			return entry
+	return null
+
+## 返回播放历史数组引用（已按最近播放降序）。
+func get_play_history_entries() -> Array[MusicPlayHistoryData]:
+	return play_history
+
+## 记录一次起播：累计次数 +1、刷新最近播放时间，并移到数组最前。
+## played_at 为 Unix 秒；传 -1 表示取当前系统时间（测试可注入固定值）。
+func record_play(track_id: String, played_at: int = -1) -> MusicPlayHistoryData:
+	var normalized_id := track_id.strip_edges()
+	if normalized_id.is_empty():
+		return null
+	var timestamp := played_at if played_at > 0 else int(Time.get_unix_time_from_system())
+	var entry := get_play_history_entry(normalized_id)
+	if entry == null:
+		entry = MusicPlayHistoryData.new()
+		entry.track_id = normalized_id
+		play_history.append(entry)
+	entry.play_count += 1
+	entry.last_played_at = maxi(entry.last_played_at, timestamp)
+	# 保持「最近播放的最靠前」，读档后不必再排序。
+	play_history.erase(entry)
+	play_history.insert(0, entry)
+	_trim_play_history()
+	return entry
+
+## 累计播放次数（只统计仍在资料库里的曲目，口径与历史页一致）。
+func get_total_play_count(valid_track_ids: Dictionary = {}) -> int:
+	var total := 0
+	for entry in play_history:
+		if entry == null:
+			continue
+		if not valid_track_ids.is_empty() and not valid_track_ids.has(entry.track_id):
+			continue
+		total += maxi(0, entry.play_count)
+	return total
+
+## 清空全部播放历史，返回被清掉的条数。
+func clear_play_history() -> int:
+	var removed := play_history.size()
+	play_history.clear()
+	return removed
+
+func _trim_play_history() -> void:
+	if play_history.size() <= PLAY_HISTORY_LIMIT:
+		return
+	# 数组按最近播放降序，末尾就是最久没听的，直接截断。
+	play_history.resize(PLAY_HISTORY_LIMIT)
+
+func _normalize_play_history() -> void:
+	var result: Array[MusicPlayHistoryData] = []
+	var seen := {}
+	for entry in play_history:
+		if entry == null:
+			continue
+		entry.normalize()
+		if entry.track_id.is_empty() or seen.has(entry.track_id):
+			continue
+		seen[entry.track_id] = true
+		result.append(entry)
+	# 历史顺序以「最近播放时间」为准：旧存档没有做维持序，读档时补排一次。
+	result.sort_custom(func(left: MusicPlayHistoryData, right: MusicPlayHistoryData) -> bool:
+		return left.last_played_at > right.last_played_at
+	)
+	if result.size() > PLAY_HISTORY_LIMIT:
+		result.resize(PLAY_HISTORY_LIMIT)
+	play_history = result
 
 func _build_track_id_map() -> Dictionary:
 	var result := {}

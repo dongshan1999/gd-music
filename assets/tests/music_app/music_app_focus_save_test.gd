@@ -51,6 +51,14 @@ func _run() -> void:
 	manager.in_quit()
 	reloaded.load()
 	_check(reloaded.data.music.playback_state.elapsed_seconds == 3, "Quit still saves immediately")
+	# 存档模型不可用时（脚本编译失败会让 data 变成 null）绝不能把空数据写回磁盘。
+	var kept_bytes := FileAccess.get_file_as_bytes(manager.save_path)
+	manager.data = null
+	_check(not manager.save(true), "Save is refused when the data model is unavailable")
+	manager.in_quit()
+	_check(FileAccess.get_file_as_bytes(manager.save_path) == kept_bytes, "Unavailable data model never overwrites the existing save")
+	reloaded.load()
+	_check(reloaded.data.music.playback_state.elapsed_seconds == 3, "Existing save survives an unavailable data model")
 	for failure in _failures:
 		push_error(failure)
 	print("Music app focus save tests: %s failures" % _failures.size())

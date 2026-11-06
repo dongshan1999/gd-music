@@ -3,6 +3,8 @@ extends Control
 
 static var instance = null
 
+const APP_THEME_PATH := "res://assets/themes/gd_music_theme.tres"
+
 const MusicAppScriptPathsType := preload("res://assets/scripts/constants/music_app_script_paths.gd")
 const PlaybackControllerScript := preload(MusicAppScriptPathsType.MUSIC_APP_PLAYBACK_CONTROLLER)
 const PlaybackStateControllerScript := preload(MusicAppScriptPathsType.MUSIC_APP_PLAYBACK_STATE_CONTROLLER)
@@ -10,6 +12,7 @@ const PlaylistStateControllerScript := preload(MusicAppScriptPathsType.MUSIC_APP
 const PopupRouterControllerScript := preload(MusicAppScriptPathsType.MUSIC_APP_POPUP_ROUTER_CONTROLLER)
 const PluginControllerScript := preload(MusicAppScriptPathsType.MUSIC_APP_PLUGIN_CONTROLLER)
 const DownloadControllerScript := preload(MusicAppScriptPathsType.MUSIC_APP_DOWNLOAD_CONTROLLER)
+const HistoryStateControllerScript := preload(MusicAppScriptPathsType.MUSIC_APP_HISTORY_STATE_CONTROLLER)
 
 @onready var normal_popup_host: Control = %NormalPopupHost
 @onready var mini_player: Control = %MiniPlayer
@@ -24,6 +27,7 @@ var _playlist_state_controller = PlaylistStateControllerScript.new(self)
 var _popup_router_controller = PopupRouterControllerScript.new(self)
 var _plugin_controller = PluginControllerScript.new(self)
 var _download_controller = DownloadControllerScript.new(self)
+var _history_state_controller = HistoryStateControllerScript.new(self)
 
 const BACK_CONFIRM_WINDOW_MSEC := 2000
 const BACK_EVENT_DEBOUNCE_MSEC := 120
@@ -55,11 +59,20 @@ func _ready() -> void:
 	_plugin_controller.in_ready()
 	_download_controller.in_ready()
 	_playback_state_controller.bind_background_audio_controls()
+	# 播放历史挂在全局播放事件上，四条起播链路（native/ffmpeg/mpv）统一计数。
+	_history_state_controller.bind_playback_events()
 	if DX != null and DX.debug != null:
 		DX.debug.register_target("MusicAppShowcase", self)
 
 	mini_player.setup(self)
 	_playlist_state_controller.normalize_favorite_playlist()
+
+	# 应用全部用指针操作，按钮不参与焦点，避免点击后残留聚焦框。
+	get_tree().node_added.connect(_on_tree_node_added)
+	_suppress_button_focus(self)
+	# 触摸端没有鼠标悬停，但触摸会被引擎模拟成鼠标，点过的行会一直保持 hover 底色，这里直接去掉。
+	if OS.has_feature("mobile"):
+		_strip_hover_styles()
 
 	add_child(_timer)
 	_timer.wait_time = 1.0
@@ -79,9 +92,12 @@ func _ready() -> void:
 
 ## 退出场景树时回收音频与弹窗宿主引用。
 func _exit_tree() -> void:
+	_history_state_controller.unbind_playback_events()
 	_playback_state_controller.stop_audio_playback(true)
 	_plugin_controller.in_quit()
 	_popup_router_controller.detach_popup_hosts(normal_popup_host, fullscreen_popup_host)
+	if get_tree() != null and get_tree().node_added.is_connected(_on_tree_node_added):
+		get_tree().node_added.disconnect(_on_tree_node_added)
 	if instance == self:
 		instance = null
 
@@ -151,3 +167,29 @@ func _handle_back_requested() -> void:
 
 func _on_audio_finished(source_player: Node = null) -> void:
 	_playback_state_controller.on_audio_finished(source_player)
+
+## 场景树里有新节点时，同步关闭其中按钮的焦点；页面与行都是运行时挂载的，所以要监听而不是只扫一次。
+func _on_tree_node_added(node: Node) -> void:
+	_suppress_button_focus(node)
+
+## 触摸端没有悬停概念：把主题里所有 hover 样式替换成 normal，避免点过的行一直亮着。
+## 传 null 时处理项目默认主题（所有页面共用同一份实例）。
+func _strip_hover_styles(app_theme: Theme = null) -> void:
+	var target: Theme = app_theme
+	if target == null:
+		target = load(APP_THEME_PATH) as Theme
+	if target == null:
+		return
+	for type_name in target.get_stylebox_type_list():
+		if not target.has_stylebox("hover", type_name):
+			continue
+		var normal := target.get_stylebox("normal", type_name)
+		if normal != null:
+			target.set_stylebox("hover", type_name, normal)
+
+## 递归关闭按钮焦点：点击不再抢焦点，键盘/手柄也不会停在列表行上。
+func _suppress_button_focus(node: Node) -> void:
+	if node is BaseButton:
+		(node as BaseButton).focus_mode = Control.FOCUS_NONE
+	for child in node.get_children():
+		_suppress_button_focus(child)

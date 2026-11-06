@@ -341,7 +341,13 @@ func _flush_pending_save(force: bool = false) -> bool:
 	var ok := true
 
 	if force or _is_dirty:
-		ok = _save_main_json(_encode_data_for_save()) and ok
+		var payload: Variant = _encode_data_for_save()
+		# 存档模型不可用（脚本编译失败、data 被置空、序列化整体失败）时绝不落盘。
+		# 宁可本次不保存，也不能用空数据覆盖磁盘上已经存在的存档。
+		if _is_empty_payload(payload):
+			push_warning("Save skipped: no payload produced. Existing save kept: %s" % save_path)
+			return false
+		ok = _save_main_json(payload) and ok
 
 	if ok:
 		_reset_pending_state()
@@ -350,8 +356,19 @@ func _flush_pending_save(force: bool = false) -> bool:
 	return ok
 
 func _encode_data_for_save() -> Variant:
+	if data == null:
+		return null
 	_normalize_object(data)
 	return DX_JsonSerializer.serialize(data)
+
+func _is_empty_payload(payload: Variant) -> bool:
+	if payload == null:
+		return true
+	if payload is Dictionary:
+		return (payload as Dictionary).is_empty()
+	if payload is Array:
+		return (payload as Array).is_empty()
+	return false
 
 func _reset_pending_state() -> void:
 	_is_dirty = false

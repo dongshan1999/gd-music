@@ -33,6 +33,15 @@ var _pending_seek_track_key := ""
 var _pending_seek_until_msec := 0
 ## 最近一次「自动切歌」的时间戳，用于前台 finished 与后台 tick 巡检互斥。
 var _last_auto_finish_msec := 0
+## 最近一次推给界面的「曲目|播放态|队列游标」快照。
+## 通知栏/锁屏/灵动岛/耳机这些 App 外部入口改状态时不会走本类的常规播放链路，
+## 靠它让每秒的 tick 巡检发现差异并补发界面事件。
+var _ui_state_key := ""
+## 是否已排了一次「外部入口触发的界面刷新」。
+## App 在后台时主循环不推进，deferred 会一直挂着；用户在通知栏连按几下
+## （暂停→下一首→暂停）会挂好几份，回到前台一次全执行就会连刷好几遍。
+## 这里做合并：只排第一个，落地时读的是最新状态，一拍就够。
+var _remote_ui_refresh_pending := false
 var last_error := ""
 
 ## Phase 1 播放后端：null = 沿用 Godot 原生播放器（AudioStreamPlayer / FFmpegVideoStream）。
@@ -133,6 +142,7 @@ func _on_background_media_control(action: String) -> void:
 			set_elapsed_seconds(target_seconds)
 			_apply_immediate_seek(target_seconds)
 			request_audio_sync()
+			_schedule_remote_ui_refresh()
 		return
 	match action:
 		"play":
@@ -168,12 +178,53 @@ func _on_background_media_control(action: String) -> void:
 		"tick":
 			# 前台服务每秒的心跳：后台没有主循环，mpv 播完的 finished 会一直排在
 			# 延迟队列里，只能靠这里主动查播放器状态补一次「播完了」的收尾。
+			# 心跳本身不改界面状态（真切歌了由 tick_playback_progress 的差异检测补刷）。
 			_poll_background_playback_end()
+			return
 		"stop":
 			if is_playing():
 				set_is_playing(false)
 			stop_audio_playback(true)
 			_loaded_track_key = ""
+	# 媒体按钮改完状态后必须补一次界面事件：mini player 和播放页只订阅
+	# PlaybackStarted/Finished/ProgressChanged 三条信号，不会自己轮询播放队列。
+	# 缺这一步的表现就是「灵动岛/通知栏已经换了歌或暂停了，App 里还是旧的」。
+	_schedule_remote_ui_refresh()
+
+## 请求一次「App 外部入口触发」的界面刷新。
+## ⚠ 不能在 _on_background_media_control() 里直接 fire 信号：那个回调跑在 Java
+## 线程上，而订阅方是 UI 节点（会碰 CanvasItem，必须主线程）。这里统一 defer，
+## 顺带解决了「App 在后台时主循环不推进」——deferred 会等到回到前台的第一帧执行，
+## 正好补上界面该刷新却一直没刷的那一枪。
+func _schedule_remote_ui_refresh() -> void:
+	if _remote_ui_refresh_pending:
+		return
+	_remote_ui_refresh_pending = true
+	call_deferred("_refresh_ui_now")
+
+## 立刻把当前播放状态推给界面（主线程调用）。
+func _refresh_ui_now() -> void:
+	_remote_ui_refresh_pending = false
+	var track := get_current_track()
+	_ui_state_key = _build_ui_state_key(track)
+	_emit_playback_progress_changed(track)
+
+## 界面关心的「外观状态」指纹：换歌、切播放/暂停、队列游标变化都算。
+func _build_ui_state_key(track: TrackData) -> String:
+	return "%s|%s|%s" % [
+		"" if track == null else track.id,
+		"1" if is_playing() else "0",
+		str(_get_base_controller().get_playback_queue_index()),
+	]
+
+## 每秒巡检：发现外观状态和上次推给界面的不一致，就补发一次。
+## 覆盖「App 外部入口改了状态但 deferred 刷新没跑到」的兜底场景，
+## 以及通知栏心跳里 _poll_background_playback_end() 悄悄切歌的情况。
+func _refresh_ui_if_playback_state_changed() -> void:
+	var track := get_current_track()
+	if _build_ui_state_key(track) == _ui_state_key:
+		return
+	_refresh_ui_now()
 
 ## 后台巡检：发现底层播放器已经自然播到结尾，就替 finished 信号完成一次切歌。
 ## ⚠ 只在引擎主循环不推进的后台场景有意义；前台时 finished 会自己到达，
@@ -396,7 +447,14 @@ func tick_playback_progress() -> void:
 		if is_playing():
 			set_is_playing(false)
 			request_audio_sync()
+		# 这里不补发界面事件：没有曲目时 _emit_playback_progress_changed() 会直接
+		# return（它拿不到 track），队列被清空后的空态由页面自己的列表刷新负责。
 		return
+
+	# 兜底：通知栏/锁屏/灵动岛/耳机改过曲目或播放态时，这里把界面补刷一次。
+	# 放在下面几个提前 return 之前，否则「后台按了暂停再回到 App」这类
+	# 恰好没有进度可推的时刻，界面会一直停在旧的播放图标上。
+	_refresh_ui_if_playback_state_changed()
 
 	if not is_playing() or not _player_has_stream(audio_player) or not audio_player.is_playing() or _player_is_paused(audio_player):
 		return
@@ -406,6 +464,8 @@ func tick_playback_progress() -> void:
 		return
 	set_elapsed_seconds(next_elapsed)
 	_update_background_playback_position()
+	# 顺带把指纹对齐，免得下一拍又因为「状态没变但指纹是旧的」多刷一次。
+	_ui_state_key = _build_ui_state_key(get_current_track())
 	_emit_playback_progress_changed()
 
 ## 响应音频播放完成事件，自动切到队列下一首。

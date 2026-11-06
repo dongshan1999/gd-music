@@ -48,6 +48,29 @@ music_app.local.edit_title,Edit,编辑,编辑
 music_app.local.edit_message,Edit is not implemented yet. Local import is available for now.,编辑功能暂未实现，当前先支持本地导入。,编辑功能暂未实现，当前先支持本地导入。
 music_app.local.download_title,Download List,下载列表,下载列表
 music_app.local.download_message,Download list is not implemented yet. Local import is available for now.,下载列表暂未实现，当前先支持本地导入。,下载列表暂未实现，当前先支持本地导入。
+music_app.history.title,Play History,播放历史,播放历史
+music_app.history.tab.recent,Recent,最近播放,最近播放
+music_app.history.tab.most_played,Most Played,播放最多,播放最多
+music_app.history.summary,{tracks} tracks · {plays} plays,共 {tracks} 首 · 累计播放 {plays} 次,共 {tracks} 首 · 累计播放 {plays} 次
+music_app.history.empty.recent.title,No play history yet,还没有播放记录,还没有播放记录
+music_app.history.empty.recent.hint,Play any song and it will show up here.,随便听一首，这里就会记录下来。,随便听一首，这里就会记录下来。
+music_app.history.empty.most.title,No play counts yet,还没有播放次数,还没有播放次数
+music_app.history.empty.most.hint,Play a song a few times to see it ranked here.,多听几遍，这里就会按次数排名。,多听几遍，这里就会按次数排名。
+music_app.history.play_count,{count} plays,播放 {count} 次,播放 {count} 次
+music_app.history.play_count_one,1 play,播放 1 次,播放 1 次
+music_app.history.total_plays_hint,{count} plays,共 {count} 次,共 {count} 次
+music_app.history.last_played_hint,Last played {time},最近 {time},最近 {time}
+music_app.history.just_now,just now,刚刚,刚刚
+music_app.history.minutes_ago,{count} min ago,{count} 分钟前,{count} 分钟前
+music_app.history.hours_ago,{count} h ago,{count} 小时前,{count} 小时前
+music_app.history.days_ago,{count} d ago,{count} 天前,{count} 天前
+music_app.history.clear_title,Clear History,清空播放历史,清空播放历史
+music_app.history.clear_message,Clear all play history and play counts? This cannot be undone.,确定清空全部播放记录和播放次数？此操作不可恢复。,确定清空全部播放记录和播放次数？此操作不可恢复。
+music_app.history.clear_confirm,Clear,清空,清空
+music_app.history.clear_cancel,Cancel,取消,取消
+music_app.history.cleared,Play history cleared,播放历史已清空,播放历史已清空
+music_app.history.empty_toast,No play history to clear,没有可清空的播放历史,没有可清空的播放历史
+music_app.history.unknown_track,Unknown Track,未知曲目,未知曲目
 music_app.scan.select_all,Select All,全选,全选
 music_app.scan.unselect_all,Clear All,取消全选,取消全选
 music_app.scan.hint,Select folders to scan,选择要扫描的文件夹,选择要扫描的文件夹
